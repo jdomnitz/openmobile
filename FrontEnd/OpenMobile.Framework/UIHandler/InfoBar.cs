@@ -27,7 +27,7 @@ namespace OpenMobile
     /// <summary>
     /// Infobanner data
     /// </summary>
-    public class InfoBanner
+    public class InfoBar
     {
         #region Properties
 
@@ -51,37 +51,7 @@ namespace OpenMobile
         private string _Text;
 
         /// <summary>
-        /// The style of the banner
-        /// </summary>
-        public enum Styles
-        {
-            /// <summary>
-            /// A animated popup banner
-            /// </summary>
-            AnimatedBanner
-        }
-
-        /// <summary>
-        /// The style of the banner
-        /// </summary>
-        public Styles Style
-        {
-            get
-            {
-                return this._Style;
-            }
-            set
-            {
-                if (this._Style != value)
-                {
-                    this._Style = value;
-                }
-            }
-        }
-        private Styles _Style;
-
-        /// <summary>
-        /// Time in milliseconds the banner is shown (from start animation to close)
+        /// Time in milliseconds the text is shown (from start animation to close)
         /// </summary>
         public int Timeout
         {
@@ -97,40 +67,28 @@ namespace OpenMobile
                 }
             }
         }
-        private int _Timeout = 1500;
+        private int _Timeout = 0;
 
         #endregion
 
         #region constructors
 
         /// <summary>
-        /// Creates new infobanner data
+        /// Creates new InfoBar data
         /// </summary>
         /// <param name="text"></param>
-        public InfoBanner(string text)
+        public InfoBar(string text)
         {
             _Text = text;
         }
 
         /// <summary>
-        /// Creates new infobanner data
+        /// Creates new InfoBar data
         /// </summary>
-        /// <param name="style"></param>
         /// <param name="text"></param>
-        public InfoBanner(Styles style, string text)
+        /// <param name="timeout"></param>
+        public InfoBar(string text, int timeout)
             : this(text)
-        {
-            _Style = style;
-        }
-
-        /// <summary>
-        /// Creates new infobanner data
-        /// </summary>
-        /// <param name="style"></param>
-        /// <param name="text"></param>
-        /// <param name="timeout">Time to show dialog in milliseconds</param>
-        public InfoBanner(Styles style, string text, int timeout)
-            : this(style, text)
         {
             _Timeout = timeout;
         }

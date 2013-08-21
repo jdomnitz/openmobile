@@ -54,13 +54,13 @@ namespace OpenMobile.Framework
         {
             if (celsius == isMetric())
                 if (celsius == true)
-                    return temp.ToString("0.0") + " °C";
+                    return String.Format("{0:0.#}°C", temp); //temp.ToString("0.0") + " °C";
                 else
-                    return temp.ToString("0.0") + " °F";
+                    return String.Format("{0:0.#}°F", temp); //temp.ToString("0.0") + " °F";
             else if (celsius == true)
-                return Calculation.CtoF(temp).ToString("0.0") + " °F";
+                return String.Format("{0:0.#}°F", Calculation.CtoF(temp)); //Calculation.CtoF(temp).ToString("0.0") + " °F";
             else
-                return Calculation.FtoC(temp).ToString("0.0") + " °C";
+                return String.Format("{0:0.#}°C", Calculation.FtoC(temp)); //Calculation.FtoC(temp).ToString("0.0") + " °C";
         }
         /// <summary>
         /// Converts to the local unit of distance measurement

@@ -232,6 +232,8 @@ namespace OpenMobile.UI
 
         #region Control Buttons (show/hide and properties)
 
+        private Timer[] _tmrControlButtonsAutoHide;
+
         /// <summary>
         /// The main ButtonStrip for the bottom bar menu (other button strips are implemented by the skins themself)
         /// </summary>
@@ -336,6 +338,42 @@ namespace OpenMobile.UI
         {
             if (OnShowControlButtons != null)
                 OnShowControlButtons(screen, fast);
+        }
+
+        public void ControlButtons_AutoHideTimer_Reset(int screen)
+        {
+            if (_tmrControlButtonsAutoHide.Length <= screen && screen < 0)
+                return;
+
+            if (_tmrControlButtonsAutoHide[screen].Enabled)
+            {
+                _tmrControlButtonsAutoHide[screen].Enabled = false;
+                _tmrControlButtonsAutoHide[screen].Enabled = true;
+            }
+        }
+
+        public void ControlButtons_Show(int screen, bool fast, int secondsToShow)
+        {
+            // Call event
+            Raise_OnShowControlButtons(screen, fast);
+
+            if (_tmrControlButtonsAutoHide[screen] == null)
+            {
+                _tmrControlButtonsAutoHide[screen] = new Timer(secondsToShow * 1000);
+                _tmrControlButtonsAutoHide[screen].Elapsed += _tmrControlButtonsAutoHide_Elapsed;
+                _tmrControlButtonsAutoHide[screen].AutoReset = false;
+            }
+            _tmrControlButtonsAutoHide[screen].Interval = secondsToShow * 1000;
+            _tmrControlButtonsAutoHide[screen].Screen = screen;
+            _tmrControlButtonsAutoHide[screen].Tag = fast;
+            _tmrControlButtonsAutoHide[screen].Enabled = true;
+        }
+
+        void _tmrControlButtonsAutoHide_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Timer tmr = sender as Timer;
+            tmr.Enabled = false;
+            Raise_OnHideControlButtons(tmr.Screen, (bool)tmr.Tag);
         }
 
         /// <summary>
@@ -499,6 +537,12 @@ namespace OpenMobile.UI
             _ControlButtons_ButtonStripContainer_OnButtonStripSet_Handler = new ButtonStripContainer.ButtonStripChangedEventHandler(ControlButtons_ButtonStripContainer_OnButtonStripSet);
             _ControlButtons_ButtonStripContainer.OnButtonStripSet += _ControlButtons_ButtonStripContainer_OnButtonStripSet_Handler;
 
+            _tmrControlButtonsAutoHide = new Timer[BuiltInComponents.Host.ScreenCount];
+
+            _MediaBanner_Enable = new bool[BuiltInComponents.Host.ScreenCount];
+            for (int i = 0; i < _MediaBanner_Enable.Length; i++)
+                _MediaBanner_Enable[i] = true;
+
             BuiltInComponents.Host.OnSystemEvent += new SystemEvent(Host_OnSystemEvent);
         }
 
@@ -521,6 +565,9 @@ namespace OpenMobile.UI
                             if (args[1] as string == strip.PluginName && args[2] as string == strip.PanelName)
                                 BuiltInComponents.Host.UIHandler.PopUpMenu.ClearButtonStrip(screen);
                         }
+
+                        // Reenable the media banner by default when leaving a panel
+                        MediaBanner_Enable(screen);
                     }
                 }
             }
@@ -532,6 +579,9 @@ namespace OpenMobile.UI
                     if (int.TryParse(args[0] as string, out screen))
                     {
                         BuiltInComponents.Host.UIHandler.PopUpMenu.ClearButtonStrip(screen);
+
+                        // Reenable the media banner by default when leaving a panel
+                        MediaBanner_Enable(screen);
                     }
                 }
             }
@@ -836,7 +886,14 @@ namespace OpenMobile.UI
                                 // Add notification icon to Icon container
                                 if (notification.Icon != null)
                                 {
-                                    OMImage Image_NotificationIcon = new OMImage(_IconContainerItemName, 0, 0, _IconContainer.Region.Height, _IconContainer.Region.Height, new imageItem(notification.Icon, notification.ID.ToString()));
+                                    int iconHeight = _IconContainer.Region.Height;
+                                    if (notification.IconSize_Height > 0)
+                                        iconHeight = notification.IconSize_Height;
+                                    int iconWidth = _IconContainer.Region.Height;
+                                    if (notification.IconSize_Width > 0)
+                                        iconWidth = notification.IconSize_Width;
+
+                                    OMImage Image_NotificationIcon = new OMImage(_IconContainerItemName, 0, 0, iconWidth, iconHeight, new imageItem(notification.Icon, notification.ID.ToString()));
                                     Image_NotificationIcon.Name = String.Format("{0}{1}{2}", _IconContainerItemName, notification.OwnerPlugin.pluginName, notification.ID.ToString());
                                     if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
                                         Image_NotificationIcon.Image.image.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
@@ -850,7 +907,15 @@ namespace OpenMobile.UI
                     // Add notification statusbar icon to Icon container if present
                     if (notification.IconStatusBar != null)
                     {
-                        OMImage Image_NotificationIcon = new OMImage(_IconContainerItemName, 0, 0, _IconContainer.Region.Height, _IconContainer.Region.Height, new imageItem(notification.IconStatusBar, notification.ID.ToString()));
+
+                        int iconHeight = _IconContainer.Region.Height;
+                        if (notification.IconSize_Height > 0)
+                            iconHeight = notification.IconSize_Height;
+                        int iconWidth = _IconContainer.Region.Height;
+                        if (notification.IconSize_Width > 0)
+                            iconWidth = notification.IconSize_Width;
+
+                        OMImage Image_NotificationIcon = new OMImage(_IconContainerItemName, 0, 0, iconWidth, iconHeight, new imageItem(notification.IconStatusBar, notification.ID.ToString()));
                         Image_NotificationIcon.Name = String.Format("{0}{1}{2}", _IconContainerItemName, notification.OwnerPlugin.pluginName, notification.ID.ToString());
                         if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
                             Image_NotificationIcon.Image.image.Overlay(BuiltInComponents.SystemSettings.SkinTextColor); // Support overlay of skin colors
@@ -1241,6 +1306,20 @@ namespace OpenMobile.UI
 
         #endregion
 
+        /// <summary>
+        /// The default size of icons on the statusbar
+        /// </summary>
+        public Size StatusBar_DefaultIconSize
+        {
+            get
+            {
+                _StatusBar_DefaultIconSize.Width = _IconContainer.Region.Height;
+                _StatusBar_DefaultIconSize.Height = _IconContainer.Region.Height;
+                return _StatusBar_DefaultIconSize;
+            }
+        }
+        private Size _StatusBar_DefaultIconSize = new Size();
+
         #endregion
 
         #region InfoBanner
@@ -1287,6 +1366,140 @@ namespace OpenMobile.UI
         {
             // Call event
             Raise_OnHideInfoBanner(screen);
+        }
+
+        #endregion
+
+        #region MediaBanner
+
+        public delegate void ShowMediaBannerDelegate(int screen, bool fast);
+        public delegate void HideMediaBannerDelegate(int screen, bool fast);
+        public delegate void EnableMediaBannerDelegate(int screen, bool fast);
+
+        /// <summary>
+        /// Event is raised when the Mediabanner is requested to hide
+        /// </summary>
+        public event HideMediaBannerDelegate OnHideMediaBanner;
+        private void Raise_OnHideMediaBanner(int screen, bool fast)
+        {
+            if (OnHideMediaBanner != null)
+                OnHideMediaBanner(screen, fast);
+        }
+
+        /// <summary>
+        /// Event is raised when the Mediabanner is requested to show
+        /// </summary>
+        public event ShowMediaBannerDelegate OnShowMediaBanner;
+        private void Raise_OnShowMediaBanner(int screen, bool fast)
+        {
+            if (OnShowMediaBanner != null)
+                OnShowMediaBanner(screen, fast);
+        }
+
+        /// <summary>
+        /// Event is raised when the Mediabanner is enabled
+        /// </summary>
+        public event EnableMediaBannerDelegate OnEnableMediaBanner;
+        private void Raise_OnEnableMediaBanner(int screen, bool fast)
+        {
+            if (OnEnableMediaBanner != null)
+                OnEnableMediaBanner(screen, fast);
+        }
+
+        /// <summary>
+        /// Show the Mediabanner
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="bannerData"></param>
+        public void MediaBanner_Show(int screen, bool fast = false)
+        {
+            // Call event
+            if (_MediaBanner_Enable[screen])
+                Raise_OnShowMediaBanner(screen, fast);
+        }
+
+        /// <summary>
+        /// Hide the Mediabanner 
+        /// </summary>
+        /// <param name="screen"></param>
+        public void MediaBanner_Hide(int screen, bool fast = false)
+        {
+            // Call event
+            Raise_OnHideMediaBanner(screen, fast);
+        }
+
+        private bool[] _MediaBanner_Enable;
+
+        public bool MediaBanner_IsEnabled(int screen)
+        {
+            return _MediaBanner_Enable[screen];
+        }
+
+        public void MediaBanner_Enable(int screen, bool fast = false)
+        {
+            if (screen < 0 || screen >= _MediaBanner_Enable.Length)
+                return;
+
+            _MediaBanner_Enable[screen] = true;
+            Raise_OnEnableMediaBanner(screen, fast);
+        }
+        public void MediaBanner_Disable(int screen, bool fast = false)
+        {
+            if (screen < 0 || screen >= _MediaBanner_Enable.Length)
+                return;
+
+            _MediaBanner_Enable[screen] = false;
+            MediaBanner_Hide(screen, fast);
+        }
+
+        
+
+        #endregion
+
+        #region TopBar InfoText (infobar)
+
+        public delegate void ShowInfoBarDelegate(int screen, InfoBar barData);
+        public delegate void HideInfoBarDelegate(int screen);
+
+        /// <summary>
+        /// Event is raised when the infobar is requested to hide
+        /// </summary>
+        public event HideInfoBarDelegate OnHideInfoBar;
+        private void Raise_OnHideInfoBar(int screen)
+        {
+            if (OnHideInfoBar != null)
+                OnHideInfoBar(screen);
+        }
+
+        /// <summary>
+        /// Event is raised when the infobar is requested to show
+        /// </summary>
+        public event ShowInfoBarDelegate OnShowInfoBar;
+        private void Raise_OnShowInfoBar(int screen, InfoBar barData)
+        {
+            if (OnShowInfoBar != null)
+                OnShowInfoBar(screen, barData);
+        }
+
+        /// <summary>
+        /// Show the infobar
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="bannerData"></param>
+        public void InfoBar_Show(int screen, InfoBar barData)
+        {
+            // Call event
+            Raise_OnShowInfoBar(screen, barData);
+        }
+
+        /// <summary>
+        /// Hide the infobar 
+        /// </summary>
+        /// <param name="screen"></param>
+        public void InfoBar_Hide(int screen)
+        {
+            // Call event
+            Raise_OnHideInfoBar(screen);
         }
 
         #endregion

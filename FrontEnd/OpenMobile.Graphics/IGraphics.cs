@@ -25,7 +25,7 @@ namespace OpenMobile.Graphics
         void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData);
         void DrawImage(OImage image, Point[] destPoints);
         void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency);
-        void DrawCube(OImage image, int x, int y, int z, double width, double height, int depth, Vector3 rotation);
+        void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, Vector3 rotation);
         void DrawLine(Pen pen, int x1, int y1, int x2, int y2);
         void DrawLine(Pen pen, Point pt1, Point pt2);
         void DrawLine(Pen pen, float x1, float y1, float x2, float y2);
@@ -41,7 +41,7 @@ namespace OpenMobile.Graphics
         void FillPolygon(Brush brush, Point[] points);
         void FillRectangle(Brush brush, int x, int y, int width, int height);
         void FillRectangle(Brush brush, Rectangle rect);
-        void FillRectangle(GradientData gradient, Rectangle rect);
+        void FillRectangle(GradientData gradient, Rectangle rect, float opacity);
         void FillRoundRectangle(Brush brush, int x, int y, int width, int height, int radius);
         void FillRoundRectangle(Brush brush, Rectangle rect, int radius);
         OImage GenerateStringTexture(string s, Font font, Color color, int Left, int Top, int Width, int Height, System.Drawing.StringFormat format);

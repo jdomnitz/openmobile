@@ -438,7 +438,12 @@ namespace OpenMobile.Graphics
             }
         }
 
-        public void Glow(Color c)
+        /// <summary>
+        /// Adds a glow effect around the image
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="glowSize">Size of glow (NB! Must be an odd number)</param>
+        public void Glow(Color c, int glowSize = 31)
         {
             if (img == null)
                 return;
@@ -458,7 +463,7 @@ namespace OpenMobile.Graphics
 
                 // Blur (NB! Length must be an odd number)
                 Convolution conv = new Convolution();
-                fipbmp.FastZGaussian_Blur_NxN(bmp, 31, 0.01f, 255, true, false, conv);
+                fipbmp.FastZGaussian_Blur_NxN(bmp, glowSize, 0.01f, 255, true, false, conv);
 
                 // Increase alpha (a darker base color like blue needs a higher alpha value to ensure visibility)
                 float AlphaIncrease = c.B / 255;
@@ -731,6 +736,10 @@ namespace OpenMobile.Graphics
             //GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Clones this object
+        /// </summary>
+        /// <returns></returns>
         public Object Clone()
         {
             lock (img)
@@ -738,6 +747,15 @@ namespace OpenMobile.Graphics
                 OImage newImg = new OImage((Bitmap)img.Clone());
                 return newImg;
             }
+        }
+
+        /// <summary>
+        /// Copies this image into a new image object
+        /// </summary>
+        /// <returns></returns>
+        public OImage Copy()
+        {
+            return this.Clone() as OImage;
         }
 
         public override string ToString()

@@ -21,51 +21,129 @@ namespace OpenMobile.Graphics
 
         /// <summary>
         /// Creates new reflections data
+        /// <para>NB! Default reflection length is set to 0.2 (20%) of height. So height has to be 20% more than width to make room for reflection</para>
         /// </summary>
-        /// <param name="fadeColorStart"></param>
-        /// <param name="fadeColorEnd"></param>
-        public ReflectionsData(Color fadeColorStart, Color fadeColorEnd)
+        /// <param name="reflectionColorEnd"></param>
+        public ReflectionsData(Color reflectionColorEnd)
         {
-            this._FadeColorStart = fadeColorStart;
-            this._FadeColorEnd = fadeColorEnd;
+            this._ReflectionColorEnd = reflectionColorEnd;
         }
+        /// <summary>
+        /// Creates new reflections data
+        /// <para>NB! Default reflection length is set to 0.2 (20%) of height. So height has to be 20% more than width to make room for reflection</para>
+        /// </summary>
+        /// <param name="reflectionColorStart"></param>
+        /// <param name="reflectionColorEnd"></param>
+        public ReflectionsData(Color reflectionColorStart, Color reflectionColorEnd)
+        {
+            this._ReflectionColorStart = reflectionColorStart;
+            this._ReflectionColorEnd = reflectionColorEnd;
+        }
+        /// <summary>
+        /// Creates new reflections data
+        /// <para>NB! Default reflection length is set to 0.2 (20%) of height. So height has to be 20% more than width to make room for reflection</para>
+        /// </summary>
+        /// <param name="reflectionColorStart"></param>
+        /// <param name="reflectionColorEnd"></param>
+        /// <param name="reflectionLength"></param>
+        public ReflectionsData(Color reflectionColorStart, Color reflectionColorEnd, float reflectionLength)
+        {
+            this._ReflectionColorStart = reflectionColorStart;
+            this._ReflectionColorEnd = reflectionColorEnd;
+            this._ReflectionLength = reflectionLength;
+        }
+        /// <summary>
+        /// Creates new reflections data
+        /// <para>NB! Default reflection length is set to 0.2 (20%) of height. So height has to be 20% more than width to make room for reflection</para>
+        /// </summary>
+        /// <param name="reflectionColorStart"></param>
+        /// <param name="reflectionColorEnd"></param>
+        /// <param name="reflectionLength"></param>
+        /// <param name="reflectionOffset"></param>
+        public ReflectionsData(Color reflectionColorStart, Color reflectionColorEnd, float reflectionLength, int reflectionOffset)
+        {
+            this._ReflectionColorStart = reflectionColorStart;
+            this._ReflectionColorEnd = reflectionColorEnd;
+            this._ReflectionLength = reflectionLength;
+            this._ReflectionOffset = reflectionOffset;
+        }
+
         /// <summary>
         /// The color to start with when fading out the reflection
         /// </summary>
-        public Color FadeColorStart
+        public Color ReflectionColorStart
         {
             get
             {
-                return this._FadeColorStart;
+                return this._ReflectionColorStart;
             }
             set
             {
-                if (this._FadeColorStart != value)
+                if (this._ReflectionColorStart != value)
                 {
-                    this._FadeColorStart = value;
+                    this._ReflectionColorStart = value;
                 }
             }
         }
-        private Color _FadeColorStart = Color.FromArgb(255, 51, 51, 51);
+        private Color _ReflectionColorStart = Color.White;
 
         /// <summary>
         /// The color to end with when fading out the reflection
         /// </summary>
-        public Color FadeColorEnd
+        public Color ReflectionColorEnd
         {
             get
             {
-                return this._FadeColorEnd;
+                return this._ReflectionColorEnd;
             }
             set
             {
-                if (this._FadeColorEnd != value)
+                if (this._ReflectionColorEnd != value)
                 {
-                    this._FadeColorEnd = value;
+                    this._ReflectionColorEnd = value;
                 }
             }
         }
-        private Color _FadeColorEnd = Color.Transparent;
+        private Color _ReflectionColorEnd = Color.Transparent;
+
+        /// <summary>
+        /// Length of reflection in percentage of total dimension (usually height)
+        /// </summary>
+        public float ReflectionLength
+        {
+            get
+            {
+                return this._ReflectionLength;
+            }
+            set
+            {
+                if (this._ReflectionLength != value)
+                {
+                    if (value >= 0 && value <= 1)
+                        this._ReflectionLength = value;
+                }
+            }
+        }
+        private float _ReflectionLength = 0.2f;
+
+        /// <summary>
+        /// The offset for the reflection
+        /// </summary>
+        public int ReflectionOffset
+        {
+            get
+            {
+                return this._ReflectionOffset;
+            }
+            set
+            {
+                if (this._ReflectionOffset != value)
+                {
+                    this._ReflectionOffset = value;
+                }
+            }
+        }
+        private int _ReflectionOffset;        
     }
 
     public sealed class Graphics
@@ -410,7 +488,7 @@ namespace OpenMobile.Graphics
         /// <param name="height"></param>
         /// <param name="depth"></param>
         /// <param name="rotation"></param>
-        public void DrawCube(OImage image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
+        public void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
         {
             implementation.DrawCube(image, x, y, z, width, height, depth, rotation);
         }
@@ -617,9 +695,9 @@ namespace OpenMobile.Graphics
         /// </summary>
         /// <param name="gradient"></param>
         /// <param name="rect"></param>
-        public void FillRectangle(GradientData gradient, Rectangle rect)
+        public void FillRectangle(GradientData gradient, Rectangle rect, float opacity)
         {
-            implementation.FillRectangle(gradient, rect);
+            implementation.FillRectangle(gradient, rect, opacity);
         }
 
         /// <summary>
@@ -1537,7 +1615,12 @@ namespace OpenMobile.Graphics
         public uint LoadTexture(ref OImage image)
         {
             if (image.TextureGenerationRequired(this.screen))
-                implementation.LoadTexture(ref image);
+            {
+                lock (image)
+                {
+                    implementation.LoadTexture(ref image);
+                }
+            }
             return image.GetTexture(this.screen);
         }
 

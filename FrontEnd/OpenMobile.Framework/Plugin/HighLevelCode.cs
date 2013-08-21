@@ -72,5 +72,50 @@ namespace OpenMobile.Plugin
             get { return _displayName; }
         }
         private string _displayName;
+
+        /// <summary>
+        /// Closes all other panels and shows only the specified one 
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="panelName"></param>
+        /// <returns></returns>
+        protected bool GotoPanel(int screen, string panelName)
+        {
+            return OM.Host.execute(eFunction.GotoPanel, screen, String.Format("{0};{1}", this.pluginName, panelName));
+        }
+        /// <summary>
+        /// Closes all other panels and shows only the specified one using the specified transition effect
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="panelName"></param>
+        /// <param name="transition"></param>
+        /// <returns></returns>
+        protected bool GotoPanel(int screen, string panelName, eGlobalTransition transition)
+        {
+            return OM.Host.execute(eFunction.GotoPanel, screen, String.Format("{0};{1}", this.pluginName, panelName), transition);
+        }
+
+        /// <summary>
+        /// Shows a panel
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="panelName"></param>
+        /// <returns></returns>
+        protected bool ShowPanel(int screen, string panelName)
+        {
+            return OM.Host.execute(eFunction.ShowPanel, screen, String.Format("{0};{1}", this.pluginName, panelName));
+        }
+        /// <summary>
+        /// Shows a panel using the specified transition effect
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="panelName"></param>
+        /// <param name="transition"></param>
+        /// <returns></returns>
+        protected bool ShowPanel(int screen, string panelName, eGlobalTransition transition)
+        {
+            return OM.Host.execute(eFunction.ShowPanel, screen, String.Format("{0};{1}", this.pluginName, panelName), transition);
+        }
+
     }
 }

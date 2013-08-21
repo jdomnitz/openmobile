@@ -276,6 +276,13 @@ namespace OpenMobile.Plugin
         /// <param name="noCache">Dont cache the image in the gloabl cache</param>
         /// <returns></returns>
         imageItem getSkinImage(string imageName, bool noCache);
+
+        /// <summary>
+        /// Gets a image from a full image path
+        /// </summary>
+        /// <param name="fullImageName"></param>
+        /// <returns></returns>
+        imageItem getImageFromFile(string fullImageName);
         /// <summary>
         /// Get an image relative to a plugins path
         /// </summary>
@@ -643,5 +650,21 @@ namespace OpenMobile.Plugin
         RenderingWindowData GetRenderingWindowData(int screen);
 
         iRenderingWindow RenderingWindowInterface(int screen);
+
+        /// <summary>
+        /// a bool indicating if the current location is defined as daytime
+        /// </summary>
+        bool CurrentLocation_Daytime { get; }
+
+        /// <summary>
+        /// The current calculated time for sunrise
+        /// </summary>
+        DateTime CurrentLocation_Sunrise { get; }
+
+        /// <summary>
+        /// The current calculated time for sunset
+        /// </summary>
+        DateTime CurrentLocation_Sunset { get; }
+
     }
 }

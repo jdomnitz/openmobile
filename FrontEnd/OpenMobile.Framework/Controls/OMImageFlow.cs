@@ -30,7 +30,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// An "coverflow" style control for images
     /// </summary>
-    public class OMImageFlow : OMControl, IThrow, IHighlightable, IClickableAdvanced
+    public class OMImageFlow : OMLabel, IThrow, IHighlightable, IClickableAdvanced
     {
         // Code is based on the free source code found here http://lxd.bumuckl.com/home.php but modified to fit the OpenMobile project.
 
@@ -55,6 +55,17 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Apply the "pyramid" style to a OMImageFlow control
+        /// </summary>
+        /// <param name="control"></param>
+        public static void PreConfigLayout_Pyramid_ApplyToControl(OMImageFlow control)
+        {
+            control.Item_DistancePushBack = 0.3f;
+            control.Item_Distance = 0.3f;
+            control.Item_CenterImageScale = 1;
+        }
+
+        /// <summary>
         /// Creates a "flat" style control
         /// </summary>
         /// <param name="name"></param>
@@ -72,8 +83,24 @@ namespace OpenMobile.Controls
             imgFlow.Item_CenterImagePlacementZ = 0;
             imgFlow.Control_PlacementOffsetY = 0.3f;
             imgFlow.Animation_FadeOutDistance = 3;
+            imgFlow._Control_PlacementOffsetY = 0;
             //imgFlow.Item_CenterImageScale = 1;
             return imgFlow;
+        }
+
+        /// <summary>
+        /// Apply the "flat" style to a OMImageFlow control
+        /// </summary>
+        /// <param name="control"></param>
+        public static void PreConfigLayout_Flat_ApplyToControl(OMImageFlow control)
+        {
+            control.Item_Rotation = 0;
+            control.Item_DistanceToCenter = 0.1f;
+            control.Item_Distance = 1.1f;
+            control.Item_CenterImagePlacementZ = 0;
+            control.Control_PlacementOffsetY = 0.3f;
+            control.Animation_FadeOutDistance = 3;
+            control._Control_PlacementOffsetY = 0;
         }
 
         #endregion
@@ -83,11 +110,11 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Creates a new imageflow
         /// </summary>
-        /// <param name="Name"></param>
-        /// <param name="Left"></param>
-        /// <param name="Top"></param>
-        /// <param name="Width"></param>
-        /// <param name="Height"></param>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
         public OMImageFlow(string name, int left, int top, int width, int height)
             : base(name, left, top, width, height)
         {
@@ -95,21 +122,50 @@ namespace OpenMobile.Controls
             if (_Step_Backup > _Animation_Step_Max) _Step_Backup = _Animation_Step_Max;
 
             // Set the default image size
-            _ImageSize = new Size(this.height * 0.6f, this.height * 0.6f);
+            _ImageSize = new Size(this.height * 0.5f, this.height * 0.5f);
+
+            _Control_PlacementOffsetY = -(this.height * 0.15f);
+
+            _textAlignment = Alignment.BottomCenter;
         }
 
         #endregion
 
         #region private classes
 
-        private struct RVect
+        /// <summary>
+        /// Vector data 
+        /// </summary>
+        protected struct RVect
         {
+            /// <summary>
+            /// X value
+            /// </summary>
             public float x;
+            /// <summary>
+            /// Y value
+            /// </summary>
             public float y;
+            /// <summary>
+            /// Z Value
+            /// </summary>
             public float z;
+            /// <summary>
+            /// Rotation
+            /// </summary>
             public float rot;
+            /// <summary>
+            /// Scale
+            /// </summary>
             public float scale;
 
+            /// <summary>
+            /// Creates new vector data
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <param name="z"></param>
+            /// <param name="rot"></param>
             public RVect(float x, float y, float z, float rot)
             {
                 this.x = x;
@@ -119,6 +175,14 @@ namespace OpenMobile.Controls
                 this.scale = 1;
             }
 
+            /// <summary>
+            /// Creates new vector data
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <param name="z"></param>
+            /// <param name="rot"></param>
+            /// <param name="scale"></param>
             public RVect(float x, float y, float z, float rot, float scale)
             {
                 this.x = x;
@@ -128,41 +192,93 @@ namespace OpenMobile.Controls
                 this.scale = scale;
             }
 
+            /// <summary>
+            /// String representation
+            /// </summary>
+            /// <returns></returns>
             public override string ToString()
             {
                 return String.Format("[{0},{1},{2}:{4}]", x, y, z, rot);
             }
         }
 
-        private class ImageWrapper
+        /// <summary>
+        /// Image items
+        /// </summary>
+        protected class ImageWrapper : ICloneable
         {
+            /// <summary>
+            /// Current Image
+            /// </summary>
             public OImage Image;
-            public string Name;
+            /// <summary>
+            /// Width of item
+            /// </summary>
             public float Width;
+            /// <summary>
+            /// Height of item
+            /// </summary>
             public float Height;
+            /// <summary>
+            /// Current placement
+            /// </summary>
             public RVect Current;
+            /// <summary>
+            /// Target placement
+            /// </summary>
             public RVect AnimEnd;
 
+            /// <summary>
+            /// Creates a new imageWrapper item
+            /// </summary>
             public ImageWrapper()
             {
             }
-            public ImageWrapper(string name, OImage image, float width, float height)
+            /// <summary>
+            /// Creates a new imageWrapper item
+            /// </summary>
+            /// <param name="image"></param>
+            /// <param name="width"></param>
+            /// <param name="height"></param>
+            public ImageWrapper(OImage image, float width, float height)
             {
-                this.Name = name;
                 this.Image = image;
                 this.Width = width;
                 this.Height = height;
             }
 
-            public override string ToString()
+            /// <summary>
+            /// Clones this item
+            /// </summary>
+            /// <returns></returns>
+            public object Clone()
             {
-                return String.Format("{0} [{1} - {2}]", Name, Current, AnimEnd);
+                return this.MemberwiseClone();
             }
         }
 
         #endregion
 
         #region Public Properties
+
+        /// <summary>
+        /// Enable reflections
+        /// </summary>
+        public bool ReflectionsEnabled
+        {
+            get
+            {
+                return this._ReflectionsEnabled;
+            }
+            set
+            {
+                if (this._ReflectionsEnabled != value)
+                {
+                    this._ReflectionsEnabled = value;
+                }
+            }
+        }
+        private bool _ReflectionsEnabled = true;        
 
         /// <summary>
         /// Sets or gets the speed of the animation 
@@ -790,7 +906,7 @@ namespace OpenMobile.Controls
 
         public OImage overlay = null;
 
-        private List<ImageWrapper> _Images = new List<ImageWrapper>();
+        protected List<ImageWrapper> _Images = new List<ImageWrapper>();
         private Timer tmrUpdate = null;
         int cleanUpDelay = 0;
 
@@ -854,7 +970,7 @@ namespace OpenMobile.Controls
 
             current.scale = current.scale + (to.scale - current.scale) * _Animation_Step;
 
-            if (System.Math.Abs(to.rot - current.rot) > 0.001)
+            if (System.Math.Abs(to.rot - current.rot) > 0.0001)
             {
                 animate = true;
                 current.rot = current.rot + (to.rot - current.rot) * (_Animation_Step * _Animation_PreRotation);                
@@ -869,62 +985,84 @@ namespace OpenMobile.Controls
             _View_rotate_active = false;
         }
 
-        private int updateCountIdle = 0;
+        private int _updateCountIdle = 0;
+        private int _SelectedIndexStored = -1;
         private void Update()
         {
-            bool animationActive = false;
-
-            for (int i = _Images.Count - 1; i >= 0; i--)
+            lock (_Images)
             {
-                CalcRV(ref _Images[i].AnimEnd, i - _SelectedIndex);
-                animationActive = Animate(ref _Images[i].Current, _Images[i].AnimEnd);
-            }
+                bool animationActive = false;
 
-            if (!animationActive && _View_rotate_active)
-                cleanUpDelay++;
-            else
-                cleanUpDelay = 0;
+                for (int i = _Images.Count - 1; i >= 0; i--)
+                {
+                    CalcRV(ref _Images[i].AnimEnd, i - _SelectedIndex);
+                    if (Animate(ref _Images[i].Current, _Images[i].AnimEnd))
+                        animationActive = true;
+                }
 
-            if (cleanUpDelay > 1)
-                CleanupAnimation();
+                if (!animationActive && _View_rotate_active)
+                    cleanUpDelay++;
+                else
+                    cleanUpDelay = 0;
 
-            //slowly reset view angle
-            if (!_View_rotate_active)
-            {
-                _View_rotate += (0 - _View_rotate) * _ViewRotate_ReverseSpeed;
-                if (System.Math.Abs(_View_rotate) < 0.0001)
-                    _View_rotate = 0;
+                if (cleanUpDelay > 1)
+                    CleanupAnimation();
 
-                if (_View_rotate != 0)
+                //slowly reset view angle
+                if (!_View_rotate_active)
+                {
+                    _View_rotate += (0 - _View_rotate) * _ViewRotate_ReverseSpeed;
+                    if (System.Math.Abs(_View_rotate) < 0.0001)
+                        _View_rotate = 0;
+
+                    if (_View_rotate != 0)
+                        animationActive = true;
+                }
+
+                if (animationActive)
+                    _updateCountIdle = 0;
+
+                if (!animationActive && _updateCountIdle < 10)
+                {
+                    _updateCountIdle++;
                     animationActive = true;
-            }
+                }
 
-            if (animationActive)
-                updateCountIdle = 0;
+                // Selected index changed?
+                if (_SelectedIndexStored != _SelectedIndex)
+                {
+                    // Override to update text field
+                    this.Text = ExtractLabelText();
 
-            if (!animationActive && updateCountIdle < 10)
-            {
-                updateCountIdle++;
-                animationActive = true;
-            }
+                    _SelectedIndexStored = _SelectedIndex;
+                }
 
-            if (animationActive | _View_rotate_active)
-            {
-                Refresh();
-                tmrUpdate.Enabled = true;
-            }
-            else
-            {   // Stop update timer
-                tmrUpdate.Enabled = false;
+                if (animationActive | _View_rotate_active)
+                {
+                    Refresh();
+                    if (tmrUpdate != null)
+                        tmrUpdate.Enabled = true;
+                }
+                else
+                {   // Stop update timer
+                    if (tmrUpdate != null)
+                        tmrUpdate.Enabled = false;
+                }
             }
         }
 
         private void Animation_Control(bool start)
         {
             if (start)
-                tmrUpdate.Enabled = true;
+            {
+                if (tmrUpdate != null)
+                    tmrUpdate.Enabled = true;
+            }
             else
-                tmrUpdate.Enabled = false;
+            {
+                if (tmrUpdate != null)
+                    tmrUpdate.Enabled = false;
+            }
         }
 
         void tmrUpdate_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -933,42 +1071,71 @@ namespace OpenMobile.Controls
             Update();
         }
 
+        /// <summary>
+        /// Updates the text displayed in the label field
+        /// </summary>
+        /// <returns></returns>
+        internal virtual string ExtractLabelText()
+        {
+            return this._text;
+        }
+
         #endregion
 
         #region List item control
 
-        public void Insert(string name, OImage image)
+        public void Insert(OImage image)
         {
-            Insert(name, image, _ImageSize.Width, _ImageSize.Height, null);
+            Insert(image, _ImageSize.Width, _ImageSize.Height, null);
+        }
+        public void Insert(OImage image, int index)
+        {
+            Insert(image, _ImageSize.Width, _ImageSize.Height, index);
         }
 
-        public void Insert(string name, OImage image, float width, float height)
+        public void Insert(OImage image, float width, float height)
         {
-            Insert(name, image, width, height, null);
+            Insert(image, width, height, null);
         }
 
-        public void Insert(string name, OImage image, float width, float height, int? index)
+        public void Insert(OImage image, float width, float height, int? index)
         {
             // Insert new item
+            ImageWrapper img = new ImageWrapper(image, width, height);
+            CalcRV(ref img.Current, _Images.Count-1);
+            img.Current.x += 1;
+            img.Current.rot = 90;
+
             if (!index.HasValue)
             {
-                ImageWrapper img = new ImageWrapper(name, image, width, height);
-                CalcRV(ref img.Current, _Images.Count-1);
-                img.Current.x += 1;
-                img.Current.rot = 90;
                 _Images.Add(img);
             }
             else
             {
-                if (index.Value < _Images.Count)
-                {
-                    _Images[index.Value].Image = image;
-                    _Images[index.Value].Width = width;
-                    _Images[index.Value].Height = height;
-                    _Images[index.Value].Name = name;
-                }
+                _Images.Insert(index.Value, img);
+                //if (index.Value < _Images.Count)
+                //{
+                //    _Images[index.Value].Image = image;
+                //    _Images[index.Value].Width = width;
+                //    _Images[index.Value].Height = height;
+                //}
             }
-            Animation_Control(true);
+            Update();
+        }
+
+        public void Clear()
+        {
+            _Images.Clear();
+            Update();
+        }
+
+        public void RemoveAt(int index)
+        {
+            if (index >= _Images.Count || index < 0)
+                return;
+
+            _Images.RemoveAt(index);
+            Update();
         }
 
         public void MoveLeft()
@@ -1077,59 +1244,72 @@ namespace OpenMobile.Controls
 
         private void Draw(Graphics.Graphics g)
         {
-	        int CS = _SelectedIndex;
-	        int count;
-            float visibleCount = 40;
-
-            // Translate base point from center to upper left corner of screen
-            GL.Translate(-500, -300, 0);
-
-            // Translate graphics to correct placement
-            GL.Translate(this.left + (this.width / 2), this.top + (this.height / 2), 0);
-
-            // Scale graphics to correct size
-            GL.Scale(this.Region.Height / 2, this.Region.Height / 2, 1);
-
-            // Ensure graphics are centered vertically
-            GL.Translate(0, -0.37f, 0);
-
-	        //Draw right Covers
-	        for(count = _Images.Count-1;count >= 0;count--)
-	        {
-		        if(count > CS)
-                {
-                    if (_Images[count].Current.x < (visibleCount * _Item_Distance))
-                        DrawCover(g, _Images[count], false);
-		        }
-	        }
-
-	        //Draw left Covers
-            for (count = 0; count < _Images.Count; count++)
+            try
             {
-		        if(count < CS)
+                int CS = _SelectedIndex;
+                int count;
+                float visibleCount = 40;
+
+                // Translate base point from center to upper left corner of screen
+                GL.Translate(-500, -300, 0);
+
+                // Translate graphics to correct placement
+                GL.Translate(this.left + (this.width / 2), this.top + (this.height / 2), 0);
+
+                //// Scale graphics to correct size
+                //GL.Scale(this.Region.Height / 2, this.Region.Height / 2, 1);
+
+                //// Ensure graphics are centered vertically
+                //GL.Translate(0, -(this.height * 0.15), 0);
+
+                //Draw right Covers
+                for (count = _Images.Count - 1; count >= 0; count--)
                 {
-                    if (_Images[count].Current.x > (visibleCount * -_Item_Distance))
-                        DrawCover(g, _Images[count], false);
-		        }
-	        }
+                    if (count > CS)
+                    {
+                        if (_Images[count].Current.x < (visibleCount * _Item_Distance))
+                            DrawCover(g, _Images[count], false);
+                    }
+                }
 
-	        //Draw Center Cover
-            if (CS >= 0 && CS < _Images.Count)
-                DrawCover(g, _Images[CS], true);
+                //Draw left Covers
+                for (count = 0; count < _Images.Count; count++)
+                {
+                    if (count < CS)
+                    {
+                        if (_Images[count].Current.x > (visibleCount * -_Item_Distance))
+                            DrawCover(g, _Images[count], false);
+                    }
+                }
 
+                //Draw Center Cover
+                if (CS >= 0 && CS < _Images.Count)
+                    DrawCover(g, _Images[CS], true);
+            }
+            catch
+            {
+                // Mask errors here
+            }
         }
 
         private void DrawCover(Graphics.Graphics g, ImageWrapper cf, bool enableOverlay)
         {
-	        float w = cf.Width;
+	        // Error handling
+            if (cf.Image == null)
+                return;
+            
+            float w = cf.Width;
 	        float h = cf.Height;
 
 	        //fadeout 
             float opacity = 1 - 1 / (_Animation_FadeOutDistance + _ViewRotate_LightStrenght * System.Math.Abs(_View_rotate)) * System.Math.Abs(0 - cf.Current.x);
 
             //if (System.Math.Abs(opacity) < 0.2f)
-            if (opacity <= 0.0f)
-                return;
+            //if (opacity <= 0.0f)
+            //    return;
+
+            // Set opacity according to controls values
+            //opacity = opacity * _RenderingValue_Alpha;
 
             // load texture
             uint texture = g.LoadTexture(ref cf.Image);
@@ -1161,8 +1341,8 @@ namespace OpenMobile.Controls
             // Offset control
             GL.Translate(_Control_PlacementOffsetX, _Control_PlacementOffsetY, 0);
             
-            //// Scale graphics to correct dimensions
-            //GL.Scale(w, h, 1);
+            // Scale graphics to correct dimensions
+            GL.Scale(w, h, 1);
 
             // Place item
             GL.Translate(_Control_PlacementX, _Control_PlacementY, _Control_PlacementZ);
@@ -1189,52 +1369,55 @@ namespace OpenMobile.Controls
 
             //DrawCover
             GL.Begin(BeginMode.Quads);
-            GL.Color4(LDOWN * opacity, LDOWN * opacity, LDOWN * opacity, 1);
+            GL.Color4(LDOWN * opacity, LDOWN * opacity, LDOWN * opacity, _RenderingValue_Alpha * (opacity * 2));
             GL.TexCoord2(0.0f, 0.0f);
             GL.Vertex3(w / 2 * -1, -0.5, 0);
-            GL.Color4(RDOWN * opacity, RDOWN * opacity, RDOWN * opacity, 1);
+            GL.Color4(RDOWN * opacity, RDOWN * opacity, RDOWN * opacity, _RenderingValue_Alpha * (opacity * 2));
             GL.TexCoord2(1.0f, 0.0f);
             GL.Vertex3(w / 2, -0.5, 0);
-            GL.Color4(RUP * opacity, RUP * opacity, RUP * opacity, 1);
+            GL.Color4(RUP * opacity, RUP * opacity, RUP * opacity, _RenderingValue_Alpha * (opacity * 2));
             GL.TexCoord2(1.0f, 1.0f);
             GL.Vertex3(w / 2, -0.5 + h, 0);
-            GL.Color4(LUP * opacity, LUP * opacity, LUP * opacity, 1);
+            GL.Color4(LUP * opacity, LUP * opacity, LUP * opacity, _RenderingValue_Alpha * (opacity * 2));
             GL.TexCoord2(0.0f, 1.0f);
             GL.Vertex3(w / 2 * -1, -0.5 + h, 0);
             GL.End();
 
             //Draw reflection
-            GL.Begin(BeginMode.Quads);
-            GL.Color4(opacity * _Item_ReflectionStrengthBottom, opacity * _Item_ReflectionStrengthBottom, opacity * _Item_ReflectionStrengthBottom, opacity * _Item_ReflectionStrengthBottom);
-            GL.TexCoord2(0.0f, 1.0f);
-            GL.Vertex3(w / 2 * -1, 0.5, 0);
-            GL.TexCoord2(1.0f, 1.0f);
-            GL.Vertex3(w / 2, 0.5, 0);
-            GL.Color4(LUP * opacity * _Item_ReflectionStrengthUp, LUP * opacity * _Item_ReflectionStrengthUp, LUP * opacity * _Item_ReflectionStrengthUp, opacity * _Item_ReflectionStrengthUp);
-            GL.TexCoord2(1.0f, 0.0f);
-            GL.Vertex3(w / 2, 0.5 + h, 0);
-            GL.TexCoord2(0.0f, 0.0f);
-            GL.Vertex3(w / 2 * -1, 0.5 + h, 0);
-            GL.End();
+            if (_ReflectionsEnabled)
+            {
+                GL.Begin(BeginMode.Quads);
+                GL.Color4(opacity * _Item_ReflectionStrengthBottom, opacity * _Item_ReflectionStrengthBottom, opacity * _Item_ReflectionStrengthBottom, opacity * _Item_ReflectionStrengthBottom * _RenderingValue_Alpha);
+                GL.TexCoord2(0.0f, 1.0f);
+                GL.Vertex3(w / 2 * -1, 0.5, 0);
+                GL.TexCoord2(1.0f, 1.0f);
+                GL.Vertex3(w / 2, 0.5, 0);
+                GL.Color4(LUP * opacity * _Item_ReflectionStrengthUp, LUP * opacity * _Item_ReflectionStrengthUp, LUP * opacity * _Item_ReflectionStrengthUp, opacity * _Item_ReflectionStrengthUp * _RenderingValue_Alpha);
+                GL.TexCoord2(1.0f, 0.0f);
+                GL.Vertex3(w / 2, 0.5 + h, 0);
+                GL.TexCoord2(0.0f, 0.0f);
+                GL.Vertex3(w / 2 * -1, 0.5 + h, 0);
+                GL.End();
+            }
 
             // Draw overlay
-            if (enableOverlay)
+            if (enableOverlay && overlay != null)
             {
                 texture = g.LoadTexture(ref overlay);
                 if (texture != 0)
                 {
                     GL.BindTexture(TextureTarget.Texture2D, texture);
                     GL.Begin(BeginMode.Quads);
-                    GL.Color4(LDOWN * opacity, LDOWN * opacity, LDOWN * opacity, 1);
+                    GL.Color4(LDOWN * opacity, LDOWN * opacity, LDOWN * opacity, _RenderingValue_Alpha);
                     GL.TexCoord2(0.0f, 0.0f);
                     GL.Vertex3(w / 2 * -1, -0.5, 0);
-                    GL.Color4(RDOWN * opacity, RDOWN * opacity, RDOWN * opacity, 1);
+                    GL.Color4(RDOWN * opacity, RDOWN * opacity, RDOWN * opacity, _RenderingValue_Alpha);
                     GL.TexCoord2(1.0f, 0.0f);
                     GL.Vertex3(w / 2, -0.5, 0);
-                    GL.Color4(RUP * opacity, RUP * opacity, RUP * opacity, 1);
+                    GL.Color4(RUP * opacity, RUP * opacity, RUP * opacity, _RenderingValue_Alpha);
                     GL.TexCoord2(1.0f, 1.0f);
                     GL.Vertex3(w / 2, -0.5 + h, 0);
-                    GL.Color4(LUP * opacity, LUP * opacity, LUP * opacity, 1);
+                    GL.Color4(LUP * opacity, LUP * opacity, LUP * opacity, _RenderingValue_Alpha);
                     GL.TexCoord2(0.0f, 1.0f);
                     GL.Vertex3(w / 2 * -1, -0.5 + h, 0);
                     GL.End();
@@ -1247,6 +1430,11 @@ namespace OpenMobile.Controls
             GL.PopMatrix();
         }
 
+        /// <summary>
+        /// Renders the control
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
         public override void Render(Graphics.Graphics g, renderingParams e)
         {
             // Save current matrix
@@ -1261,6 +1449,9 @@ namespace OpenMobile.Controls
 
             base.RenderBegin(g, e);
 
+            // Render controls background
+            base.Render_Background(g, e);
+
             if (_ClipRendering)
                 g.SetClipFast(this.left, this.top, this.width, this.height); 
 
@@ -1272,6 +1463,9 @@ namespace OpenMobile.Controls
             // Restore matrix
             GL.PopMatrix();
 
+            // Render controls foreground (text label)
+            base.Render_Foreground(g, e, _text);
+
             base.RenderFinish(g, e);
 
         }
@@ -1280,34 +1474,39 @@ namespace OpenMobile.Controls
 
         #region Mouse Throw
 
-        Timer tmrThrowHandler = null;
-        Point accDistance;
+        Timer _tmrThrowHandler = null;
+        Point _accDistance;
+        bool _ThrowActive = false;
         void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
         {
-            accDistance += RelativeDistance;
-            if (System.Math.Abs(accDistance.X) > 50)
+            _ThrowActive = true;
+            _accDistance += RelativeDistance;
+            if (System.Math.Abs(_accDistance.X) > 50)
             {
                 if (RelativeDistance.X > 0)
                     SelectedIndex--;
                 else if (RelativeDistance.X < 0)
                     SelectedIndex++;
-                accDistance.X = accDistance.Y = 0;
+                _accDistance.X = _accDistance.Y = 0;
             }
         }
 
         void IThrow.MouseThrowStart(int screen, Point StartLocation, PointF CursorSpeed, PointF scaleFactors, ref bool Cancel)
         {
-            if (tmrThrowHandler != null)
-                tmrThrowHandler.Enabled = false;
+            _ThrowActive = true;
+            if (_tmrThrowHandler != null)
+                _tmrThrowHandler.Enabled = false;
         }
 
         void IThrow.MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation, PointF CursorSpeed)
         {
-            if (tmrThrowHandler == null)
+            _ThrowActive = false;
+            
+            if (_tmrThrowHandler == null)
             {
-                tmrThrowHandler = new Timer(1);
-                tmrThrowHandler.Elapsed += new System.Timers.ElapsedEventHandler(tmrThrowHandler_Elapsed);
-                tmrThrowHandler.Screen = screen;
+                _tmrThrowHandler = new Timer(1);
+                _tmrThrowHandler.Elapsed += new System.Timers.ElapsedEventHandler(tmrThrowHandler_Elapsed);
+                _tmrThrowHandler.Screen = screen;
             }
 
             if (System.Math.Abs(CursorSpeed.X) <= 1f)
@@ -1316,22 +1515,23 @@ namespace OpenMobile.Controls
             //tmrThrowHandler.Tag = new PointF(TotalDistance.X * System.Math.Abs(CursorSpeed.X * 2), TotalDistance.Y * System.Math.Abs(CursorSpeed.Y * 2));
 
             PointF existingThrowSpeed = new PointF();
-            if (tmrThrowHandler.Tag is PointF)
-                existingThrowSpeed = (PointF)tmrThrowHandler.Tag;
+            if (_tmrThrowHandler.Tag is PointF)
+                existingThrowSpeed = (PointF)_tmrThrowHandler.Tag;
 
             //tmrThrowHandler.Tag = new PointF(existingThrowSpeed.X + (TotalDistance.X * System.Math.Abs(CursorSpeed.X)), existingThrowSpeed.Y + (TotalDistance.Y * System.Math.Abs(CursorSpeed.Y)));
-            tmrThrowHandler.Tag = new PointF(existingThrowSpeed.X + (2 * (1+CursorSpeed.X)), existingThrowSpeed.Y + (2 * (1+CursorSpeed.Y)));
-            tmrThrowHandler.Interval = 1;
-            tmrThrowHandler.Enabled = true;
+            _tmrThrowHandler.Tag = new PointF(existingThrowSpeed.X + (2 * (1+CursorSpeed.X)), existingThrowSpeed.Y + (2 * (1+CursorSpeed.Y)));
+            _tmrThrowHandler.Interval = 1;
+            _tmrThrowHandler.Enabled = true;
 
             //SelectedIndex = (int)((_SelectedIndex + 1) * -CursorSpeed.X * (-TotalDistance.X / 100f));
+
         }
 
         void tmrThrowHandler_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            tmrThrowHandler.Enabled = false;
+            _tmrThrowHandler.Enabled = false;
 
-            PointF throwSpeed = (PointF)tmrThrowHandler.Tag;
+            PointF throwSpeed = (PointF)_tmrThrowHandler.Tag;
             if (throwSpeed.X > 0)
                 SelectedIndex--;
             else if (throwSpeed.X < 0)
@@ -1343,12 +1543,12 @@ namespace OpenMobile.Controls
 
             if (System.Math.Abs(throwSpeed.X) > 0)
             {
-                tmrThrowHandler.Interval = 250 / System.Math.Abs(throwSpeed.X);
-                if (tmrThrowHandler.Interval < 350)
-                    tmrThrowHandler.Enabled = true;
+                _tmrThrowHandler.Interval = 250 / System.Math.Abs(throwSpeed.X);
+                if (_tmrThrowHandler.Interval < 350)
+                    _tmrThrowHandler.Enabled = true;
             }
 
-            tmrThrowHandler.Tag = throwSpeed;
+            _tmrThrowHandler.Tag = throwSpeed;
         }
 
         #endregion
@@ -1359,6 +1559,10 @@ namespace OpenMobile.Controls
         {
             //if (!IsPointClickable(e.X, e.Y))
             //    return;
+
+            // Cancel if throw is active
+            if (_ThrowActive)
+                return;
 
             switch (GetClickHorizontalSection(e.Location))
             {
@@ -1380,6 +1584,10 @@ namespace OpenMobile.Controls
 
         void IClickableAdvanced.longClickMe(int screen, Input.MouseButtonEventArgs e)
         {
+            // Cancel if throw is active
+            if (_ThrowActive)
+                return;
+
             switch (GetClickHorizontalSection(e.Location))
             {
                 case 1: // Left side
@@ -1401,6 +1609,10 @@ namespace OpenMobile.Controls
 
         void IClickableAdvanced.holdClickMe(int screen, Input.MouseButtonEventArgs e)
         {
+            // Cancel if throw is active
+            if (_ThrowActive)
+                return;
+
             switch (GetClickHorizontalSection(e.Location))
             {
                 case 1: // Left side
@@ -1464,5 +1676,22 @@ namespace OpenMobile.Controls
         }
 
         #endregion
+
+        #region ICloneable Members
+
+        public override object Clone(OMPanel parent)
+        {
+            OMImageFlow newObject = (OMImageFlow)this.MemberwiseClone();
+            newObject.parent = parent;
+            newObject._Images = new List<ImageWrapper>();
+            foreach (ImageWrapper iW in _Images)
+            {
+                newObject._Images.Add((ImageWrapper)iW.Clone());
+            }
+            return newObject;
+        }
+
+        #endregion
+
     }
 }

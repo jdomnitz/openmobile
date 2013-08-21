@@ -97,6 +97,8 @@
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
     <Compile Include="Controls\ControlLayout.cs" />
+    <Compile Include="Controls\iVisibility.cs" />
+    <Compile Include="Controls\OMMediaFlow.cs" />
     <Compile Include="Controls\OMImageFlow.cs" />
     <Compile Include="Controls\OMCube.cs" />
     <Compile Include="Controls\OMControlGraphicsBase.cs" />
@@ -189,6 +191,7 @@
     <Compile Include="Plugin\IPlayer\IMediaProvider.cs" />
     <Compile Include="Plugin\IPlayer\MediaProviderCode.cs" />
     <Compile Include="RenderingWindow\iRenderingWindow.cs" />
+    <Compile Include="UIHandler\InfoBar.cs" />
     <Compile Include="UIHandler\InfoBanner.cs" />
     <Compile Include="UIHandler\Notification.cs" />
     <Compile Include="UIHandler\UIHandler.cs" />
@@ -282,6 +285,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

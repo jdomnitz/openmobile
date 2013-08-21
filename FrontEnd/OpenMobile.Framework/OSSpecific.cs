@@ -667,5 +667,43 @@ namespace OpenMobile.Framework
                 return false;
             }
         }
+
+        /// <summary>
+        /// Checks if a process is running 
+        /// </summary>
+        /// <param name="name">ProcessName</param>
+        /// <returns></returns>
+        public static bool Process_IsRunning(string processName)
+        {
+            Process p = Array.Find<Process>(Process.GetProcesses(), x => x.ProcessName.ToLower() == processName.ToLower());
+            return p != null;
+        }
+
+        /// <summary>
+        /// Closes all processes that matches the given name
+        /// </summary>
+        /// <param name="name">ProcessName</param>
+        /// <returns></returns>
+        public static bool Process_Close(string processName)
+        {
+            try
+            {
+                Process[] pa = Process.GetProcessesByName(processName);
+                if (pa.Length > 0)
+                {
+                    foreach (Process p in pa)
+                        p.Kill();
+                    return true;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

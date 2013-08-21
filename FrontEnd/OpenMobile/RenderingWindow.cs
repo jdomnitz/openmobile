@@ -174,7 +174,7 @@ namespace OpenMobile
             {
                 foreach (OMControl control in panel.Controls)
                 {
-                    if (typeof(IContainer2).IsInstanceOfType(control) && control.Visible)
+                    if (typeof(IContainer2).IsInstanceOfType(control) && control.IsControlRenderable())
                     {
                         foreach (OMControl containerControl in ((IContainer2)control).Controls)
                             containerControl.RefreshGraphic();
@@ -1129,11 +1129,22 @@ namespace OpenMobile
             Invalidate();
         }
 
+        private OMPanel lastPanelTransition = null;
+
         public void ExecuteTransition(string transType, float transSpeed)
         {
             lock (this) // Lock to prevent multiple transitons at the same time
             {
                 List<OMPanel> panels = RenderingQueue.FindAll(x => ((x.Mode == eModeType.Loaded) || (x.Mode == eModeType.transitioningIn) || (x.Mode == eModeType.transitioningOut)));
+
+                // If only one panel is transitioned in then we can use the transition effect for the panel (of any) if not use the requested effect
+                if (panels.Count == 1)
+                {
+                    if (panels[0].Mode == eModeType.transitioningIn || panels[0].Mode == eModeType.Loaded)
+                        transType = panels[0].TransitionEffect_Show.ToString();
+                    if (panels[0].Mode == eModeType.transitioningOut || panels[0].Mode == eModeType.Unloaded)
+                        transType = panels[0].TransitionEffect_Hide.ToString();
+                }
 
                 // Reset transition effects parameters
                 TransitionEffectParam_In = new renderingParams();
@@ -1187,6 +1198,13 @@ namespace OpenMobile
 
                             // Raise event for entering panel
                             panel.RaiseEvent(screen, eEventType.Entering);
+
+                            // Show infobar text (if present)
+                            if (!String.IsNullOrEmpty(panel.Header))
+                            {
+                                OM.Host.UIHandler.InfoBar_Show(screen, new InfoBar(panel.Header));
+                                lastPanelTransition = panel;
+                            }
                         }
                         else if (panel.Mode == eModeType.transitioningOut | panel.Mode == eModeType.Unloaded)
                         {   // Panel is transitioning out, remove from rendering queue
@@ -1196,6 +1214,10 @@ namespace OpenMobile
 
                             // Raise event for leaving panel
                             panel.RaiseEvent(screen, eEventType.Leaving);
+
+                            // Remove infobar text
+                            if (!String.IsNullOrEmpty(panel.Header) && (lastPanelTransition == panel))
+                                OM.Host.UIHandler.InfoBar_Hide(screen);
                         }
                     }
                 }
@@ -1203,7 +1225,7 @@ namespace OpenMobile
             }
         }
 
-        public void TransitionInPanel(OMPanel newP)
+        public bool TransitionInPanel(OMPanel newP)
         {
             lock (this) // Lock to prevent multiple transitons at the same time
             {
@@ -1224,19 +1246,25 @@ namespace OpenMobile
 
                     // Raise panel event
                     newP.RaiseEvent(screen, eEventType.Loaded);
+
+                    return true;
                 }
                 else
                 {   // Reset existing panel to normal mode if it's already loaded
                     ExistingPanel.Mode = eModeType.Normal;
+                    return false;
                 }
-
             }
         }
 
-        public void TransitionOutPanel(OMPanel oldP)
+        public bool TransitionOutPanel(OMPanel oldP)
         {
             lock (this) // Lock to prevent multiple transitons at the same time
             {
+                // Is this panel loaded? If not cancel request
+                if (!RenderingQueue.Contains(oldP))
+                    return false;
+
                 // Unfocus currently focused control
                 UpdateControlFocus(null, null, true);
 
@@ -1245,6 +1273,8 @@ namespace OpenMobile
 
                 // Raise panel event
                 oldP.RaiseEvent(screen, eEventType.Unloaded);
+
+                return true;
             }
         }
 
@@ -1383,6 +1413,15 @@ namespace OpenMobile
                             RenderingQueue.Insert(i + 1, newP);
                         return;
                     }
+                    else if (newP.PanelType == OMPanel.PanelTypes.Modal)
+                    {
+                        if (RenderingQueue[i].PanelType == OMPanel.PanelTypes.Modal || RenderingQueue[i].Priority == ePriority.UI)
+                            RenderingQueue.Insert(i, newP);
+                        else
+                            RenderingQueue.Insert(i + 1, newP);
+                        return;
+                    }
+
                     else
                     {
                         RenderingQueue.Insert(i + 1, newP);
@@ -1485,7 +1524,7 @@ namespace OpenMobile
             for (int i = panel.controlCount - 1; i >= 0; i--)
             {
                 control = panel.Controls[i];
-                if (typeof(IContainer2).IsInstanceOfType(control) && control.Visible)
+                if (typeof(IContainer2).IsInstanceOfType(control) && control.IsControlRenderable())
                 {
                     OMControl ContainerControl = null;
                     for (int i2 = ((IContainer2)control).Controls.Count - 1; i2 >= 0; i2--)
@@ -1526,7 +1565,7 @@ namespace OpenMobile
                 return false;
 
             // Make sure this control is visible
-            if (!control.Visible)
+            if (!control.IsControlRenderable())
                 return false;
 
             // Ensure control allows user interaction
@@ -1644,7 +1683,7 @@ namespace OpenMobile
             if (control == null)
                 return false;
 
-            return (control.Visible && !control.NoUserInteraction && typeof(IHighlightable).IsInstanceOfType(control) && ApplicationArea.Contains(control.Region));
+            return (control.IsControlRenderable() && !control.NoUserInteraction && typeof(IHighlightable).IsInstanceOfType(control) && ApplicationArea.Contains(control.Region));
         }
 
         private bool IsControlClickable(OMControl control)
@@ -1739,7 +1778,7 @@ namespace OpenMobile
                         Controls.Add(control);
 
                         // Add sub controls to list to check
-                        if (typeof(IContainer2).IsInstanceOfType(control) && control.Visible)
+                        if (typeof(IContainer2).IsInstanceOfType(control) && control.IsControlRenderable())
                             for (int i3 = ((IContainer2)control).Controls.Count - 1; i3 >= 0; i3--)
                                 Controls.Add(((IContainer2)control).Controls[i3]);
 
@@ -1832,7 +1871,7 @@ namespace OpenMobile
         }
 
         private enum ClickTypes { None, Normal, Long, Hold }
-        private void ActivateClick(OMControl control, ClickTypes ClickType, OpenMobile.Input.MouseButtonEventArgs e)
+        private void ActivateClick(OMControl control, ClickTypes ClickType, MouseButtonEventArgs e)
         {
             // Cancel if no control is provided
             if (control == null)
@@ -1841,6 +1880,10 @@ namespace OpenMobile
             // If no mouse data is available we'll simulate it (as indicated by the negative mouse location)
             if (e == null)
                 e = new MouseButtonEventArgs(-1, -1, MouseButton.Left, true);
+
+            // Scale mouse data
+            MouseButtonEventArgs eScaled = new MouseButtonEventArgs(e);
+            MouseButtonEventArgs.Scale(eScaled, _ScaleFactors);
 
             // Lock the currently focused control
             lock (FocusedControl)
@@ -1860,7 +1903,7 @@ namespace OpenMobile
                             SandboxedThread.Asynchronous(delegate()
                             {
                                 if (typeof(IClickableAdvanced).IsInstanceOfType(control))
-                                    ((IClickableAdvanced)control).clickMe(screen, e);
+                                    ((IClickableAdvanced)control).clickMe(screen, eScaled);
                                 else
                                     ((IClickable)control).clickMe(screen);
                             });
@@ -1871,7 +1914,7 @@ namespace OpenMobile
                             SandboxedThread.Asynchronous(delegate()
                             {
                                 if (typeof(IClickableAdvanced).IsInstanceOfType(control))
-                                    ((IClickableAdvanced)control).longClickMe(screen, e);
+                                    ((IClickableAdvanced)control).longClickMe(screen, eScaled);
                                 else
                                     ((IClickable)control).longClickMe(screen);
                             });
@@ -1882,7 +1925,7 @@ namespace OpenMobile
                             SandboxedThread.Asynchronous(delegate()
                             {
                                 if (typeof(IClickableAdvanced).IsInstanceOfType(control))
-                                    ((IClickableAdvanced)control).holdClickMe(screen, e);
+                                    ((IClickableAdvanced)control).holdClickMe(screen, eScaled);
                                 else
                                     ((IClickable)control).holdClickMe(screen);
                             });

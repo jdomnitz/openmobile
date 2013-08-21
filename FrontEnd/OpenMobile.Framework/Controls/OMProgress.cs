@@ -473,7 +473,7 @@ namespace OpenMobile.Controls
             Refresh();
         }
 
-        internal override void DataSource_Missing()
+        internal override void DataSource_Missing(string propertyName)
         {
             SetValue(0, "ERR");
         }

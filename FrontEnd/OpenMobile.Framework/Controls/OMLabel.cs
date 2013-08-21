@@ -59,10 +59,6 @@ namespace OpenMobile.Controls
         /// Outline color of the text
         /// </summary>
         protected Color _outlineColor = BuiltInComponents.SystemSettings.SkinFocusColor;//Color.Black;
-        /// <summary>
-        /// Sensor name to subscribe to
-        /// </summary>
-        protected string _displaySensorName = "";
 
         /// <summary>
         /// Get's the size of the text contained in this control
@@ -262,10 +258,6 @@ namespace OpenMobile.Controls
             }
             set
             {
-                //if (value == null)
-                //    value = String.Empty;
-                //if (_text == value)
-                //    return;
                 _text = value;
                 
                 // Check for datasource present
@@ -373,7 +365,7 @@ namespace OpenMobile.Controls
             Refresh();
         }
 
-        internal override void DataSource_Missing()
+        internal override void DataSource_Missing(string propertyName)
         {
             _text = "ERR";
             _RefreshGraphic = true;

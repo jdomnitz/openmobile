@@ -337,8 +337,47 @@ namespace OpenMobile.Controls
         /// <param name="OnClick"></param>
         /// <param name="OnHoldClick"></param>
         /// <param name="OnLongClick"></param>
+        /// <param name="visibleBackground"></param>
+        /// <param name="visibleBorder"></param>
         /// <returns></returns>
-        static public Button PreConfigLayout_MenuBarStyle(string name, Size size, int opacity, imageItem icon, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
+        static public Button PreConfigLayout_MenuBarStyle(string name, Size size, int opacity, imageItem icon, userInteraction OnClick = null, userInteraction OnHoldClick = null, userInteraction OnLongClick = null, bool visibleBackground = true, bool visibleBorder = true)
+        {
+            return PreConfigLayout_MenuBarStyle(name, size, opacity, icon, (object)OnClick, (object)OnHoldClick, (object)OnLongClick, visibleBackground, visibleBorder);
+        }
+
+        /// <summary>
+        /// Creates a button for usage in a menubar
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="size"></param>
+        /// <param name="opacity"></param>
+        /// <param name="icon"></param>
+        /// <param name="OnClick">Command to execute</param>
+        /// <param name="OnHoldClick">Command to execute</param>
+        /// <param name="OnLongClick">Command to execute</param>
+        /// <param name="visibleBackground"></param>
+        /// <param name="visibleBorder"></param>
+        /// <returns></returns>
+        static public Button PreConfigLayout_MenuBarStyle(string name, Size size, int opacity, imageItem icon, string OnClick = null, string OnHoldClick = null, string OnLongClick = null, bool visibleBackground = true, bool visibleBorder = true)
+        {
+            return PreConfigLayout_MenuBarStyle(name, size, opacity, icon, (object)OnClick, (object)OnHoldClick, (object)OnLongClick, visibleBackground, visibleBorder);
+        }
+
+
+        /// <summary>
+        /// Creates a button for usage in a menubar
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="size"></param>
+        /// <param name="opacity"></param>
+        /// <param name="icon"></param>
+        /// <param name="OnClick"></param>
+        /// <param name="OnHoldClick"></param>
+        /// <param name="OnLongClick"></param>
+        /// <param name="visibleBackground"></param>
+        /// <param name="visibleBorder"></param>
+        /// <returns></returns>
+        static public Button PreConfigLayout_MenuBarStyle(string name, Size size, int opacity, imageItem icon, object OnClick = null, object OnHoldClick = null, object OnLongClick = null, bool visibleBackground = true, bool visibleBorder = true)
         {
             Button btn = new Button(name);
 
@@ -362,7 +401,18 @@ namespace OpenMobile.Controls
             }
 
             // Button function
-            OMButton Button_Settings = OMButton.PreConfigLayout_BasicStyle(String.Format("{0}_{1}", btn.Name, "Button"), -1, 0, size.Width, size.Height, GraphicCorners.None);
+
+            OMButton Button_Settings = null;
+            if (visibleBackground)
+                Button_Settings = OMButton.PreConfigLayout_BasicStyle(String.Format("{0}_{1}", btn.Name, "Button"), -1, 0, size.Width, size.Height, GraphicCorners.None);
+            else
+            {
+                Color? borderColor = null;
+                if (!visibleBorder)
+                    borderColor = Color.Transparent;
+                Button_Settings = OMButton.PreConfigLayout_BasicStyle_NoBackground(String.Format("{0}_{1}", btn.Name, "Button"), -1, 0, size.Width, size.Height, GraphicCorners.None, borderColor);
+            }
+            
             Button_Settings.Opacity = opacity;
 
             if (icon.image != null)
@@ -377,9 +427,18 @@ namespace OpenMobile.Controls
             }
 
             // Map actions
-            Button_Settings.OnClick += OnClick;
-            Button_Settings.OnHoldClick += OnHoldClick;
-            Button_Settings.OnLongClick += OnLongClick;
+            if (OnClick is userInteraction)
+                Button_Settings.OnClick += (userInteraction)OnClick;
+            else if (OnClick is String)
+                Button_Settings.Command_Click = OnClick as string;
+            if (OnHoldClick is userInteraction)
+                Button_Settings.OnHoldClick += (userInteraction)OnHoldClick;
+            else if (OnHoldClick is String)
+                Button_Settings.Command_HoldClick = OnHoldClick as string;
+            if (OnLongClick is userInteraction)
+                Button_Settings.OnLongClick += (userInteraction)OnLongClick;
+            else if (OnLongClick is String)
+                Button_Settings.Command_LongClick = OnLongClick as string;
 
             btn.Add(Button_Settings);
 
@@ -533,8 +592,19 @@ namespace OpenMobile.Controls
                 int index = this.IndexOf(item);
                 if (index == -1)
                     return;
-                base.Remove(item);
-                this.Raise_OnItemRemoved(_Parent.Screen, index);
+                RemoveAt(index);
+            }
+
+            /// <summary>
+            /// Remove an item 
+            /// </summary>
+            /// <param name="buttonName"></param>
+            public new void Remove(string buttonName)
+            {
+                Button btn = this[buttonName];
+                if (btn == null)
+                    return;
+                Remove(btn);
             }
 
             /// <summary>
@@ -1273,8 +1343,7 @@ namespace OpenMobile.Controls
                                         OMContainer container = _Container.Parent[Screen, _Container.Name] as OMContainer;
                                         lock (container)
                                         {
-                                            container.RemoveControl(index);
-                                            container.addControl(index, (Button)_ButtonStrip[Screen].Buttons[index].Clone(), false, ControlDirections.Right);
+                                            container.ReplaceControl(index, (Button)_ButtonStrip[Screen].Buttons[index].Clone(), GetOMContainerDirection(_Alignment));
                                         }
                                     }
                                 }
@@ -1284,8 +1353,7 @@ namespace OpenMobile.Controls
                         {   // Container not loaded on any screen yet, just update it
                             lock (_Container)
                             {
-                                _Container.RemoveControl(index);
-                                _Container.addControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), false, ControlDirections.Right);
+                                _Container.ReplaceControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), GetOMContainerDirection(_Alignment));
                             }
                         }
                     }
@@ -1294,8 +1362,7 @@ namespace OpenMobile.Controls
             else
             {   // Access a specifc container
                 OMContainer container = _Container.Parent[(int)screen, _Container.Name] as OMContainer;
-                container.RemoveControl(index);
-                container.addControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), false, ControlDirections.Right);
+                container.ReplaceControl(index, (Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), GetOMContainerDirection(_Alignment));
             }
         }
 

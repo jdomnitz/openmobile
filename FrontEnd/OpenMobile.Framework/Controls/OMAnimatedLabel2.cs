@@ -32,7 +32,7 @@ namespace OpenMobile.Controls
     /// A label used for rendering various text effects
     /// </summary>
     [System.Serializable]
-    public class OMAnimatedLabel2 : OMLabel, ICloneable
+    public class OMAnimatedLabel2 : OMLabel//, ICloneable
     {
         private class RenderData : IDisposable, ICloneable
         {
@@ -43,6 +43,25 @@ namespace OpenMobile.Controls
             {
                 get { return _Texture; }
             }
+
+            /// <summary>
+            /// Is a refresh/regeneration of this texture required?
+            /// </summary>
+            public bool TextureRefreshRequired
+            {
+                get
+                {
+                    return this._TextureRefreshRequired;
+                }
+                set
+                {
+                    if (this._TextureRefreshRequired != value)
+                    {
+                        this._TextureRefreshRequired = value;
+                    }
+                }
+            }
+            private bool _TextureRefreshRequired;        
 
             private float _CharWidth_Avg = 0f;
             public float CharWidth_Avg
@@ -90,6 +109,25 @@ namespace OpenMobile.Controls
                 }
             }
 
+            /// <summary>
+            /// Text format to use
+            /// </summary>
+            public eTextFormat TextFormat
+            {
+                get
+                {
+                    return this._TextFormat;
+                }
+                set
+                {
+                    if (this._TextFormat != value)
+                    {
+                        this._TextFormat = value;
+                    }
+                }
+            }
+            private eTextFormat _TextFormat;        
+
             private Rectangle _LastPosition;
             private bool SetSizeToMatchControl()
             {
@@ -120,14 +158,21 @@ namespace OpenMobile.Controls
             /// <summary>
             /// Refresh texture data
             /// </summary>
-            public void RefreshTexture(eTextFormat textFormat)
+            public void RefreshTexture(int screen, bool force=false)
             {
-                // Regeneration of texture required, delete old textures
-                if (Texture != null)
-                    Texture.Dispose();
+                if (_TextureRefreshRequired)
+                {
+                    // Regeneration of texture required, delete old textures
+                    //if (_Texture != null)
+                    //{
+                    //    _Texture.Dispose();
+                    //    _Texture = null;
+                    //}
 
-                // Generate new texture
-                _Texture = Graphics.Graphics.GenerateTextTexture(Texture, 0, Position.Left, Position.Top, Position.Width, Position.Height, _Text, home._font, textFormat, home._textAlignment, home._color, home._outlineColor);
+                    // Generate new texture
+                    _Texture = Graphics.Graphics.GenerateTextTexture(_Texture, screen, Position.Left, Position.Top, Position.Width, Position.Height, _Text, home._font, _TextFormat, home._textAlignment, home._color, home._outlineColor);
+                }
+                _TextureRefreshRequired = false;
             }
 
             public RenderData(OMAnimatedLabel2 home)
@@ -141,11 +186,18 @@ namespace OpenMobile.Controls
             }
             public void SetText(string text, bool SetWidthToTextSize, eTextFormat textFormat)
             {
-                bool TextureRefreshRequired = _Text != text;
+
+                if (_TextFormat != textFormat)
+                    _TextureRefreshRequired = true;
+
+                _TextFormat = textFormat;
+
+                if (_Text != text)
+                    _TextureRefreshRequired = true;
 
                 _Text = text;
                 if (SetSizeToMatchControl())
-                    TextureRefreshRequired = true;
+                    _TextureRefreshRequired = true;
 
                 RefreshTextDimensions();
 
@@ -153,12 +205,14 @@ namespace OpenMobile.Controls
                 {   // Limit width of text rectangle to just fit text to remove any text alignment values
                     int TextWidth = (int)(CharWidth_Avg * (_Text.Length + 1));
                     if (TextWidth != Position.Width)
-                        TextureRefreshRequired = true;
+                        _TextureRefreshRequired = true;
                     Position.Width = TextWidth;
                 }
 
-                if (TextureRefreshRequired)
-                    RefreshTexture(textFormat);
+                //if (TextureRefreshRequired)
+                //    //RefreshTexture(textFormat);
+                //    home.RefreshGraphic();
+                //_TextureRefreshRequired = true;
             }
 
             public void ResetClip()
@@ -185,6 +239,7 @@ namespace OpenMobile.Controls
                 RenderData returnData = (RenderData)this.MemberwiseClone();
                 if (this._Texture != null)
                     returnData._Texture = (OImage)this._Texture.Clone();
+                returnData._TextureRefreshRequired = true;
                 return returnData;
             }
 
@@ -411,17 +466,53 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
-                            _MainObject.SetText(text, true);
+                            //if (_MainObject.Text != text)
+                                _MainObject.SetText(text, true);
                             _MainObject.ResetClip();
-                            _MainObject.Visible = true;
+                            //if (_SecondObject.Text != text)
                             _SecondObject.SetText(text, true);
                             _SecondObject.ResetClip();
                             _SecondObject.Position.Left = Region.Right; // Position second object just outside the controls region
-                            _SecondObject.Visible = false;
                             int ObjectSeparation = (int)(_MainObject.CharWidth_Avg * 10);
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        int offsetX = this.Region.Center.X - _MainObject.Position.Center.X;
+                                        _MainObject.Position.Translate(offsetX, 0);
+                                        _SecondObject.Position.Translate(offsetX + ObjectSeparation, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        int offsetX = this.Region.Right - _MainObject.Position.Right;
+                                        _MainObject.Position.Translate(offsetX, 0);
+                                        _SecondObject.Position.Translate(offsetX + ObjectSeparation, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
+
+                            _MainObject.Visible = true;
+                            _SecondObject.Visible = false;
 
                             // Render initial state
                             Refresh();
@@ -470,36 +561,121 @@ namespace OpenMobile.Controls
                                     AnimationStep = (int)AnimationValue;
                                     AnimationValue -= AnimationStep;
 
-                                    if (_MainObject.Visible)
-                                        _MainObject.Position.Left -= AnimationStep;
-
-                                    if (_MainObject.Position.Right < Region.Left)
+                                    switch (_textAlignment)
                                     {
-                                        _MainObject.Visible = false;
-                                        _MainObject.Position.Left = Region.Right;
+                                        case Alignment.BottomLeft:
+                                        case Alignment.CenterLeft:
+                                        case Alignment.TopLeft:
+                                            {
+                                                if (_MainObject.Visible)
+                                                    _MainObject.Position.Left -= AnimationStep;
+
+                                                if (_MainObject.Position.Right < Region.Left)
+                                                {
+                                                    _MainObject.Visible = false;
+                                                    _MainObject.Position.Left = Region.Right;
+                                                }
+
+                                                if (_MainObject.Position.Left < Region.Left && _MainObject.Position.Right < (Region.Right - ObjectSeparation))
+                                                    _SecondObject.Visible = true;
+
+                                                if (_SecondObject.Visible)
+                                                    _SecondObject.Position.Left -= AnimationStep;
+
+                                                if (_SecondObject.Position.Right < Region.Left)
+                                                {
+                                                    _SecondObject.Visible = false;
+                                                    _SecondObject.Position.Left = Region.Right;
+                                                }
+
+                                                if (_SecondObject.Position.Left < Region.Left && _SecondObject.Position.Right < (Region.Right - ObjectSeparation))
+                                                    _MainObject.Visible = true;
+
+                                                // Exit animation
+                                                if (_SecondObject.Position.Left <= Region.Left)
+                                                {
+                                                    _SecondObject.Position.Left = Region.Left;
+                                                    return false;
+                                                }
+                                            }
+                                            break;
+                                        case Alignment.BottomCenter:
+                                        case Alignment.CenterCenter:
+                                        case Alignment.TopCenter:
+                                            {
+                                                if (_MainObject.Visible)
+                                                    _MainObject.Position.Left -= AnimationStep;
+
+                                                if (_MainObject.Position.Right < Region.Left)
+                                                {
+                                                    _MainObject.Visible = false;
+                                                    //_MainObject.Position.Left = Region.Right;
+                                                }
+
+                                                if (_MainObject.Position.Left < Region.Left && _MainObject.Position.Right < (Region.Right - ObjectSeparation))
+                                                    _SecondObject.Visible = true;
+
+                                                if (_SecondObject.Visible)
+                                                    _SecondObject.Position.Left -= AnimationStep;
+
+                                                if (_SecondObject.Position.Right < Region.Left)
+                                                {
+                                                    _SecondObject.Visible = false;
+                                                    _SecondObject.Position.Left = Region.Right;
+                                                }
+
+                                                if (_SecondObject.Position.Left < Region.Left && _SecondObject.Position.Right < (Region.Right - ObjectSeparation))
+                                                    _MainObject.Visible = true;
+
+                                                // Exit animation
+                                                if (_SecondObject.Position.Center.X <= Region.Center.X)
+                                                {
+                                                    //_SecondObject.Position.Left = Region.Left;
+                                                    return false;
+                                                }
+                                            }
+                                            break;
+                                        case Alignment.BottomRight:
+                                        case Alignment.CenterRight:
+                                        case Alignment.TopRight:
+                                            {
+                                                if (_MainObject.Visible)
+                                                    _MainObject.Position.Left -= AnimationStep;
+
+                                                if (_MainObject.Position.Right < Region.Left)
+                                                {
+                                                    _MainObject.Visible = false;
+                                                    //_MainObject.Position.Left = Region.Right;
+                                                }
+
+                                                if (_MainObject.Position.Left < Region.Left && _MainObject.Position.Right < (Region.Right - ObjectSeparation))
+                                                    _SecondObject.Visible = true;
+
+                                                if (_SecondObject.Visible)
+                                                    _SecondObject.Position.Left -= AnimationStep;
+
+                                                if (_SecondObject.Position.Right < Region.Left)
+                                                {
+                                                    _SecondObject.Visible = false;
+                                                    _SecondObject.Position.Left = Region.Right;
+                                                }
+
+                                                if (_SecondObject.Position.Left < Region.Left && _SecondObject.Position.Right < (Region.Right - ObjectSeparation))
+                                                    _MainObject.Visible = true;
+
+                                                // Exit animation
+                                                if (_SecondObject.Position.Right <= Region.Right)
+                                                {
+                                                    //_SecondObject.Position.Left = Region.Left;
+                                                    return false;
+                                                }
+                                            }
+                                            break;
+                                        default:
+                                            break;
                                     }
 
-                                    if (_MainObject.Position.Left < Region.Left && _MainObject.Position.Right < (Region.Right - ObjectSeparation))
-                                        _SecondObject.Visible = true;
 
-                                    if (_SecondObject.Visible)
-                                        _SecondObject.Position.Left -= AnimationStep;
-
-                                    if (_SecondObject.Position.Right < Region.Left)
-                                    {
-                                        _SecondObject.Visible = false;
-                                        _SecondObject.Position.Left = Region.Right;
-                                    }
-
-                                    if (_SecondObject.Position.Left < Region.Left && _SecondObject.Position.Right < (Region.Right - ObjectSeparation))
-                                        _MainObject.Visible = true;
-
-                                    // Exit animation
-                                    if (_SecondObject.Position.Left <= Region.Left)
-                                    {
-                                        _SecondObject.Position.Left = Region.Left;
-                                        return false;
-                                    }
 
                                     Refresh();
                                 }
@@ -523,11 +699,46 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(1);
+                            ClearRenderObjects(0);
 
                             // Set parameters
-                            _MainObject.SetText(text, true);
+                            if (_MainObject.Text != text)
+                                _MainObject.SetText(text, true);                                
                             _MainObject.ResetClip();
+
+                            int scrollMethod = 0; // 0 = LeftAligned, 1 = Centered, 2 = RightAligned
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    scrollMethod = 0;
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        scrollMethod = 1;
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        scrollMethod = 2;
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
 
                             // Render initial state
                             Refresh();
@@ -561,6 +772,164 @@ namespace OpenMobile.Controls
 
                             if (_Animation_Cancel)
                                 goto end;
+
+                            int startPos = _MainObject.Position.Left;
+
+                            #region Scroll step 1
+
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
+                            {
+                                // Cancel animation
+                                if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
+                                    return false;
+
+                                // Calculate animation value
+                                AnimationValue += AnimationStepF;
+
+                                // Animation step large enough?
+                                if (AnimationValue > StepSize)
+                                {
+                                    AnimationStep = (int)AnimationValue;
+                                    AnimationValue -= AnimationStep;
+
+                                    if (scrollMethod == 2)
+                                    {
+                                        _MainObject.Position.Left -= AnimationStep;
+                                        Refresh();
+                                        // End animation?
+                                        if (_MainObject.Position.Left <= this.Region.Left)
+                                        {   // Yes, set final value and exit
+                                            _MainObject.Position.Left = this.Region.Left;
+                                            return false;
+                                        }
+                                    }
+                                    else if (scrollMethod == 0)
+                                    {
+                                        _MainObject.Position.Left += AnimationStep;
+                                        Refresh();
+                                        // End animation?
+                                        if (_MainObject.Position.Right >= this.Region.Right)
+                                        {   // Yes, set final value and exit
+                                            _MainObject.Position.Left = this.Region.Right - _MainObject.Position.Width;
+                                            return false;
+                                        }
+                                    }
+                                    else if (scrollMethod == 1 || scrollMethod == 11)
+                                    {   // Centered
+
+                                        if (scrollMethod == 1)
+                                        {
+                                            _MainObject.Position.Left -= AnimationStep;
+                                            Refresh();
+                                            // Change direction?
+                                            if (_MainObject.Position.Left <= this.Region.Left)
+                                            {   // Yes
+                                                scrollMethod = 11;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            _MainObject.Position.Left += AnimationStep;
+                                            Refresh();
+                                            // End animation?
+                                            if (_MainObject.Position.Left >= startPos)
+                                            {   // Yes, set final value and exit
+                                                _MainObject.Position.Left = startPos;
+                                                scrollMethod = 1;
+                                                return false;
+                                            }
+                                        }
+                                    }
+
+                                    Refresh();
+                                }
+
+                                // Continue animation
+                                return true;
+                            });
+
+                            #endregion
+
+                            // Delay before starting animation
+                            if (_Animation_Run && DelayedRun)
+                                SleepEx(1000, ref _Animation_Cancel);
+
+                            #region Scroll step 2
+
+                            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
+                            {
+                                // Cancel animation
+                                if (!_Animation_Run || _Animation_Cancel || !visible || !hooked())
+                                    return false;
+
+                                // Calculate animation value
+                                AnimationValue += AnimationStepF;
+
+                                // Animation step large enough?
+                                if (AnimationValue > StepSize)
+                                {
+                                    AnimationStep = (int)AnimationValue;
+                                    AnimationValue -= AnimationStep;
+
+                                    if (scrollMethod == 0)
+                                    {
+                                        _MainObject.Position.Left -= AnimationStep;
+                                        Refresh();
+                                        // End animation?
+                                        if (_MainObject.Position.Left <= this.Region.Left)
+                                        {   // Yes, set final value and exit
+                                            _MainObject.Position.Left = this.Region.Left;
+                                            return false;
+                                        }
+                                    }
+                                    else if (scrollMethod == 2)
+                                    {
+                                        _MainObject.Position.Left += AnimationStep;
+                                        Refresh();
+                                        // End animation?
+                                        if (_MainObject.Position.Right >= this.Region.Right)
+                                        {   // Yes, set final value and exit
+                                            _MainObject.Position.Left = this.Region.Right - _MainObject.Position.Width;
+                                            return false;
+                                        }
+                                    }
+                                    else if (scrollMethod == 1 || scrollMethod == 11)
+                                    {   // Centered
+
+                                        if (scrollMethod == 1)
+                                        {
+                                            _MainObject.Position.Left += AnimationStep;
+                                            Refresh();
+                                            // Change direction?
+                                            if (_MainObject.Position.Right >= this.Region.Right)
+                                            {   // Yes
+                                                scrollMethod = 11;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            _MainObject.Position.Left -= AnimationStep;
+                                            Refresh();
+                                            // End animation?
+                                            if (_MainObject.Position.Left <= startPos)
+                                            {   // Yes, set final value and exit
+                                                _MainObject.Position.Left = startPos;
+                                                scrollMethod = 1;
+                                                return false;
+                                            }
+                                        }
+                                    }
+
+                                    Refresh();
+                                }
+
+                                // Continue animation
+                                return true;
+                            });
+
+                            #endregion
+
+                            break;
 
                             #region Scroll Right
 
@@ -654,19 +1023,52 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.SetText(text, true);
+                            _SecondObject.SetText(text2, true);
+                            int ObjectSeparation = (int)(_MainObject.CharWidth_Avg * 10);
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
+
                             _MainObject.Clip = _MainObject.Position;
                             _MainObject.LimitClip(this.Region);
-                            _MainObject.Visible = true;
+                            _MainObject.Visible = false;
                             _MainObject.Clip.Width = 0;
-                            _SecondObject.SetText(text2, true);
                             _SecondObject.Clip = _SecondObject.Position;
                             _SecondObject.LimitClip(this.Region);
-                            _SecondObject.Visible = true;
-                            int ObjectSeparation = (int)(_MainObject.CharWidth_Avg * 10);
+                            _SecondObject.Visible = false;
+
 
                             // Render initial state
                             Refresh();
@@ -681,6 +1083,8 @@ namespace OpenMobile.Controls
 
                             if (_Animation_Cancel)
                                 goto end;
+
+                            int ChangeoverPos = System.Math.Min(_MainObject.Position.Left, _SecondObject.Position.Left);
 
                             // Animation runs until it's canceled or changed 
                             #region UnveilRight
@@ -700,16 +1104,51 @@ namespace OpenMobile.Controls
                                     AnimationStep = (int)AnimationValue;
                                     AnimationValue -= AnimationStep;
 
-                                    // Adjust clip of main object (text to unveil)
-                                    _MainObject.Clip.Width += AnimationStep;
+                                    ChangeoverPos += AnimationStep;
 
-                                    // Adjust clip of second object (text to hide)
-                                    _SecondObject.Clip.Left += AnimationStep;
-                                    _SecondObject.Clip.Width -= AnimationStep;
+                                    // Adjust clip of object to show
+                                    if (ChangeoverPos >= _MainObject.Position.Left)
+                                    {
+                                        _MainObject.Visible = true;
+                                        _MainObject.Clip.Width = ChangeoverPos - _MainObject.Position.Left;
+                                    }
+
+                                    // Adjust clip of object to hide
+                                    if (ChangeoverPos >= _SecondObject.Position.Left && ChangeoverPos <= _SecondObject.Position.Right)
+                                    {
+                                        _SecondObject.Visible = true;
+                                        _SecondObject.Clip.Left = ChangeoverPos;
+                                        _SecondObject.Clip.Width = ChangeoverPos - _SecondObject.Position.Left;
+                                    }
 
                                     // Exit animation
-                                    if (_SecondObject.Clip.Width <= 0)
+                                    if ((_SecondObject.Clip.Width <= 0 && _MainObject.Clip.Width >= _MainObject.Position.Width) || (ChangeoverPos >= this.Region.Right))
+                                    {
+                                        _MainObject.ResetClip();
+                                        _SecondObject.Visible = false;
                                         return false;
+                                    }
+
+
+                                    // Adjust clip of main object (text to unveil)
+                                    //_MainObject.Clip.Width += AnimationStep;
+
+                                    // Adjust clip of second object (text to hide)
+                                    //_SecondObject.Clip.Left += AnimationStep;
+                                    //_SecondObject.Clip.Width -= AnimationStep;
+                                    //if (_SecondObject.Clip.Width > 0)
+                                    //{
+                                    //    int r = _SecondObject.Clip.Right;
+                                    //    _SecondObject.Clip.Left = _MainObject.Clip.Right;
+                                    //    _SecondObject.Clip.Width = r - _SecondObject.Clip.Left;
+                                    //}
+
+                                    //// Exit animation
+                                    //if (_SecondObject.Clip.Width <= 0 && _MainObject.Clip.Width >= this.Region.Width)
+                                    //{
+                                    //    _MainObject.ResetClip();
+                                    //    return false;
+                                    //}
 
                                     Refresh();
                                 }
@@ -717,7 +1156,7 @@ namespace OpenMobile.Controls
                                 // Continue animation
                                 return true;
                             });
-
+                            Refresh();
                             #endregion
 
                             // Delay before ending animation
@@ -735,7 +1174,7 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.Visible = true;
@@ -745,6 +1184,37 @@ namespace OpenMobile.Controls
                             _SecondObject.Visible = true;
                             _SecondObject.SetText(text2, true);
                             _SecondObject.ResetClip();
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
 
                             // Render initial state
                             Refresh();
@@ -815,7 +1285,7 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.Visible = true;
@@ -825,6 +1295,37 @@ namespace OpenMobile.Controls
                             _SecondObject.Visible = true;
                             _SecondObject.SetText(text2, true);
                             _SecondObject.ResetClip();
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
 
                             // Render initial state
                             Refresh();
@@ -895,7 +1396,7 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.Visible = true;
@@ -905,6 +1406,37 @@ namespace OpenMobile.Controls
                             _SecondObject.Visible = true;
                             _SecondObject.SetText(text2, true);
                             _SecondObject.ResetClip();
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        //_MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        //_MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
 
                             // Render initial state
                             Refresh();
@@ -937,10 +1469,41 @@ namespace OpenMobile.Controls
                                     AnimationValue -= AnimationStep;
 
                                     // Adjust position of main object (text to unveil)
-                                    if (_MainObject.Position.Left < this.Region.Left)
-                                        _MainObject.Position.Left += AnimationStep;
-                                    else
-                                        _MainObject.Position.Left = this.Region.Left;
+                                    switch (_textAlignment)
+                                    {
+                                        case Alignment.BottomLeft:
+                                        case Alignment.CenterLeft:
+                                        case Alignment.TopLeft:
+                                        default:
+                                            {
+                                                if (_MainObject.Position.Left < this.Region.Left)
+                                                    _MainObject.Position.Left += AnimationStep;
+                                                else
+                                                    _MainObject.Position.Left = this.Region.Left;
+                                            }
+                                            break;
+                                        case Alignment.BottomCenter:
+                                        case Alignment.CenterCenter:
+                                        case Alignment.TopCenter:
+                                            {
+                                                if (_MainObject.Position.Center.X < this.Region.Center.X)
+                                                    _MainObject.Position.Left += AnimationStep;
+                                                else
+                                                    _MainObject.Position.Left = this.Region.Left + (this.Region.Center.X - _MainObject.Position.Center.X);
+                                            }
+                                            break;
+                                        case Alignment.BottomRight:
+                                        case Alignment.CenterRight:
+                                        case Alignment.TopRight:
+                                            {
+                                                if (_MainObject.Position.Right < this.Region.Right)
+                                                    _MainObject.Position.Left += AnimationStep;
+                                                else
+                                                    _MainObject.Position.Left = this.Region.Left + (this.Region.Right - _MainObject.Position.Right);
+                                            }
+                                            break;
+                                    }
+
 
                                     // Adjust positon of second object (text to hide)
                                     _SecondObject.Position.Left += (int)(AnimationStep * 1.2f);
@@ -949,13 +1512,52 @@ namespace OpenMobile.Controls
                                     _SecondObject.Alpha = 1.0f - ((float)(_SecondObject.Position.Left - this.Region.Left) / (float)(this.Region.Width / 2));
 
                                     // Exit animation
-                                    if (_MainObject.Position.Left == this.Region.Left && _SecondObject.Alpha <= 0.05f)
+                                    switch (_textAlignment)
                                     {
-                                        _MainObject.Position.Left = this.Region.Left;
-                                        _SecondObject.Visible = false;
-                                        Refresh();
-                                        return false;
+                                        case Alignment.BottomLeft:
+                                        case Alignment.CenterLeft:
+                                        case Alignment.TopLeft:
+                                        default:
+                                            {
+                                                if (_MainObject.Position.Left == this.Region.Left && _SecondObject.Alpha <= 0.05f)
+                                                {
+                                                    _MainObject.Position.Left = this.Region.Left;
+                                                    _SecondObject.Visible = false;
+                                                    Refresh();
+                                                    return false;
+                                                }
+                                            }
+                                            break;
+                                        case Alignment.BottomCenter:
+                                        case Alignment.CenterCenter:
+                                        case Alignment.TopCenter:
+                                            {
+                                                if (_MainObject.Position.Center.X >= this.Region.Center.X && _SecondObject.Alpha <= 0.05f)
+                                                {
+                                                    _MainObject.Position.Left = this.Region.Left;
+                                                    _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                                    _SecondObject.Visible = false;
+                                                    Refresh();
+                                                    return false;
+                                                }
+                                            }
+                                            break;
+                                        case Alignment.BottomRight:
+                                        case Alignment.CenterRight:
+                                        case Alignment.TopRight:
+                                            {
+                                                if (_MainObject.Position.Right >= this.Region.Right && _SecondObject.Alpha <= 0.05f)
+                                                {
+                                                    _MainObject.Position.Left = this.Region.Left;
+                                                    _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                                    _SecondObject.Visible = false;
+                                                    Refresh();
+                                                    return false;
+                                                }
+                                            }
+                                            break;
                                     }
+
 
                                     Refresh();
                                 }
@@ -981,7 +1583,7 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.Visible = true;
@@ -992,6 +1594,38 @@ namespace OpenMobile.Controls
                             _SecondObject.SetText(text2, true);
                             _SecondObject.ResetClip();
 
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        //_MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        //_MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
+
+                            Rectangle _SecondObject_StartPos = _SecondObject.Position;
                             // Render initial state
                             Refresh();
 
@@ -1023,25 +1657,105 @@ namespace OpenMobile.Controls
                                     AnimationValue -= AnimationStep;
 
                                     // Adjust position of main object (text to unveil)
-                                    if (_MainObject.Position.Left > this.Region.Left)
-                                        _MainObject.Position.Left -= AnimationStep;
-                                    else
-                                        _MainObject.Position.Left = this.Region.Left;
+                                    switch (_textAlignment)
+                                    {
+                                        case Alignment.BottomLeft:
+                                        case Alignment.CenterLeft:
+                                        case Alignment.TopLeft:
+                                        default:
+                                            {
+                                                if (_MainObject.Position.Left > this.Region.Left)
+                                                    _MainObject.Position.Left -= AnimationStep;
+                                                else
+                                                    _MainObject.Position.Left = this.Region.Left;
+                                            }
+                                            break;
+                                        case Alignment.BottomCenter:
+                                        case Alignment.CenterCenter:
+                                        case Alignment.TopCenter:
+                                            {
+                                                if (_MainObject.Position.Center.X > this.Region.Center.X)
+                                                    _MainObject.Position.Left -= AnimationStep;
+                                                else
+                                                    _MainObject.Position.Left = this.Region.Center.X - (_MainObject.Position.Width / 2);
+                                            }
+                                            break;
+                                        case Alignment.BottomRight:
+                                        case Alignment.CenterRight:
+                                        case Alignment.TopRight:
+                                            {
+                                                if (_MainObject.Position.Right > this.Region.Right)
+                                                    _MainObject.Position.Left -= AnimationStep;
+                                                else
+                                                    _MainObject.Position.Left = this.Region.Right - _MainObject.Position.Width;
+                                            }
+                                            break;
+                                    }
+
+                                    //// Adjust position of main object (text to unveil)
+                                    //if (_MainObject.Position.Left > this.Region.Left)
+                                    //    _MainObject.Position.Left -= AnimationStep;
+                                    //else
+                                    //    _MainObject.Position.Left = this.Region.Left;
 
                                     // Adjust positon of second object (text to hide)
                                     _SecondObject.Position.Left -= AnimationStep;
 
                                     // Set alpha value of object being transitioned out (this is a result of the distance it has moved)
-                                    _SecondObject.Alpha = 1.0f - (System.Math.Abs((float)(_SecondObject.Position.Left - this.Region.Left)) / (float)(this.Region.Width / 2));
+                                    _SecondObject.Alpha = 1.0f - (System.Math.Abs((float)(_SecondObject_StartPos - _SecondObject.Position).Left) / (float)(this.Region.Width / 2));
 
                                     // Exit animation
-                                    if (_MainObject.Position.Left == this.Region.Left && _SecondObject.Alpha <= 0.05f)
+                                    //if (_MainObject.Position.Left == this.Region.Left && _SecondObject.Alpha <= 0.05f)
+                                    //{
+                                    //    _MainObject.Position.Left = this.Region.Left;
+                                    //    _SecondObject.Visible = false;
+                                    //    Refresh();
+                                    //    return false;
+                                    //}
+                                    switch (_textAlignment)
                                     {
-                                        _MainObject.Position.Left = this.Region.Left;
-                                        _SecondObject.Visible = false;
-                                        Refresh();
-                                        return false;
+                                        case Alignment.BottomLeft:
+                                        case Alignment.CenterLeft:
+                                        case Alignment.TopLeft:
+                                        default:
+                                            {
+                                                if (_MainObject.Position.Left == this.Region.Left && _SecondObject.Alpha <= 0.05f)
+                                                {
+                                                    _MainObject.Position.Left = this.Region.Left;
+                                                    _SecondObject.Visible = false;
+                                                    Refresh();
+                                                    return false;
+                                                }
+                                            }
+                                            break;
+                                        case Alignment.BottomCenter:
+                                        case Alignment.CenterCenter:
+                                        case Alignment.TopCenter:
+                                            {
+                                                if (_MainObject.Position.Center.X <= this.Region.Center.X && _SecondObject.Alpha <= 0.05f)
+                                                {
+                                                    _MainObject.Position.Left = this.Region.Center.X - (_MainObject.Position.Width/2);
+                                                    _SecondObject.Visible = false;
+                                                    Refresh();
+                                                    return false;
+                                                }
+                                            }
+                                            break;
+                                        case Alignment.BottomRight:
+                                        case Alignment.CenterRight:
+                                        case Alignment.TopRight:
+                                            {
+                                                if (_MainObject.Position.Right <= this.Region.Right && _SecondObject.Alpha <= 0.05f)
+                                                {
+                                                    _MainObject.Position.Left = this.Region.Right - _MainObject.Position.Width;
+                                                    _SecondObject.Visible = false;
+                                                    Refresh();
+                                                    return false;
+                                                }
+                                            }
+                                            break;
                                     }
+
 
                                     Refresh();
                                 }
@@ -1067,7 +1781,7 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.Visible = true;
@@ -1078,6 +1792,37 @@ namespace OpenMobile.Controls
                             _SecondObject.SetText(text2, true);
                             _SecondObject.ResetClip();
                             _SecondObject.Alpha = 1f;
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
 
                             // Render initial state
                             Refresh();
@@ -1137,7 +1882,7 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.Visible = true;
@@ -1147,6 +1892,37 @@ namespace OpenMobile.Controls
                             _SecondObject.Visible = true;
                             _SecondObject.SetText(text2, true);
                             _SecondObject.ResetClip();
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
 
                             // Render initial state
                             Refresh();
@@ -1212,7 +1988,7 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(2);
+                            ClearRenderObjects(0);
 
                             eTextFormat GlowTextFormat = eTextFormat.Normal;
                             #region Find GlowTextFormat effect to use
@@ -1298,6 +2074,37 @@ namespace OpenMobile.Controls
                             _SecondObject.SetText(text, true, GlowTextFormat);
                             _SecondObject.ResetClip();
 
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                        _SecondObject.Position.Translate(this.Region.Center.X - _SecondObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                        _SecondObject.Position.Translate(this.Region.Right - _SecondObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
+
                             // Render initial state
                             Refresh();
 
@@ -1308,7 +2115,7 @@ namespace OpenMobile.Controls
                             if (_Animation_Cancel)
                                 goto end;
 
-                            #region GrowAndFade
+                            #region Glow
 
                             bool FadeIn = true;
 
@@ -1357,13 +2164,42 @@ namespace OpenMobile.Controls
                                 goto end;
 
                             // Clear old parameters if required
-                            ClearRenderObjects(1);
+                            ClearRenderObjects(0);
 
                             // Set parameters
                             _MainObject.Visible = true;
                             _MainObject.Alpha = 1f;
                             _MainObject.SetText(text, true);
                             _MainObject.ResetClip();
+
+                            #region Reposition object to match text alignment property
+
+                            switch (_textAlignment)
+                            {
+                                case Alignment.BottomLeft:
+                                case Alignment.CenterLeft:
+                                case Alignment.TopLeft:
+                                    // No action required, this is the default placement
+                                    break;
+                                case Alignment.BottomCenter:
+                                case Alignment.CenterCenter:
+                                case Alignment.TopCenter:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Center.X - _MainObject.Position.Center.X, 0);
+                                    }
+                                    break;
+                                case Alignment.BottomRight:
+                                case Alignment.CenterRight:
+                                case Alignment.TopRight:
+                                    {
+                                        _MainObject.Position.Translate(this.Region.Right - _MainObject.Position.Right, 0);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            #endregion
 
                             // Render initial state
                             Refresh();
@@ -1572,7 +2408,7 @@ namespace OpenMobile.Controls
             }
         }
 
-        private void Animation_Start()
+        private void Animation_Start(int screen)
         {
             // Cancel if no animation is active
             if (Animation == eAnimation.None && AnimationSingle == eAnimation.None)
@@ -1582,11 +2418,8 @@ namespace OpenMobile.Controls
             }
 
             // Reconfigure animation parameters if needed (This method is called each rendering frame)
-            if (_RefreshGraphic)
-            {   // Refresh rendering objects
-                for (int i = 0; i < _RenderObjects.Count; i++)
-                    _RenderObjects[i].RefreshTexture(_textFormat);
-            }
+            for (int i = 0; i < _RenderObjects.Count; i++)
+                _RenderObjects[i].RefreshTexture(screen);
 
             // Start animation thread
             if (_Animation_Thread == null)
@@ -1704,7 +2537,7 @@ namespace OpenMobile.Controls
         /// <param name="AnimationSpeed"></param>
         public void TransitionInText(eAnimation animationEffect, string newText, float AnimationSpeed)
         {
-            TransitionInText(animationEffect, newText, _AnimationSpeed, null);
+            TransitionInText(animationEffect, newText, AnimationSpeed, null);
         }
         /// <summary>
         /// Transition in new text with the specified animation effect, displays it for a specifed time then transitions it out with the same effect
@@ -1720,7 +2553,8 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Transition in new text with the specified animation effect, displays it for a specifed time then transitions it out with the same effect
         /// </summary>
-        /// <param name="animationEffect"></param>
+        /// <param name="animationEffectIn"></param>
+        /// <param name="animationEffectOut"></param>
         /// <param name="newText"></param>
         /// <param name="AnimationSpeed"></param>
         /// <param name="showDuration"></param>
@@ -1783,17 +2617,30 @@ namespace OpenMobile.Controls
         {
             get
             {
+                if (_DataSourceString != null)
+                    return _DataSourceString;
                 return base.Text;
             }
             set
             {
                 if (value == null)
                     value = String.Empty;
+
+                // Check for datasource present
+                if (base.DataSource_InLine(ref value))
+                {
+                    _DataSourceString = value;
+                    return;
+                }
+                _DataSourceString = null;
+
                 if (_text == value)
                     return;
+
                 TransitionInText(_AnimationSingle, value);
             }
         }
+        private string _DataSourceString;
 
         /// <summary>
         /// Left placement
@@ -1886,7 +2733,7 @@ namespace OpenMobile.Controls
             //    return;
 
             // Start animation
-            Animation_Start();
+            Animation_Start(g.screen);
 
             lock (this)
             {
@@ -1900,7 +2747,7 @@ namespace OpenMobile.Controls
                 for (int i = _RenderObjects.Count - 1; i >= 0; i--)
                 {
                     RenderData rd = _RenderObjects[i];
-                    if (rd.Visible)
+                    if (rd.Visible && !string.IsNullOrEmpty(rd.Text))
                     {
                         g.SetClipFast(rd.Clip.Left, rd.Clip.Top, rd.Clip.Width, rd.Clip.Height);
                         //g.DrawImage(rd.Texture, rd.Position.Left, rd.Position.Top, rd.Position.Width + 5, rd.Position.Height, this.GetAlphaValue(rd.Alpha));
@@ -1950,16 +2797,38 @@ namespace OpenMobile.Controls
 
         public override object Clone(OMPanel parent)
         {
-            OMAnimatedLabel2 newObject = (OMAnimatedLabel2)this.MemberwiseClone();
+            //OMAnimatedLabel2 newObject = (OMAnimatedLabel2)this.MemberwiseClone();
+            OMAnimatedLabel2 newObject = (OMAnimatedLabel2)base.Clone(parent);
             newObject.parent = parent;
             //OMContainer newObject = (OMContainer)base.Clone();
             newObject._RenderObjects = new List<RenderData>();
             foreach (RenderData rd in _RenderObjects)
                 newObject._RenderObjects.Add((RenderData)rd.Clone());
+            newObject.RefreshGraphic();
             return newObject;
         }
 
         #endregion
+
+        #region DataSource
+
+        internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
+        {
+            TransitionInText(_AnimationSingle, dataSource.FormatedValue);
+        }
+
+        internal override void DataSource_Missing(string propertyName)
+        {
+            TransitionInText(_AnimationSingle, "ERR");
+        }
+
+        internal override void DataSource_InLine_Changed(string s)
+        {
+            TransitionInText(_AnimationSingle, s);
+        }
+
+        #endregion
+
     }
 
 }

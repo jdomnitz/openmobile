@@ -77,7 +77,26 @@ namespace OpenMobile.Controls
             }
         }
         private OpenMobile.Math.Vector3 _Rotation = new OpenMobile.Math.Vector3();
-        
+
+        /// <summary>
+        /// Reflection data (how to render a reflection)
+        /// </summary>
+        public ReflectionsData ReflectionData
+        {
+            get
+            {
+                return this._ReflectionData;
+            }
+            set
+            {
+                if (this._ReflectionData != value)
+                {
+                    this._ReflectionData = value;
+                }
+            }
+        }
+        private ReflectionsData _ReflectionData = null;     
+        //dfsgdsfsdf
 
         /// <summary>
         /// Creates the control with the default size and location
@@ -198,7 +217,7 @@ namespace OpenMobile.Controls
                 raiseUpdate(false);
 
                 // Raise image change event
-                if (OnImageChange != null)
+                if (OnImageChange != null && this.parent.IsLoaded(this.parent.ActiveScreen))
                     OnImageChange(this, this.parent.ActiveScreen);
             }
         }
@@ -210,6 +229,25 @@ namespace OpenMobile.Controls
             this.Width = Image.image.Width;
             this.Height = Image.image.Height;
         }
+
+        /// <summary>
+        /// Image to show when main image is null
+        /// </summary>
+        public imageItem NullImage
+        {
+            get
+            {
+                return this._NullImage;
+            }
+            set
+            {
+                if (this._NullImage != value)
+                {
+                    this._NullImage = value;
+                }
+            }
+        }
+        private imageItem _NullImage;        
 
         /// <summary>
         /// Draws the control
@@ -230,13 +268,12 @@ namespace OpenMobile.Controls
                 }
             }
 
-            //if (image.image == null)
-            //{
-            //    if (image == imageItem.MISSING)
-            //        g.FillRectangle(new Brush(Color.FromArgb((int)(255 * OpacityFloat), Color.Black)), left, top, width, height);
-            //}
-            //else
-            if (image.image != null)
+            // Map image to use
+            OImage img = image.image;
+            if (img == null)
+                img = NullImage.image;
+
+            if (img != null)
             {
                 // Enable animation?
                 if (_ShowAnimation)
@@ -245,42 +282,35 @@ namespace OpenMobile.Controls
 
                     if (aimg == null)
                     {   // Create animation object
-                        aimg = new OAnimatedImage(image.image.image);
+                        aimg = new OAnimatedImage(img.image);
                         if (DrawAnimationDelegate==null)
                             DrawAnimationDelegate = new OAnimatedImage.redraw(aimg_OnRedraw);
                         aimg.OnRedraw += DrawAnimationDelegate;
                     }
                     else
                     {   // Get current frame from animation
-                        image.image = aimg.getFrame();
+                        img = aimg.getFrame();
                     }
 
                     #endregion
                 }
 
-                //float alpha = OpacityFloat;
-                //if (this.Mode == eModeType.transitioningIn)
-                //    alpha = e.globalTransitionIn;
-                //else if (this.Mode == eModeType.transitioningOut)
-                //    alpha = e.globalTransitionOut;
-
                 // Draw image background (if any)
                 if (_BackgroundColor != Color.Transparent && _RenderingValue_Alpha == 1)
                     g.FillRectangle(new Brush(Color.FromArgb((int)(_BackgroundColor.A * OpacityFloat), _BackgroundColor)), new Rectangle(left + 1, top + 1, width - 2, height - 2));
 
-                lock (image.image)
+                lock (img)
                 {
                     switch (drawmode)
                     {
                         case DrawModes.Crop:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), 0, 0, width, height, _RenderingValue_Alpha);
+                            g.DrawImage(img, new Rectangle(left, top, width, height), 0, 0, width, height, _RenderingValue_Alpha);
                             break;
                         case DrawModes.CropLeft:
-                            g.DrawImage(image.image, new Rectangle(left, top, width, height), image.image.Width - width, image.image.Height - height, width, height, _RenderingValue_Alpha);
+                            g.DrawImage(img, new Rectangle(left, top, width, height), img.Width - width, img.Height - height, width, height, _RenderingValue_Alpha);
                             break;
                         case DrawModes.Scale:
-                            g.DrawImage(image.image, left, top, 0, width, height, _RenderingValue_Alpha, eAngle.Normal, Rotation, new ReflectionsData(Color.FromArgb(255,130,130,130),Color.Black));
-                            //g.DrawImage(image.image, left, top, width, height, _RenderingValue_Alpha, eAngle.Normal);
+                            g.DrawImage(img, left, top, 0, width, height, _RenderingValue_Alpha, eAngle.Normal, Rotation, _ReflectionData);
                             break;
                     }
                 }
@@ -380,6 +410,25 @@ namespace OpenMobile.Controls
 
         #region DataSource
 
+        /// <summary>
+        /// Set to true if you want to show and hide the image based on the value of a datasource (null value will hide the image, any other value will show it
+        /// </summary>
+        public bool DataSourceControlsVisibility
+        {
+            get
+            {
+                return this._DataSourceControlsVisibility;
+            }
+            set
+            {
+                if (this._DataSourceControlsVisibility != value)
+                {
+                    this._DataSourceControlsVisibility = value;
+                }
+            }
+        }
+        private bool _DataSourceControlsVisibility = false;
+
         internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
         {
             // Is this a binary data source, if so use the true/false state to show/hide image
@@ -387,11 +436,11 @@ namespace OpenMobile.Controls
             {
                 try
                 {
-                    this.Visible = (bool)dataSource.Value;
+                    base.Visible = (bool)dataSource.Value;
                 }
                 catch
                 {
-                    this.Visible = false;
+                    base.Visible = false;
                 }
             }
             else if (dataSource.Value is OImage)
@@ -404,7 +453,10 @@ namespace OpenMobile.Controls
             }
             else
             {   // This is not a binary datasource, use null to detect state
-                this.Visible = dataSource.Value != null;
+                if (_DataSourceControlsVisibility)
+                    base.Visible = dataSource.Value != null;
+                else
+                    this.Image = new imageItem(dataSource.Value as OImage);
             }
             _RefreshGraphic = true;
             Refresh();

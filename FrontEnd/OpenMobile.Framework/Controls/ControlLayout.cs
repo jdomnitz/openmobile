@@ -102,6 +102,15 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// Adds controls which matches the specified name to this group
+        /// </summary>
+        /// <param name="control"></param>
+        public void AddControls(string idString)
+        {
+            _Controls.AddRange(_Panel.Controls.FindAll(x => x.Name.Contains(_IDString)));            
+        }
+
+        /// <summary>
         /// Returns the control with the given name
         /// </summary>
         /// <param name="name"></param>
@@ -233,24 +242,25 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Shows / hides the controls
+        /// Shows / hides the controls (NB! Will only show controls that was previously hidden by a controlLayout)
         /// </summary>
         public bool Visible
         {
             get
             {
-                if (_Controls.Count > 0)
-                    return _Controls[0].Visible;
-                return this._Visible;
+                for (int i = 0; i < _Controls.Count; i++)
+                {
+                    if (_Controls[i].Visible)
+                        return true;
+                }
+                return false;
             }
             set
             {
-                this._Visible = value;
                 foreach (OMControl control in _Controls)
-                    control.Visible = _Visible;
+                    control.Visible = value;            
             }
         }
-        private bool _Visible;
 
         /// <summary>
         /// Sets the opacity level of the controls (0 transparent - 255 solid)

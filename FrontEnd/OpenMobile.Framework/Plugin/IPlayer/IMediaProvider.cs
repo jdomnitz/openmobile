@@ -79,7 +79,8 @@ namespace OpenMobile.Plugin
         Stop,
 
         /// <summary>
-        /// Start playback. Param0: file as mediaInfo
+        /// Start playback. Param0: file as mediaInfo (If param0 is missing the current playlist location will be played instead)
+        /// <para>Param0 can also be a integer describing a index in the current playlist to play (zerobased)</para>
         /// </summary>
         Play,
 
@@ -99,12 +100,12 @@ namespace OpenMobile.Plugin
         PlaybackPosition_Get,
 
         /// <summary>
-        /// Seek forward. 
+        /// Seek forward. Param0: Seconds as int 
         /// </summary>
         Forward,
 
         /// <summary>
-        /// Seek backward. 
+        /// Seek backward. Param0: Seconds as int  
         /// </summary>
         Backward,
 
@@ -133,6 +134,21 @@ namespace OpenMobile.Plugin
         /// </summary>
         SubTitle_Disable,
 
+        /// <summary>
+        /// Sets the suffle state. Param0: Shuffle state as bool (if param is missing suffle is toggled)
+        /// </summary>
+        Suffle,
+
+        /// <summary>
+        /// Sets the current playlist. Param0: new Playlist as Playlist
+        /// </summary>
+        PlayList_Set,
+
+        /// <summary>
+        /// Sets the repeat state. Param0: Repeat state as bool (if param is missing repeat is toggled)
+        /// </summary>
+        Repeat,
+        
         /// <summary>
         /// Custom command, Param0: Command name, Param1..ParamX: Command parameters
         /// </summary>
@@ -256,14 +272,138 @@ namespace OpenMobile.Plugin
             this._Command = command;
             this.Parameters = parameters;
         }
+
+        /// <summary>
+        /// Compares two commandwrappers by looking at their commands and parameters
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool operator ==(MediaProvider_CommandWrapper a, MediaProvider_CommandWrapper b)
+        {
+            // If both are null, or both are same instance, return true.
+            if (System.Object.ReferenceEquals(a, b))
+            {
+                return true;
+            }
+
+            // If one is null, but not both, return false.
+            if (((object)a == null) || ((object)b == null))
+            {
+                return false;
+            }
+
+            if (a.Command.Equals(b.Command) &&
+                a.Parameters.Length.Equals(b.Parameters.Length))
+            {
+                // Also verify each parameter
+                for (int i = 0; i < a.Parameters.Length; i++)
+                    if (!a.Parameters[i].Equals(b.Parameters[i]))
+                        return false;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Negates two commandwrappers by looking at their commands and parameters
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool operator !=(MediaProvider_CommandWrapper a, MediaProvider_CommandWrapper b)
+        {
+            return !(a == b);
+        }
+
     }
 
     /// <summary>
-    /// Media provider commands
+    /// Mediaprovider playback state
+    /// </summary>
+    public enum MediaProvider_PlaybackState
+    {
+        /// <summary>
+        /// Stopped
+        /// </summary>
+        Stopped,
+        /// <summary>
+        /// Playing
+        /// </summary>
+        Playing,
+        /// <summary>
+        /// Paused
+        /// </summary>
+        Paused
+    }
+
+    /// <summary>
+    /// Mediaprovider playback data
+    /// </summary>
+    public class MediaProvider_PlaybackData
+    {
+        /// <summary>
+        /// Total length of available media 
+        /// </summary>
+        public TimeSpan Length { get; set; }
+
+        /// <summary>
+        /// Current playback position
+        /// </summary>
+        public TimeSpan CurrentPos { get; set; }
+
+        /// <summary>
+        /// Current playback position in percentage
+        /// </summary>
+        public int CurrentPosPercent { get; set; }
+
+        /// <summary>
+        /// Current playback state
+        /// </summary>
+        public MediaProvider_PlaybackState State { get; set; }
+    }
+
+    /// <summary>
+    /// Media provider data
     /// </summary>
     public enum MediaProvider_Data
     {
+        /// <summary>
+        /// State of playback. Param0: State as MediaProvider_PlaybackState
+        /// </summary>
+        PlaybackState,
 
+        /// <summary>
+        /// Media info updated. Param0: media as mediaInfo
+        /// </summary>
+        MediaInfo,
+
+        /// <summary>
+        /// Playback position data. Param0: Current position as timespan, Param1: Media length as timespan, Param2: Current Position in percent as int.
+        /// </summary>
+        PlaybackPositionData,
+
+        /// <summary>
+        /// Suffle state as bool.
+        /// </summary>
+        Suffle,
+
+        /// <summary>
+        /// Repeat state as bool.
+        /// </summary>
+        Repeat,
+
+        /// <summary>
+        /// Current Playlist as Playlist.
+        /// </summary>
+        PlayList,
+
+        /// <summary>
+        /// Custom data, Param0: Data name, Param1..ParamX: Data parameters
+        /// </summary>
+        Custom
     }
 
     /// <summary>
@@ -272,41 +412,78 @@ namespace OpenMobile.Plugin
     public class MediaProvider_DataWrapper : MediaProvider_WrapperBase
     {
         /// <summary>
-        /// Data
+        /// Type of data
         /// </summary>
-        public MediaProvider_Data Data
+        public MediaProvider_Data DataType
         {
             get
             {
-                return this._Data;
+                return this._DataType;
             }
             set
             {
-                if (this._Data != value)
+                if (this._DataType != value)
                 {
-                    this._Data = value;
+                    this._DataType = value;
                 }
             }
         }
-        private MediaProvider_Data _Data;
+        private MediaProvider_Data _DataType;
 
         /// <summary>
         /// Creates a new datawrapper
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="dataType"></param>
         /// <param name="parameters"></param>
-        public MediaProvider_DataWrapper(MediaProvider_Data data, params object[] parameters)
+        public MediaProvider_DataWrapper(MediaProvider_Data dataType, params object[] parameters)
         {
-            this._Data = data;
+            this._DataType = dataType;
             this.Parameters = parameters;
         }
     }
+    
+    /// <summary>
+    /// Event arguments for mediaProvider events
+    /// </summary>
+    public class MediaProviderData_EventArgs
+    {
+        /// <summary>
+        /// Data
+        /// </summary>
+        public MediaProvider_DataWrapper Data { get; set; }
 
+        /// <summary>
+        /// Creates a new instance of event arguments
+        /// </summary>
+        /// <param name="data"></param>
+        public MediaProviderData_EventArgs(MediaProvider_DataWrapper data)
+        {
+            this.Data = data;
+        }
+    }
+
+    /// <summary>
+    /// Media provider Data event handler
+    /// </summary>
+    /// <param name="mediaProvider"></param>
+    /// <param name="zone"></param>
+    /// <param name="e"></param>
+    public delegate void MediaProviderData_EventHandler(object sender, Zone zone, MediaProviderData_EventArgs e);
+
+    public delegate void MediaProviderChanged_EventHandler(object sender, Zone zone);
+
+    /// <summary>
+    /// Media provider Info event handler
+    /// </summary>
+    /// <param name="mediaProvider"></param>
+    /// <param name="zone"></param>
+    /// <param name="providerInfo"></param>
+    public delegate void MediaProviderInfo_EventHandler(object sender, Zone zone, MediaProviderInfo providerInfo);
 
     /// <summary>
     /// Interface for media providers
     /// </summary>
-    public interface IMediaProvider
+    public interface IMediaProvider : IBasePlugin
     {
         /// <summary>
         /// Gets the media provider types supported by this plugin
@@ -324,23 +501,23 @@ namespace OpenMobile.Plugin
         /// Sets the currently active media source
         /// </summary>
         /// <param name="zone"></param>
-        /// <param name="mediaSource"></param>
+        /// <param name="name">Name of mediasource to activate</param>
         /// <returns></returns>
-        bool SetMediaSource(Zone zone, MediaSource mediaSource);
+        bool SetMediaSource(Zone zone, string name);
 
         /// <summary>
         /// Activate media provider (use this to power on)
         /// </summary>
         /// <param name="zone"></param>
         /// <returns></returns>
-        bool ActivateMediaProvider(Zone zone);
+        MediaProviderState ActivateMediaProvider(Zone zone);
 
         /// <summary>
         /// Deactivate media provider (use this to power off)
         /// </summary>
         /// <param name="zone"></param>
         /// <returns></returns>
-        bool DeactivateMediaProvider(Zone zone);
+        MediaProviderState DeactivateMediaProvider(Zone zone);
 
         /// <summary>
         /// Gets the current information from the media provider
@@ -364,5 +541,16 @@ namespace OpenMobile.Plugin
         /// <param name="data"></param>
         /// <returns></returns>
         object GetData(Zone zone, MediaProvider_DataWrapper data);
+
+        /// <summary>
+        /// Data has changed
+        /// </summary>
+        event MediaProviderData_EventHandler OnDataChanged;
+
+        /// <summary>
+        /// Provider info has changed
+        /// </summary>
+        event MediaProviderInfo_EventHandler OnProviderInfoChanged;
+        
     }
 }

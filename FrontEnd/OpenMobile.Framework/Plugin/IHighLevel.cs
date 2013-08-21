@@ -145,7 +145,12 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Pluginlevel MainMenu plugin
         /// </summary>
-        MainMenu=16
+        MainMenu=16,
+        /// <summary>
+        /// Plugin can not be disabled from loading
+        /// </summary>
+        NoDisable=32
+
     }
 
     /// <summary>

@@ -88,5 +88,16 @@ namespace OpenMobile.helperFunctions
             }
         }
 
+        /// <summary>
+        /// Extracts the screen number from a string like this "Screen0" returns 0 if it fails
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static int GetScreenFromString(string s)
+        {
+            int screen = 0;
+            int.TryParse(s.Substring(6), out screen);
+            return screen;
+        }
     }
 }

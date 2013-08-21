@@ -142,6 +142,23 @@ namespace OpenMobile.Data
         #region Properties
 
         /// <summary>
+        /// Get's the screen number from this datasource (if existent, if not returns null)
+        /// </summary>
+        public int? Screen
+        {
+            get
+            {
+                if (this._NameLevel1.ToUpper().Contains("SCREEN"))
+                {
+                    int screen = 0;
+                    if (int.TryParse(_NameLevel1.Substring(_NameLevel1.ToUpper().IndexOf("SCREEN")+6,1), out screen))
+                        return screen;
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Does this source provide valid data?
         /// </summary>
         public bool Valid
@@ -287,7 +304,7 @@ namespace OpenMobile.Data
             /// </summary>
             bytespersec,
             /// <summary>
-            /// Binary On/Off as 1/0
+            /// Binary On/Off as 1/0 or true/false
             /// </summary>
             binary,
             /// <summary>
@@ -459,6 +476,22 @@ namespace OpenMobile.Data
         public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description)
             : this(provider, nameLevel1, nameLevel2, nameLevel3, 0, dataType, null, description)
         {
+        }
+
+        /// <summary>
+        /// Creates a new DataSource object with an initial value 
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="dataType"></param>
+        /// <param name="description"></param>
+        /// <param name="initialValue"></param>
+        public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description, object initialValue)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, 0, dataType, null, description)
+        {
+            _Value = initialValue;
         }
 
         /// <summary>
@@ -721,7 +754,7 @@ namespace OpenMobile.Data
                 else
                 {
                     _Valid = true;
-                    if (!value.Equals(_Value))
+                    if (_Value == null || value == null || !value.Equals(_Value))
                     {
                         _Value = value;
                         Changed = true;
@@ -898,6 +931,27 @@ namespace OpenMobile.Data
         public static string GetFormatedValue(DataSource dataSource)
         {
             return GetFormatedValue(dataSource, dataSource.Value);
+        }
+
+        #endregion
+
+        #region Conversion methods
+
+        /// <summary>
+        /// Gets the datasource value as an ImageItem
+        /// </summary>
+        /// <returns></returns>
+        public imageItem GetValueAsImageItem()
+        {
+            if (this.Value is OpenMobile.Graphics.OImage)
+            {   // Actual image data present
+                return new imageItem(this.Value as OpenMobile.Graphics.OImage);
+            }
+            else if (this.Value is imageItem)
+            {   // Actual image data present
+                return (imageItem)this.Value;
+            }
+            return imageItem.NONE;
         }
 
         #endregion

@@ -338,30 +338,119 @@ namespace OpenMobile.Graphics
             double width2 = Width / 2.0;
             double height2 = Height / 2.0;
 
-            // Save current matrix
-            GL.PushMatrix(); 
+            if (useReflection)
+            {
+                double reflectionImageHeight = height2 * reflectionData.ReflectionLength;
+                double reflectionImageHeight2 = reflectionImageHeight / 2;
+                double orgImageHeight = Height - reflectionImageHeight;
+                double orgImageHeight2 = orgImageHeight / 2;
 
-            // Translate base point from upper left corner to place graphics correctly
-            _3D_Translate(X + width2, Y + height2, Z);
+                double height4 = Height / 4.0;
+                double reflectionLength = Height * reflectionData.ReflectionLength;
+                double reflectionLength2 = reflectionLength / 2;
 
-            // Rotate graphics
-            _3D_Rotate(rotation.X, rotation.Y, rotation.Z);
+                // Save current matrix
+                GL.PushMatrix();
 
-            // Scale graphics to correct dimensions
-            GL.Scale(width2, height2, 1);
+                // Translate base point from upper left corner to place graphics correctly
+                _3D_Translate(X + width2, Y + orgImageHeight2, Z);
 
-            // Render texture
-            GL.Color4(1F, 1F, 1F, transparency);
-            GL.Begin(BeginMode.Quads);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1, -1, 0); //TOP-LEFT
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1, -1, 0); //TOP-RIGHT
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
-            GL.End();
+                // Rotate graphics
+                _3D_Rotate(rotation.X, rotation.Y, rotation.Z);
 
-            // Restore matrix
-            GL.PopMatrix();
+                // Scale graphics to correct dimensions
+                GL.Scale(width2, orgImageHeight2, 1);
 
+                // Render texture
+                GL.Color4(1F, 1F, 1F, transparency);
+                GL.Begin(BeginMode.Quads);
+                GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1, -1, 0); //TOP-LEFT
+                GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1, -1, 0); //TOP-RIGHT
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
+                GL.End();
+
+                // Restore matrix
+                GL.PopMatrix();
+
+                // Render reflection
+
+                // Save current matrix
+                GL.PushMatrix();
+
+                // Translate base point from upper left corner to place graphics correctly
+                _3D_Translate(X + width2, Y + orgImageHeight + orgImageHeight2 + reflectionData.ReflectionOffset, Z);
+
+                // Rotate graphics
+                _3D_Rotate(-rotation.X, rotation.Y, -rotation.Z);
+
+                // Scale graphics to correct dimensions
+                GL.Scale(width2, orgImageHeight2, 1);
+
+                // Render texture
+                //GL.Begin(BeginMode.Quads);
+                //GL.Color4(reflectionData.ReflectionColorStart.Rd, reflectionData.ReflectionColorStart.Gd, reflectionData.ReflectionColorStart.Bd, transparency * reflectionData.ReflectionColorStart.Ad);
+                //GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, -1, 0); //TOP-LEFT
+                //GL.Color4(reflectionData.ReflectionColorStart.Rd, reflectionData.ReflectionColorStart.Gd, reflectionData.ReflectionColorStart.Bd, transparency * reflectionData.ReflectionColorStart.Ad);
+                //GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, -1, 0); //TOP-RIGHT
+                //GL.Color4(reflectionData.ReflectionColorEnd.Rd, reflectionData.ReflectionColorEnd.Gd, reflectionData.ReflectionColorEnd.Bd, transparency * reflectionData.ReflectionColorEnd.Ad);
+                //GL.TexCoord2(1.0f, 0.0f + (1 - reflectionData.ReflectionLength)); GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
+                //GL.Color4(reflectionData.ReflectionColorEnd.Rd, reflectionData.ReflectionColorEnd.Gd, reflectionData.ReflectionColorEnd.Bd, transparency * reflectionData.ReflectionColorEnd.Ad);
+                //GL.TexCoord2(0.0f, 0.0f + (1 - reflectionData.ReflectionLength)); GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
+                //GL.End();
+                //GL.Begin(BeginMode.Quads);
+                //GL.Color4(reflectionData.ReflectionColorStart.Rd, reflectionData.ReflectionColorStart.Gd, reflectionData.ReflectionColorStart.Bd, transparency * reflectionData.ReflectionColorStart.Ad);
+                //GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, -reflectionData.ReflectionLength, 0); //TOP-LEFT
+                //GL.Color4(reflectionData.ReflectionColorStart.Rd, reflectionData.ReflectionColorStart.Gd, reflectionData.ReflectionColorStart.Bd, transparency * reflectionData.ReflectionColorStart.Ad);
+                //GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, -reflectionData.ReflectionLength, 0); //TOP-RIGHT
+                //GL.Color4(reflectionData.ReflectionColorEnd.Rd, reflectionData.ReflectionColorEnd.Gd, reflectionData.ReflectionColorEnd.Bd, transparency * reflectionData.ReflectionColorEnd.Ad);
+                //GL.TexCoord2(1.0f, 0.0f + (1 - reflectionData.ReflectionLength)); GL.Vertex3(1, reflectionData.ReflectionLength, 0); //BOTTOM-RIGHT
+                //GL.Color4(reflectionData.ReflectionColorEnd.Rd, reflectionData.ReflectionColorEnd.Gd, reflectionData.ReflectionColorEnd.Bd, transparency * reflectionData.ReflectionColorEnd.Ad);
+                //GL.TexCoord2(0.0f, 0.0f + (1 - reflectionData.ReflectionLength)); GL.Vertex3(-1, reflectionData.ReflectionLength, 0); //BOTTOM-LEFT
+                //GL.End();
+
+                double ReflectionLength2 = reflectionData.ReflectionLength * 2;
+
+                GL.Begin(BeginMode.Quads);
+                GL.Color4(reflectionData.ReflectionColorStart.Rd, reflectionData.ReflectionColorStart.Gd, reflectionData.ReflectionColorStart.Bd, transparency * reflectionData.ReflectionColorStart.Ad);
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, -1, 0); //TOP-LEFT
+                GL.Color4(reflectionData.ReflectionColorStart.Rd, reflectionData.ReflectionColorStart.Gd, reflectionData.ReflectionColorStart.Bd, transparency * reflectionData.ReflectionColorStart.Ad);
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, -1, 0); //TOP-RIGHT
+                GL.Color4(reflectionData.ReflectionColorEnd.Rd, reflectionData.ReflectionColorEnd.Gd, reflectionData.ReflectionColorEnd.Bd, transparency * reflectionData.ReflectionColorEnd.Ad);
+                GL.TexCoord2(1.0f, 0.0f + (1 - reflectionData.ReflectionLength)); GL.Vertex3(1, -1 + ReflectionLength2, 0); //BOTTOM-RIGHT
+                GL.Color4(reflectionData.ReflectionColorEnd.Rd, reflectionData.ReflectionColorEnd.Gd, reflectionData.ReflectionColorEnd.Bd, transparency * reflectionData.ReflectionColorEnd.Ad);
+                GL.TexCoord2(0.0f, 0.0f + (1 - reflectionData.ReflectionLength)); GL.Vertex3(-1, -1 + ReflectionLength2, 0); //BOTTOM-LEFT
+                GL.End();
+
+                // Restore matrix
+                GL.PopMatrix();
+            }
+            else
+            {
+                // Save current matrix
+                GL.PushMatrix();
+
+                // Translate base point from upper left corner to place graphics correctly
+                _3D_Translate(X + width2, Y + height2, Z);
+
+                // Rotate graphics
+                _3D_Rotate(rotation.X, rotation.Y, rotation.Z);
+
+                // Scale graphics to correct dimensions
+                GL.Scale(width2, height2, 1);
+
+                // Render texture
+                GL.Color4(1F, 1F, 1F, transparency);
+                GL.Begin(BeginMode.Quads);
+                GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1, -1, 0); //TOP-LEFT
+                GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1, -1, 0); //TOP-RIGHT
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
+                GL.End();
+
+                // Restore matrix
+                GL.PopMatrix();
+            }
 
             //// Render reflection (only if rotation is around Y axis)
             //if (useReflection && rotation.Z == 0 && rotation.X == 0)
@@ -410,7 +499,7 @@ namespace OpenMobile.Graphics
             DrawImage(image, X, Y, Width, Height, transparency, eAngle.Normal);
         }
 
-        public void DrawCube(OImage image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
+        public void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
         {
             GL.PushMatrix();
 
@@ -431,24 +520,20 @@ namespace OpenMobile.Graphics
             GL.Rotate(rotation.Y, 0, 1, 0);
             GL.Rotate(rotation.Z, 0, 0, 1);
 
-            //GL.PointSize(3);
-            //GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
-            //GL.PolygonMode(MaterialFace.Back, PolygonMode.Line);
-
             bool useTexture = false;
-            if (image != null)
+            if (image != null && image.Length > 0)
             {
-                useTexture = true;
-                if (image.TextureGenerationRequired(_Screen))
-                    if (!LoadTexture(ref image))
-                    {
-                        GL.Disable(EnableCap.Texture2D);
-                        return;
-                    }
-
+                for (int i = 0; i < image.Length; i++)
+                {
+                    useTexture = true;
+                    if (image[i].TextureGenerationRequired(_Screen))
+                        if (!LoadTexture(ref image[i]))
+                        {
+                            GL.Disable(EnableCap.Texture2D);
+                            return;
+                        }
+                }
                 GL.Enable(EnableCap.Texture2D);
-                GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(_Screen));
-
                 // Set texture parameters
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
@@ -457,40 +542,80 @@ namespace OpenMobile.Graphics
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToBorder);
             }
 
-            GL.Begin(BeginMode.Quads);
+            if (!useTexture)
+            {
+                GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
+                GL.PolygonMode(MaterialFace.Back, PolygonMode.Line);
+            }
+
+
             GL.Color3(1.0f, 1.0f, 1.0f);	// Color Blue
+            if (useTexture && image[0] != null)
+                GL.BindTexture(TextureTarget.Texture2D, image[0].GetTexture(_Screen));
+            GL.Begin(BeginMode.Quads);
             if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, 1.0f);	// Top Right Of The Quad (Top)
             if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Top)
             if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, -1.0f, -1.0f);	// Bottom Left Of The Quad (Top)
             if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, -1.0f, -1.0f);	// Bottom Right Of The Quad (Top)
+            GL.End();
+
             GL.Color3(1.0f, 1.0f, 1.0f);	// Color Orange
+            if (useTexture && image[1] != null)
+                GL.BindTexture(TextureTarget.Texture2D, image[1].GetTexture(_Screen));
+            GL.Begin(BeginMode.Quads);
             if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Top Right Of The Quad (Bottom)
             if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 1.0f, -1.0f);	// Top Left Of The Quad (Bottom)
             if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Bottom)
             if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Bottom)
+            GL.End();
+
             GL.Color3(1.0f, 1.0f, 1.0f);	// Color Red	
+            if (useTexture && image[2] != null)
+                GL.BindTexture(TextureTarget.Texture2D, image[2].GetTexture(_Screen));
+            GL.Begin(BeginMode.Quads);
             if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Front)
             if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, -1.0f);	// Top Left Of The Quad (Front)
             if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, -1.0f);	// Bottom Left Of The Quad (Front)
             if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Bottom Right Of The Quad (Front)
+            GL.End();
+
             GL.Color3(1.0f, 1.0f, 1.0f);	// Color Yellow
+            if (useTexture && image[3] != null)
+                GL.BindTexture(TextureTarget.Texture2D, image[3].GetTexture(_Screen));
+            GL.Begin(BeginMode.Quads);
             if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Back)
             if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Back)
             if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, -1.0f, 1.0f);	// Bottom Left Of The Quad (Back)
             if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, -1.0f, 1.0f);	// Bottom Right Of The Quad (Back)
+            GL.End();
+
             GL.Color3(1.0f, 1.0f, 1.0f);	// Color Blue
+            if (useTexture && image[4] != null)
+                GL.BindTexture(TextureTarget.Texture2D, image[4].GetTexture(_Screen));
+            GL.Begin(BeginMode.Quads);
             if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Left)
             if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Left)
             if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Left)
             if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, -1.0f);	// Bottom Right Of The Quad (Left)
+            GL.End();
+
             GL.Color3(1.0f, 1.0f, 1.0f);	// Color Violet
+            if (useTexture && image[5] != null)
+                GL.BindTexture(TextureTarget.Texture2D, image[5].GetTexture(_Screen));
+            GL.Begin(BeginMode.Quads);
             if (useTexture) GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, 1.0f);	// Top Right Of The Quad (Right)
             if (useTexture) GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, -1.0f);	// Top Left Of The Quad (Right)
             if (useTexture) GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Bottom Left Of The Quad (Right)
             if (useTexture) GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Right)
-
             GL.End();
-            GL.Disable(EnableCap.Texture2D);
+
+            if (useTexture)
+                GL.Disable(EnableCap.Texture2D);
+            else
+            {
+                GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+                GL.PolygonMode(MaterialFace.Back, PolygonMode.Fill);
+            }
 
             GL.PopMatrix();
 
@@ -572,13 +697,67 @@ namespace OpenMobile.Graphics
             // Move base point to 0,0,0
             _3D_Translate(0, 0, 0);
 
-            float[] ar = new float[] { x, y, x + width, y, x + width, y + height, x, y + height };
-            GL.EnableClientState(ArrayCap.VertexArray);
+            // Calculate base points
+            // Point order:
+            //  1               2   
+            //    -------------
+            //  0 | 11      4 | 3
+            //    |           |
+            //    |           |
+            //  9 | 10      5 | 6
+            //    -------------
+            //  8               7
+
+            #region Point calculations
+
+            PointF[] p = new PointF[12];
+            p[0] = new PointF(x, y + pen.Width);
+            p[1] = new PointF(x, y);
+            p[2] = new PointF(x + width, y);
+            p[3] = new PointF(x + width, y + pen.Width);
+            p[4] = new PointF(x + width - pen.Width, y + pen.Width);
+            p[5] = new PointF(x + width - pen.Width, y + height - pen.Width);
+            p[6] = new PointF(x + width, y + height - pen.Width);
+            p[7] = new PointF(x + width, y + height);
+            p[8] = new PointF(x, y + height);
+            p[9] = new PointF(x, y + height - pen.Width);
+            p[10] = new PointF(x + pen.Width, y + height - pen.Width);
+            p[11] = new PointF(x + pen.Width, y + pen.Width);
+
+            #endregion
+
             GL.Color4(pen.Color);
-            GL.LineWidth(pen.Width);
-            GL.VertexPointer(2, VertexPointerType.Float, 0, ar);
-            GL.DrawArrays(BeginMode.LineLoop, 0, 4);
-            GL.DisableClientState(ArrayCap.VertexArray);
+            //GL.LineWidth(pen.Width);
+
+             GL.Begin(BeginMode.QuadStrip);
+
+            // Top line
+            GL.Vertex3(p[0].X, p[0].Y, 0);
+            GL.Vertex3(p[1].X, p[1].Y, 0);
+            GL.Vertex3(p[3].X, p[3].Y, 0);
+            GL.Vertex3(p[2].X, p[2].Y, 0);
+
+            // Bottom line
+            //GL.Color4(Color.Yellow);
+            GL.Vertex3(p[6].X, p[6].Y, 0);
+            GL.Vertex3(p[7].X, p[7].Y, 0);
+            GL.Vertex3(p[9].X, p[9].Y, 0);
+            GL.Vertex3(p[8].X, p[8].Y, 0);
+
+            // Right line
+            //GL.Color4(Color.Blue);
+            GL.Vertex3(p[4].X, p[4].Y, 0);
+            GL.Vertex3(p[3].X, p[3].Y, 0);
+            GL.Vertex3(p[5].X, p[5].Y, 0);
+            GL.Vertex3(p[6].X, p[6].Y, 0);
+
+            // Left line
+            GL.Vertex3(p[10].X, p[10].Y, 0);
+            GL.Vertex3(p[9].X, p[9].Y, 0);
+            GL.Vertex3(p[11].X, p[11].Y, 0);
+            GL.Vertex3(p[0].X, p[0].Y, 0);
+
+            GL.End();
 
             // Restore matrix
             GL.PopMatrix();
@@ -818,7 +997,7 @@ namespace OpenMobile.Graphics
             GL.PopMatrix();          
         }
 
-        public void FillRectangle(GradientData gradient, Rectangle rect)
+        public void FillRectangle(GradientData gradient, Rectangle rect, float opacity)
         {
             double width2 = rect.Width / 2.0;
             double height2 = rect.Height / 2.0;
@@ -838,10 +1017,10 @@ namespace OpenMobile.Graphics
             for (int i = 0; i < gradient.Count; i++)
             {
                 GL.Begin(BeginMode.Quads);
-                GL.Color4(gradient[i].ColorPointV1.Color); GL.Vertex3(gradient[i].ColorPointV1.Point);
-                GL.Color4(gradient[i].ColorPointV2.Color); GL.Vertex3(gradient[i].ColorPointV2.Point);
-                GL.Color4(gradient[i].ColorPointV3.Color); GL.Vertex3(gradient[i].ColorPointV3.Point);
-                GL.Color4(gradient[i].ColorPointV4.Color); GL.Vertex3(gradient[i].ColorPointV4.Point);
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV1.Color.A/255.0f) * opacity), gradient[i].ColorPointV1.Color)); GL.Vertex3(gradient[i].ColorPointV1.Point);
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV2.Color.A / 255.0f) * opacity), gradient[i].ColorPointV2.Color)); GL.Vertex3(gradient[i].ColorPointV2.Point);
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV3.Color.A/255.0f) * opacity), gradient[i].ColorPointV3.Color)); GL.Vertex3(gradient[i].ColorPointV3.Point);
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV4.Color.A / 255.0f) * opacity), gradient[i].ColorPointV4.Color)); GL.Vertex3(gradient[i].ColorPointV4.Point);
                 GL.End();                
             }
 

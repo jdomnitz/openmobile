@@ -162,34 +162,26 @@ namespace OpenMobile
 
         #region ICloneable Members
 
+        /// <summary>
+        /// Clones this object
+        /// </summary>
+        /// <returns></returns>
         public object Clone()
         {
             imageItem returnData = (imageItem)this.MemberwiseClone();
             if (this.image != null)
                 returnData.image = (OImage)this.image.Clone();
             returnData.name = this.name;
-
-            //Type type = returnData.GetType();
-            //foreach (PropertyInfo propInfo in type.GetProperties())
-            //{
-            //    if (propInfo.CanWrite && propInfo.CanRead && (propInfo.GetGetMethod().GetParameters().Length == 0))
-            //        try
-            //        {
-            //            //Clone IClonable object
-            //            if (propInfo.PropertyType.GetInterface("ICloneable", true) != null)
-            //            {
-            //                ICloneable clone = (ICloneable)propInfo.GetValue(this, null);
-            //                propInfo.SetValue(returnData, clone.Clone(), null);
-            //            }
-            //            else
-            //            {
-            //                propInfo.SetValue(returnData, propInfo.GetValue(this, null), null);
-            //            }
-            //        }
-            //        catch (TargetInvocationException) { }
-            //}
-
             return returnData;
+        }
+
+        /// <summary>
+        /// Copies this object as a new imageItem
+        /// </summary>
+        /// <returns></returns>
+        public imageItem Copy()
+        {
+            return (imageItem)this.Clone();
         }
 
         #endregion

@@ -266,6 +266,28 @@ namespace OpenMobile.Data
 
         /// <summary>
         /// Subscribes to updates for a datasource
+        /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen{:S:}.Zone.Volume)</para>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="onDataSourceChanged"></param>
+        /// <returns></returns>
+        public bool SubscribeToDataSource(int screen, string name, DataSourceChangedDelegate onDataSourceChanged)
+        {
+            // Ensure we don't prosess empty data
+            if (String.IsNullOrEmpty(name))
+                return false;
+
+            // Check for special dataref of screen present 
+            if (name.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+            {   // Present, replace with screen reference
+                name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, screen.ToString());
+            }
+
+            return SubscribeToDataSource_Internal(name, onDataSourceChanged, true);
+        }
+
+        /// <summary>
+        /// Subscribes to updates for a datasource
         /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
         /// <param name="name"></param>

@@ -87,6 +87,27 @@ namespace OpenMobile.Controls
         }
         private AutoSizeModes _AutoSizeMode;
 
+        private bool _AdjustControlPlacementAtFirstRender = true;
+
+        /// <summary>
+        /// The default direction to place controls in
+        /// </summary>
+        public ControlDirections DefaultControlDirection
+        {
+            get
+            {
+                return this._DefaultControlDirection;
+            }
+            set
+            {
+                if (this._DefaultControlDirection != value)
+                {
+                    this._DefaultControlDirection = value;
+                }
+            }
+        }
+        private ControlDirections _DefaultControlDirection = ControlDirections.None;        
+
         private int ControlCountOld = 0;
 
         protected List<int> _RenderOrder = null;        
@@ -179,7 +200,7 @@ namespace OpenMobile.Controls
         private bool _ScrollBar_Vertical_ScrollInProgress = false;
         private bool _ScrollBar_Horizontal_ScrollInProgress = false;
         private int _ScrollBar_ClearanceToEdge = 3;
-        private int _ScrollBar_Thickness = 7;
+        private int _ScrollBar_Thickness = 6;
         private Color _ScrollBar_ColorNormal = Color.FromArgb(70, Color.White);
         private Color _ScrollBar_ColorHighlighted = Color.FromArgb(180, Color.White);
 
@@ -283,25 +304,25 @@ namespace OpenMobile.Controls
         #region Background
 
         private imageItem image;
-        private byte transparency = 100;
-        /// <summary>
-        /// Opacity (0-100%)
-        /// </summary>
-        public byte Transparency
-        {
-            get
-            {
-                return transparency;
-            }
-            set
-            {
-                if (transparency == value)
-                    return;
-                transparency = value;
-                opacity = (byte)(255 * (transparency / 100F));
-                raiseUpdate(false);
-            }
-        }
+        //private byte transparency = 100;
+        ///// <summary>
+        ///// Opacity (0-100%)
+        ///// </summary>
+        //public byte Transparency
+        //{
+        //    get
+        //    {
+        //        return transparency;
+        //    }
+        //    set
+        //    {
+        //        if (transparency == value)
+        //            return;
+        //        transparency = value;
+        //        opacity = (byte)(255 * (transparency / 100F));
+        //        raiseUpdate(false);
+        //    }
+        //}
 
         private Color _BackgroundColor = Color.Transparent;
 
@@ -436,7 +457,10 @@ namespace OpenMobile.Controls
             if (!_NoOffsetOnNextRender)
             {
                 if (oldRegion.Left == int.MinValue && oldRegion.Top == int.MinValue)
-                    e.Offset = Region - ControlsArea;
+                {
+                    if (_AdjustControlPlacementAtFirstRender)
+                        e.Offset = Region - ControlsArea;
+                }
                 else
                     e.Offset = Region - oldRegion;
             }
@@ -453,37 +477,43 @@ namespace OpenMobile.Controls
             #region Limit offset so we don't move the controls outside the bounds
 
             // Horizontal offset
-            if (e.Offset.X > 0)
+            if (ScrollRegion.X != 0)
             {
-                if (System.Math.Abs(e.Offset.X) > System.Math.Abs(Region.Left - ControlsArea.Left))
-                {   // X offset is outside of bounds, limit value
-                    e.Offset.X = System.Math.Abs(Region.Left - ControlsArea.Left);
+                if (e.Offset.X > 0)
+                {
+                    if (System.Math.Abs(e.Offset.X) > System.Math.Abs(Region.Left - ControlsArea.Left))
+                    {   // X offset is outside of bounds, limit value
+                        e.Offset.X = System.Math.Abs(Region.Left - ControlsArea.Left);
+                    }
                 }
-            }
-            else if (e.Offset.X < 0)
-            {
-                if (System.Math.Abs(e.Offset.X) > System.Math.Abs(Region.Right - ControlsArea.Right))
-                {   // X offset is outside of bounds, limit value
-                    e.Offset.X = -System.Math.Abs(Region.Right - ControlsArea.Right);
+                else if (e.Offset.X < 0)
+                {
+                    if (System.Math.Abs(e.Offset.X) > System.Math.Abs(Region.Right - ControlsArea.Right))
+                    {   // X offset is outside of bounds, limit value
+                        e.Offset.X = -System.Math.Abs(Region.Right - ControlsArea.Right);
+                    }
                 }
             }
 
             // Vertical offset
-            if (e.Offset.Y > 0)
+            if (ScrollRegion.Y != 0)
             {
-                if (System.Math.Abs(e.Offset.Y) > System.Math.Abs(Region.Top - ControlsArea.Top))
-                {   // Y offset is outside of bounds, limit value
-                    e.Offset.Y = System.Math.Abs(Region.Top - ControlsArea.Top);
+                if (e.Offset.Y > 0)
+                {
+                    if (System.Math.Abs(e.Offset.Y) > System.Math.Abs(Region.Top - ControlsArea.Top))
+                    {   // Y offset is outside of bounds, limit value
+                        e.Offset.Y = System.Math.Abs(Region.Top - ControlsArea.Top);
+                    }
+                    //Console.WriteLine(String.Format("+ {3} / {0} - Reg.Top:{1} Cont.Top:{2})", System.Math.Abs(Region.Top - ControlsArea.Top), Region.Top, ControlsArea.Top, e.Offset.Y));
                 }
-                //Console.WriteLine(String.Format("+ {3} / {0} - Reg.Top:{1} Cont.Top:{2})", System.Math.Abs(Region.Top - ControlsArea.Top), Region.Top, ControlsArea.Top, e.Offset.Y));
-            }
-            else if (e.Offset.Y < 0)
-            {
-                if (System.Math.Abs(e.Offset.Y) > System.Math.Abs(Region.Bottom - ControlsArea.Bottom))
-                {   // Y offset is outside of bounds, limit value
-                    e.Offset.Y = -System.Math.Abs(Region.Bottom - ControlsArea.Bottom);
+                else if (e.Offset.Y < 0)
+                {
+                    if (System.Math.Abs(e.Offset.Y) > System.Math.Abs(Region.Bottom - ControlsArea.Bottom))
+                    {   // Y offset is outside of bounds, limit value
+                        e.Offset.Y = -System.Math.Abs(Region.Bottom - ControlsArea.Bottom);
+                    }
+                    //Console.WriteLine(String.Format("- {3} / {0} - Reg.Btn:{1} Cont.Btn:{2})", System.Math.Abs(Region.Bottom - ControlsArea.Bottom), Region.Bottom, ControlsArea.Bottom, e.Offset.Y));
                 }
-                //Console.WriteLine(String.Format("- {3} / {0} - Reg.Btn:{1} Cont.Btn:{2})", System.Math.Abs(Region.Bottom - ControlsArea.Bottom), Region.Bottom, ControlsArea.Bottom, e.Offset.Y));
             }
 
             #endregion
@@ -876,7 +906,7 @@ namespace OpenMobile.Controls
         public Rectangle GetControlsArea()
         {
             if (_Controls.Count == 0)
-                return new Rectangle();
+                return new Rectangle(this.Region.Left, this.Region.Top, 0, 0);
 
             Rectangle TotalRegion = _Controls[0].Region;
             for (int i = 1; i < _Controls.Count; i++)
@@ -895,10 +925,15 @@ namespace OpenMobile.Controls
                 control.UpdateThisControl += this.parent.raiseUpdate;
             }
         }
-        private void Controls_PlaceAndConfigure(ControlGroup ControlToAdd, ControlGroup ControlToRemove)
+        private void Controls_PlaceAndConfigure()//ControlGroup ControlToAdd, ControlGroup ControlToRemove)
         {
             foreach (ControlGroup cg in _Controls)
-                Control_PlaceAndConfigure(cg, ControlToAdd, ControlToRemove);
+            {
+                //Control_PlaceAndConfigure(cg, ControlToAdd, ControlToRemove);
+                Control_Configure(cg);
+
+                Control_PlaceOnScrollPoints(cg);
+            }
         }
 
         private void Control_PlaceRelative(ControlGroup controlGroup)
@@ -1138,7 +1173,7 @@ namespace OpenMobile.Controls
                 bool Configure = (base.parent == null);
                 base.Parent = value;
                 if (value != null && Configure)
-                    Controls_PlaceAndConfigure(null, null);
+                    Controls_PlaceAndConfigure();
             }
         }
 
@@ -1211,22 +1246,13 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Adds a control with absolute placement to this container
-        /// </summary>
-        /// <param name="control"></param>
-        /// <returns></returns>
-        public bool addControl(OMControl control)
-        {
-            return addControl(control, false);
-        }
-        /// <summary>
         /// Adds a control with relative placement to this container
         /// </summary>
         /// <param name="control"></param>
         /// <returns></returns>
         public bool addControlRelative(OMControl control)
         {
-            return addControl(control, true);
+            return addControl(control, ControlDirections.RelativeToParent);
         }
         /// <summary>
         /// Adds a control with absolute placement to this container
@@ -1235,18 +1261,17 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public bool addControlAbsolute(OMControl control)
         {
-            return addControl(control, false);
+            return addControl(control, ControlDirections.Absolute);
         }
         
         /// <summary>
         /// Adds a control to this container
         /// </summary>
         /// <param name="control"></param>
-        /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
         /// <returns></returns>
-        public bool addControl(OMControl control, bool Relative)
+        public bool addControl(OMControl control)
         {
-            return addControl(new ControlGroup(control), Relative, ControlDirections.None);
+            return addControl(new ControlGroup(control), _DefaultControlDirection);
         }
         /// <summary>
         /// Adds a control to this container
@@ -1256,61 +1281,165 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public bool addControl(OMControl control, ControlDirections direction)
         {
-            return addControl(new ControlGroup(control), false, direction);
+            return addControl(new ControlGroup(control), direction);
         }
 
         /// <summary>
         /// Adds a control to this container
         /// </summary>
         /// <param name="cg"></param>
-        /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
         /// <returns></returns>
-        public bool addControl(ControlGroup cg, bool Relative)
+        public bool addControl(ControlGroup cg)
         {
-            return addControl(cg, Relative, ControlDirections.None);
+            return addControl(cg, DefaultControlDirection);
         }
 
         /// <summary>
         /// Adds a control to this container
         /// </summary>
         /// <param name="cg"></param>
-        /// <param name="direction">The direction to add the new controlgroup</param>
+        /// <param name="direction"></param>
         /// <returns></returns>
         public bool addControl(ControlGroup cg, ControlDirections direction)
-        {
-            return addControl(cg, false, direction);
-        }
-
-        /// <summary>
-        /// Adds a control to this container
-        /// </summary>
-        /// <param name="cg"></param>
-        /// <param name="Relative">Indicates that the placement of this control is releative to the container</param>
-        /// <returns></returns>
-        public bool addControl(ControlGroup cg, bool relative, ControlDirections direction)
         {
             if (cg == null)
                 return false;
 
-            // Configure direction data
+            // Save reference to direction
             cg.PlacementDirection = direction;
 
-            if (direction == ControlDirections.CenterHorizontally)
-                _NoOffsetOnNextRender = true;
+            // Shift all other controls to accomodate the inserted control
+            switch (direction)
+            {
+                case ControlDirections.None:
+                    {
+                    }
+                    break;
+                case ControlDirections.Down:
+                    #region Down
+                    {
+                        // Place new control
+                        if (_Controls.Count > 0)
+                        {
+                            cg.X = _Controls[_Controls.Count - 1].Region.Left;
+                            cg.Y = _Controls[_Controls.Count - 1].Region.Bottom;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Left;
+                            cg.Y = this.Region.Top;
+                        }
+                    }
+                    #endregion
+                    break;
+                case ControlDirections.Up:
+                    #region Up
+                    {
+                        // Place new control
+                        if (_Controls.Count > 0)
+                        {
+                            cg.X = _Controls[_Controls.Count - 1].Region.Left;
+                            cg.Y = _Controls[_Controls.Count - 1].Region.Top - cg.Region.Height;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Left;
+                            cg.Y = this.Region.Top - cg.Region.Height;
+                        }
+                    }
+                    #endregion
+                    break;
+                case ControlDirections.CenterHorizontally:
+                case ControlDirections.Right:
+                    #region Right
+                    {
+                        // Place new control
+                        if (_Controls.Count > 0)
+                        {
+                            cg.X = _Controls[_Controls.Count - 1].Region.Right;
+                            cg.Y = _Controls[_Controls.Count - 1].Region.Top;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Left;
+                            cg.Y = this.Region.Top;
+                        }
+                    }
+                    #endregion
+                    break;
+                case ControlDirections.Left:
+                    #region Left
+                    {
+                        // Place new control
+                        if (_Controls.Count > 0)
+                        {
+                            cg.X = _Controls[_Controls.Count - 1].Region.Left - cg.Region.Width;
+                            cg.Y = _Controls[_Controls.Count - 1].Region.Top;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Right - cg.Region.Width;
+                            cg.Y = this.Region.Top;
+                        }
+                    }
+                    #endregion
+                    break;
 
-            // Add control
+                case ControlDirections.RelativeToParent:
+                    {
+                        // Place controls relatively to this control
+                        cg.Translate(this.Region);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            // Insert new control
             _Controls.Add(cg);
-            RenderOrder_Reset();
 
-            // Add this control to the panel
-            if (this.parent != null)
-                Control_PlaceAndConfigure(cg, null, null);
+            // Center controls 
+            if (direction == ControlDirections.CenterHorizontally)
+            {
+                Controls_CenterHorizontally();
+
+                // Disable control placement if we center controls and we haven't rendered yet.
+                if (!_ControlRendered)
+                    _AdjustControlPlacementAtFirstRender = false;
+            }
+
+            Controls_PlaceAndConfigure();
+
+            RenderOrder_Reset();
 
             AutoSizeContainer();
 
-            Raise_OnControlAdded();
+            base.Refresh();
 
+            Raise_OnControlAdded();
             return true;
+
+
+            //// Configure direction data
+            //cg.PlacementDirection = direction;
+
+            //if (direction == ControlDirections.CenterHorizontally)
+            //    _NoOffsetOnNextRender = true;
+
+            //// Add control
+            //_Controls.Add(cg);
+            //RenderOrder_Reset();
+
+            //// Add this control to the panel
+            //if (this.parent != null)
+            //    Control_PlaceAndConfigure(cg, null, null);
+
+            //AutoSizeContainer();
+
+            //Raise_OnControlAdded();
+
+            //return true;
         }
 
         /// <summary>
@@ -1325,30 +1454,166 @@ namespace OpenMobile.Controls
             if (cg == null)
                 return false;
 
-            // Configure direction data
+            // Save reference to direction
             cg.PlacementDirection = direction;
 
-            if (direction == ControlDirections.CenterHorizontally)
-                _NoOffsetOnNextRender = true;
-
-            // Add control
-            _Controls.Insert(index, cg);
-            RenderOrder_Reset();
-
-            // Add this control to the panel
-            if (this.parent != null)
+            // Shift all other controls to accomodate the inserted control
+            switch (direction)
             {
-                Control_PlaceAndConfigure(cg, null, null);
+                case ControlDirections.None:
+                    break;
+                case ControlDirections.Down:
+                    #region Down
+                    {
+                        for (int i = index; i < _Controls.Count; i++)
+                            _Controls[i].Translate(0, cg.Region.Height);
 
-                // Move all other controls as well to accomodate the inserted control
-                for (int i = index+1; i < _Controls.Count; i++)
-                    Control_PlaceAndConfigure(_Controls[i], cg, null);
+                        // Place new control
+                        if (index > 0)
+                        {
+                            cg.X = _Controls[index-1].Region.Left;
+                            cg.Y = _Controls[index-1].Region.Bottom;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Left;
+                            cg.Y = this.Region.Top;
+                        }
+                    }
+                    #endregion
+                    break;
+                case ControlDirections.Up:
+                    #region Up
+                    {
+                        for (int i = index; i < _Controls.Count; i++)
+                            _Controls[i].Translate(0, -cg.Region.Height);
+
+                        // Place new control
+                        if (index > 0)
+                        {
+                            cg.X = _Controls[index-1].Region.Left;
+                            cg.Y = _Controls[index-1].Region.Top - cg.Region.Height;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Left;
+                            cg.Y = this.Region.Top - cg.Region.Height;
+                        }
+                    }
+                    #endregion
+                   break;
+                case ControlDirections.CenterHorizontally:
+                case ControlDirections.Right:
+                    #region Right
+                    {
+                        for (int i = index; i < _Controls.Count; i++)
+                            _Controls[i].Translate(cg.Region.Width, 0);
+
+                        // Place new control
+                        if (index > 0)
+                        {
+                            cg.X = _Controls[index-1].Region.Right;
+                            cg.Y = _Controls[index-1].Region.Top;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Left;
+                            cg.Y = this.Region.Top;
+                        }
+                    }
+                    #endregion
+                    break;
+                case ControlDirections.Left:
+                    #region Left
+                    {
+                        for (int i = index; i < _Controls.Count; i++)
+                            _Controls[i].Translate(-cg.Region.Width, 0);
+
+                        // Place new control
+                        if (index > 0)
+                        {
+                            cg.X = _Controls[index - 1].Region.Left - cg.Region.Width;
+                            cg.Y = _Controls[index - 1].Region.Top;
+                        }
+                        else
+                        {
+                            cg.X = this.Region.Right - cg.Region.Width;
+                            cg.Y = this.Region.Top;
+                        }
+                    }
+                    #endregion
+                    break;
+                default:
+                    break;
             }
+
+            // Insert new control
+            _Controls.Insert(index, cg);
+
+            // Center controls 
+            if (direction == ControlDirections.CenterHorizontally)
+            {
+                Controls_CenterHorizontally();
+
+                // Disable control placement if we center controls and we haven't rendered yet.
+                if (!_ControlRendered)
+                    _AdjustControlPlacementAtFirstRender = false;
+            }
+
+            RenderOrder_Reset();
 
             AutoSizeContainer();
 
+            base.Refresh();
+            
             Raise_OnControlAdded();
             return true;
+
+
+
+
+
+
+
+
+
+            //if (cg == null)
+            //    return false;
+
+            //// Configure direction data
+            //cg.PlacementDirection = direction;
+
+            //if (direction == ControlDirections.CenterHorizontally)
+            //    _NoOffsetOnNextRender = true;
+
+            //// Add control
+            //_Controls.Insert(index, cg);
+            //RenderOrder_Reset();
+
+            //// Add this control to the panel
+            //if (this.parent != null)
+            //{
+            //    Control_PlaceAndConfigure(cg, null, null);
+
+            //    // Move all other controls as well to accomodate the inserted control
+            //    for (int i = index+1; i < _Controls.Count; i++)
+            //        Control_PlaceAndConfigure(_Controls[i], cg, null);
+            //}
+
+            //AutoSizeContainer();
+
+            //Raise_OnControlAdded();
+            //return true;
+        }
+
+        private void Controls_CenterHorizontally()
+        {
+            // Get center position of current items
+            int CenterMissmatch = this.Region.Center.X - this.GetControlsArea().Center.X;
+
+            // Offset all controls according to missmatch
+            foreach (ControlGroup cg in _Controls)
+                cg.Translate(CenterMissmatch, 0);
         }
 
         private void AutoSizeContainer()
@@ -1465,6 +1730,85 @@ namespace OpenMobile.Controls
             Raise_OnControlRemoved();
 
             return result;
+        }
+
+        public bool ReplaceControl(int index, ControlGroup cg, ControlDirections direction)
+        {
+            cg.PlacementDirection = direction;
+            
+            // Get area of control to replace
+            Rectangle oldRegion = _Controls[index].Region;
+            Rectangle newRegion = cg.Region;
+
+            // Calculate offset and placement for new control
+            Point offset = new Point();
+            switch (cg.PlacementDirection)
+            {
+                case ControlDirections.None:
+                    break;
+                case ControlDirections.Down:
+                     {
+                        cg.X = oldRegion.X;
+                        cg.Y = oldRegion.Y;
+                        offset.Y = newRegion.Height - oldRegion.Height;
+                    }
+                   break;
+                case ControlDirections.Up:
+                    {
+                        offset.Y = -(newRegion.Height - oldRegion.Height);
+                        cg.X = oldRegion.X;
+                        cg.Y = oldRegion.Y - offset.Y;
+                    }
+                    break;
+                case ControlDirections.RelativeToParent:
+                case ControlDirections.Absolute:
+                case ControlDirections.CenterHorizontally:
+                case ControlDirections.Right:
+                    {
+                        cg.X = oldRegion.X;
+                        cg.Y = oldRegion.Y;
+                        offset.X = newRegion.Width - oldRegion.Width;
+                    }
+                    break;
+                case ControlDirections.Left:
+                    {
+                        offset.X = -(newRegion.Width - oldRegion.Width);
+                        cg.X = oldRegion.X - offset.X;
+                        cg.Y = oldRegion.Y;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            // Shift controls to support the new size
+            if (index < _Controls.Count - 1)
+            {
+                for (int i = index + 1; i < _Controls.Count; i++)
+                    _Controls[i].Translate(offset.X, offset.Y);
+            }
+
+            _Controls[index] = cg;
+
+            // Center controls 
+            if (cg.PlacementDirection == ControlDirections.CenterHorizontally)
+            {
+                Controls_CenterHorizontally();
+
+                // Disable control placement if we center controls and we haven't rendered yet.
+                if (!_ControlRendered)
+                    _AdjustControlPlacementAtFirstRender = false;
+            }
+
+            RenderOrder_Reset();
+
+            AutoSizeContainer();
+
+            base.Refresh();
+
+            Raise_OnControlAdded();
+            return true;
+
         }
 
         protected virtual void Control_SetPlacement(ControlGroup ControlToPlace, ControlDirections direction, ControlGroup ControlToInsert, ControlGroup ControlToRemove)
@@ -1857,7 +2201,7 @@ namespace OpenMobile.Controls
             newObject._Controls = new List<ControlGroup>();
             foreach (ControlGroup cg in _Controls)
             {
-                newObject._Controls.Add(cg.Clone());
+                newObject._Controls.Add(cg.Clone(parent));
                 //ControlGroup newCG = new ControlGroup();
                 //foreach (OMControl control in cg)
                 //    newCG.Add((OMControl)control.Clone());

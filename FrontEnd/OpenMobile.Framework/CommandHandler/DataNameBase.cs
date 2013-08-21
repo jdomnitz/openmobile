@@ -45,7 +45,12 @@ namespace OpenMobile
         /// <summary>
         /// The string ID used as a placeholder for screen numbers
         /// </summary>
-        public const string DataTag_Screen = "{:screen:}";
+        public const string DataTag_Screen = "{:S:}";
+
+        /// <summary>
+        /// The string ID used as a placeholder for indicating that the command should be looped, exact functionallity of this command is up to the different implementations
+        /// </summary>
+        public const string DataTag_Loop = "{:L:}";
 
         /// <summary>
         /// Returns a fully referenced name from the separate parts

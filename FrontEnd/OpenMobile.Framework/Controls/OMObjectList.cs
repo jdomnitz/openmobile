@@ -394,7 +394,7 @@ namespace OpenMobile.Controls
             listItem.ExecuteAction_SetValues(this, this.parent.ActiveScreen, _Items.Count - 1, values);
 
             // Add controls to renderinglist
-            base.addControl(listItem, true, direction);
+            base.addControl(listItem, direction);
 
             if (ControlAndOffsetDataOverride != null)
             {
@@ -424,7 +424,7 @@ namespace OpenMobile.Controls
             listItem.ExecuteAction_SetValues(this, this.parent.ActiveScreen, _Items.Count - 1, values);
 
             // Add controls to renderinglist
-            base.addControl(listItem, true, direction);
+            base.addControl(listItem, direction);
 
             if (ControlAndOffsetDataOverride != null)
             {
@@ -583,29 +583,19 @@ namespace OpenMobile.Controls
             return base.addControlAbsolute(control);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
-        public new bool addControl(OMControl control, bool Relative)
-        {
-            return base.addControl(control, Relative);
-        }
-        [Obsolete("This method is not supported in the OMObjectList control", true)]
         public new bool addControl(OMControl control, ControlDirections direction)
         {
             return base.addControl(control, direction);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
-        public new bool addControl(ControlGroup cg, bool Relative)
+        public new bool addControl(ControlGroup cg)
         {
-            return base.addControl(cg, Relative);
+            return base.addControl(cg);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
         public new bool addControl(ControlGroup cg, ControlDirections direction)
         {
             return base.addControl(cg, direction);
-        }
-        [Obsolete("This method is not supported in the OMObjectList control", true)]
-        public new bool addControl(ControlGroup cg, bool relative, ControlDirections direction)
-        {
-            return base.addControl(cg, relative, direction);
         }
         [Obsolete("This method is not supported in the OMObjectList control", true)]
         public new bool addControl(int index, ControlGroup cg, bool relative, ControlDirections direction)

@@ -1220,6 +1220,12 @@ namespace OpenMobile
         /// </summary>
         ZoneUpdated,
         /// <summary>
+        /// Used as event only! Indicates zones has been loaded and initialized after OM startup
+        /// <para>---------------------------------------</para>
+        /// <para>Arg: None</para>
+        /// </summary>
+        ZonesLoaded,
+        /// <summary>
         /// Used as event only! Indicates that audio devices are available
         /// </summary>
         AudioDevicesAvailable,
@@ -1281,6 +1287,41 @@ namespace OpenMobile
         /// <para>Arg: Screen number</para>
         /// </summary>
         IdleLeaving,
+        /// <summary>
+        /// Used as event only! Current media provider for the given zone is changed
+        /// <para>Arg: Zone</para>
+        /// </summary>
+        MediaProviderChanged,
+        /// <summary>
+        /// Used as event only! Current media provider updated it's info
+        /// <para>Arg: Zone</para>
+        /// </summary>
+        MediaProviderInfoChanged,
+
+        /// <summary>
+        /// Used as event only! Raised as soon as a closeprogram command is received
+        /// </summary>
+        CloseProgramPreview,
+
+        /// <summary>
+        /// Used as event only! Sunrise at current location
+        /// </summary>
+        CurrentLocationSunrise,
+
+        /// <summary>
+        /// Used as event only! Sunset at current location
+        /// </summary>
+        CurrentLocationSunset,
+
+        /// <summary>
+        /// Used as event only! Changed to day mode for current location
+        /// </summary>
+        CurrentLocationDay,
+
+        /// <summary>
+        /// Used as event only! Changed to night mode for current location
+        /// </summary>
+        CurrentLocationNight,
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -2596,7 +2637,7 @@ namespace OpenMobile
         /// <summary>
         /// Track Number
         /// </summary>
-        public int TrackNumber;
+        public int TrackNumber = -1;
         /// <summary>
         /// Media Genre
         /// </summary>
