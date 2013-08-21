@@ -47,11 +47,17 @@ namespace OMClock
 
         public eLoadStatus initialize(IPluginHost host)
         {
-            OMPanel p = new OMPanel("Clock");
+            OMPanel p = new OMPanel("Clock", "Current time");
             theHost = host;
             manager = new ScreenManager(this);
 
             Rectangle ClientArea = theHost.ClientArea[0];
+
+            OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", 0, 0, OM.Host.ClientArea_Init.Width - 100, OM.Host.ClientArea_Init.Height - 100,
+                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+            shapeBackground.Left = OM.Host.ClientArea_Init.Center.X - shapeBackground.Region.Center.X;
+            shapeBackground.Top = OM.Host.ClientArea_Init.Center.Y - shapeBackground.Region.Center.Y;
+            p.addControl(shapeBackground);
 
             // Create a new controlgroup
             ControlGroup clockGroup = new ControlGroup();
@@ -59,15 +65,19 @@ namespace OMClock
             // Clock and date
             OMLabel labelClockTime = new OMLabel("labelClockTime", 0, 0, theHost.ClientArea[0].Width, 200);
             labelClockTime.TextAlignment = Alignment.CenterCenter;
-            labelClockTime.Font = new Font(Font.LED, 130F);
+            //labelClockTime.Font = new Font(Font.LED, 130F);
             labelClockTime.AutoFitTextMode = FitModes.FitFillSingleLine;
             labelClockTime.Text = "{System.Time}";
+            //labelClockTime.Format = eTextFormat.Outline;
+            //labelClockTime.OutlineColor = Color.Black;
             clockGroup.Add(labelClockTime);
             OMLabel labelClockdate = new OMLabel("labelClockdate", labelClockTime.Region.Left, labelClockTime.Region.Bottom + 20, labelClockTime.Region.Width, 100);
             labelClockdate.TextAlignment = Alignment.CenterCenter;
-            labelClockdate.Font = new Font(Font.LED, 50F);
+            //labelClockdate.Font = new Font(Font.LED, 50F);
             labelClockdate.AutoFitTextMode = FitModes.FitFillSingleLine;
             labelClockdate.Text = "{System.Date.Long}";
+            //labelClockdate.Format = eTextFormat.Outline;
+            //labelClockdate.OutlineColor = Color.Black;
             clockGroup.Add(labelClockdate);
 
             // Place group in center

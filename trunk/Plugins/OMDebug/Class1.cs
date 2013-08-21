@@ -7,6 +7,7 @@ using OpenMobile;
 using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
+using System.Diagnostics;
 
 namespace OMDebug
 {
@@ -89,7 +90,11 @@ namespace OMDebug
                 {
                     // Output filter level
                     List<string> OptionList = new List<string>(Enum.GetNames(typeof(DebugMessageType)));
-                    settings.Add(new Setting(SettingTypes.MultiChoice, "OMDebug.OutputFilter", "Filter", "Show messages of this type and above", OptionList, OptionList, setting.getSetting(this, "OMDebug.OutputFilter")));
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "OMDebug.OutputFilter", "Filter", "Minimum log messages level", OptionList, OptionList, setting.getSetting(this, "OMDebug.OutputFilter")));
+
+                    settings.Add(new Setting(SettingTypes.Button, "OMDebug.OpenDebugLog", String.Empty, "Open debug log", null, null));
+
+                    settings.Add(new Setting(SettingTypes.Button, "OMDebug.ClearDebugLog", String.Empty, "Clear debug log!", null, null));
                 }
                 settings.OnSettingChanged += new SettingChanged(Setting_Changed);
             }
@@ -98,19 +103,42 @@ namespace OMDebug
 
         private void Setting_Changed(int screen, Setting s)
         {
-            using (PluginSettings settings = new PluginSettings())
-                settings.setSetting(this, s.Name, s.Value);
-            try
+            switch (s.Name)
             {
-                OutputFilter = (DebugMessageType)Enum.Parse(typeof(DebugMessageType), s.Value);
+                case "OMDebug.OpenDebugLog":
+                    {
+                        Process.Start(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"));
+                    }
+                    break;
+
+                case "OMDebug.ClearDebugLog":
+                    {
+                        ClearLog();
+                    }
+                    break;
+
+                case "OMDebug.OutputFilter":
+                    {
+                        using (PluginSettings settings = new PluginSettings())
+                            settings.setSetting(this, s.Name, s.Value);
+                        try
+                        {
+                            OutputFilter = (DebugMessageType)Enum.Parse(typeof(DebugMessageType), s.Value);
+                        }
+                        catch
+                        {
+                            OutputFilter = DebugMessageType.Unspecified;
+                        }
+                        if (time == 0)
+                            time = Environment.TickCount;
+                        writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " : OMDebug.OutputFilter set to " + OutputFilter.ToString());
+                    }
+                    break;
+
+                default:
+                    break;
             }
-            catch
-            {
-                OutputFilter = DebugMessageType.Unspecified;
-            }
-            if (time == 0)
-                time = Environment.TickCount;
-            writer.WriteLine(((Environment.TickCount - time) / 1000.0).ToString("0.000") + " : OMDebug.OutputFilter set to " + OutputFilter.ToString());
+
         }
 
         #region IBasePlugin Members
@@ -145,6 +173,17 @@ namespace OMDebug
             get { return OM.Host.getSkinImage("Icons|Icon-Debug"); }
         }
 
+        private void ClearLog()
+        {
+            lock (writer)
+            {
+                writer.Close();
+                System.IO.File.Delete(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"));
+                writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
+                writer.WriteLine(String.Format("Log file cleared at {0}", DateTime.Now));
+            }
+        }
+
         public bool incomingMessage(string message, string source)
         {
             /* Messages can be classified by "tagging" the message with a code in the beginning of the string
@@ -155,15 +194,8 @@ namespace OMDebug
              *      W   :   Warning
              *      I   :   Info (this is the default level if no code is present)
             */
-            if(message == "CLEARLOG")
-            {
-                lock (writer)
-                {
-                    writer.Close();
-                    System.IO.File.Delete(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"));
-                    writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
-                }
-            }
+            if (message == "CLEARLOG")
+                ClearLog();
 
             WriteToLog("(" + source + ") => \t", DebugMessage.Decode(message));
             return true;

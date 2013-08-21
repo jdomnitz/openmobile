@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlDemo.cs" />
+    <Compile Include="panelDataSources.cs" />
     <Compile Include="panel3D.cs" />
     <Compile Include="panelOMList2Test.cs" />
     <Compile Include="panelSlideInTest.cs" />

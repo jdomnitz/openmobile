@@ -41,11 +41,16 @@ namespace OMRadio
         private List<stationInfo> Presets = new List<stationInfo>();
         private Settings settings;
         private bool SourceSelected = false;
+        private int OpacityLevel = 128;
+        private int OpacityButtons = 170;
 
         #region IHighLevel Members
 
         public OMPanel loadPanel(string name, int screen)
         {
+
+            //theHost.DebugMsg(string.Format("Radio - loadPanel()"), string.Format("name = {0}, screen = {1}", name, screen)); 
+
             if (manager == null)
                 return null;
 
@@ -63,6 +68,7 @@ namespace OMRadio
                 
             return manager[screen, name];
         }
+
         private void ConfigureMainPanel(int screen)
         {
             // Default data
@@ -70,22 +76,33 @@ namespace OMRadio
             {
                 if (!SourceSelected)
                 {
+                    //theHost.DebugMsg(string.Format("Radio - ConfigureMainPanel()"), "Source not set. Fetching DefaultTunedContentSource...");
                     string Source = setting.getSetting(this, "Radio.DefaultTunedContentSource");
-                    if ((Source != "None")&&(Source!=""))
+                    if ((Source != "None") && (Source != ""))
                     {
-                        object o = new object();
-                        theHost.getData(eGetData.GetTunedContentInfo, "", screen.ToString(), out o);
+                        //theHost.DebugMsg(string.Format("Radio - ConfigureMainPanel()"), "DefaultTunedContentSource: " + Source);
+                        tunedContentInfo o = theHost.getData(eGetData.GetTunedContentInfo, "", screen.ToString()) as tunedContentInfo;
                         if (o == null)
                         {
                             for (int i = 0; i < theHost.ScreenCount; i++)
-                                ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading " + Source;
+                                ((OMLabel)manager[i]["Radio_StationName"]).Text = "Loading source: " + Source;
 
-                            SafeThread.Asynchronous(delegate(){AutoLoadSource(screen,Source);},theHost);
+                            //theHost.DebugMsg(string.Format("Radio - ConfigureMainPanel()"), "Loading source: " + Source);
+
+                            SourceSelected = true;
+
+                            SafeThread.Asynchronous(delegate() { AutoLoadSource(screen, Source); }, theHost);
+
                         }
                     }
                 }
+                else
+                {
+                    //theHost.DebugMsg(string.Format("Radio - ConfigureMainPanel()"), "Source is already selected.");
+                }
             }
         }
+
         private void ConfigureListView(int screen)
         {
             OMPanel panel = manager[screen, "ListView"];
@@ -93,12 +110,11 @@ namespace OMRadio
             {
                 case "source":
                     {
+                        //theHost.DebugMsg(string.Format("Radio - ConfigureListView()"), "Build list of available sources.");
                         ((OMLabel)panel["Label_Header"]).Text = "Select tuned content source:";
                         OMList List_Source = (OMList)panel["ListView_List"];
                         List_Source.Clear();
-                        object o;
-                        theHost.getData(eGetData.GetPlugins, "", out o);
-                        List<IBasePlugin> lst = (List<IBasePlugin>)o;
+                        List<IBasePlugin> lst = theHost.getData(eGetData.GetPlugins, "") as List<IBasePlugin>;
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
                         format.font = new Font(Font.GenericSansSerif, 21F);
@@ -112,18 +128,18 @@ namespace OMRadio
                         }
                         else
                         {
+                            //theHost.DebugMsg(string.Format("Radio - ConfigureListView()"), "No available sources found.");
                             List_Source.Add(new OMListItem("No source available", "", format,"unload"));
                         }
                     }
                     break;
                 case "band":
                     {
+                        //theHost.DebugMsg(string.Format("Radio - ConfigureListView()"), "Build list of supported bands.");
                         ((OMLabel)panel["Label_Header"]).Text = "Select band:";
                         OMList List_Source = (OMList)panel["ListView_List"];
                         List_Source.Clear();
-                        object o;
-                        theHost.getData(eGetData.GetSupportedBands, "", screen.ToString(), out o);
-                        eTunedContentBand[] lst = (eTunedContentBand[])o;
+                        eTunedContentBand[] lst = theHost.getData(eGetData.GetSupportedBands, "", screen.ToString()) as eTunedContentBand[];
                         OMListItem.subItemFormat format = new OMListItem.subItemFormat();
                         format.color = Color.FromArgb(128, Color.White);
                         format.font = new Font(Font.GenericSansSerif, 21F);
@@ -134,12 +150,14 @@ namespace OMRadio
                         }
                         else
                         {
+                            //theHost.DebugMsg(string.Format("Radio - ConfigureListView()"), "No supported bands found.");
                             List_Source.Add(new OMListItem("No band available", "", format,"unload"));
                         }
                     }
                     break;
                 case "stationlist":
                     {
+                        //theHost.DebugMsg(string.Format("Radio - ConfigureListView()"), "Build list of station sources.");
                         ((OMLabel)panel["Label_Header"]).Text = "Select station list source:";
                         OMList List_Source = (OMList)panel["ListView_List"];
                         List_Source.Clear();
@@ -173,20 +191,43 @@ namespace OMRadio
 
         }
 
-        private void AutoLoadSource(int screen,string Source)
+        private int loadingCount = 0;
+        private void AutoLoadSource(int screen, string Source)
         {
+            loadingCount += 1;
+            //theHost.DebugMsg(string.Format("Radio - AutoLoadSource()"), string.Format("Attempting load of tuned content {0} (Attempt #: {1})", Source, loadingCount));
             if (theHost.execute(eFunction.loadTunedContent, screen.ToString(), Source))
+            {
+                theHost.execute(eFunction.Stop, screen.ToString());
+                theHost.DebugMsg(string.Format("Radio - AutoLoadSource()"), "Loading of tuned content successful");
                 UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
+                // Force update of station info?
+                UpdateStationInfo(theHost.ZoneHandler.GetZone(screen));
+            }
             else
+            {
+                theHost.DebugMsg(string.Format("Radio - AutoLoadSource()"), "Loading of tuned content failed, checking if currently playing");
                 if (theHost.getPlayingMedia(screen).Type == eMediaType.Radio)
+                {
+                    //theHost.DebugMsg(string.Format("Radio - AutoLoadSource()"), "Currently playing media is Radio");
                     UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
+                    // Force update of station info?
+                    UpdateStationInfo(theHost.ZoneHandler.GetZone(screen));
+                }
                 else
+                {
+                    theHost.DebugMsg(string.Format("Radio - AutoLoadSource()"), "No tunedcontent and radio is not currently playing");
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         ((OMLabel)manager[i]["Radio_StationName"]).Text = "Auto load failed!";
+                }
+            }
         }
 
         public Settings loadSettings()
         {
+
+            //theHost.DebugMsg("Radio - loadSettings()", "Load radio settings.");
+
             if ((settings == null)&&(theHost!=null))
             {
                 settings = new Settings("Radio settings");
@@ -197,18 +238,23 @@ namespace OMRadio
 
                     // Default tuned content source
                     List<string> TunedContentList = new List<string>();
-                    TunedContentList.Add("None"); 
-                    object o;
-                    theHost.getData(eGetData.GetPlugins, "", out o);
-                    List<IBasePlugin> lst = (List<IBasePlugin>)o;
+                    // Minimum of 1 item
+                    TunedContentList.Add("None");
+
+                    List<IBasePlugin> lst = theHost.getData(eGetData.GetPlugins, "") as List<IBasePlugin>;
+
                     if (lst != null)
                     {
                         lst = lst.FindAll(p => typeof(ITunedContent).IsInstanceOfType(p));
                         foreach (IBasePlugin b in lst)
                             TunedContentList.Add(b.pluginName);
-
-                        settings.Add(new Setting(SettingTypes.MultiChoice, "Radio.DefaultTunedContentSource", "Source", "Default radio source", TunedContentList, TunedContentList, setting.getSetting(this, "Radio.DefaultTunedContentSource")));
                     }
+                    else
+                    {
+                        //theHost.DebugMsg(string.Format("Radio - loadSettings()"), "There were no ITunedContent plugins found.");
+                    }
+                    // Show default source option
+                    settings.Add(new Setting(SettingTypes.MultiChoice, "Radio.DefaultTunedContentSource", "Source", "Default radio source", TunedContentList, TunedContentList, setting.getSetting(this, "Radio.DefaultTunedContentSource")));
                 }
                 settings.OnSettingChanged += new SettingChanged(Setting_Changed);
             }
@@ -221,14 +267,14 @@ namespace OMRadio
                 settings.setSetting(this, s.Name, s.Value);
         }
 
+        #endregion
+
+        #region IBasePlugin Members
+
         public string displayName
         {
             get { return "Radio"; }
         }
-
-        #endregion
-
-        #region IBasePlugin Members
 
         public string authorName
         {
@@ -260,6 +306,7 @@ namespace OMRadio
         {
             return false;
         }
+
         public bool incomingMessage<T>(string message, string source, ref T data)
         {
             return false;
@@ -267,76 +314,107 @@ namespace OMRadio
 
         public eLoadStatus initialize(IPluginHost host)
         {
+
             OMPanel panelMain = new OMPanel("Radio");
             theHost = host;
+            //theHost.DebugMsg("Radio - initialize()", "Initializing....");
             theHost.OnMediaEvent += new MediaEvent(theHost_OnMediaEvent);
 
             // Default data
             using (PluginSettings setting = new PluginSettings())
             {
                 if (setting.getSetting(this, "Radio.UsePresetAsStartupListSource") == "True")
+                {
+                    //theHost.DebugMsg(string.Format("Radio - Initialize()"), "Presets are default list.");
                     StationListSource = StationListSources.Presets;
+                }
                 else
+                {
+                    //theHost.DebugMsg(string.Format("Radio - Initialize()"), "LIVE is default list.");
                     StationListSource = StationListSources.Live;
+                }
+
+                /*
+                if (string.IsNullOrEmpty(setting.getSetting(this, "Radio.DefaultTunedContentSource")))
+                {
+                    //theHost.DebugMsg(string.Format("Radio - Initialize()"), "No default source is set.");
+                }
+                else
+                {
+                    //theHost.DebugMsg(string.Format("Radio - Initialize()"), string.Format("Default source is set to: {0}.", setting.getSetting(this, "Radio.DefaultTunedContentSource")));
+                }
+                */
             }
 
             #region Main panel
 
             #region Buttons 
 
-            OMButton Button_Source = new OMButton(10, 110, 150, 70);
-            Button_Source.Name = "Button_Source";
-            Button_Source.Image = theHost.getSkinImage("Full");
-            Button_Source.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //OMButton Button_Source = new OMButton("Button_Source", 10, 80, 150, 70);
+            OMButton Button_Source = OMButton.PreConfigLayout_BasicStyle("Button_Source", 10, 80, 150, 87, GraphicCorners.Top, "", "Source");
+            //Button_Source.Name = "Button_Source";
+            //Button_Source.Opacity = OpacityButtons;
+            //Button_Source.Image = theHost.getSkinImage("Full");
+            //Button_Source.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Button_Source.OnClick += new userInteraction(Button_Source_OnClick);
-            Button_Source.Transition = eButtonTransition.None;
-            Button_Source.Text = "Source";
+            //Button_Source.Transition = eButtonTransition.None;
+            //Button_Source.Text = "Source";
             panelMain.addControl(Button_Source);
 
-            OMButton Button_RadioBand = new OMButton(10, Button_Source.Top + Button_Source.Height + 10, 150, 70);
-            Button_RadioBand.Name = "Button_Band";
-            Button_RadioBand.Image = theHost.getSkinImage("Full");
-            Button_RadioBand.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //OMButton Button_RadioBand = new OMButton("Button_Band", 10, Button_Source.Top + Button_Source.Height + 10, 150, 70);
+            OMButton Button_RadioBand = OMButton.PreConfigLayout_BasicStyle("Button_Band", Button_Source.Region.Left, Button_Source.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.None, "", "Band");
+            //Button_RadioBand.Name = "Button_Band";
+            //Button_RadioBand.Opacity = OpacityButtons;
+            //Button_RadioBand.Image = theHost.getSkinImage("Full");
+            //Button_RadioBand.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Button_RadioBand.OnClick += new userInteraction(Button_RadioBand_OnClick);
-            Button_RadioBand.Transition = eButtonTransition.None;
-            Button_RadioBand.Text = "Band";
+            //Button_RadioBand.Transition = eButtonTransition.None;
+            //Button_RadioBand.Text = "Band";
             panelMain.addControl(Button_RadioBand);
 
-            OMButton Button_RadioScan = new OMButton(10, Button_RadioBand.Top + Button_RadioBand.Height + 10, 150, 70);
-            Button_RadioScan.Name = "Button_RadioScan";
-            Button_RadioScan.Image = theHost.getSkinImage("Full");
-            Button_RadioScan.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //OMButton Button_RadioScan = new OMButton("Button_RadioScan", 10, Button_RadioBand.Top + Button_RadioBand.Height + 10, 150, 70);
+            OMButton Button_RadioScan = OMButton.PreConfigLayout_BasicStyle("Button_RadioScan", Button_Source.Region.Left, Button_RadioBand.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.None, "", "Seek >>");
+            //Button_RadioScan.Name = "Button_RadioScan";
+            //Button_RadioScan.Opacity = OpacityButtons;
+            //Button_RadioScan.Image = theHost.getSkinImage("Full");
+            //Button_RadioScan.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Button_RadioScan.OnClick += new userInteraction(Button_RadioAutoScan_OnClick);
-            Button_RadioScan.Transition = eButtonTransition.None;
-            Button_RadioScan.Text = "Scan";
+            Button_RadioScan.OnLongClick += new userInteraction(Button_RadioAutoScan_OnLongClick);
+            //Button_RadioScan.Transition = eButtonTransition.None;
+            //Button_RadioScan.Text = "Seek >>";
             panelMain.addControl(Button_RadioScan);
 
-            OMButton Button_ChannelListSource = new OMButton(10, Button_RadioScan.Top + Button_RadioScan.Height + 10, 150, 70);
-            Button_ChannelListSource.Name = "Button_ChannelListSource";
-            Button_ChannelListSource.Image = theHost.getSkinImage("Full");
-            Button_ChannelListSource.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //OMButton Button_ChannelListSource = new OMButton("Button_ChannelListSource", 10, Button_RadioScan.Top + Button_RadioScan.Height + 10, 150, 70);
+            OMButton Button_ChannelListSource = OMButton.PreConfigLayout_BasicStyle("Button_ChannelListSource", Button_Source.Region.Left, Button_RadioScan.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.None, "", "List\nsource");
+            //Button_ChannelListSource.Name = "Button_ChannelListSource";
+            //Button_ChannelListSource.Opacity = OpacityButtons;
+            //Button_ChannelListSource.Image = theHost.getSkinImage("Full");
+            //Button_ChannelListSource.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Button_ChannelListSource.OnClick += new userInteraction(Button_ChannelListSource_OnClick);
-            Button_ChannelListSource.Transition = eButtonTransition.None;
-            Button_ChannelListSource.Text = "List\nsource";
+            //Button_ChannelListSource.Transition = eButtonTransition.None;
+            //Button_ChannelListSource.Text = "List\nsource";
             panelMain.addControl(Button_ChannelListSource);
 
-            OMButton Button_TuneTo = new OMButton(10, Button_ChannelListSource.Top + Button_ChannelListSource.Height + 10, 150, 70);
-            Button_TuneTo.Name = "Button_TuneTo";
-            Button_TuneTo.Image = theHost.getSkinImage("Full");
-            Button_TuneTo.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            //OMButton Button_TuneTo = new OMButton("Button_TuneTo", 10, Button_ChannelListSource.Top + Button_ChannelListSource.Height + 10, 150, 70);
+            OMButton Button_TuneTo = OMButton.PreConfigLayout_BasicStyle("Button_TuneTo", Button_Source.Region.Left, Button_ChannelListSource.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.Bottom, "", "Direct\nTune");
+            //Button_TuneTo.Name = "Button_TuneTo";
+            //Button_TuneTo.Opacity = OpacityButtons;
+            //Button_TuneTo.Image = theHost.getSkinImage("Full");
+            //Button_TuneTo.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Button_TuneTo.OnClick += new userInteraction(Button_TuneTo_OnClick);
-            Button_TuneTo.Transition = eButtonTransition.None;
-            Button_TuneTo.Text = "Direct\nTune";
+            //Button_TuneTo.Transition = eButtonTransition.None;
+            //Button_TuneTo.Text = "Direct\nTune";
             panelMain.addControl(Button_TuneTo);
             #endregion
 
             #region RadioInfo field
 
-            OMBasicShape Shape_StationInfoBorder = new OMBasicShape("Shape_StationInfoBorder", 180, 110, 800, 110,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
+            OMBasicShape Shape_StationInfoBorder = new OMBasicShape("Shape_StationInfoBorder", 180, 80, 800, 140,
+                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+            Shape_StationInfoBorder.Opacity = OpacityLevel;
             panelMain.addControl(Shape_StationInfoBorder);
 
-            OMLabel Radio_StationName = new OMLabel(Shape_StationInfoBorder.Left + 10, Shape_StationInfoBorder.Top + 5, Shape_StationInfoBorder.Width - 20 , 40);
+            OMLabel Radio_StationName = new OMLabel("Radio_StationName", Shape_StationInfoBorder.Left + 10, Shape_StationInfoBorder.Top + 5, Shape_StationInfoBorder.Width - 20 , 40);
             Radio_StationName.Name = "Radio_StationName";
             Radio_StationName.TextAlignment = Alignment.CenterLeft;
             Radio_StationName.Font = new Font(Font.GenericSansSerif, 24F);
@@ -350,7 +428,7 @@ namespace OMRadio
             Info.Visible = false;
             panelMain.addControl(Info);
 
-            OMLabel Radio_StationText = new OMLabel(Radio_StationName.Left + 10, Radio_StationName.Top + Radio_StationName.Height, Radio_StationName.Width - 10, 30);
+            OMLabel Radio_StationText = new OMLabel("Radio_StationText", Radio_StationName.Left + 10, Radio_StationName.Top + Radio_StationName.Height, Radio_StationName.Width - 10, 30);
             Radio_StationText.Name = "Radio_StationText";
             Radio_StationText.TextAlignment = Alignment.CenterLeft;
             Radio_StationText.Font = new Font(Font.GenericSansSerif, 14F);
@@ -358,7 +436,16 @@ namespace OMRadio
             Radio_StationText.Text = "";
             panelMain.addControl(Radio_StationText);
 
-            OMLabel Radio_StationGenre = new OMLabel(Shape_StationInfoBorder.Left + 20, (Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height) - 25, 200, 20);
+            OMLabel Radio_StationText2 = new OMLabel("Radio_StationText2", Radio_StationText.Left + 10, Radio_StationText.Top + Radio_StationText.Height, Radio_StationText.Width - 10, 30);
+            Radio_StationText2.Name = "Radio_StationText2";
+            Radio_StationText2.TextAlignment = Alignment.CenterLeft;
+            Radio_StationText2.Font = new Font(Font.GenericSansSerif, 14F);
+            Radio_StationText2.Format = eTextFormat.Normal;
+            Radio_StationText2.Text = "";
+            panelMain.addControl(Radio_StationText2);
+
+            // Small text info along bottom of box
+            OMLabel Radio_StationGenre = new OMLabel("Radio_StationGenre", Shape_StationInfoBorder.Left + 20, (Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height) - 25, 200, 20);
             Radio_StationGenre.Name = "Radio_StationGenre";
             Radio_StationGenre.TextAlignment = Alignment.CenterLeft;
             Radio_StationGenre.Font = new Font(Font.GenericSansSerif, 12F);
@@ -366,11 +453,11 @@ namespace OMRadio
             Radio_StationGenre.Text = "";
             panelMain.addControl(Radio_StationGenre);
 
-            OMLabel Radio_StationBitRate = new OMLabel(Shape_StationInfoBorder.Left + Shape_StationInfoBorder.Width - 580, (Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height) - 25, 80, 20);
+            OMLabel Radio_StationBitRate = new OMLabel("Radio_StationBitRate", Shape_StationInfoBorder.Left + Shape_StationInfoBorder.Width - 580, (Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height) - 25, 80, 20);
+            Radio_StationBitRate.Name = "Radio_StationBitRate";
             Radio_StationBitRate.TextAlignment = Alignment.CenterCenter;
             Radio_StationBitRate.Font = new Font(Font.GenericSansSerif, 12F);
             Radio_StationBitRate.Format = eTextFormat.Normal;
-            Radio_StationBitRate.Name = "Radio_StationBitRate";
             Radio_StationBitRate.Text = "";
             panelMain.addControl(Radio_StationBitRate);
 
@@ -414,11 +501,12 @@ namespace OMRadio
 
             #region Channel List
 
-            OMBasicShape Shape_ChannelListBorder = new OMBasicShape("Shape_ChannelListBorder", Shape_StationInfoBorder.Left, Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height + 10, Shape_StationInfoBorder.Width, 290,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
+            OMBasicShape Shape_ChannelListBorder = new OMBasicShape("Shape_ChannelListBorder", Shape_StationInfoBorder.Left, Shape_StationInfoBorder.Top + Shape_StationInfoBorder.Height + 10, Shape_StationInfoBorder.Width, 285,
+                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+            Shape_ChannelListBorder.Opacity = OpacityLevel;
             panelMain.addControl(Shape_ChannelListBorder);
 
-            OMLabel Label_StationListHeader = new OMLabel(Shape_ChannelListBorder.Left + 5, Shape_ChannelListBorder.Top, Shape_ChannelListBorder.Width - 10, 30);
+            OMLabel Label_StationListHeader = new OMLabel("Label_StationListHeader", Shape_ChannelListBorder.Left + 5, Shape_ChannelListBorder.Top, Shape_ChannelListBorder.Width - 10, 30);
             Label_StationListHeader.Name = "Label_StationListHeader";
             Label_StationListHeader.TextAlignment = Alignment.CenterLeft;
             Label_StationListHeader.Font = new Font(Font.GenericSansSerif, 14F);
@@ -426,7 +514,7 @@ namespace OMRadio
             Label_StationListHeader.Text = "Station list:";
             panelMain.addControl(Label_StationListHeader);
 
-            OMLabel Label_StationListSource = new OMLabel(Shape_ChannelListBorder.Left + Shape_ChannelListBorder .Width - 205, Shape_ChannelListBorder.Top, 200, 30);
+            OMLabel Label_StationListSource = new OMLabel("Label_StationListSource", Shape_ChannelListBorder.Left + Shape_ChannelListBorder .Width - 205, Shape_ChannelListBorder.Top, 200, 30);
             Label_StationListSource.Name = "Label_StationListSource";
             Label_StationListSource.TextAlignment = Alignment.CenterRight;
             Label_StationListSource.Font = new Font(Font.GenericSansSerif, 14F);
@@ -436,8 +524,8 @@ namespace OMRadio
 
             OMList List_RadioStations = new OMList(Shape_ChannelListBorder.Left + 5, Label_StationListHeader.Top + Label_StationListHeader.Height + 10, Shape_ChannelListBorder.Width - 10, Shape_ChannelListBorder.Height - 60);
             List_RadioStations.ListStyle = eListStyle.RoundedTextList;
-            List_RadioStations.ItemColor1 = Color.Transparent;//Color.FromArgb(58, 58, 58);//Color.FromArgb(0, 0, 66);
-            List_RadioStations.ItemColor2 = Color.Transparent;//Color.FromArgb(58, 58, 58);//Color.FromArgb(0, 0, 10);
+            List_RadioStations.ItemColor1 = Color.Transparent;  //Color.FromArgb(58, 58, 58);//Color.FromArgb(0, 0, 66);
+            List_RadioStations.ItemColor2 = Color.Transparent;  //Color.FromArgb(58, 58, 58);//Color.FromArgb(0, 0, 10);
             List_RadioStations.SelectedItemColor1 = Color.FromArgb(192, 192, 192);
             List_RadioStations.SelectedItemColor2 = Color.FromArgb(38, 37, 37);
             List_RadioStations.Name = "List_RadioStations";
@@ -461,7 +549,7 @@ namespace OMRadio
             OMBasicShape Shape_AccessBlock = new OMBasicShape("Shape_AccessBlock", 0, 0, 1000, 600,
                 new ShapeData(shapes.Rectangle, Color.FromArgb(150, Color.Black)));
             panelListView.addControl(Shape_AccessBlock);
-            OMButton Button_Cancel = new OMButton(0, 0, 1000, 600);
+            OMButton Button_Cancel = new OMButton("Button_Cancel", 0, 0, 1000, 600);
             Button_Cancel.Name = "Button_Cancel";
             Button_Cancel.OnClick += new userInteraction(Button_Cancel_OnClick);
             panelListView.addControl(Button_Cancel);
@@ -470,7 +558,7 @@ namespace OMRadio
                 new ShapeData(shapes.Rectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
             panelListView.addControl(Shape_Border);
 
-            OMLabel Label_Header = new OMLabel(Shape_Border.Left + 5, Shape_Border.Top + 5, Shape_Border.Width - 10, 30);
+            OMLabel Label_Header = new OMLabel("Label_Header", Shape_Border.Left + 5, Shape_Border.Top + 5, Shape_Border.Width - 10, 30);
             Label_Header.Name = "Label_Header";
             Label_Header.Text = "Select tuned content source:";
             panelListView.addControl(Label_Header);
@@ -512,7 +600,7 @@ namespace OMRadio
             OMBasicShape Shape_AccessBlock2 = new OMBasicShape("MessageBox_Shape_AccessBlock", 0, 0, 1000, 600,
                 new ShapeData(shapes.Rectangle, Color.FromArgb(150, Color.Black)));
             panelMessageBox.addControl(Shape_AccessBlock2);
-            OMButton Button_Cancel2 = new OMButton(0, 0, 1000, 600);
+            OMButton Button_Cancel2 = new OMButton("MessageBox_Button_Cancel", 0, 0, 1000, 600);
             Button_Cancel2.Name = "MessageBox_Button_Cancel";
             Button_Cancel2.OnClick += new userInteraction(Button_Cancel_OnClick);
             panelMessageBox.addControl(Button_Cancel2);
@@ -521,7 +609,7 @@ namespace OMRadio
                 new ShapeData(shapes.RoundedRectangle, Color.FromArgb(58, 58, 58), Color.Gray, 2));
             panelMessageBox.addControl(Shape_Border2);
 
-            OMLabel Label_Header2 = new OMLabel(Shape_Border2.Left + 5, Shape_Border2.Top + 5, Shape_Border2.Width - 10, 30);
+            OMLabel Label_Header2 = new OMLabel("MessageBox_Label_Header", Shape_Border2.Left + 5, Shape_Border2.Top + 5, Shape_Border2.Width - 10, 30);
             Label_Header2.Name = "MessageBox_Label_Header";
             Label_Header2.Text = "Delete preset?";
             panelMessageBox.addControl(Label_Header2);
@@ -538,12 +626,12 @@ namespace OMRadio
                 new ShapeData(shapes.RoundedRectangle, Color.Black));
             panelMessageBox.addControl(Shape_Background_Lower2);
 
-            OMLabel Label_Info = new OMLabel(Shape_Border2.Left + 5, Shape_Background2.Top + 5, Shape_Border2.Width - 10, 135);
+            OMLabel Label_Info = new OMLabel("MessageBox_Label_Info", Shape_Border2.Left + 5, Shape_Background2.Top + 5, Shape_Border2.Width - 10, 135);
             Label_Info.Name = "MessageBox_Label_Info";
             Label_Info.Text = "";
             panelMessageBox.addControl(Label_Info);
 
-            OMButton Button_Yes = new OMButton(Shape_Border2.Left + Shape_Border2.Width - 320, Shape_Border2.Top + Shape_Border2.Height - 80, 150, 70);
+            OMButton Button_Yes = new OMButton("MessageBox_Button_Yes", Shape_Border2.Left + Shape_Border2.Width - 320, Shape_Border2.Top + Shape_Border2.Height - 80, 150, 70);
             Button_Yes.Name = "MessageBox_Button_Yes";
             Button_Yes.Image = theHost.getSkinImage("Full");
             Button_Yes.FocusImage = theHost.getSkinImage("Full.Highlighted");
@@ -552,7 +640,7 @@ namespace OMRadio
             Button_Yes.Text = "Yes";
             panelMessageBox.addControl(Button_Yes);
 
-            OMButton Button_No = new OMButton(Button_Yes.Left + Button_Yes.Width + 10, Button_Yes.Top, Button_Yes.Width, Button_Yes.Height);
+            OMButton Button_No = new OMButton("MessageBox_Button_No", Button_Yes.Left + Button_Yes.Width + 10, Button_Yes.Top, Button_Yes.Width, Button_Yes.Height);
             Button_No.Name = "MessageBox_Button_No";
             Button_No.Image = theHost.getSkinImage("Full");
             Button_No.FocusImage = theHost.getSkinImage("Full.Highlighted");
@@ -572,11 +660,13 @@ namespace OMRadio
 
         void Button_TuneTo_OnClick(OMControl sender, int screen)
         {
+            //theHost.DebugMsg(string.Format("Radio - Button_TuneTo_OnClick()"), "Direct Tune...");
+
             OpenMobile.helperFunctions.OSK osk = new OpenMobile.helperFunctions.OSK("", "tune parameters", "Enter tune parameters", OSKInputTypes.Keypad, false);
             string newStation = osk.ShowOSK(screen);
-            object o;
-            theHost.getData(eGetData.GetMediaStatus, "",screen.ToString(), out o);
-            stationInfo info = o as stationInfo;
+
+            stationInfo info = theHost.getData(eGetData.GetMediaStatus, "", screen.ToString()) as stationInfo;
+
             if ((info != null)&&(info.stationID!=null)&&(info.stationID.Contains(":")))
             {   //this method is more reliable for undefined bands (ex pandora)
                 newStation = info.stationID.Substring(0, info.stationID.IndexOf(':') + 1) + newStation;
@@ -584,8 +674,7 @@ namespace OMRadio
             }
             else
             {   //this method is plan b - if the radio hasn't tuned anything yet
-                theHost.getData(eGetData.GetTunedContentInfo, "", screen.ToString(), out o);
-                tunedContentInfo tc = o as tunedContentInfo;
+                tunedContentInfo tc = theHost.getData(eGetData.GetTunedContentInfo, "", screen.ToString()) as tunedContentInfo;
                 if (tc != null)
                 {
                     newStation = tc.band.ToString() + ":" + newStation;
@@ -633,14 +722,13 @@ namespace OMRadio
                 stationInfo station = new stationInfo(List.SelectedItem.text, (string)List.SelectedItem.tag);
                 SaveToPresets(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance, station);
             }
-
-            if (StationListSource == StationListSources.Presets)
+            else if (StationListSource == StationListSources.Presets)
             {
                 ((OMPanel)manager[screen, "MessageBox"]).Tag = "presets";
                 theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "MessageBox");
                 theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.None.ToString());
             }
-
+            
         }
 
         void Button_ChannelListSource_OnClick(OMControl sender, int screen)
@@ -660,6 +748,8 @@ namespace OMRadio
         {
             string PanelTag = (string)((OMPanel)manager[screen, "ListView"]).Tag;
             string SelectedItemTag;
+            //string StationInfoMessage = "Select a station";
+
             if (((OMList)sender).SelectedItem.tag == null)
                 return;
             else
@@ -688,13 +778,19 @@ namespace OMRadio
                             d.ShowMsgBoxNonBlocking(screen,250);
                             if (theHost.execute(eFunction.loadTunedContent,screen.ToString(), SelectedItemTag))
                             {
+                                //theHost.DebugMsg(string.Format("Radio - ListView_List_OnClick()"), "Loaded " + SelectedItemTag + ", select a station...");
                                 d.Close();
+                                UpdateStationInfo(theHost.ZoneHandler.GetZone(screen));
+                                UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance);
+                                /*
                                 if (UpdateStationList(theHost.ZoneHandler.GetZone(screen).AudioDevice.Instance))
                                     for (int i = 0; i < theHost.ScreenCount; i++)
-                                        ((OMLabel)manager[i]["Radio_StationName"]).Text = "Select a Station";
+                                        ((OMLabel)manager[i]["Radio_StationName"]).Text = StationInfoMessage ;
+                                */
                             }
                             else
                             {
+                                //theHost.DebugMsg(string.Format("Radio - ListView_List_OnClick()"), "Loading " + SelectedItemTag + " failed!"); 
                                 d.Close();
                                 d = new dialog(this.pluginName, "");
                                 d.Header = "Load failed";
@@ -708,6 +804,7 @@ namespace OMRadio
                     break;
                 case "band":
                     {
+                        
                         if (SelectedItemTag == "unload")
                             return;
                         for (int i = 0; i < theHost.ScreenCount; i++)
@@ -752,7 +849,42 @@ namespace OMRadio
 
         void Button_RadioAutoScan_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.scanBand, screen.ToString());
+            //theHost.execute(eFunction.scanBand, screen.ToString());
+            //theHost.execute(eFunction.scanForward, screen.ToString());
+
+            OMPanel panelMain = ((OMPanel)manager[screen, "Radio"]);
+            OMButton button = ((OMButton)manager[screen]["Button_RadioScan"]);
+
+            switch (button.Text)
+            {
+                case "Seek >>":
+                    theHost.execute(eFunction.scanForward, screen.ToString());
+                    break;
+                case "<< Seek":
+                    theHost.execute(eFunction.scanBackward, screen.ToString());
+                    break;
+            }
+
+        }
+
+        void Button_RadioAutoScan_OnLongClick(OMControl sender, int screen)
+        {
+
+            OMPanel panelMain = ((OMPanel)manager[screen, "Radio"]);
+            OMButton button = panelMain["Button_RadioScan"] as OMButton;
+
+            switch (button.Text)
+            {
+                case "<< Seek":
+                    button.Text = "Seek >>";
+                    theHost.execute(eFunction.scanForward, screen.ToString());
+                    break;
+                case "Seek >>":
+                    button.Text = "<< Seek";
+                    theHost.execute(eFunction.scanBackward, screen.ToString());
+                    break;
+            }
+
         }
 
         void Button_RadioBand_OnClick(OMControl sender, int screen)
@@ -765,20 +897,42 @@ namespace OMRadio
 
         void theHost_OnMediaEvent(eFunction function, Zone zone, string arg)
         {
+
             if ((function == eFunction.Play)||(function==eFunction.tunerDataUpdated))
             {
                 UpdateStationInfo(zone);
+                try
+                {
+                   UpdateStationList(zone.AudioDevice.Instance);
+                }
+                catch
+                {
+                    theHost.DebugMsg(string.Format("Radio - OnMediaEvent({0}, {1}, {2})", function, zone.Description, arg), string.Format("UpdateStationList failed"));
+                }
+            }
+            else if (function == eFunction.Stop)
+            {
+                // Somehow stop the radio playing
             }
             else if (function == eFunction.stationListUpdated)
             {
-                UpdateStationList(zone.AudioDevice.Instance);
+                try
+                {
+                    UpdateStationList(zone.AudioDevice.Instance);
+                }
+                catch 
+                {
+                    //theHost.DebugMsg(string.Format("Radio - OnMediaEvent({0}, {1}, {2})", function, zone.Description, arg), string.Format("UpdateStationList failed"));
+                }
             }
             else if (function == eFunction.unloadTunedContent)
             {
+                //theHost.DebugMsg(string.Format("Radio - OnMediaEvent({0}, {1}, {2})", function, zone.Description, arg), "Unloading tuned content.");
                 for (int i = 0; i < theHost.ScreenCount; i++)
                     if (theHost.ZoneHandler.GetZone(i) == zone)
                         killStationInfo(i);
             }
+
         }
 
         void Button_Source_OnClick(OMControl sender, int screen)
@@ -802,12 +956,14 @@ namespace OMRadio
 
         private void ClearStationInfo(int screen)
         {
+            //theHost.DebugMsg(string.Format("Radio - ClearStationInfo({0})", screen), "Clearing station info.");
             ((OMLabel)manager[screen]["Radio_StationName"]).Text = "Select source...";
             ((OMLabel)manager[screen]["Radio_StationFrequency"]).Text = "";
             ((OMLabel)manager[screen]["Radio_StationSignal"]).Text = "";
             ((OMLabel)manager[screen]["Radio_StationGenre"]).Text = "";
             ((OMLabel)manager[screen]["Radio_StationBitRate"]).Text = "";
             ((OMLabel)manager[screen]["Radio_StationText"]).Text = "";
+            ((OMLabel)manager[screen]["Radio_StationText2"]).Text = "";
             ((OMLabel)manager[screen]["Radio_Status"]).Text = "";
             ((OMLabel)manager[screen]["Radio_Band"]).Text = "";
             ((OMLabel)manager[screen]["Radio_StationHD"]).Text = "";
@@ -816,18 +972,36 @@ namespace OMRadio
         }
         private void UpdateStationInfo(Zone zone)
         {
+            //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), "UpdateStationInfo().");
+            
             if (zone == null)
+            {
+                //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), "Zone was null.");
                 return;
+            }
 
-            object o = new object();
-            theHost.getData(eGetData.GetTunedContentInfo, "", zone.ToString(), out o);
-            if (o == null)
+            //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), "Fetching tuned content info.");
+
+            tunedContentInfo  info = theHost.getData(eGetData.GetTunedContentInfo, "", zone.ToString()) as tunedContentInfo;
+
+            if (info == null)
+            {
+                //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo({0})", zone.Description), "object 'info' was empty.");
                 return;
-            tunedContentInfo info = (tunedContentInfo)o;
+            }
+
             if (info.currentStation == null)
+            {
+                //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), "currentStation data was null.");
                 return;
-
+            }
+            
             mediaInfo mediaInfo = theHost.getPlayingMedia(zone);
+
+            if (mediaInfo == null)
+            {
+                return;
+            }
 
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
@@ -835,17 +1009,37 @@ namespace OMRadio
 
                 #region Frequency
 
-                if (((info.band == eTunedContentBand.AM) | (info.band == eTunedContentBand.FM)))
+                try
                 {
-                    if ((info.currentStation.stationID.Contains(":")) && (info.currentStation.stationID.IndexOf(':') < (info.currentStation.stationID.Length - 1)))
+                    if (((info.band == eTunedContentBand.AM) | (info.band == eTunedContentBand.FM)))
                     {
-                        int Frequency = int.Parse(info.currentStation.stationID.Substring(info.currentStation.stationID.IndexOf(':') + 1));
-                        ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = (Frequency / 1000.0F).ToString("##.00") + "MHz";
+                        if ((info.currentStation.stationID.Contains(":")) && (info.currentStation.stationID.IndexOf(':') < (info.currentStation.stationID.Length - 1)))
+                        {
+                            int Frequency = int.Parse(info.currentStation.stationID.Substring(info.currentStation.stationID.IndexOf(':') + 1));
+                            if (info.band == eTunedContentBand.AM)
+                            {
+                                ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = (Frequency / 100.0F).ToString("####") + "KHz";
+                            }
+                            else
+                            {
+                                ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = (Frequency / 1000.0F).ToString("##.00") + "MHz";
+                            }
+                        }
+                        else
+                        {
+                            ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = "";
+                        }
                     }
-                    else
-                    {
-                        ((OMLabel)manager[i]["Radio_StationFrequency"]).Text = "";
-                    }
+                }
+                catch
+                {
+                    //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), "There were errors fetcing updated station info.");
+                    //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), string.Format("StationID: {0}", info.currentStation.stationID));
+                    //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), string.Format("StationName: {0}", info.currentStation.stationName));
+                    //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), string.Format("StationArtist: {0}", info.currentStation.stationArtist));
+                    //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), string.Format("Status: {0}", info.status));
+                    //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), string.Format("Band: {0}", info.band));
+                    //theHost.DebugMsg(string.Format("Radio - UpdateStationInfo()"), string.Format("mediaInfoName: {0}", mediaInfo.Name));
                 }
 
                 #endregion
@@ -879,21 +1073,26 @@ namespace OMRadio
 
                 #endregion
 
+                ((OMLabel)manager[i]["Radio_StationText"]).Text = mediaInfo.Album;
+                ((OMLabel)manager[i]["Radio_StationText2"]).Text = mediaInfo.Artist;
+
                 ((OMLabel)manager[i]["Radio_StationGenre"]).Text = info.currentStation.stationGenre;
                 ((OMLabel)manager[i]["Radio_StationBitRate"]).Text = (info.currentStation.Bitrate > 0 ? info.currentStation.Bitrate.ToString() + "Kbps" : "");
-                ((OMLabel)manager[i]["Radio_StationText"]).Text = mediaInfo.Name;
                 ((OMLabel)manager[i]["Radio_Status"]).Text = info.status.ToString();
                 ((OMLabel)manager[i]["Radio_Band"]).Text = info.band.ToString();
                 ((OMLabel)manager[i]["Radio_StationHD"]).Text = (info.currentStation.HD ? "HD" : "");
 
             }
         }
+
         private void killStationInfo(int screen)
         {
+            //theHost.DebugMsg("Radio - killStationInfo()", "Killing station info.");
+            ((OMLabel)manager[screen]["Radio_StationText"]).Text = string.Empty;
+            ((OMLabel)manager[screen]["Radio_StationText2"]).Text = string.Empty;
             ((OMLabel)manager[screen]["Radio_StationSignal"]).Text = string.Empty;
             ((OMLabel)manager[screen]["Radio_StationGenre"]).Text = string.Empty;
             ((OMLabel)manager[screen]["Radio_StationBitRate"]).Text = string.Empty;
-            ((OMLabel)manager[screen]["Radio_StationText"]).Text = string.Empty;
             OMList list = (OMList)manager[screen]["List_RadioStations"];
             if (list.Count > 0)
             {
@@ -906,10 +1105,14 @@ namespace OMRadio
             ((OMLabel)manager[screen]["Radio_Band"]).Text = string.Empty;
             ((OMLabel)manager[screen]["Radio_StationHD"]).Text = string.Empty;
         }
+
         private bool UpdateStationList(int instance)
         {
+            //theHost.DebugMsg("Radio - UpdateStationList", "Updating station list.");
+
             // Get radio info
             tunedContentInfo info = theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString()) as tunedContentInfo;
+
             if (info == null)
             {
                 for (int i = 0; i < theHost.ScreenCount; i++)
@@ -966,6 +1169,7 @@ namespace OMRadio
 
         private void Message(int Screen, string Msg, int Time)
         {
+            //theHost.DebugMsg("Radio - Message()", string.Format("Msg = {0}, Screen = {1}", Msg, Time));
             OMLabel Radio_StationName = (OMLabel)manager[Screen]["Radio_StationName"];
             OMLabel Info = (OMLabel)manager[Screen]["Info"];
             Radio_StationName.Visible = false;
@@ -983,8 +1187,9 @@ namespace OMRadio
         {
             lock (Presets)
             {
-                object o = new object();
-                theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+                //object o = new object();
+                //theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+                tunedContentInfo o = theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString()) as tunedContentInfo;
                 if (o == null)
                     return;
                 tunedContentInfo info = (tunedContentInfo)o;
@@ -1022,8 +1227,9 @@ namespace OMRadio
                     Presets.Remove(it);
                 Presets.Add(Station);
 
-                object o = new object();
-                theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+                //object o = new object();
+                //theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+                tunedContentInfo o = theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString()) as tunedContentInfo;
                 if (o == null)
                     return;
                 tunedContentInfo info = (tunedContentInfo)o;
@@ -1039,8 +1245,9 @@ namespace OMRadio
             if (it == null)
                 return;
             Presets.Remove(it);            
-            object o = new object();
-            theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+            //object o = new object();
+            //theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString(), out o);
+            tunedContentInfo o = theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString()) as tunedContentInfo;
             if (o == null)
                 return;
             tunedContentInfo info = (tunedContentInfo)o;

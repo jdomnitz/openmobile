@@ -27,6 +27,7 @@ using OpenMobile.Media;
 using OpenMobile.helperFunctions;
 using OpenMobile.mPlayer;
 using OpenMobile.Controls;
+using System.Drawing;
 
 namespace OMPlayer2
 {
@@ -45,6 +46,29 @@ namespace OMPlayer2
             }
         }
 
+        private enum PlaybackModes
+        {
+            Stop,
+            Play,
+            Pause
+        }
+
+        private class mPlayerWrapper
+        {
+            public mPlayer Player { get; set; }
+
+            public PlaybackModes RequestedPlayBackMode { get; set; }
+
+            public Timer tmrDelayedCommand { get; set; }
+
+            public mPlayerWrapper(mPlayer player)
+            {
+                this.Player = player;
+            }
+        }
+
+        MediaSource _MediaSource_File;
+
         #region Constructor / Plugin config
 
         public OMPlayer2()
@@ -52,6 +76,9 @@ namespace OMPlayer2
         {
             _VideoPlayers = new mPlayer[BuiltInComponents.Host.ScreenCount];
             _VideoWindows = new VideoWindow[BuiltInComponents.Host.ScreenCount];
+
+            // Kill any active mPlayers at startup
+            OpenMobile.Framework.OSSpecific.Process_Close("mplayer");
         }
 
         #endregion
@@ -64,16 +91,25 @@ namespace OMPlayer2
             host.OnSystemEvent += new SystemEvent(host_OnSystemEvent);
             host.OnMediaEvent += new MediaEvent(host_OnMediaEvent);
 
-            // Preload media players and connect them to the each zone (one player per zone, one video player per screen)
-            OpenMobile.Threading.SafeThread.Asynchronous(() =>
-            {
-                for (int i = 0; i < BuiltInComponents.Host.ZoneHandler.Zones.Count; i++)
-                    ZonePlayer_CheckInstance(BuiltInComponents.Host.ZoneHandler.Zones[i]);
-            });
+            //// Preload media players and connect them to the each zone (one player per zone, one video player per screen)
+            //OpenMobile.Threading.SafeThread.Asynchronous(() =>
+            //{
+            //    for (int i = 0; i < BuiltInComponents.Host.ZoneHandler.Zones.Count; i++)
+            //        ZonePlayer_CheckInstance(BuiltInComponents.Host.ZoneHandler.Zones[i]);
+            //});
 
             // Preload videoplayers (one per screen)
-            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
-                VideoPlayer_CheckInstance(i);
+            OpenMobile.Threading.SafeThread.Asynchronous(() =>
+            {
+                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                    VideoPlayer_CheckInstance(i);
+            });
+
+            // Initialize media sources
+            _MediaSource_File = new MediaSource(OM.Host.getSkinImage("Icons|Icon-File").image, "File");
+
+            // List this source as available to the host
+            base.MediaSource_RegisterNew(_MediaSource_File);
 
             return eLoadStatus.LoadSuccessful;
         }
@@ -81,7 +117,7 @@ namespace OMPlayer2
         /// <summary>
         /// Local instances of the mPlayer used as main player for zone. Each player is mapped to a zone and is set as a master sending sync data on the network
         /// </summary>
-        private Dictionary<Zone, mPlayer> _ZonePlayers = new Dictionary<Zone, mPlayer>();
+        private Dictionary<Zone, mPlayerWrapper> _ZonePlayers = new Dictionary<Zone, mPlayerWrapper>();
 
         /// <summary>
         /// Local instances of mPlayer used as video players (One player per screen, these are used as slaves to the zoneplayers)
@@ -93,39 +129,67 @@ namespace OMPlayer2
         /// </summary>
         private VideoWindow[] _VideoWindows = null;
 
-        private MediaProviderInfo _MediaProviderInfo = new MediaProviderInfo();
-        public override MediaProviderInfo GetMediaProviderInfo(Zone zone)
-        {
-            return _MediaProviderInfo;
-        }
-
         public override bool ExecuteCommand(Zone zone, MediaProvider_CommandWrapper command)
         {
             switch (command.Command)
             {
                 case MediaProvider_Commands.Stop:
+                    #region Stop
+
                     {  // Stop playback
+                        _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Stop;
                         if (_ZonePlayers.ContainsKey(zone))
-                            _ZonePlayers[zone].Stop();
+                            _ZonePlayers[zone].Player.Stop();
                     }
                     return true;
+
+                    #endregion
                 case MediaProvider_Commands.Play:
+                    #region Play
+
                     {   // Start playback
+                        mediaInfo media = null;
                         if (Params.IsParamsValid(command.Parameters, 1))
+                        {   // Specific media
+                            if (command.Parameters[0] is mediaInfo)
+                                media = Params.GetParam<mediaInfo>(command.Parameters, 0);
+                            else if (command.Parameters[0] is int)
+                            {   // Play index in playlist
+                                base.GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.SetCurrentStartIndex(Params.GetParam<int>(command.Parameters, 0));
+                                media = base.GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.CurrentItem;
+                            }
+                        }
+                        else
                         {
-                            mediaInfo media = Params.GetParam<mediaInfo>(command.Parameters, 0);
+                            media = base.GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.CurrentItem;
+                        }
+
+                        if (media != null)
+                        {
                             try
                             {
                                 ZonePlayer_CheckInstance(zone);
+
+                                // Update media info data
+                                base.MediaInfo_Set(zone, media);
 
                                 // Classify media source
                                 switch (media.Type)
                                 {
                                     default:
                                         {
-                                            _ZonePlayers[zone].Identify = true;
-                                            _ZonePlayers[zone].Start(true, true);
-                                            _ZonePlayers[zone].PlayFile(media.Location);
+                                            _ZonePlayers[zone].Player.Identify = true;
+                                            _ZonePlayers[zone].Player.Start(true, true);
+                                            if (_ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Pause)
+                                            {
+                                                _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Play;
+                                                _ZonePlayers[zone].Player.Pause();
+                                            }
+                                            else
+                                            {
+                                                _ZonePlayers[zone].Player.PlayFile(media.Location);
+                                            }
+                                            _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Play;
                                         }
                                         return true;
                                     case eMediaType.AudioCD:
@@ -135,13 +199,14 @@ namespace OMPlayer2
                                                 Drive = media.Location.Substring(0, 2);
                                             //TODO: Add other platforms
 
-                                            if (_ZonePlayers[zone].DiscDevice == null || !_ZonePlayers[zone].DiscDevice.Equals(Drive))
-                                                _ZonePlayers[zone].DiscDevice = Drive;
+                                            if (_ZonePlayers[zone].Player.DiscDevice == null || !_ZonePlayers[zone].Player.DiscDevice.Equals(Drive))
+                                                _ZonePlayers[zone].Player.DiscDevice = Drive;
 
-                                            _ZonePlayers[zone].Identify = true;
-                                            _ZonePlayers[zone].Start(true, true);
+                                            _ZonePlayers[zone].Player.Identify = true;
+                                            _ZonePlayers[zone].Player.Start(true, true);
 
-                                            _ZonePlayers[zone].PlayCD(media.TrackNumber);
+                                            _ZonePlayers[zone].Player.PlayCD(media.TrackNumber);
+                                            _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Play;
                                         }
                                         return true;
                                     case eMediaType.HDDVD:
@@ -152,11 +217,11 @@ namespace OMPlayer2
                                                 Drive = media.Location.Substring(0, 2);
                                             //TODO: Add other platforms
 
-                                            if (_ZonePlayers[zone].DiscDevice == null || !_ZonePlayers[zone].DiscDevice.Equals(Drive))
-                                                _ZonePlayers[zone].DiscDevice = Drive;
+                                            if (_ZonePlayers[zone].Player.DiscDevice == null || !_ZonePlayers[zone].Player.DiscDevice.Equals(Drive))
+                                                _ZonePlayers[zone].Player.DiscDevice = Drive;
 
                                             //_AudioPlayers[zone].Identify = false;
-                                            _ZonePlayers[zone].Start(true, true);
+                                            _ZonePlayers[zone].Player.Start(true, true);
 
                                             bool discDeviceBusy = false;
                                             ExecuteOnAllPlayers((mPlayer player) =>
@@ -166,15 +231,17 @@ namespace OMPlayer2
                                             });
 
                                             if (!discDeviceBusy)
-                                                _ZonePlayers[zone].PlayDVD();
+                                                _ZonePlayers[zone].Player.PlayDVD();
                                             else
                                                 command.ErrorText = "Unable to play DVD!\nDVD drive is used by another zone/screen";
+                                            _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Play;
                                         }
                                         return true;
                                     case eMediaType.BluRay:
                                         {
                                             // Todo: find bluray drive
-                                            _ZonePlayers[zone].PlayBluRay();
+                                            _ZonePlayers[zone].Player.PlayBluRay();
+                                            _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Play;
                                         }
                                         return true;
                                 }
@@ -182,52 +249,145 @@ namespace OMPlayer2
                             catch (Exception e)
                             {
                                 OM.Host.DebugMsg(this.pluginName, e);
+                                return false;
                             }
-
                         }
                     }
                     return true;
+
+                    #endregion
                 case MediaProvider_Commands.Pause:
+                    #region Pause
+
                     {
+                        _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Pause;
                         if (_ZonePlayers.ContainsKey(zone))
-                            _ZonePlayers[zone].Pause();
+                            _ZonePlayers[zone].Player.Pause();
                     }
                     return true;
+ 
+                    #endregion
                 case MediaProvider_Commands.PlaybackPosition_Set:
+                    #region PlaybackPosition_Set
+
                     break;
+
+                    #endregion
                 case MediaProvider_Commands.PlaybackPosition_Get:
+                    #region PlaybackPosition_Get
+
                     break;
+
+                    #endregion
                 case MediaProvider_Commands.Forward:
+                    #region Forward
+                    {   // Seek forward the specified seconds
+                        if (Params.IsParamsValid(command.Parameters, 1))
+                        {
+                            int seconds = Params.GetParam<int>(command.Parameters, 0);
+                            try
+                            {
+                                ZonePlayer_CheckInstance(zone);
+                                _ZonePlayers[zone].Player.SeekFwd(seconds);
+                                return true;
+                            }                            
+                            catch (Exception e)
+                            {
+                                OM.Host.DebugMsg(this.pluginName, e);
+                                return false;
+                            }
+                        }
+                    }
                     break;
+
+                    #endregion
                 case MediaProvider_Commands.Backward:
+                    #region Backward
+                    {   // Seek backwards the specified seconds
+                        if (Params.IsParamsValid(command.Parameters, 1))
+                        {
+                            int seconds = Params.GetParam<int>(command.Parameters, 0);
+                            try
+                            {
+                                ZonePlayer_CheckInstance(zone);
+                                _ZonePlayers[zone].Player.SeekBwd(seconds);
+                                return true;
+                            }
+                            catch (Exception e)
+                            {
+                                OM.Host.DebugMsg(this.pluginName, e);
+                                return false;
+                            }
+                        }
+                    }
                     break;
+
+                    #endregion
                 case MediaProvider_Commands.StepForward:
+                    #region StepForward
+
                     {
-                        if (_ZonePlayers.ContainsKey(zone))
-                            _ZonePlayers[zone].Next();
+                        MediaProviderInfo providerInfo = base.GetZoneSpecificDataInstance(zone).ProviderInfo;
+                        if (providerInfo.MediaSource == _MediaSource_File)
+                        {
+                            if (providerInfo.MediaSource.Playlist != null)
+                            {
+                                providerInfo.MediaSource.Playlist.GotoNextMedia();
+                            }
+                            if (_ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Play)
+                                DelayedCommand_Set(zone, 500, new MediaProvider_CommandWrapper(MediaProvider_Commands.Play));                                
+                        }
+                        else
+                            if (_ZonePlayers.ContainsKey(zone))
+                                _ZonePlayers[zone].Player.Next();
                     }
                     return true;
+
+                    #endregion
                 case MediaProvider_Commands.StepBackward:
+                    #region StepBackward
+
                     {
-                        if (_ZonePlayers.ContainsKey(zone))
-                            _ZonePlayers[zone].Previous();
+                        MediaProviderInfo providerInfo = base.GetZoneSpecificDataInstance(zone).ProviderInfo;
+                        if (providerInfo.MediaSource == _MediaSource_File)
+                        {
+                            if (providerInfo.MediaSource.Playlist != null)
+                            {
+                                providerInfo.MediaSource.Playlist.GotoPreviousMedia();
+                            }
+                            if (_ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Play)
+                                DelayedCommand_Set(zone, 500, new MediaProvider_CommandWrapper(MediaProvider_Commands.Play));
+                        }
+                        else
+                            if (_ZonePlayers.ContainsKey(zone))
+                                _ZonePlayers[zone].Player.Previous();
                     }
                     return true;
+
+                    #endregion
                 case MediaProvider_Commands.SubTitle_Cycle:
+                    #region SubTitle_Cycle
+
                     {
                         if (_ZonePlayers.ContainsKey(zone))
-                            _ZonePlayers[zone].SubTitles_Cycle();
+                            _ZonePlayers[zone].Player.SubTitles_Cycle();
                     }
                     return true;
 
+                    #endregion
                 case MediaProvider_Commands.SubTitle_Disable:
+                    #region SubTitle_Disable
+
                     {
                         if (_ZonePlayers.ContainsKey(zone))
-                            _ZonePlayers[zone].SubTitles_Disable();
+                            _ZonePlayers[zone].Player.SubTitles_Disable();
                     }
                     return true;
 
+                    #endregion
                 case MediaProvider_Commands.SetVideoTarget:
+                    #region SetVideoTarget
+
                     {   // Set video target for the player
                         if (Params.IsParamsValid(command.Parameters, 2))
                         {
@@ -243,8 +403,73 @@ namespace OMPlayer2
                         }
                     }
                     return true;
-                case MediaProvider_Commands.Custom:
+
+                    #endregion
+                case MediaProvider_Commands.Suffle:
+                    #region Suffle
+                    {
+                        MediaProviderInfo providerInfo = base.GetZoneSpecificDataInstance(zone).ProviderInfo;
+                        if (providerInfo.MediaSource == _MediaSource_File)
+                        {
+                            if (providerInfo.MediaSource.Playlist != null)
+                            {
+                                if (Params.IsParamsValid(command.Parameters, 1))
+                                {   // Specific value
+                                    providerInfo.MediaSource.Playlist.Random = Params.GetParam<bool>(command.Parameters, 0);
+                                }
+                                else
+                                {
+                                    providerInfo.MediaSource.Playlist.Random = !providerInfo.MediaSource.Playlist.Random;
+                                }
+                            }
+                        }
+                        base.Raise_OnDataChanged(zone, MediaProvider_Data.Suffle, providerInfo.MediaSource.Playlist.Random);
+                    }
                     break;
+
+                    #endregion
+                case MediaProvider_Commands.Repeat:
+                    #region Repeat
+                    {
+                        MediaProviderInfo providerInfo = base.GetZoneSpecificDataInstance(zone).ProviderInfo;
+                        if (providerInfo.MediaSource.Playlist != null)
+                        {
+                            if (Params.IsParamsValid(command.Parameters, 1))
+                            {   // Specific value
+                                providerInfo.MediaSource.Playlist.Repeat = Params.GetParam<bool>(command.Parameters, 0);
+                            }
+                            else
+                            {
+                                providerInfo.MediaSource.Playlist.Repeat = !providerInfo.MediaSource.Playlist.Repeat;
+                            }
+                        }
+                        base.Raise_OnDataChanged(zone, MediaProvider_Data.Repeat, providerInfo.MediaSource.Playlist.Repeat);
+                    }
+                    break;
+
+                    #endregion
+                case MediaProvider_Commands.PlayList_Set:
+                    #region PlayList_Set
+
+                    {
+                        MediaProviderInfo providerInfo = base.GetZoneSpecificDataInstance(zone).ProviderInfo;
+                        if (providerInfo.MediaSource == _MediaSource_File)
+                        {
+                            if (Params.IsParamsValid(command.Parameters, 1))
+                            {   // Specific media
+                                providerInfo.MediaSource.Playlist = Params.GetParam<PlayList2>(command.Parameters, 0);
+                            }
+                        }
+                    }
+                    break;
+
+                    #endregion
+                case MediaProvider_Commands.Custom:
+                    #region Custom
+
+                    break;
+
+                    #endregion
                 default:
                     break;
             }
@@ -252,9 +477,31 @@ namespace OMPlayer2
             return false;
         }
 
-        public override object GetData(Zone zone, MediaProvider_DataWrapper data)
+        private void DelayedCommand_Set(Zone zone, int delay, MediaProvider_CommandWrapper command)
         {
-            return null;
+            // Create new timer?
+            if (_ZonePlayers[zone].tmrDelayedCommand == null || (MediaProvider_CommandWrapper)_ZonePlayers[zone].tmrDelayedCommand.Tag != command)
+            {   // Yes
+                _ZonePlayers[zone].tmrDelayedCommand = new Timer(delay);
+                _ZonePlayers[zone].tmrDelayedCommand.AutoReset = false;
+                _ZonePlayers[zone].tmrDelayedCommand.Tag = command;
+                _ZonePlayers[zone].tmrDelayedCommand.Tag2 = zone;
+                _ZonePlayers[zone].tmrDelayedCommand.Enabled = true;
+                _ZonePlayers[zone].tmrDelayedCommand.Elapsed += new System.Timers.ElapsedEventHandler(tmrDelayedCommand_Elapsed);
+
+            }
+            else
+            {   // No, Extend delay of current timer
+                _ZonePlayers[zone].tmrDelayedCommand.Enabled = false;
+                _ZonePlayers[zone].tmrDelayedCommand.Enabled = true;
+            }
+        }
+
+        void tmrDelayedCommand_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Timer tmr = sender as Timer;
+            if (tmr.Tag != null && tmr.Tag2 != null)
+                ExecuteCommand((Zone)tmr.Tag2, (MediaProvider_CommandWrapper)tmr.Tag);
         }
 
         #region Host events
@@ -382,8 +629,8 @@ namespace OMPlayer2
             foreach (mPlayer player in _VideoPlayers)
                 function(player);
 
-            foreach (mPlayer player in _ZonePlayers.Values)
-                function(player);
+            foreach (mPlayerWrapper player in _ZonePlayers.Values)
+                function(player.Player);
         }
 
         #region Player instance control
@@ -400,7 +647,7 @@ namespace OMPlayer2
                 if (!_ZonePlayers.ContainsKey(zone))
                 {   // Player does not exist, create a new zonePlayer
                     int basePort = 24000 + ((BuiltInComponents.Host.ScreenCount + 1) * _ZonePlayers.Count);
-                    _ZonePlayers.Add(zone, ZonePlayer_Create(zone, basePort));
+                    _ZonePlayers.Add(zone, new mPlayerWrapper(ZonePlayer_Create(zone, basePort)));
                 }
             }
         }
@@ -419,7 +666,7 @@ namespace OMPlayer2
                 // Find first screen this zone is active on and use this as the main video target
                 if (screens.Length > 0)
                     if (_VideoWindows[screens[0]] != null)
-                        ZonePlayer_Configure(_ZonePlayers[zone], _VideoWindows[screens[0]]);
+                        ZonePlayer_Configure(_ZonePlayers[zone].Player, _VideoWindows[screens[0]]);
 
                 // Set rest of screens as video slaves
                 if (screens.Length > 1)
@@ -428,7 +675,7 @@ namespace OMPlayer2
                     {
                         VideoPlayer_CheckInstance(i);
                         if (_VideoWindows[i] != null)
-                            VideoPlayer_Configure(_VideoPlayers[i], _ZonePlayers[zone], _VideoWindows[i], i);
+                            VideoPlayer_Configure(_VideoPlayers[i], _ZonePlayers[zone].Player, _VideoWindows[i], i);
                     }
                 }
             }
@@ -474,26 +721,6 @@ namespace OMPlayer2
             player.Start(true, true);
 
             return player;
-        }
-
-        void player_OnPlaybackStopped(mPlayer sender)
-        {
-
-        }
-
-        void player_OnPlaybackStarted(mPlayer sender)
-        {
-
-        }
-
-        void player_OnPlaybackPaused(mPlayer sender)
-        {
-
-        }
-
-        void player_OnMediaInfoUpdated(mPlayer sender)
-        {
-
         }
 
         private void ZonePlayer_Configure(mPlayer player, VideoWindow videoWindow)
@@ -675,21 +902,143 @@ namespace OMPlayer2
 */
         #endregion
 
-        #region MediaProvider control
+        #region Player events
 
-        public override bool ActivateMediaProvider(Zone zone)
+        void player_OnPlaybackStopped(mPlayer sender)
         {
-            ZonePlayer_CheckInstance(zone);
-            return base.ActivateMediaProvider(zone);
+            Zone zone = (Zone)sender.Tag;
+
+            // move to next track in playlist
+            if (_ZonePlayers.ContainsKey(zone) && _ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Play)
+            {
+                ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.StepForward));
+                System.Threading.Thread.Sleep(50);
+                ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.Play));
+            }
+
+            base.MediaInfo_PlayBackState_Set((Zone)sender.Tag, MediaProvider_PlaybackState.Stopped);
+
+            // Clear media info
+            base.MediaInfo_Clear(zone);
+            base.MediaInfo_MediaText_Set(zone, String.Empty, String.Empty);
         }
 
-        public override bool DeactivateMediaProvider(Zone zone)
+        void player_OnPlaybackStarted(mPlayer sender)
+        {
+            Zone zone = (Zone)sender.Tag;
+            base.MediaInfo_PlayBackState_Set(zone, MediaProvider_PlaybackState.Playing);
+        }
+
+        void player_OnPlaybackPaused(mPlayer sender)
+        {
+            base.MediaInfo_PlayBackState_Set((Zone)sender.Tag, MediaProvider_PlaybackState.Paused);
+        }
+
+        void player_OnMediaInfoUpdated(mPlayer sender)
+        {
+            if (_ZonePlayers.ContainsKey((Zone)sender.Tag))
+            {
+                Zone zone = (Zone)sender.Tag;
+
+                // Update missing media info
+                switch (sender.MediaInfo.MediaType)
+	            {
+                    case mPlayer.MediaTypes.Stream_HTTP:
+                        base.MediaInfo_UpdateMissingInfo(zone, sender.MediaInfo.Genre, sender.MediaInfo.Comment, sender.MediaInfo.Title, sender.MediaInfo.Genre, (int)sender.MediaInfo.Length.TotalSeconds, sender.MediaInfo.Track);
+                        break;
+                    default:
+                        base.MediaInfo_UpdateMissingInfo(zone, sender.MediaInfo.Album, sender.MediaInfo.Artist, sender.MediaInfo.Title, sender.MediaInfo.Genre, (int)sender.MediaInfo.Length.TotalSeconds, sender.MediaInfo.Track);
+                        break;
+	            }
+
+                // Update playback position data
+                base.MediaInfo_PlaybackPositionData_Set(zone, sender.MediaInfo.PlaybackPos, sender.MediaInfo.Length);
+
+                // Also update the provider info fields
+                mediaInfo media = base.GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo;
+                switch (media.Type)
+                {
+                    case eMediaType.AudioCD:
+                    case eMediaType.DVD:
+                    case eMediaType.BluRay:
+                        base.MediaInfo_MediaText_Set(zone, String.Format("{0}", media.Name), String.Format("{0}", media.TrackNumber));
+                        break;
+                    default:
+                        base.MediaInfo_MediaText_Set(zone, String.Format("{0}", media.Name), String.Format("{0} - {1}", media.Artist, media.Album));
+                        break;
+                }
+                UpdateMissingCoverImage(media);
+            }
+        }
+
+        /// <summary>
+        /// Updates media info with an image that's loaded from the plugin folder if not already present
+        /// </summary>
+        /// <param name="media"></param>
+        private void UpdateMissingCoverImage(mediaInfo media)
+        {
+            // Try to find local cover images if image is missing (loaded from plugin folder)
+            if (media.coverArt == null || media.coverArt.image == null)
+            {
+                if (!String.IsNullOrEmpty(media.Name) && _LastMissingCoverImageSearchText != media.Name)
+                {
+                    media.coverArt = OM.Host.getPluginImage(this, String.Format("CoverArt|{0}", media.Name)).image;
+
+                    if (media.coverArt == null || media.coverArt.image == null)
+                    {
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Unable to find local media image in folder '{0}\\CoverArt\\' named '{1}'", 
+                            OpenMobile.helperFunctions.Plugins.Plugins.GetPluginFolder(this), media.Name));
+                        media.coverArt = OM.Host.getSkinImage("Icons|Icon-Stream").image;
+                    }
+
+                    _LastMissingCoverImageSearchText = media.Name;
+                }
+            }
+        }
+        private string _LastMissingCoverImageSearchText = String.Empty;
+
+        #endregion
+
+        #region MediaProvider control
+
+        public override MediaProviderState ActivateMediaProvider(Zone zone)
+        {
+            ZonePlayer_CheckInstance(zone);
+
+            bool PlayerReady = false;
+            string PlayerLoadState = "";
+            switch (_ZonePlayers[zone].Player.PlayerLoadState)
+            {
+                case mPlayer.PlayerLoadStates.NotReady:
+                    PlayerLoadState = "Not ready";
+                    break;
+                case mPlayer.PlayerLoadStates.Ready:
+                    PlayerLoadState = "";
+                    PlayerReady = true;
+                    break;
+                case mPlayer.PlayerLoadStates.Failed_mPlayerFileNotAvailable:
+                    PlayerLoadState = String.Format(@"mPlayer exe not found at ""{0}""", _ZonePlayers[zone].Player.mPlayerFileName);
+                    break;
+                case mPlayer.PlayerLoadStates.Failed_mPlayerUnableToStart:
+                    PlayerLoadState = "Unable to start mPlayer process";
+                    break;
+                default:
+                    break;
+            }
+
+            // Activate default media source (or last used)
+            base.MediaSource_Set(zone, _MediaSources[0]);
+
+            return new MediaProviderState(PlayerReady, PlayerLoadState);
+        }
+
+        public override MediaProviderState DeactivateMediaProvider(Zone zone)
         {
             // Stop playback
             if (_ZonePlayers.ContainsKey(zone))
-                _ZonePlayers[zone].Stop();
+                _ZonePlayers[zone].Player.Stop();
 
-            return base.DeactivateMediaProvider(zone);
+            return new MediaProviderState(false, String.Empty);
         }
 
         /// <summary>
@@ -713,7 +1062,7 @@ namespace OMPlayer2
                 foreach (var key in _ZonePlayers.Keys)
                     if (_ZonePlayers != null)
                         if (_ZonePlayers.ContainsKey(key))
-                            _ZonePlayers[key].Dispose();
+                            _ZonePlayers[key].Player.Dispose();
 
                 // Dispose videoplayers
                 foreach (mPlayer player in _VideoPlayers)

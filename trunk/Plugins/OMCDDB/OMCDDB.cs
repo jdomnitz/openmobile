@@ -253,6 +253,10 @@ namespace OMCDDB
         {
             return false;
         }
+        public mediaInfo GetMediaInfoByUrl(string url)
+        {        
+            return null;
+        }
 
         public bool removePlaylist(string name)
         {

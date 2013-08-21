@@ -37,18 +37,10 @@ namespace ControlDemo
 {
     public static class panelPlayListTest
     {
-        static IPluginHost Host;
-        static ScreenManager Manager;
-        static string PluginName;
         static OMListItem.subItemFormat subItemformat;
 
-        public static void Initialize(string pluginName, ScreenManager manager, IPluginHost host)
+        public static OMPanel Initialize()
         {
-            // Save reference to host objects
-            Host = host;
-            Manager = manager;
-            PluginName = pluginName;
-
             OMPanel p = new OMPanel("PlayListTest");
 
             // Playlist test
@@ -172,7 +164,7 @@ namespace ControlDemo
             List_QueueItems.ListItemHeight = 70;
             p.addControl(List_QueueItems);
 
-            manager.loadPanel(p);
+            return p;
         }
 
         static void Slider_Rotation_OnSliderMoved(OMSlider sender, int screen)

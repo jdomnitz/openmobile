@@ -1,16 +1,4 @@
-﻿/**** ToDo
-
-- Alphabetized countryList (Being Worked on)
-- Take "disconnects" from the internet into account (if a file is currently being d/l'ed)
-  - store name/progress and attempt to re-enable on internet connected event
-- Fix auto d/l of updated timestamped country zip files (coded, not tested)
-- Icons ('down arrow' for Downloading, ??? for processing)
-- Code cleanup...
-- Bugs?
-
-****/
-
-/*********************************************************************************
+﻿/*********************************************************************************
     This file is part of Open Mobile.
 
     Open Mobile is free software: you can redistribute it and/or modify
@@ -70,6 +58,7 @@ namespace OMGPS
         public static Notification GPSNotification;
         public static Notification DLNotification;
         public static Notification ProcessingNotification;
+        public static Notification PostalNotification;
         private string dataStream;
         System.Threading.AutoResetEvent checkIt;
         List<string> baudRates = new List<string>() { "115200", "57600", "38400", "19200", "9600", "4800", "2400" };
@@ -83,7 +72,7 @@ namespace OMGPS
         List<DownloadItem> downloadList;
         Settings settings;
 
-
+        bool fromDisconnect;
         bool checkboxesmade;
 
         public eLoadStatus initialize(IPluginHost host)
@@ -99,6 +88,7 @@ namespace OMGPS
             geoNamesList = new Dictionary<string, string>();
             queueList = new List<DownloadItem>();
             downloadList = new List<DownloadItem>();
+
 
             //events
             this.GPSAdded += new GPSAddedEventHandler(this_GPSAdded);
@@ -148,10 +138,61 @@ namespace OMGPS
 
             //StartNetworkTimer();
             checkboxesmade = false;
+            fromDisconnect = false;
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
 
             return eLoadStatus.LoadSuccessful;
 
+        }
+
+        private void getPostalCodes()
+        {
+            //we're we currently d/ling it or processing it?
+            //if (StoredData.Get(this, "GPS.PostalCodes") != "")
+            //{
+            //check timestamp
+            string html = "";
+            try
+            {
+                using (WebClient wc = new WebClient())
+                {
+                    html = wc.DownloadString("http://download.geonames.org/export/zip/");
+                }
+            }
+            catch { }
+            if (html != "")
+            {
+                html = html.Remove(0, html.IndexOf("allCountries.zip"));
+                html = html.Remove(0, html.IndexOf("</a>") + 4).Trim();
+                html = html.Substring(0, html.IndexOf("<hr>")).Trim();
+                string[] split = html.Split('\t');
+                if ((Convert.ToDateTime(PostalCodes.updatedDateTime) < Convert.ToDateTime(split[0].Trim())) || (PostalCodes.updatedDateTime == ""))
+                {
+                    PostalCodes.running = false;
+                    //PostalCodes.working.Abort();
+                    PostalCodes.working.Join();
+                    PostalCodes.updatedDateTime = split[0].Trim();
+                    //PostalCodes.Progess = 0;
+                    StoredData.Set(this, "GPS.PostalCodes.Processing", "");
+                    //dl the new file
+                    PostalCodes.DL();
+                    return;
+                }
+            }
+            if ((StoredData.Get(this, "GPS.PostalCodes.Progress") != "") && (StoredData.Get(this, "GPS.PostalCodes.Progress") != "0"))
+            {
+                PostalCodes.Progress = Convert.ToInt32(StoredData.Get(this, "GPS.PostalCodes.Progress"));
+                PostalCodes.DL();
+            }
+            else if (StoredData.Get(this, "GPS.PostalCodes.Processing") == "True")
+            {
+                //continue processing
+                if (StoredData.Get(this, "GPS.PostalCodes.ProcessingIndex") == "")
+                    StoredData.Set(this, "GPS.PostalCodes.ProcessingIndex", "0");
+                PostalCodes.ProcessingIndex = Convert.ToInt32(StoredData.Get(this, "GPS.PostalCodes.ProcessingIndex"));
+                PostalCodes.StartProcess();
+            }
+            //}
         }
 
         private void theHost_OnSystemEvent(eFunction function, object[] args)
@@ -159,14 +200,74 @@ namespace OMGPS
             switch (function)
             {
                 case eFunction.connectedToInternet:
+                    //http://download.geonames.org/export/zip/allcountries.zip ----- POSTAL CODES HERE
+
+                    //OpenMobile.Threading.SafeThread.Asynchronous(() => { getPostalCodes(); });
+                    //return;
                     if (!checkboxesmade)
                     {
                         for (int i = 0; i < theHost.ScreenCount; i++)
                             MakeCheckboxes(i);
                     }
+                    if (fromDisconnect)
+                    {
+                        fromDisconnect = false;
+                        bool isdl = false;
+                        for (int i = 0; i < downloadList.Count; i++)
+                        {
+                            if (downloadList[i].IsDownloading)
+                            {
+                                isdl = true;
+                                break;
+                            }
+                        }
+                        //if nothing is currently being downloaded
+                        if (!isdl)
+                        {
+                            if (StoredData.Get(this, "GPS.DLName") != "")
+                            {
+                                for (int i = 0; i < downloadList.Count; i++)
+                                {
+                                    if (downloadList[i].Name == StoredData.Get(this, "GPS.DLName"))
+                                    {
+                                        for (int j = 0; j < queueList.Count; j++)
+                                        {
+                                            if (downloadList[i].Name == queueList[j].Name)
+                                            {
+                                                if (Convert.ToDateTime(StoredData.Get(this, "GPS.DL." + i.ToString() + ".ts")) < queueList[j].ts)
+                                                {
+                                                    downloadList[i].ResetDownload();
+                                                    StoredData.Set(this, "GPS.DL." + i.ToString() + ".ts", queueList[j].ts.ToString());
+                                                    StoredData.Set(this, "GPS.DLProgress", "");
+                                                }
+                                                break;
+                                            }
+                                        }
+                                        if (StoredData.Get(this, "GPS.DLProgress") != "")
+                                            downloadList[i].Progress = Convert.ToInt32(StoredData.Get(this, "GPS.DLProgress"));
+                                        downloadList[i].Download();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     break;
                 case eFunction.disconnectedFromInternet:
-
+                    for (int i = 0; i < downloadList.Count; i++)
+                    {
+                        if (downloadList[i].IsDownloading)
+                        {
+                            downloadList[i].Closing = true;
+                            downloadList[i].doDownload = false;
+                            downloadList[i].downloadThread.Join();
+                            StoredData.Set(this, "GPS.DLName", downloadList[i].Name);
+                            StoredData.Set(this, "GPS.DLProgress", downloadList[i].Progress);
+                            StoredData.Set(this, "GPS.DL." + i.ToString() + ".ts", downloadList[i].ts.ToString());
+                            fromDisconnect = true;
+                            break;
+                        }
+                    }
                     break;
             }
         }
@@ -381,8 +482,12 @@ namespace OMGPS
         {
             killThread = true;
             dataStream = "";
-            gpsThread.Abort();
-            gpsThread.Join();
+            fromDisconnect = false;
+            if (gpsThread != null)
+            {
+                gpsThread.Abort();
+                gpsThread.Join();
+            }
             if ((GPSPort != null) && (GPSPort.IsOpen))
             {
                 GPSPort.Close();
@@ -395,40 +500,52 @@ namespace OMGPS
                 //theHost.UIHandler.RemoveNotification(DLNotification,true);
                 DLNotification.Dispose();
             }
-            for (int i = 0; i < downloadList.Count; i++)
+            PostalCodes.running = false;
+            if (PostalCodes.working != null)
+                PostalCodes.working.Join();
+            if (PostalCodes.processing != null)
+                PostalCodes.processing.Join();
+            if (downloadList != null)
             {
-                if (downloadList[i].IsDownloading)
+                for (int i = 0; i < downloadList.Count; i++)
                 {
-                    downloadList[i].Closing = true;
-                    downloadList[i].doDownload = false;
-                    downloadList[i].downloadThread.Join();
-                    StoredData.Set(this, "GPS.DLName", downloadList[i].Name);
-                    StoredData.Set(this, "GPS.DLProgress", downloadList[i].Progress);
-                    StoredData.Set(this, "GPS.DL." + i.ToString() + ".ts", downloadList[i].ts.ToString());
-                    break;
-                }
-            }
-            if (ProcessingQueue.processingList.Count > 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < ProcessingQueue.processingList.Count; i++)
-                {
-                    ProcessingQueue.processingList[i].Stop();
-                    if (ProcessingQueue.processingList[i].IsProcessing)
+                    if (downloadList[i].IsDownloading)
                     {
-                        if (i == 0)
-                        {
-                            sb.Append(ProcessingQueue.processingList[i].Name);
-                            StoredData.Set(this, "GPS.DL.Processing.Progress", ProcessingQueue.processingList[i].ProcessNumber.ToString());
-                        }
-                        else
-                            sb.Append("|" + ProcessingQueue.processingList[i].Name);
+                        downloadList[i].Closing = true;
+                        downloadList[i].doDownload = false;
+                        downloadList[i].downloadThread.Join();
+                        StoredData.Set(this, "GPS.DLName", downloadList[i].Name);
+                        StoredData.Set(this, "GPS.DLProgress", downloadList[i].Progress);
+                        StoredData.Set(this, "GPS.DL.TS." + i.ToString(), downloadList[i].ts.ToString());
+                        break;
                     }
                 }
-                StoredData.Set(this, "GPS.DL.Processing", sb.ToString());
             }
-            else
-                StoredData.Set(this, "GPS.DL.Processing", "");
+            if (ProcessingQueue.processingList != null)
+            {
+                if (ProcessingQueue.processingList.Count > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < ProcessingQueue.processingList.Count; i++)
+                    {
+                        //ProcessingItem pi = ProcessingQueue.processingList[i];
+                        ProcessingQueue.processingList[i].Stop();
+                        if (ProcessingQueue.processingList[i].IsProcessing)
+                        {
+                            if (i == 0)
+                            {
+                                sb.Append(ProcessingQueue.processingList[i].Name);
+                                StoredData.Set(this, "GPS.DL.Processing.Progress", ProcessingQueue.processingList[i].ProcessNumber.ToString());
+                            }
+                            else
+                                sb.Append("|" + ProcessingQueue.processingList[i].Name);
+                        }
+                    }
+                    StoredData.Set(this, "GPS.DL.Processing", sb.ToString());
+                }
+                else
+                    StoredData.Set(this, "GPS.DL.Processing", "");
+            }
         }
 
         public static void StoreProgress(string progress)
@@ -448,10 +565,19 @@ namespace OMGPS
                 string html = "";
                 using (System.Net.WebClient wc = new System.Net.WebClient())
                     html = wc.DownloadString("http://download.geonames.org/export/dump/");
+                string html2 = "";
+                using (System.Net.WebClient wc = new System.Net.WebClient())
+                    html2 = wc.DownloadString("http://download.geonames.org/export/zip/");
                 html = html.Remove(0, html.IndexOf("Parent Directory"));
                 html = html.Substring(0, html.IndexOf(".txt<"));
                 html = html.Substring(0, html.LastIndexOf("<img src=") + 5);
-                int cnt = 0;
+
+                html2 = html2.Remove(0, html2.IndexOf("allCountries.zip"));
+                html2 = html2.Remove(0, html2.IndexOf("</a>") + 4).Trim();
+                html2 = html2.Substring(0, html2.IndexOf("img") - 2).Trim();
+                string[] pcsplit = html2.Split(' ');
+                //int cnt = 0;
+                int cnt = 1; //changed from 0 to 1 to accommodate "postal codes" being indexed at 0
                 OMObjectList.ListItem ItemBase = new OMObjectList.ListItem();
                 OMCheckbox chk = new OMCheckbox("chk", 0, 0, theHost.ClientArea[0].Width, 40);
                 ItemBase.Add(chk);
@@ -470,6 +596,7 @@ namespace OMGPS
                 OMObjectList countryList = manager[screen1, "gpsPanel"]["countryList"] as OMObjectList;
                 countryList.ItemBase = ItemBase;
                 List<string[]> tempList = new List<string[]>();
+                tempList.Add(new string[] { "allCountries.zip", "download.geonames.org/export/zip/allCountries.zip", pcsplit[0] + " " + pcsplit[1], pcsplit[3].Trim(), "Postal Codes (All Countries)", "0" });
                 while (html.Contains("a href="))
                 {
                     html = html.Remove(0, html.IndexOf("a href=") + 8);
@@ -496,61 +623,66 @@ namespace OMGPS
                 //tempList = AlphanumComparatorFast.Sorted(tempList);
                 for (int i = 0; i < tempList.Count; i++)
                 {
-                    queueList.Add(new DownloadItem(tempList[i][0], tempList[i][1], Convert.ToDateTime(tempList[i][2]), tempList[i][3]));
-                    countryList.AddItemFromItemBase(new object[] { tempList[i][5], tempList[i][4] + " ( " + tempList[i][2] + ", " + tempList[i][3] + " )", StoredData.Get(this, tempList[i][5]) }, ControlDirections.Down);
+                    if (screen1 == 0)
+                        queueList.Add(new DownloadItem(tempList[i][0], tempList[i][1], Convert.ToDateTime(tempList[i][2]), tempList[i][3]));
+                    countryList.AddItemFromItemBase(new object[] { tempList[i][5], tempList[i][4] + " ( " + tempList[i][2] + ", " + tempList[i][3] + " )", StoredData.Get(this, "GPS.DL.Checked." + tempList[i][5]) }, ControlDirections.Down);
                     //"OMGPS.DL.Checked.tempList[i][5]
-                    if ((!downloadList.Contains(queueList[queueList.Count - 1])) && (StoredData.Get(this, "GPS.DL.Checked." + tempList[i][5]) == "True"))
+                    if ((!downloadList.Contains(queueList[queueList.Count - 1])) && (StoredData.Get(this, "GPS.DL.Checked." + tempList[i][5]) == "True") && (screen1 == 0))
                         downloadList.Add(queueList[queueList.Count - 1]);
                 }
-
-
-                //countryList.ItemBase = ItemBase;
-
-                if (downloadList.Count > 0)
+                if (screen1 == 0)
                 {
-                    bool dling = false;
-                    for (int i = 0; i < downloadList.Count; i++)
+                    if (downloadList.Count > 0)
                     {
-                        if ((downloadList[i].IsDownloading) || (downloadList[i].Name == StoredData.Get(this, "GPS.DLName")))
-                        {
-                            dling = true;
-                            for (int j = 0; j < queueList.Count; j++)
-                            {
-                                if (downloadList[i].Name == queueList[j].Name)
-                                {
-                                    if (Convert.ToDateTime(StoredData.Get(this, "GPS.DL." + i.ToString() + ".ts")) < queueList[j].ts)
-                                    {
-                                        downloadList[i].ResetDownload();
-                                        StoredData.Set(this, "GPS.DL." + i.ToString() + ".ts", queueList[j].ts.ToString());
-                                        StoredData.Set(this, "GPS.DLProgress", "");
-                                    }
-                                    break;
-                                }
-                            }
-                            if (StoredData.Get(this, "GPS.DLProgress") != "")
-                                downloadList[i].Progress = Convert.ToInt32(StoredData.Get(this, "GPS.DLProgress"));
-                            downloadList[i].Download();
-                            break;
-                        }
-                    }
-                    //if we are done looping and nothing was previously downloading, we need to test the timestamps of all the ones in the downloadList
-                    if (!dling)
-                    {
+                        bool dling = false;
                         for (int i = 0; i < downloadList.Count; i++)
                         {
-                            for (int j = 0; j < queueList.Count; j++)
+                            if ((downloadList[i].IsDownloading) || (downloadList[i].Name == StoredData.Get(this, "GPS.DLName")))
                             {
-                                if (downloadList[i].Name == queueList[j].Name)
+                                dling = true;
+                                for (int j = 0; j < queueList.Count; j++)
                                 {
-                                    if (Convert.ToDateTime(StoredData.Get(this, "GPS.DL." + i.ToString() + ".ts")) < queueList[j].ts)
+                                    if (downloadList[i].Name == queueList[j].Name)
                                     {
-                                        downloadList[i].ResetDownload();
-                                        StoredData.Set(this, "GPS.DL." + i.ToString() + ".ts", queueList[j].ts.ToString());
-                                        StoredData.Set(this, "GPS.DLProgress", "");
-                                        downloadList[i].Download();
+                                        if (Convert.ToDateTime(StoredData.Get(this, "GPS.DL.TS." + i.ToString())) < queueList[j].ts)
+                                        {
+                                            downloadList[i].ResetDownload();
+                                            StoredData.Set(this, "GPS.DL." + i.ToString() + ".ts", queueList[j].ts.ToString());
+                                            StoredData.Set(this, "GPS.DLProgress", "");
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
+                                if (StoredData.Get(this, "GPS.DLProgress") != "")
+                                    downloadList[i].Progress = Convert.ToInt32(StoredData.Get(this, "GPS.DLProgress"));
+                                downloadList[i].Download();
+                                break;
+                            }
+                        }
+                        //if we are done looping and nothing was previously downloading, we need to test the timestamps of all the ones in the downloadList
+                        if (!dling)
+                        {
+                            bool toDL = false;
+                            for (int i = 0; i < downloadList.Count; i++)
+                            {
+                                for (int j = 0; j < queueList.Count; j++)
+                                {
+                                    if (downloadList[i].Name == queueList[j].Name)
+                                    {
+                                        //"GPS.DL.TS.
+                                        if (Convert.ToDateTime(StoredData.Get(this, "GPS.DL.TS." + i.ToString())) < queueList[j].ts)
+                                        {
+                                            downloadList[i].ResetDownload();
+                                            StoredData.Set(this, "GPS.DL.TS." + i.ToString(), queueList[j].ts.ToString());
+                                            StoredData.Set(this, "GPS.DLProgress", "");
+                                            downloadList[i].Download();
+                                            toDL = true;
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (toDL)
+                                    break;
                             }
                         }
                     }
@@ -560,13 +692,29 @@ namespace OMGPS
             catch { }
         }
 
-        private void chk_OnClick(object sender, int screen)
+        private void chk_OnClick(OMControl sender, int screen)
         {
             //"OMGPS.DL.Checked."tempList[i][5]
             if (StoredData.Get(this, "GPS.DL.Checked." + ((OMCheckbox)sender).Tag.ToString()) != "True")
                 StoredData.Set(this, "GPS.DL.Checked." + ((OMCheckbox)sender).Tag.ToString(), "True");
             else
                 StoredData.Set(this, "GPS.DL.Checked." + ((OMCheckbox)sender).Tag.ToString(), "False");
+
+            OMObjectList list = sender.Parent[screen, "countryList"] as OMObjectList;
+            if (list != null)
+            {
+                int index = list.Controls.IndexOf(sender);
+                OM.Host.ForEachScreen(delegate(int s)
+                {
+                    if (s != screen)
+                    {
+                        OMCheckbox chk = ((OMObjectList)sender.Parent[s, "countryList"])[sender.Name][sender.Name] as OMCheckbox;
+                        chk.Checked = (sender as OMCheckbox).Checked;
+                        chk.Refresh();
+                    }
+                });
+            }
+
             if (StoredData.Get(this, "GPS.DL.Checked." + ((OMCheckbox)sender).Tag.ToString()) == "False")
             {
                 for (int i = 0; i < downloadList.Count; i++)
@@ -578,7 +726,7 @@ namespace OMGPS
                         downloadList.Remove(downloadList[i]);
                         //1 -> 0, 2 -> 1
                         for (int j = i + 1; j < downloadList.Count; j++)
-                            StoredData.Set(this, "GPS.DL." + (j - 1).ToString() + ".ts", StoredData.Get(this, "GPS.DL." + j.ToString() + ".ts"));
+                            StoredData.Set(this, "GPS.DL.TS." + i.ToString(), StoredData.Get(this, "GPS.DL.TS." + j.ToString()));
                         break;
                     }
                 }
@@ -731,7 +879,7 @@ namespace OMGPS
                     downloadList[i].IsDownloading = false;
                     //ProcessingQueue.CurrentlyDownloadingName = "";
                     StoredData.Set(this, "GPS.DLName", "");
-                    StoredData.Set(this, "GPS.DL." + i.ToString() + ".ts", downloadList[i].ts.ToString());
+                    StoredData.Set(this, "GPS.DL.TS." + i.ToString(), downloadList[i].ts.ToString());
 
                     theHost.UIHandler.RemoveNotification(DLNotification, true);
                     //ProcessFile.Start(downloadList[i].Name);
@@ -762,15 +910,42 @@ namespace OMGPS
                             ProcessingQueue.processingList[ProcessingQueue.processingList.Count - 1].Start();
                         }
                     }
+                    break;
+                    //change to check for timestamps or no/blank timestamps
 
+                    /*
                     if (i < downloadList.Count - 1)
                     {
                         downloadList[i + 1].Progress = 0;
                         downloadList[i + 1].Download();
                         break;
                     }
+                    */
                 }
             }
+            bool toDL = false;
+            for (int i = 0; i < downloadList.Count; i++)
+            {
+                for (int j = 0; j < queueList.Count; j++)
+                {
+                    if (downloadList[i].Name == queueList[j].Name)
+                    {
+                        //"GPS.DL.TS.
+                        if ((StoredData.Get(this, "GPS.DL.TS." + i.ToString()) == "") || (Convert.ToDateTime(StoredData.Get(this, "GPS.DL.TS." + i.ToString())) < queueList[j].ts))
+                        {
+                            downloadList[i].ResetDownload();
+                            StoredData.Set(this, "GPS.DL.TS." + i.ToString(), queueList[j].ts.ToString());
+                            StoredData.Set(this, "GPS.DLProgress", "");
+                            downloadList[i].Download();
+                            toDL = true;
+                        }
+                        break;
+                    }
+                }
+                if (toDL)
+                    break;
+            }
+
         }
 
         public OMPanel loadPanel(string name, int screen)
@@ -815,6 +990,8 @@ namespace OMGPS
         }
 
     }
+
+
 
     public class GPSParser
     {
@@ -960,8 +1137,8 @@ namespace OMGPS
             doDownload = true;
             //if (OMGPS.DLNotification == null) //create a new notification
             //{
-            OMGPS.DLNotification = new Notification(OMGPS.ibp, "GPSDL", OM.Host.getSkinImage("AIcons|arrow down").image, OM.Host.getSkinImage("AIcons|arrow down").image, "Initiating Download: " + Name, "1");
-            OMGPS.DLNotification.Text = "";
+            OMGPS.DLNotification = new Notification(OMGPS.ibp, "GPSDL", OM.Host.getSkinImage("AIcons|9-av-download").image, OM.Host.getSkinImage("AIcons|9-av-download").image, "Initiating Download: " + Name, "Starting Download");
+            //OMGPS.DLNotification.Text = "";
             OMGPS.theHost.UIHandler.AddNotification(OMGPS.DLNotification);
             //}
             //else //update the existing notification
@@ -979,7 +1156,7 @@ namespace OMGPS
             //we only get here if we had successful internet connectivity to fulfill the settings on OMGPS
             //we still need to wrap this entire method in try..catch and start a timer if needed to check network activity (like the settings)
 
-            HttpWebRequest myHttpWebRequest = (HttpWebRequest)WebRequest.Create(new Uri("http://" + Url));
+            HttpWebRequest myHttpWebRequest = (HttpWebRequest)WebRequest.Create(new Uri("http://" + Url)); //http://download.geonames.org/export/zip/allCountries.zip
             FileMode filemode;
 
             if (Progress == 0)
@@ -1008,7 +1185,11 @@ namespace OMGPS
                         //count = receiveStream.Read(read, 0, 1024);
                         Progress += count;
                         //filename (% = (Convert.ToDouble(progress/filesize) * 100  + %)) \n progress / FileSize
-                        OMGPS.DLNotification.Header = "Downloading: " + Name;
+                        if (Name == "allCountries.zip")
+                            OMGPS.DLNotification.Header = "Downloading: Postal Codes";
+                        else
+                            OMGPS.DLNotification.Header = "Downloading: " + Name;
+
                         OMGPS.DLNotification.Text = "( " + Progress.ToString() + " / " + FileSize.ToString() + "  --  " + (Convert.ToInt32((Convert.ToDouble(Progress) / Convert.ToDouble(FileSize)) * 100)).ToString() + "%";
                         if (Closing)
                         {
@@ -1122,123 +1303,430 @@ namespace OMGPS
         {
             Running = true;
             IsProcessing = true;
-            ProcessingThread = new Thread(Processing);
-            ProcessingThread.Start();
-        }
-        private void Processing()
-        {
-            //if (!File.Exists(OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS.db")))
-            //    SqliteConnection.CreateFile(OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS.db"));
             if (StoredData.Get(OMGPS.ibp, "GPS.DL.Processing.Progress") != "")
                 ProcessNumber = Convert.ToInt32(StoredData.Get(OMGPS.ibp, "GPS.DL.Processing.Progress"));
             else
                 ProcessNumber = 0;
             //if (OMGPS.ProcessingNotification == null)
             //{  //create
-            OMGPS.ProcessingNotification = new Notification(OMGPS.ibp, "GPSProcessing", imageItem.NONE.image, imageItem.NONE.image, "Initiating Processing: " + Name, "1");
+            OMGPS.ProcessingNotification = new Notification(OMGPS.ibp, "GPSProcessing", OM.Host.getSkinImage("AIcons|5-content-import-export").image, OM.Host.getSkinImage("AIcons|5-content-import-export").image, "Initiating Processing: " + Name, "1");
             if (ProcessNumber > 0)
                 OMGPS.ProcessingNotification.Text = "( Attemping To Continue, Please Wait )";
             else
                 OMGPS.ProcessingNotification.Text = "Starting, Please Wait";
             OMGPS.theHost.UIHandler.AddNotification(OMGPS.ProcessingNotification);
-            //}
-            //else
-            //{  //update
-            //    OMGPS.ProcessingNotification.Header = "Initiating Processing: " + Name;
-            //    OMGPS.ProcessingNotification.Text = "";
-            //}
-            using (SqliteConnection sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0"))
+            ProcessingThread = new Thread(Processing);
+            ProcessingThread.Start();
+        }
+
+        private void Processing()
+        {
+            bool eof = false;
+            int totalLineCount = 0;
+            int i = 0;
+            string line;
+            if (Name == "allCountries.zip")
             {
+                using (SqliteConnection sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS-Staging-Postal") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+                {
+                    if (sqlConn.State != System.Data.ConnectionState.Open)
+                        sqlConn.Open();
+                    using (SqliteCommand command = sqlConn.CreateCommand())
+                    {
+                        command.CommandText = "CREATE TABLE IF NOT EXISTS [GeoNames-Staging-Postals]([Country Code-Staging-Postals] TEXT, [Postal Code-Staging-Postals] TEXT, [Place Name-Staging-Postals] TEXT, [Admin1 Name-Staging-Postals] TEXT, [Admin1 Code-Staging-Postals] TEXT, [Admin2 Name-Staging-Postals] TEXT, [Admin2 Code-Staging-Postals] TEXT, [Admin3 Name-Staging-Postals] TEXT, [Admin3 Code-Staging-Postals] TEXT, [Latitude-Staging-Postals] TEXT, [Longitude-Staging-Postals] TEXT, [Accuracy-Staging-Postals] TEXT);";
+                        command.ExecuteNonQuery();
+                        command.CommandText = "vacuum";
+                        command.ExecuteNonQuery();
+                        using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), Name.Substring(0, Name.LastIndexOf(".")) + ".txt")))
+                        {
+                            while (sr.ReadLine() != null)
+                            {
+                                totalLineCount += 1;
+                            }
+                        }
+                        string[] linesplit = new string[12];
+                        using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), Name.Substring(0, Name.LastIndexOf(".")) + ".txt")))
+                        {
+                            SqliteTransaction sqltrans = sqlConn.BeginTransaction();
+                            command.Transaction = sqltrans;
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                if (sr.EndOfStream)
+                                    eof = true;
+                                if (i >= ProcessNumber)
+                                {
+                                    linesplit = line.Split('\t');
+                                    if (linesplit.Length == 12)
+                                    {
+                                        if (Running)
+                                        {
+                                            ProcessNumber = i;
+                                            command.CommandText = @"INSERT INTO [GeoNames-Staging-Postals] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "')";
+                                            try
+                                            {
+                                                command.ExecuteNonQuery();
+                                            }
+                                            catch { }
+                                            OMGPS.ProcessingNotification.Header = "Processing: PostalCodes";
+                                            OMGPS.ProcessingNotification.Text = "( " + i.ToString() + " / " + totalLineCount + " )";
+                                        }
+                                        else
+                                            break;
+                                    }
+                                }
+                                else
+                                    OMGPS.ProcessingNotification.Text = "( Attemping To Continue, Please Wait )";
+                                i += 1;
+                            }
+                            sqltrans.Commit();
+                            if (eof)
+                                Running = false;
+                        }
+                    }
+                }
+                if (eof)
+                {
+                    OMGPS.ProcessingNotification.Text = "( Finalizing Entered Data, Please Wait )";
+                    using (SqliteConnection sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+                    {
+                        if (sqlConn.State != System.Data.ConnectionState.Open)
+                            sqlConn.Open();
+                        using (SqliteCommand command1 = sqlConn.CreateCommand())
+                        {
+                            command1.CommandText = @"CREATE TABLE IF NOT EXISTS [GeoNames-Postals] ([Country Code] TEXT, [Postal Code] TEXT, [Place Name] TEXT, [Admin1 Name] TEXT, [Admin1 Code]  TEXT, [Admin2 Name] TEXT, [Admin2 Code] TEXT, [Admin3 Name] TEXT, [Admin3 Code] TEXT, Latitude TEXT, Longitude TEXT, Accuracy TEXT)";
+                            command1.ExecuteNonQuery();
+                            command1.CommandText = @"ATTACH DATABASE '" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS-Staging-Postal") + "' AS [db1]";
+                            command1.ExecuteNonQuery();
+                            command1.CommandText = @"DELETE FROM [GeoNames-Postals]";
+                            command1.ExecuteNonQuery();
+                            command1.CommandText = @"INSERT INTO [GeoNames-Postals] SELECT * FROM db1.[GeoNames-Staging-Postals]";
+                            command1.ExecuteNonQuery();
+                            command1.CommandText = "DELETE FROM db1.[GeoNames-Staging-Postals]";
+                            command1.ExecuteNonQuery();
+                            if (ProcessingFinished != null)
+                                ProcessingFinished();
+                            eof = false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                using (SqliteConnection sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS-Staging") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+                {
+                    if (sqlConn.State != System.Data.ConnectionState.Open)
+                        sqlConn.Open();
+                    //command
+                    using (SqliteCommand command = sqlConn.CreateCommand())
+                    {
+                        command.CommandText = "CREATE TABLE IF NOT EXISTS [GeoNames-Staging]([GeoNameID-Staging] INTEGER PRIMARY KEY, [Name-Staging] TEXT, [ASCIIName-Staging] TEXT, [AlternateNames-Staging] TEXT, [Latitude-Staging] TEXT, [Longitude-Staging] TEXT, [Feature Class-Staging] TEXT, [Feature Code-Staging] TEXT, [Country Code-Staging] TEXT, [CC2-Staging] TEXT, [Admin1 Code-Staging] TEXT, [Admin2 Code-Staging] TEXT, [Admin3 Code-Staging] TEXT, [Admin4 Code-Staging] TEXT, [Population-Staging] TEXT, [Elevation-Staging] TEXT, [DEM-Staging] TEXT, [TimeZone-Staging] TEXT, [Modification Date-Staging] TEXT);";
+                        command.ExecuteNonQuery();
+                        command.CommandText = "vacuum";
+                        command.ExecuteNonQuery();
+                        //stream the contents of the file...
+                        string newname = Misc.CountryCodeNames(Name.Substring(0, Name.LastIndexOf(".")));
+                        if (newname == "")
+                            newname = Name.Substring(0, Name.LastIndexOf("."));
+
+
+                        string[] linesplit = new string[19];
+
+                        //get total row count
+
+                        using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), Name.Substring(0, Name.LastIndexOf(".")) + ".txt")))
+                        {
+                            while (sr.ReadLine() != null)
+                            {
+                                totalLineCount += 1;
+                            }
+                        }
+                        using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), Name.Substring(0, Name.LastIndexOf(".")) + ".txt")))
+                        {
+                            SqliteTransaction sqltrans = sqlConn.BeginTransaction();
+                            command.Transaction = sqltrans;
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                if (sr.EndOfStream)
+                                    eof = true;
+                                if (i >= ProcessNumber)
+                                {
+                                    linesplit = line.Split('\t');
+                                    if (linesplit.Length == 19)
+                                    {
+                                        if (Running)
+                                        {
+                                            ProcessNumber = i;
+                                            //command.CommandText = @"INSERT OR IGNORE INTO [GeoNames-Staging] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "','" + General.escape(linesplit[12]) + "','" + General.escape(linesplit[13]) + "','" + General.escape(linesplit[14]) + "','" + General.escape(linesplit[15]) + "','" + General.escape(linesplit[16]) + "','" + General.escape(linesplit[17]) + "','" + General.escape(linesplit[18]) + "');" + Environment.NewLine +
+                                            //"UPDATE [GeoNames] SET [Name]='" + General.escape(linesplit[1]) + "', [ASCIIName]='" + General.escape(linesplit[2]) + "', [AlternateNames]='" + General.escape(linesplit[3]) + "',[Latitude]='" + General.escape(linesplit[4]) + "', [Longitude]='" + General.escape(linesplit[5]) + "', [Feature Class]='" + General.escape(linesplit[6]) + "', [Feature Code]='" + General.escape(linesplit[7]) + "', [Country Code]='" + General.escape(linesplit[8]) + "', [CC2]='" + General.escape(linesplit[9]) + "', [Admin1 Code]='" + General.escape(linesplit[10]) + "', [Admin2 Code]='" + General.escape(linesplit[11]) + "', [Admin3 Code]='" + General.escape(linesplit[12]) + "', [Admin4 Code]='" + General.escape(linesplit[13]) + "', [Population]='" + General.escape(linesplit[14]) + "', [Elevation]='" + General.escape(linesplit[15]) + "', [DEM]='" + General.escape(linesplit[16]) + "', [TimeZone]='" + General.escape(linesplit[17]) + "', [Modification Date]='" + General.escape(linesplit[18]) + "' WHERE changes() = 0 AND GeoNameID='" + linesplit[0] + "';";
+                                            //command.CommandText = @"INSERT OR IGNORE INTO [GeoNames-Staging] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "','" + General.escape(linesplit[12]) + "','" + General.escape(linesplit[13]) + "','" + General.escape(linesplit[14]) + "','" + General.escape(linesplit[15]) + "','" + General.escape(linesplit[16]) + "','" + General.escape(linesplit[17]) + "','" + General.escape(linesplit[18]) + "');";
+                                            command.CommandText = @"INSERT INTO [GeoNames-Staging] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "','" + General.escape(linesplit[12]) + "','" + General.escape(linesplit[13]) + "','" + General.escape(linesplit[14]) + "','" + General.escape(linesplit[15]) + "','" + General.escape(linesplit[16]) + "','" + General.escape(linesplit[17]) + "','" + General.escape(linesplit[18]) + "');";
+                                            try
+                                            {
+                                                command.ExecuteNonQuery();
+                                            }
+                                            catch { }
+                                            OMGPS.ProcessingNotification.Header = "Processing: " + newname;
+                                            OMGPS.ProcessingNotification.Text = "( " + i.ToString() + " / " + totalLineCount + " )";
+
+                                        }
+                                        else
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    OMGPS.ProcessingNotification.Text = "( Attemping To Continue, Please Wait )";
+                                }
+                                i += 1;
+                            }
+                            sqltrans.Commit();
+
+                            //if here, done with processing file
+                            if (eof)
+                            {
+                                //IsProcessing = false;
+                                Running = false;
+
+
+
+                                //StoredData.Set(OMGPS.ibp, "GPS.DL.Processing.Progress", "0");
+                                //ProcessingQueue.processingList.Remove(this);
+                            }
+                        }
+                    }
+                }
+                if (eof)
+                {
+                    OMGPS.ProcessingNotification.Text = "( Finalizing Entered Data, Please Wait )";
+                    using (SqliteConnection sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+                    {
+                        if (sqlConn.State != System.Data.ConnectionState.Open)
+                            sqlConn.Open();
+                        using (SqliteCommand command1 = sqlConn.CreateCommand())
+                        {
+                            command1.CommandText = "CREATE TABLE IF NOT EXISTS [GeoNames]([GeoNameID] INTEGER PRIMARY KEY, [Name] TEXT, [ASCIIName] TEXT, [AlternateNames] TEXT, [Latitude] TEXT, [Longitude] TEXT, [Feature Class] TEXT, [Feature Code] TEXT, [Country Code] TEXT, [CC2] TEXT, [Admin1 Code] TEXT, [Admin2 Code] TEXT, [Admin3 Code] TEXT, [Admin4 Code] TEXT, [Population] TEXT, [Elevation] TEXT, [DEM] TEXT, [TimeZone] TEXT, [Modification Date] TEXT);";
+                            command1.ExecuteNonQuery();
+                            command1.CommandText = "ATTACH DATABASE '" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS-Staging") + "' AS [db1]";
+                            command1.ExecuteNonQuery();
+                            ////@"UPDATE GeoNames SET [Name] = db1.[Name-Staging], [ASCIIName] = db1.[ASCIIName-Staging], [AlternateNames] = db1.[AlternateNames-Staging], [Latitude]=db1.[Latitude-Staging], [Longitude] = db1.[Longitude-Staging], [Feature Class] = db1.[Feature Class-Staging], [Feature Code] = db1.[Feature Code-Staging], [Country Code] = db1.[Country Code-Staging], [CC2] = db1.[CC2-Staging], [Admin1 Code] = db1.[Admin1 Code-Staging], [Admin2 Code] = db1.[Admin2 Code-Staging], [Admin3 Code] = db1.[Admin3 Code-Staging], [Admin4 Code] = db1.[Admin4 Code-Staging], [Population] = db1.[Population-Staging], [Elevation] = db1.[Elevation-Staging], [DEM] = db1.[DEM-Staging], [TimeZone] = db1.[TimeZone-Staging], [Modification Date] = db1.[Modification Date-Staging] WHERE GeoNameID = db1.[GeoNameID-Staging];"
+
+                            command1.CommandText = @"UPDATE GeoNames SET 
+                        [Name] = (SELECT [Name-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID),
+                        [ASCIIName] = (SELECT [ASCIIName-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [AlternateNames] = (SELECT [AlternateNames-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Latitude]= (SELECT [Latitude-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Longitude] = (SELECT [Longitude-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Feature Class] = (SELECT [Feature Class-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Feature Code] = (SELECT [Feature Code-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Country Code] = (SELECT [Country Code-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [CC2] = (SELECT [CC2-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Admin1 Code] = (SELECT [Admin1 Code-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Admin2 Code] = (SELECT [Admin2 Code-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Admin3 Code] = (SELECT [Admin3 Code-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Admin4 Code] = (SELECT [Admin4 Code-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Population] = (SELECT [Population-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Elevation] = (SELECT [Elevation-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [DEM] = (SELECT [DEM-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [TimeZone] = (SELECT [TimeZone-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID), 
+                        [Modification Date] = (SELECT [Modification Date-Staging] FROM db1.[GeoNames-Staging] WHERE db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID)";
+                            command1.ExecuteNonQuery();
+                            command1.CommandText = "INSERT INTO GeoNames (GeoNameID, Name, ASCIIName, AlternateNames, Latitude, Longitude, [Feature Class], [Feature Code], [Country Code], [CC2], [Admin1 Code], [Admin2 Code], [Admin3 Code], [Admin4 Code], Population, Elevation, DEM, TimeZone, [Modification Date]) SELECT db1.[GeoNames-Staging].[GeoNameID-Staging],  db1.[GeoNames-Staging].[Name-Staging], db1.[GeoNames-Staging].[ASCIIName-Staging], db1.[GeoNames-Staging].[AlternateNames-Staging], db1.[GeoNames-Staging].[Latitude-Staging], db1.[GeoNames-Staging].[Longitude-Staging], db1.[GeoNames-Staging].[Feature Class-Staging], db1.[GeoNames-Staging].[Feature Code-Staging], db1.[GeoNames-Staging].[Country Code-Staging], db1.[GeoNames-Staging].[CC2-Staging], db1.[GeoNames-Staging].[Admin1 Code-Staging], db1.[GeoNames-Staging].[Admin2 Code-Staging], db1.[GeoNames-Staging].[Admin3 Code-Staging], db1.[GeoNames-Staging].[Admin4 Code-Staging], db1.[GeoNames-Staging].[Population-Staging], db1.[GeoNames-Staging].[Elevation-Staging], db1.[GeoNames-Staging].[DEM-Staging], db1.[GeoNames-Staging].[TimeZone-Staging], db1.[GeoNames-Staging].[Modification Date-Staging] FROM db1.[GeoNames-Staging] LEFT JOIN GeoNames ON db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID WHERE GeoNames.GeoNameID IS NULL";
+                            command1.ExecuteNonQuery();
+                            command1.CommandText = "DELETE FROM db1.[GeoNames-Staging]";
+                            command1.ExecuteNonQuery();
+                            if (ProcessingFinished != null)
+                                ProcessingFinished();
+                            eof = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public class PostalCodes
+    {
+        public static Thread working;
+        public static Thread processing;
+        public static bool running;
+        public static string updatedDateTime;
+        public static int Progress;
+        public static int ProcessingIndex;
+        public long FileSize;
+        public static int ProcessNumber;
+
+        public static void DL()
+        {
+            working = new Thread(new ParameterizedThreadStart(downloading));
+            working.Start(Progress);
+        }
+
+        private static void downloading(object startInt)
+        {
+            running = true;
+            //this, "GPS.PostalCodes.Progress"
+            HttpWebRequest myHttpWebRequest = (HttpWebRequest)WebRequest.Create(new Uri("http://download.geonames.org/export/zip/allcountries.zip"));
+            FileMode filemode;
+
+            if (Progress == 0)
+            {
+                filemode = FileMode.Create;
+            }
+            else
+            {
+                filemode = FileMode.Append;
+                myHttpWebRequest.AddRange(Convert.ToInt32(Progress));
+            }
+            if (!Directory.Exists(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Temp")))
+                Directory.CreateDirectory(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Temp"));
+            using (FileStream fs = new FileStream(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Temp"), "postalCodes"), filemode))
+            {
+                using (HttpWebResponse myHttpWebResponse = (HttpWebResponse)myHttpWebRequest.GetResponse())
+                {
+                    Stream receiveStream = myHttpWebResponse.GetResponseStream();
+                    //FileSize = myHttpWebResponse.ContentLength + Progress;
+                    byte[] read = new byte[2048];
+                    int count = 0;
+                    while ((count = receiveStream.Read(read, 0, read.Length)) > 0)
+                    {
+                        fs.Write(read, 0, count);
+                        //count = receiveStream.Read(read, 0, 1024);
+                        Progress += count;
+                        //filename (% = (Convert.ToDouble(progress/filesize) * 100  + %)) \n progress / FileSize
+                        //OMGPS.DLNotification.Header = "Downloading: " + Name;
+                        //OMGPS.DLNotification.Text = "( " + Progress.ToString() + " / " + FileSize.ToString() + "  --  " + (Convert.ToInt32((Convert.ToDouble(Progress) / Convert.ToDouble(FileSize)) * 100)).ToString() + "%";
+                        if (!running)
+                        {
+                            //OMGPS.StoreProgress(Progress.ToString());
+                            //StoredData.Set(this, "GPS.PostalCodes.Progress", Progess.ToString());
+                            break;
+                        }
+                    }
+                    if (Progress >= 1)
+                    {
+                        StoredData.Set(OMGPS.ibp, "GPS.PostalCodes.Progress", "0");
+                        //process it now...
+                        //Copy();
+                        StoredData.Set(OMGPS.ibp, "GPS.PostalCodes.Processing", "True");
+                        ProcessingIndex = 0;
+                        processing = new Thread(Process);
+                        processing.Start();
+
+                        //Process();
+                        //if (DownloadFinished != null)
+                        //    DownloadFinished();
+                    }
+                }
+            }
+        }
+
+        private void Copy()
+        {
+            //copy zip from Temp to Process folder, overwriting if necessary and unzip the contents...
+            if (!Directory.Exists(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process")))
+                Directory.CreateDirectory(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"));
+            System.IO.File.Copy(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Temp"), "postalCodes"), OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), "postalCodes"), true);
+            //unzip?
+            using (ICSharpCode.SharpZipLib.Zip.ZipInputStream zis = new ICSharpCode.SharpZipLib.Zip.ZipInputStream(System.IO.File.OpenRead(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), "postalCodes"))))
+            {
+                ICSharpCode.SharpZipLib.Zip.ZipEntry ze;
+                try
+                {
+                    while ((ze = zis.GetNextEntry()) != null)
+                    {
+                        using (FileStream sw = File.Create(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), ze.Name)))
+                        {
+                            byte[] read = new byte[2048];
+                            int count = 0;
+                            //while ((count = sw.Read(read, 0, read.Length)) > 0)
+                            //{
+                            //    sw.Write(read, 0, count);
+                            //}
+                            try
+                            {
+                                int size = 2048;
+                                byte[] data = new byte[2048];
+                                while (true)
+                                {
+                                    size = zis.Read(data, 0, data.Length);
+                                    if (size > 0)
+                                        sw.Write(data, 0, data.Length);
+                                    else
+                                        break;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
+        public static void StartProcess()
+        {
+            StoredData.Set(OMGPS.ibp, "GPS.PostalCodes.Processing", "True");
+            running = true;
+            processing = new Thread(Process);
+            processing.Start();
+        }
+
+        public static void Process()
+        {
+            if (!running)
+                return;
+            bool eof = false;
+            using (SqliteConnection sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS-Staging-Postals") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+            {
+                if (sqlConn.State != System.Data.ConnectionState.Open)
+                    sqlConn.Open();
                 //command
                 using (SqliteCommand command = sqlConn.CreateCommand())
                 {
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS [GeoNames]([GeoNameID] INTEGER PRIMARY KEY, [Name] TEXT, [ASCIIName] TEXT, [AlternateNames] TEXT, [Latitude] TEXT, [Longitude] TEXT, [Feature Class] TEXT, [Feature Code] TEXT, [Country Code] TEXT, [CC2] TEXT, [Admin1 Code] TEXT, [Admin2 Code] TEXT, [Admin3 Code] TEXT, [Admin4 Code] TEXT, [Population] TEXT, [Elevation] TEXT, [DEM] TEXT, [TimeZone] TEXT, [Modification Date] TEXT);";
-                    if (sqlConn.State != System.Data.ConnectionState.Open)
-                        sqlConn.Open();
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS [GeoNames-Staging-Postals]([Country Code-Staging-Postals] TEXT, [Postal Code-Staging-Postals] TEXT, [Place Name-Staging-Postals] TEXT, [Admin1 Name-Staging-Postals] TEXT, [Admin1 Code-Staging-Postals] TEXT, [Admin2 Name-Staging-Postals] TEXT, [Admin2 Code-Staging-Postals] TEXT, [Admin3 Name-Staging-Postals] TEXT, [Admin3 Code-Staging-Postals] TEXT, [Latitude-Staging-Postals] TEXT, [Longitude-Staging-Postals] TEXT, [Accuracy-Staging-Postals] TEXT);";
                     command.ExecuteNonQuery();
-                    //stream the contents of the file...
-                    string newname = Misc.CountryCodeNames(Name.Substring(0, Name.LastIndexOf(".")));
-                    if (newname == "")
-                        newname = Name.Substring(0, Name.LastIndexOf("."));
-                    bool eof = false;
+                    command.CommandText = "vacuum";
+                    command.ExecuteNonQuery();
+
                     string line;
-                    string[] linesplit = new string[19];
+                    string[] linesplit = new string[12];
                     int i = 0;
                     //get total row count
                     int totalLineCount = 0;
-                    using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), Name.Substring(0, Name.LastIndexOf(".")) + ".txt")))
+                    using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), "allCountries.txt")))
                     {
                         while (sr.ReadLine() != null)
                         {
                             totalLineCount += 1;
                         }
                     }
-                    using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), Name.Substring(0, Name.LastIndexOf(".")) + ".txt")))
+                    using (StreamReader sr = new StreamReader(OpenMobile.Path.Combine(OpenMobile.Path.Combine(OM.Host.PluginPath, "OMGPS", "Process"), "allCountries.txt")))
                     {
-                        /*
-                        string newline = sr.ReadToEnd();
-                        string[] line = newline.Split(new char[] { '\n', '\r' },StringSplitOptions.RemoveEmptyEntries);
-                        for (int i = 0; i < line.Length; i++)
-                        {
-                            linesplit = line[i].Split('\t');
-                            command.CommandText = "INSERT OR REPLACE INTO [GeoNames] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "','" + General.escape(linesplit[12]) + "','" + General.escape(linesplit[13]) + "','" + General.escape(linesplit[14]) + "','" + General.escape(linesplit[15]) + "','" + General.escape(linesplit[16]) + "','" + General.escape(linesplit[17]) + "','" + General.escape(linesplit[18]) + "');";
-                            command.ExecuteNonQuery();
-                            OMGPS.ProcessingNotification.Header = "Processing: " + newname;
-                            OMGPS.ProcessingNotification.Text = "( " + i.ToString() + " / " + line.Length.ToString() + " )";
-                        }
-                        */
                         SqliteTransaction sqltrans = sqlConn.BeginTransaction();
                         command.Transaction = sqltrans;
                         while ((line = sr.ReadLine()) != null)
                         {
                             if (sr.EndOfStream)
                                 eof = true;
-                            if (i >= ProcessNumber)
+                            if (!running)
+                                break;
+                            if (i >= ProcessingIndex)
                             {
                                 linesplit = line.Split('\t');
-                                if (linesplit.Length == 19)
+                                if (linesplit.Length == 12)
                                 {
-                                    if (Running)
-                                    {
-                                        ProcessNumber = i;
-                                        //command.CommandText = "INSERT OR IGNORE INTO [GeoNames] VALUES ('$" + Convert.ToInt32(General.escape(linesplit[0])) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "','" + General.escape(linesplit[12]) + "','" + General.escape(linesplit[13]) + "','" + General.escape(linesplit[14]) + "','" + General.escape(linesplit[15]) + "','" + General.escape(linesplit[16]) + "','" + General.escape(linesplit[17]) + "','" + General.escape(linesplit[18]) + "'); UPDATE [GeoNames] SET [Name]='" + General.escape(linesplit[1]) + "', [ASCIIName]='" + General.escape(linesplit[2]) + "', [AlternateNames]='" + General.escape(linesplit[3]) + "',[Latitude]='" + General.escape(linesplit[4]) + "', [Longitude]='" + General.escape(linesplit[5]) + "', [Feature Class]='" + General.escape(linesplit[6]) + "', [Feature Code]='" + General.escape(linesplit[7]) + "', [Country Code]='" + General.escape(linesplit[8]) + "', [CC2]='" + General.escape(linesplit[9]) + "', [Admin1 Code]='" + General.escape(linesplit[10]) + "', [Admin2 Code]='" + General.escape(linesplit[11]) + "', [Admin3 Code]='" + General.escape(linesplit[12]) + "', [Admin4 Code]='" + General.escape(linesplit[13]) + "', [Population]='" + General.escape(linesplit[14]) + "', [Elevation]='" + General.escape(linesplit[15]) + "', [DEM]='" + General.escape(linesplit[16]) + "', [TimeZone]='" + General.escape(linesplit[17]) + "', [Modification Date]='" + General.escape(linesplit[18]) + "' WHERE GeoNameID='$" + linesplit[0] + "';";
-                                        command.CommandText = "INSERT OR REPLACE INTO [GeoNames] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "','" + General.escape(linesplit[12]) + "','" + General.escape(linesplit[13]) + "','" + General.escape(linesplit[14]) + "','" + General.escape(linesplit[15]) + "','" + General.escape(linesplit[16]) + "','" + General.escape(linesplit[17]) + "','" + General.escape(linesplit[18]) + "');";
-                                        command.ExecuteNonQuery();
-                                        OMGPS.ProcessingNotification.Header = "Processing: " + newname;
-                                        OMGPS.ProcessingNotification.Text = "( " + i.ToString() + " / " + totalLineCount + " )";
+                                    ProcessNumber = i;
 
-                                        /*
-                                        //if linesplit[0] in table, update else insert
-                                        command.CommandText = "SELECT [GeoNameID] FROM GeoNames WHERE [GeoNameID] = '" + linesplit[0] + "'";
-                                        if (sqlConn.State != System.Data.ConnectionState.Open)
-                                            sqlConn.Open();
-                                        using (SqliteDataReader reader = command.ExecuteReader())
-                                        {
-                                            if (reader.HasRows)
-                                            {
-                                                //update
-                                                reader.Close();
-                                                command.CommandText = @"UPDATE [GeoNames] SET [Name]='" + General.escape(linesplit[1]) + "', [ASCIIName]='" + General.escape(linesplit[2]) + "', [AlternateNames]='" + General.escape(linesplit[3]) + "',[Latitude]='" + General.escape(linesplit[4]) + "', [Longitude]='" + General.escape(linesplit[5]) + "', [Feature Class]='" + General.escape(linesplit[6]) + "', [Feature Code]='" + General.escape(linesplit[7]) + "', [Country Code]='" + General.escape(linesplit[8]) + "', [CC2]='" + General.escape(linesplit[9]) + "', [Admin1 Code]='" + General.escape(linesplit[10]) + "', [Admin2 Code]='" + General.escape(linesplit[11]) + "', [Admin3 Code]='" + General.escape(linesplit[12]) + "', [Admin4 Code]='" + General.escape(linesplit[13]) + "', [Population]='" + General.escape(linesplit[14]) + "', [Elevation]='" + General.escape(linesplit[15]) + "', [DEM]='" + General.escape(linesplit[16]) + "', [TimeZone]='" + General.escape(linesplit[17]) + "', [Modification Date]='" + General.escape(linesplit[18]) + "' WHERE GeoNameID='" + linesplit[0] + "';";
-                                                command.ExecuteNonQuery();
-                                            }
-                                            else
-                                            {
-                                                //insert
-                                                reader.Close();
-                                                command.CommandText = @"INSERT INTO [GeoNames] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "','" + General.escape(linesplit[12]) + "','" + General.escape(linesplit[13]) + "','" + General.escape(linesplit[14]) + "','" + General.escape(linesplit[15]) + "','" + General.escape(linesplit[16]) + "','" + General.escape(linesplit[17]) + "','" + General.escape(linesplit[18]) + "');";
-                                                command.ExecuteNonQuery();
-                                            }
-                                        }
-                                        */
+                                    command.CommandText = @"INSERT INTO [GeoNames-Staging-Postals] VALUES ('" + General.escape(linesplit[0]) + "','" + General.escape(linesplit[1]) + "','" + General.escape(linesplit[2]) + "','" + General.escape(linesplit[3]) + "','" + General.escape(linesplit[4]) + "','" + General.escape(linesplit[5]) + "','" + General.escape(linesplit[6]) + "','" + General.escape(linesplit[7]) + "','" + General.escape(linesplit[8]) + "','" + General.escape(linesplit[9]) + "','" + General.escape(linesplit[10]) + "','" + General.escape(linesplit[11]) + "');";
+                                    command.ExecuteNonQuery();
+                                    //OMGPS.ProcessingNotification.Header = "Processing: " + newname;
+                                    //OMGPS.ProcessingNotification.Text = "( " + i.ToString() + " / " + totalLineCount + " )";
 
-                                    }
-                                    else
-                                        break;
                                 }
                             }
                             else
                             {
-                                OMGPS.ProcessingNotification.Text = "( Attemping To Continue, Please Wait )";
+                                //OMGPS.ProcessingNotification.Text = "( Attemping To Continue, Please Wait )";
                             }
                             i += 1;
                         }
@@ -1247,18 +1735,48 @@ namespace OMGPS
                         //if here, done with processing file
                         if (eof)
                         {
-                            //IsProcessing = false;
-                            Running = false;
-                            eof = false;
-                            if (ProcessingFinished != null)
-                                ProcessingFinished();
+                            running = false;
+                            StoredData.Set(OMGPS.ibp, "GPS.PostalCodes.ProcessingIndex", "0");
+                            StoredData.Set(OMGPS.ibp, "GPS.PostalCodes.Processing", "");
+
+
                             //StoredData.Set(OMGPS.ibp, "GPS.DL.Processing.Progress", "0");
                             //ProcessingQueue.processingList.Remove(this);
                         }
                     }
                 }
             }
+            if (eof)
+            {
+                //OMGPS.ProcessingNotification.Text = "( Finalizing Entered Data, Please Wait )";
+                using (SqliteConnection sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+                {
+                    if (sqlConn.State != System.Data.ConnectionState.Open)
+                        sqlConn.Open();
+                    using (SqliteCommand command1 = sqlConn.CreateCommand())
+                    {
+                        //"CREATE TABLE IF NOT EXISTS [GeoNames-Staging-Postals]([Country Code-Staging-Postals] TEXT, [Postal Code-Staging-Postals] TEXT, [Place Name-Staging-Postals] TEXT, [Admin1 Name-Staging-Postals] TEXT, [Admin1 Code-Staging-Postals] TEXT, [Admin2 Name-Staging-Postals] TEXT, [Admin2 Code-Staging-Postals] TEXT, [Admin3 Name-Staging-Postals] TEXT, [Admin3 Code-Staging-Postals] TEXT, [Latitude-Staging-Postals] TEXT, [Longitude-Staging-Postals] TEXT, [Accuracy-Staging-Postals] TEXT);";
+                        command1.CommandText = "CREATE TABLE IF NOT EXISTS [GeoNames-PostalCodes]([Country Code-Postals] TEXT, [Postal Code-Postals] TEXT, [Place Name-Postals] TEXT, [Admin1 Name-Postals] TEXT, [Admin1 Code-Postals] TEXT, [Admin2 Name-Postals] TEXT, [Admin2 Code-Postals] TEXT, [Admin3 Name-Postals] TEXT, [Admin3 Code-Postals] TEXT, [Latitude-Postals] TEXT, [Longitude-Postals] TEXT, [Accuracy-Postals] TEXT);";
+                        command1.ExecuteNonQuery();
+                        command1.CommandText = "DELETE FROM [GeoNames-PostalCodes]";
+                        command1.ExecuteNonQuery();
+                        command1.CommandText = "ATTACH DATABASE '" + OpenMobile.Path.Combine(OM.Host.DataPath, "OMGPS-Staging-Postals") + "' AS [db1]";
+                        command1.ExecuteNonQuery();
+                        ////@"UPDATE GeoNames SET [Name] = db1.[Name-Staging], [ASCIIName] = db1.[ASCIIName-Staging], [AlternateNames] = db1.[AlternateNames-Staging], [Latitude]=db1.[Latitude-Staging], [Longitude] = db1.[Longitude-Staging], [Feature Class] = db1.[Feature Class-Staging], [Feature Code] = db1.[Feature Code-Staging], [Country Code] = db1.[Country Code-Staging], [CC2] = db1.[CC2-Staging], [Admin1 Code] = db1.[Admin1 Code-Staging], [Admin2 Code] = db1.[Admin2 Code-Staging], [Admin3 Code] = db1.[Admin3 Code-Staging], [Admin4 Code] = db1.[Admin4 Code-Staging], [Population] = db1.[Population-Staging], [Elevation] = db1.[Elevation-Staging], [DEM] = db1.[DEM-Staging], [TimeZone] = db1.[TimeZone-Staging], [Modification Date] = db1.[Modification Date-Staging] WHERE GeoNameID = db1.[GeoNameID-Staging];"
+
+
+                        command1.CommandText = "INSERT INTO [GeoNames-Postals] (GeoNameID, Name, ASCIIName, AlternateNames, Latitude, Longitude, [Feature Class], [Feature Code], [Country Code], [CC2], [Admin1 Code], [Admin2 Code], [Admin3 Code], [Admin4 Code], Population, Elevation, DEM, TimeZone, [Modification Date]) SELECT db1.[GeoNames-Staging].[GeoNameID-Staging],  db1.[GeoNames-Staging].[Name-Staging], db1.[GeoNames-Staging].[ASCIIName-Staging], db1.[GeoNames-Staging].[AlternateNames-Staging], db1.[GeoNames-Staging].[Latitude-Staging], db1.[GeoNames-Staging].[Longitude-Staging], db1.[GeoNames-Staging].[Feature Class-Staging], db1.[GeoNames-Staging].[Feature Code-Staging], db1.[GeoNames-Staging].[Country Code-Staging], db1.[GeoNames-Staging].[CC2-Staging], db1.[GeoNames-Staging].[Admin1 Code-Staging], db1.[GeoNames-Staging].[Admin2 Code-Staging], db1.[GeoNames-Staging].[Admin3 Code-Staging], db1.[GeoNames-Staging].[Admin4 Code-Staging], db1.[GeoNames-Staging].[Population-Staging], db1.[GeoNames-Staging].[Elevation-Staging], db1.[GeoNames-Staging].[DEM-Staging], db1.[GeoNames-Staging].[TimeZone-Staging], db1.[GeoNames-Staging].[Modification Date-Staging] FROM db1.[GeoNames-Staging] LEFT JOIN GeoNames ON db1.[GeoNames-Staging].[GeoNameID-Staging] = GeoNames.GeoNameID WHERE GeoNames.GeoNameID IS NULL";
+                        command1.ExecuteNonQuery();
+                        command1.CommandText = "DELETE FROM db1.[GeoNames-Staging-Postals]";
+                        command1.ExecuteNonQuery();
+                        //if (ProcessingFinished != null)
+                        //    ProcessingFinished();
+                        eof = false;
+                    }
+                }
+            }
         }
+
     }
 
     public class Misc

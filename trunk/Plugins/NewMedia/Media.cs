@@ -207,15 +207,21 @@ namespace NewMedia
                 }
             }
             abortJob = new bool[theHost.ScreenCount];
-            SafeThread.Asynchronous(delegate() { theHost_OnStorageEvent(eMediaType.NotSet, true, null); }, theHost);
-            OpenMobile.Threading.TaskManager.QueueTask(delegate() { loadArtists(); }, ePriority.High, "Load Artists");
+            SafeThread.Asynchronous(delegate() 
+            {
+                theHost_OnStorageEvent(eMediaType.NotSet, true, null);
+
+                OpenMobile.Threading.TaskManager.QueueTask(delegate()
+                {
+                    loadArtists();
+                }, ePriority.High, "Load Artists");
+
+            }, theHost);
+
             format.color = Color.FromArgb(175, Color.Black);
             format.highlightColor = Color.LightGray;
             format.font = new Font(Font.GenericSansSerif, 20F);
 
-            string path = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            path = System.Reflection.Assembly.GetAssembly(this.GetType()).Location;
-            imageItem img = OM.Host.getPluginImage(this, "Icon-MediaPlayer");
             return eLoadStatus.LoadSuccessful;
         }
 

@@ -37,29 +37,20 @@ namespace ControlDemo
 {
     public static class panelImages
     {
-        static IPluginHost Host;
-        static ScreenManager Manager;
-        static string PluginName;
-
-        public static void Initialize(string pluginName, ScreenManager manager, IPluginHost host)
+        public static OMPanel Initialize()
         {
-            // Save reference to host objects
-            Host = host;
-            Manager = manager;
-            PluginName = pluginName;
-
             OMPanel p = new OMPanel("Images");
 
             OMImage imgNoCover = new OMImage("imgNoCover", 0, 100, new imageItem(MediaLoader.MissingCoverImage));
             p.addControl(imgNoCover);
 
-            OMImage imgBackground = new OMImage("imgBackground", 330, 100, host.getSkinImage("OMIconBlack_Transparent"));
+            OMImage imgBackground = new OMImage("imgBackground", 330, 100, OM.Host.getSkinImage("OMIconBlack_Transparent"));
             imgBackground.BackgroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;
             imgBackground.Left = 500 - (imgBackground.Image.image.Width / 2);
             imgBackground.Top = 300 - (imgBackground.Image.image.Height / 2);
             p.addControl(imgBackground);
 
-            OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 730, 130, 200, 200, host.getSkinImage("Unknown Album.png"));
+            OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 730, 130, 200, 200, OM.Host.getSkinImage("Unknown Album.png"));
             //imgReflectionTestSource.Rotation = new OpenMobile.Math.Vector3(0, 0, 45);
             imgReflectionTestSource.OnImageChange += new userInteraction(imgReflectionTestSource_OnImageChange);
             p.addControl(imgReflectionTestSource);
@@ -110,7 +101,7 @@ namespace ControlDemo
                 //imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, true);
             p.addControl(imgReflectionTestTarget);
 
-            manager.loadPanel(p);
+            return p;
         }
 
         static void imgReflectionTestSource_OnImageChange(OMControl sender, int screen)

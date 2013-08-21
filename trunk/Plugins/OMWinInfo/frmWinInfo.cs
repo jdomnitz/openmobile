@@ -363,7 +363,25 @@ namespace OMWinInfo
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedRows.Count > 0)
+            {
                 this.cmdDataSource.Text = (string)dataGridView1.SelectedRows[0].Cells["FullName"].Value;
+
+                DataSource datasource = BuiltInComponents.Host.DataHandler.GetDataSource(this.cmdDataSource.Text);
+                if (datasource != null)
+                {
+                    if (datasource.Value is OpenMobile.Graphics.OImage)
+                        pictureBox1.Image = ((OpenMobile.Graphics.OImage)datasource.Value).image;
+                    else if (datasource.Value is OpenMobile.imageItem)
+                        pictureBox1.Image = ((OpenMobile.imageItem)datasource.Value).image.image;
+                    else
+                        pictureBox1.Image = null;
+
+                }
+                else
+                {
+                    pictureBox1.Image = null;
+                }
+            }
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -379,6 +397,46 @@ namespace OMWinInfo
         {
             frmHistoryView frmCmdHistory = new frmHistoryView("Commands history", frmHistoryView.DataTypes.Commands);
             frmCmdHistory.Show();
+        }
+
+        private Rectangle _pictureBox1_OrgLocation;
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void pictureBox1_Click_1(object sender, EventArgs e)
+        {
+            if (pictureBox1.Width == groupBox1.Width)
+            {
+                // Resize imagebox to show large image
+                pictureBox1.Left = _pictureBox1_OrgLocation.Left;
+                pictureBox1.Top = _pictureBox1_OrgLocation.Top;
+                pictureBox1.Width = _pictureBox1_OrgLocation.Width;
+                pictureBox1.Height = _pictureBox1_OrgLocation.Height;
+            }
+            else
+            {
+                _pictureBox1_OrgLocation = new Rectangle(pictureBox1.Left, pictureBox1.Top, pictureBox1.Width, pictureBox1.Height);
+
+                // Resize imagebox to show large image
+                pictureBox1.Left = groupBox1.Left;
+                pictureBox1.Top = groupBox1.Top;
+                pictureBox1.Width = groupBox1.Width;
+                pictureBox1.Height = groupBox1.Height;
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            dataGridView1.Columns[3].Width--;
+            dataGridView1.Columns[3].Width++;
+            dataGridView1.Columns[4].Width--;
+            dataGridView1.Columns[4].Width++;
+        }
+
+        private void chkAuto_CheckedChanged(object sender, EventArgs e)
+        {
+            timer1.Enabled = chkAuto.Checked;
         }
     }
 }

@@ -104,6 +104,7 @@ namespace OMSettings
                         mcTitle.Font = new Font(Font.GenericSansSerif, 24F, FontStyle.Regular);
                         mcTitle.Text = s.Header + (!string.IsNullOrEmpty(s.Header) ? ":" : "");
                         mcTitle.TextAlignment = Alignment.CenterRight;
+                        mcTitle.AutoFitTextMode = FitModes.FitSingleLine;
                         ret.Add(mcTitle);
                         controls[screen].Add(mcTitle);
                         ret.Add(cursor); 
@@ -131,10 +132,12 @@ namespace OMSettings
                         mcTitle.Font = new Font(Font.GenericSansSerif, 24F, FontStyle.Regular);
                         mcTitle.Text = s.Header + (!string.IsNullOrEmpty(s.Header) ? ":" : "");
                         mcTitle.TextAlignment = Alignment.CenterRight;
+                        mcTitle.AutoFitTextMode = FitModes.FitSingleLine;
                         if ((s.Description != null) && (s.Description.Length > 0))
                         {
                             OMLabel mcDescription = new OMLabel(330, ofset+57, 640, 30);
                             mcDescription.Font = new Font(Font.GenericSansSerif, 20);
+                            mcDescription.AutoFitTextMode = FitModes.FitSingleLine;
                             mcDescription.Text = s.Description;
                             ret.Add(mcDescription);
                             ofset += 30;
@@ -156,6 +159,7 @@ namespace OMSettings
                     tdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     tdesc.Name = title;
                     tdesc.TextAlignment = Alignment.CenterRight;
+                    tdesc.AutoFitTextMode = FitModes.FitSingleLine;
                     ret.Add(tdesc);
                     controls[screen].Add(tdesc);
                     OMTextBox text = new OMTextBox(330, ofset, 650, 50);
@@ -175,6 +179,7 @@ namespace OMSettings
                         {
                             OMLabel mcDescription = new OMLabel(text.Left, ofset + 50, text.Width, 30);
                             mcDescription.Font = new Font(Font.GenericSansSerif, 20);
+                            mcDescription.AutoFitTextMode = FitModes.FitSingleLine;
                             mcDescription.Text = s.Description;
                             ret.Add(mcDescription);
                             ofset += 30;
@@ -188,6 +193,7 @@ namespace OMSettings
                     fdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     fdesc.Name = title;
                     fdesc.TextAlignment = Alignment.CenterRight;
+                    fdesc.AutoFitTextMode = FitModes.FitSingleLine;
                     ret.Add(fdesc);
                     controls[screen].Add(fdesc);
                     OMTextBox folder = new OMTextBox(330, ofset, 650, 50);
@@ -208,6 +214,7 @@ namespace OMSettings
                     fldesc.Font = new Font(Font.GenericSansSerif, 24F);
                     fldesc.Name = title;
                     fldesc.TextAlignment = Alignment.CenterRight;
+                    fldesc.AutoFitTextMode = FitModes.FitSingleLine;
                     ret.Add(fldesc);
                     controls[screen].Add(fldesc);
                     OMTextBox file = new OMTextBox(330, ofset, 650, 50);
@@ -227,6 +234,7 @@ namespace OMSettings
                     pdesc.Text = s.Description + ":";
                     pdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     pdesc.Name = title;
+                    pdesc.AutoFitTextMode = FitModes.FitSingleLine;
                     pdesc.TextAlignment = Alignment.CenterRight;
                     ret.Add(pdesc);
                     controls[screen].Add(pdesc);
@@ -250,6 +258,7 @@ namespace OMSettings
                     rdesc.Text = s.Header + ":";
                     rdesc.Font = new Font(Font.GenericSansSerif, 24F);
                     rdesc.Name = title;
+                    rdesc.AutoFitTextMode = FitModes.FitSingleLine;
                     rdesc.TextAlignment = Alignment.CenterRight;
                     if (s.Values.Count != 2)
                         break;
@@ -275,6 +284,7 @@ namespace OMSettings
                         OMLabel rDescription = new OMLabel(330, ofset + 35, 650, 30);
                         rDescription.Font = new Font(Font.GenericSansSerif, 20);
                         rDescription.Text = s.Description.Replace("%value%", s.getInstanceValue(screen));
+                        rDescription.AutoFitTextMode = FitModes.FitSingleLine;
                         rDescription.Name = "dsc" + s.Name;
                         ret.Add(rDescription);
                         ofset += 30;
@@ -301,6 +311,7 @@ namespace OMSettings
                         mcTitle.Font = new Font(Font.GenericSansSerif, 24F, FontStyle.Regular);
                         mcTitle.Text = s.Header + (!string.IsNullOrEmpty(s.Header) ? ":" : "");
                         mcTitle.TextAlignment = Alignment.CenterRight;
+                        mcTitle.AutoFitTextMode = FitModes.FitSingleLine;
 
                         ret.Add(mcTitle);
                         controls[screen].Add(mcTitle);

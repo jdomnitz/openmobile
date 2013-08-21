@@ -821,6 +821,59 @@ namespace OMMediaDB
             }
         }
 
+        public mediaInfo GetMediaInfoByUrl(string url)
+        {
+            if (con == null)
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
+            if (con.State != ConnectionState.Open)
+                con.Open();
+            lock (con)
+            {
+                SqliteCommand command = con.CreateCommand();
+                command.CommandText = String.Format("SELECT Artist,Rating,Album,Title,URL,Genre,Track,Cover FROM tblAlbum JOIN tblSongs ON ID=AlbumNum WHERE URL = '{0}'", General.escape(url));
+                reader = command.ExecuteReader();
+            }
+
+            try
+            {
+                if (reader.Read() == false)
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            lock (reader)
+            {
+                mediaInfo i = new mediaInfo();
+                i.Artist = reader.GetString(0); // ["Artist"].ToString();
+                i.Rating = reader.GetInt16(1); // (int)reader["Rating"];
+                i.Album = reader.GetString(2); //["Album"].ToString();
+                i.Name = reader.GetString(3); //["Title"].ToString();
+                i.Location = reader.GetString(4); //["URL"].ToString();
+                i.Genre = reader.GetString(5); //["Genre"].ToString();
+                i.TrackNumber = reader.GetInt16(6); // (int)reader["Rating"];
+
+                object vl = reader.GetValue(reader.GetOrdinal("Cover"));
+                if (vl.GetType() != typeof(DBNull))
+                {
+                    try
+                    {
+                        MemoryStream m = new MemoryStream((byte[])vl);
+                        i.coverArt = OImage.FromStream(m);
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        return null;
+                    }
+                }
+                return i;
+            }
+        }
+
+
         public bool endSearch()
         {
             if (reader!=null)
@@ -885,6 +938,42 @@ namespace OMMediaDB
             return true;
         }
 
+/*
+        public bool writePlaylist(List<mediaInfo> mediaList, string name, bool append)
+        {
+            // Each item in the playlist is stored as MediaType|Artist|Album|Name|Location
+            StringBuilder query = new StringBuilder("BEGIN;");
+            {
+                if (append == false)
+                {
+                    query.Append("DELETE FROM Playlists WHERE Name='");
+                    query.Append(General.escape(name));
+                    query.Append("';");
+                }
+                foreach (mediaInfo info in mediaList)
+                {
+                    string mediaString = string.Format("{0}|{1}|{2}|{3}|{4}|{5}", info.Type, info.Artist, info.Album, info.Name, info.Location);
+                    query.Append("INSERT INTO Playlists VALUES('");
+                    query.Append(General.escape(name));
+                    query.Append("','");
+                    query.Append(General.escape(mediaString));
+                    query.Append("');");
+                }
+                query.Append("END;");
+            }
+            if (con == null)
+                con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
+            if (con.State != ConnectionState.Open)
+                con.Open();
+            lock (con)
+            {
+                SqliteCommand command = con.CreateCommand();
+                command.CommandText = query.ToString();
+                reader = command.ExecuteReader();
+            }
+            return true;
+        }
+*/
         public bool removePlaylist(string name)
         {
             StringBuilder query = new StringBuilder("BEGIN;");
@@ -913,8 +1002,64 @@ namespace OMMediaDB
             {
                 return null;
             }
+
+            // old style
             return new mediaInfo(reader[0].ToString());
         }
+
+        //public List<mediaInfo> getPlayList(string name)
+        //{
+        //    if (con == null)
+        //        con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;");
+        //    if (con.State != ConnectionState.Open)
+        //        con.Open();
+        //    SqliteCommand command = con.CreateCommand();
+        //    command.CommandText = "SELECT URL FROM Playlists WHERE Name='" + General.escape(name) + "'";
+        //    reader = command.ExecuteReader();
+            
+        //    // Cancel if list not found
+        //    if ((reader == null) || (reader.Read() == false))
+        //        return new List<mediaInfo>();
+
+        //    // New or old style playlist?
+
+        //    while (reader.Read())
+        //    {
+
+        //        if (reader[0].ToString().Contains("|"))
+        //        {   // New style: Each item in the playlist is stored as MediaType|Artist|Album|Name|Location
+        //            mediaInfo media = new mediaInfo();
+
+        //            // Extract media string
+        //            string[] mediaString = reader[0].ToString().Split('|');
+
+        //            // Extract media type
+        //            if (mediaString.Length >= 1 && !String.IsNullOrEmpty(mediaString[0]))
+        //                media.Type = (eMediaType)Enum.Parse(typeof(eMediaType), mediaString[0], true);
+
+        //            // Extract artist
+        //            if (mediaString.Length >= 2 && !String.IsNullOrEmpty(mediaString[1]))
+        //                media.Artist = mediaString[2];
+
+        //            // Extract artist
+        //            if (mediaString.Length >= 2 && !String.IsNullOrEmpty(mediaString[1]))
+        //                media.Artist = mediaString[2];
+
+        //            // Extract artist
+        //            if (mediaString.Length >= 2 && !String.IsNullOrEmpty(mediaString[1]))
+        //                media.Artist = mediaString[2];
+
+
+        //        }
+        //        else
+        //        {
+        //            // old style
+        //            return new mediaInfo(reader[0].ToString());
+        //        }
+        //    }
+
+
+        //}
 
         #region IBasePlugin Members
 

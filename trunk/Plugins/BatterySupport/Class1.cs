@@ -29,7 +29,7 @@ using OpenMobile.Plugin;
 
 namespace BatterySupport
 {
-    [PluginLevel(PluginLevels.System)]
+    [PluginLevel(PluginLevels.Normal)]
     public sealed class BatterySupport : IHighLevel
     {
         Thread batteryWatcher;

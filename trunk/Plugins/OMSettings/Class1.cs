@@ -33,6 +33,7 @@ using OpenMobile.helperFunctions.Plugins;
 namespace OMSettings
 {
     [SkinIcon("*@")] //*'")]
+    [PluginLevel(PluginLevels.Normal | PluginLevels.NoDisable)]
     public class Settings : IHighLevel
     {
         ScreenManager manager;
@@ -62,46 +63,220 @@ namespace OMSettings
             Cancel.Transition = eButtonTransition.None;
             Cancel.OnClick += new userInteraction(Cancel_OnClick);
 
-            #region menu
-            OMPanel main = new OMPanel("Main");
-            main.BackgroundColor1 = Color.Black;
-            main.BackgroundType = backgroundStyle.SolidColor;
-            OMList menu = new OMList("list_Menu", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
-            menu.ListStyle = eListStyle.MultiListText;
-            menu.Background = Color.Silver;
-            menu.ItemColor1 = Color.Black;
-            menu.Font = new Font(Font.GenericSansSerif, 30F);
-            menu.HighlightColor = Color.White;
-            menu.SelectedItemColor1 = BuiltInComponents.SystemSettings.SkinFocusColor;
-            menu.SoftEdgeData.Color1 = Color.Black;
-            menu.SoftEdgeData.Sides = FadingEdge.GraphicSides.Top | FadingEdge.GraphicSides.Bottom;
-            menu.UseSoftEdges = true;
-            OMListItem.subItemFormat format=new OMListItem.subItemFormat();
-            format.color = Color.FromArgb(128, menu.Color);
-            format.font = new Font(Font.GenericSansSerif, 21F);
-            menu.Add(new OMListItem("About", "Credits and information", format, "About"));
-            menu.Add(new OMListItem("System Settings", "User Interface and System Settings", format, "System Settings"));
-            //menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format, "personal"));
-            //menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format, "data"));
-            menu.Add(new OMListItem("Input routing", "Routing of data between a input device and a screen", format, "InputRouterScreenSelection"));
-            menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings", format, "Zones"));
-            menu.Add(new OMListItem("Plugin Settings", "Settings for all low level plugins", format, "Plugins"));
-            menu.OnClick += new userInteraction(menu_OnClick);
-            main.addControl(menu);
-            manager.loadPanel(main, true);
+            #region Plugins
+            //OMPanel panelPlugins = new OMPanel("Plugins");
+            //panelPlugins.BackgroundColor1 = Color.Black;
+            //panelPlugins.BackgroundType = backgroundStyle.SolidColor;
+            ////OMList lstplugins = new OMList(10, 100, 980, 433);
+            //OMList lstplugins = new OMList("list_Plugins", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
+            //lstplugins.ListStyle = eListStyle.MultiListText;
+            //lstplugins.Background = Color.Silver;
+            //lstplugins.ItemColor1 = Color.Black;
+            //lstplugins.Font = new Font(Font.GenericSansSerif, 30F);
+            //lstplugins.HighlightColor = Color.White;
+            //lstplugins.OnClick += new userInteraction(lstplugins_OnClick);
+            //lstplugins.Add(new OMListItem("Loading . . .","",format));
+            //lstplugins.Scrollbars = true;
+            //panelPlugins.addControl(lstplugins);
+            //manager.loadPanel(panelPlugins);
+
+            OMPanel panelPlugins = new OMPanel("Plugins");
+            panelPlugins.BackgroundColor1 = Color.Black;
+            panelPlugins.BackgroundType = backgroundStyle.SolidColor;
+
+            OMObjectList listPlugins = new OMObjectList("listPlugins", theHost.ClientArea_Init.Left, theHost.ClientArea_Init.Top, theHost.ClientArea_Init.Width, theHost.ClientArea_Init.Height);
+            panelPlugins.addControl(listPlugins);
+
+            #region Create list item
+
+            OMObjectList.ListItem ItemBase = new OMObjectList.ListItem();
+
+            int itemHeight = 100;
+
+            // Generate list item background images
+            OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
+            gd.BackgroundColor1 = Color.Transparent;
+            gd.BorderColor = Color.Transparent;
+            gd.Width = listPlugins.Width;
+            gd.Height = itemHeight;
+            gd.CornerRadius = 0;
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
+            listPluginItem_Selected = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
+            listPluginItem_Highlighted = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+
+            OMButton btnPluginListItem = new OMButton("btnPluginListItem", 0, 0, listPlugins.Width, itemHeight);
+            btnPluginListItem.FocusImage = listPluginItem_Highlighted;
+            btnPluginListItem.DownImage = listPluginItem_Selected;
+            btnPluginListItem.OnClick += new userInteraction(btnPluginListItem_OnClick);
+            ItemBase.Add(btnPluginListItem);
+
+            OMImage imgPluginListIcon = new OMImage("imgPluginListIcon", 5, 0, 64, 64);
+            ItemBase.Add(imgPluginListIcon);
+
+            OMCheckbox chkPluginListItemEnabled = new OMCheckbox("chkPluginListItemEnabled", listPlugins.Width - 180, 5, 160, 30);
+            chkPluginListItemEnabled.OutlineColor = Color.White;
+            chkPluginListItemEnabled.CheckedColor = Color.FromArgb(128, Color.White);
+            chkPluginListItemEnabled.OnClick += new userInteraction(chkPluginListItemEnabled_OnClick);
+            chkPluginListItemEnabled.Text = "Enabled:";
+            chkPluginListItemEnabled.Style = OMCheckbox.Styles.TextToTheLeft;
+            ItemBase.Add(chkPluginListItemEnabled);
+
+            OMLabel lblPluginListItemHeader = new OMLabel("lblPluginListItemHeader", imgPluginListIcon.Region.Right, 0, listPlugins.Width - imgPluginListIcon.Region.Right, 50);
+            lblPluginListItemHeader.Font = new Font(Font.GenericSansSerif, 30F);
+            lblPluginListItemHeader.TextAlignment = Alignment.CenterLeft;
+            lblPluginListItemHeader.NoUserInteraction = true;
+            ItemBase.Add(lblPluginListItemHeader);
+
+            OMLabel lblPluginListItemDescription = new OMLabel("lblPluginListItemDescription", imgPluginListIcon.Region.Right, 50, listPlugins.Width - imgPluginListIcon.Region.Right, 45);
+            lblPluginListItemDescription.TextAlignment = Alignment.CenterLeft;
+            lblPluginListItemDescription.Color = Color.FromArgb(128, lblPluginListItemHeader.Color);
+            lblPluginListItemDescription.Font = new Font(Font.GenericSansSerif, 16F);
+            lblPluginListItemDescription.NoUserInteraction = true;
+            ItemBase.Add(lblPluginListItemDescription);
+
+            OMImage imgPluginListItemSeparator = new OMImage("imgPluginListItemSeparator", 0, itemHeight, listPlugins.Width, 1);
+            imgPluginListItemSeparator.BackgroundColor = Color.FromArgb(50, Color.White);
+            ItemBase.Add(imgPluginListItemSeparator);
+
+            OMLabel lblPluginListItemDisabledInfo = new OMLabel("lblPluginListItemDisabledInfo", 0, 0, listPlugins.Width, itemHeight);
+            lblPluginListItemDisabledInfo.TextAlignment = Alignment.CenterCenter;
+            lblPluginListItemDisabledInfo.Color = Color.Red;
+            lblPluginListItemDisabledInfo.BackgroundColor = Color.FromArgb(178, Color.Black);
+            lblPluginListItemDisabledInfo.Transparency = 100;
+            lblPluginListItemDisabledInfo.Font = new Font(Font.GenericSansSerif, 26F);
+            lblPluginListItemDisabledInfo.NoUserInteraction = true;
+            ItemBase.Add(lblPluginListItemDisabledInfo);
+
+            // Method for setting values when adding list items
+            ItemBase.Action_SetItemInfo = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item, object[] values)
+            {
+                IBasePlugin plugin = values[8] as IBasePlugin;
+                PluginLevels pluginLevel = OpenMobile.helperFunctions.Plugins.Plugins.getPluginLevel(plugin.pluginName);
+                OSConfigurationFlags OSConfFlags = OpenMobile.helperFunctions.Plugins.Plugins.GetPluginOSConfigurationFlags(plugin);
+                bool OSConfFlagsValid = OpenMobile.helperFunctions.Plugins.Plugins.IsPluginOSConfigurationFlagsValid(plugin);
+
+                // Save button tag to go to correct plugin
+                OMButton btnItemButton = item["btnPluginListItem"] as OMButton;
+                btnItemButton.Tag = values[0] as string;
+
+                // Icon
+                OMImage imgItemIcon = item["imgPluginListIcon"] as OMImage;
+                imgItemIcon.Image = (imageItem)values[1];
+
+                // Header text
+                OMLabel lblItemHeader = item["lblPluginListItemHeader"] as OMLabel;
+                lblItemHeader.Text = values[2] as string;
+
+                // Description text
+                OMLabel lblItemDescription = item["lblPluginListItemDescription"] as OMLabel;
+                lblItemDescription.Text = String.Format("{0}\n", values[3] as string);
+                lblItemDescription.Text += String.Format("Version {0}", values[6]);
+                string author = values[4] as string;
+                if (!String.IsNullOrEmpty(author))
+                    lblItemDescription.Text += String.Format(" By {0}", author);
+                string email = values[5] as string;
+                if (!String.IsNullOrEmpty(email))
+                    lblItemDescription.Text += String.Format(" ({0})", email);
+
+                OMCheckbox chkItemEnabled = item["chkPluginListItemEnabled"] as OMCheckbox;
+                chkItemEnabled.Checked = (bool)values[7];
+                chkItemEnabled.Tag = plugin;
+
+                if (((pluginLevel & PluginLevels.Normal) == PluginLevels.Normal) ||
+                    ((pluginLevel & PluginLevels.UserInput) == PluginLevels.UserInput))
+                {
+                    chkItemEnabled.Transparency = 0;
+                    chkItemEnabled.NoUserInteraction = false;
+                }
+                else
+                {
+                    chkItemEnabled.Transparency = 100;
+                    chkItemEnabled.NoUserInteraction = true;
+                }
+
+                // Disabled text
+                if (!OSConfFlagsValid)
+                {
+                    OMLabel lblItemDisabledInfo = item["lblPluginListItemDisabledInfo"] as OMLabel;
+                    lblItemDisabledInfo.Transparency = 0;
+                    lblItemDisabledInfo.Text = "Plugin not supported on this system!";
+                    chkItemEnabled.Transparency = 100;
+                    chkItemEnabled.NoUserInteraction = true;
+                }
+            };
+            listPlugins.ItemBase = ItemBase;
+
             #endregion
 
-            #region general
-            LayoutManager generalLayout = new LayoutManager();
-            OpenMobile.Plugin.Settings SystemSettings = BuiltInComponents.GlobalSettings();
-            SystemSettings.OnSettingChanged += new SettingChanged(SystemSettings_OnSettingChanged);
-            OMPanel[] general = generalLayout.layout(theHost, SystemSettings);
-            manager.loadPanel(general);
+            #region Create list item separator
+
+            listItemSeparator = new OMObjectList.ListItem();
+
+            OMLabel lblSeparator = new OMLabel("lblSeparator", 0, 0, listPlugins.Width, 20);
+            lblSeparator.BackgroundColor = Color.FromArgb(50, Color.White);
+            lblSeparator.FontSize = 14;
+            lblSeparator.Color = Color.FromArgb(178, Color.White);
+            lblSeparator.TextAlignment = Alignment.CenterLeft;
+            listItemSeparator.Add(lblSeparator);
+
+            // Method for adding list items
+            listItemSeparator.Action_SetItemInfo = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item, object[] values)
+            {
+                // Item header
+                OMLabel lblItemSeparator = item["lblSeparator"] as OMLabel;
+                lblItemSeparator.Text = values[0] as string;
+            };
+
             #endregion
 
-            #region Disabled options
+            manager.loadPanel(panelPlugins);
 
-            /*
+            #endregion
+
+            OpenMobile.Threading.SafeThread.Asynchronous(() =>
+            {
+
+                #region menu
+                OMPanel main = new OMPanel("Main");
+                main.BackgroundColor1 = Color.Black;
+                main.BackgroundType = backgroundStyle.SolidColor;
+                OMList menu = new OMList("list_Menu", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
+                menu.ListStyle = eListStyle.MultiListText;
+                menu.Background = Color.Silver;
+                menu.ItemColor1 = Color.Black;
+                menu.Font = new Font(Font.GenericSansSerif, 30F);
+                menu.HighlightColor = Color.White;
+                menu.SelectedItemColor1 = BuiltInComponents.SystemSettings.SkinFocusColor;
+                menu.SoftEdgeData.Color1 = Color.Black;
+                menu.SoftEdgeData.Sides = FadingEdge.GraphicSides.Top | FadingEdge.GraphicSides.Bottom;
+                menu.UseSoftEdges = true;
+                OMListItem.subItemFormat format = new OMListItem.subItemFormat();
+                format.color = Color.FromArgb(128, menu.Color);
+                format.font = new Font(Font.GenericSansSerif, 21F);
+                menu.Add(new OMListItem("About", "Credits and information", format, "About"));
+                menu.Add(new OMListItem("System Settings", "User Interface and System Settings", format, "System Settings"));
+                //menu.Add(new OMListItem("Personal Settings", "Usernames and Passwords", format, "personal"));
+                //menu.Add(new OMListItem("Data Settings", "Settings for each of the Data Providers", format, "data"));
+                menu.Add(new OMListItem("Input routing", "Routing of data between a input device and a screen", format, "InputRouterScreenSelection"));
+                menu.Add(new OMListItem("Multi-Zone Settings", "Displays, Sound Cards and other zone specific settings", format, "Zones"));
+                menu.Add(new OMListItem("Plugin Settings", "Settings for all low level plugins", format, "Plugins"));
+                menu.OnClick += new userInteraction(menu_OnClick);
+                main.addControl(menu);
+                manager.loadPanel(main, true);
+                #endregion
+
+                #region general
+                LayoutManager generalLayout = new LayoutManager();
+                OpenMobile.Plugin.Settings SystemSettings = BuiltInComponents.GlobalSettings();
+                SystemSettings.OnSettingChanged += new SettingChanged(SystemSettings_OnSettingChanged);
+                OMPanel[] general = generalLayout.layout(theHost, SystemSettings);
+                manager.loadPanel(general);
+                #endregion
+
+                #region Disabled options
+
+                /*
             #region personal
             OMPanel personal = new OMPanel("personal");
             OMButton Save2 = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("Media.Save", 14, 136, 200, 110, "", "Save");
@@ -190,184 +365,15 @@ namespace OMSettings
             #endregion
             */
 
-            #endregion
+                #endregion
 
-            #region Plugins
-            //OMPanel panelPlugins = new OMPanel("Plugins");
-            //panelPlugins.BackgroundColor1 = Color.Black;
-            //panelPlugins.BackgroundType = backgroundStyle.SolidColor;
-            ////OMList lstplugins = new OMList(10, 100, 980, 433);
-            //OMList lstplugins = new OMList("list_Plugins", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
-            //lstplugins.ListStyle = eListStyle.MultiListText;
-            //lstplugins.Background = Color.Silver;
-            //lstplugins.ItemColor1 = Color.Black;
-            //lstplugins.Font = new Font(Font.GenericSansSerif, 30F);
-            //lstplugins.HighlightColor = Color.White;
-            //lstplugins.OnClick += new userInteraction(lstplugins_OnClick);
-            //lstplugins.Add(new OMListItem("Loading . . .","",format));
-            //lstplugins.Scrollbars = true;
-            //panelPlugins.addControl(lstplugins);
-            //manager.loadPanel(panelPlugins);
+                // Load input router panels
+                OMSettings.InputRouterScreens.Initialize(this.pluginName, manager, theHost);
 
-            OMPanel panelPlugins = new OMPanel("Plugins");
-            panelPlugins.BackgroundColor1 = Color.Black;
-            panelPlugins.BackgroundType = backgroundStyle.SolidColor;
+                // Load zones panels
+                OMSettings.ZoneSettings.Initialize(this.pluginName, manager, theHost);
 
-            OMObjectList listPlugins = new OMObjectList("listPlugins", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
-            panelPlugins.addControl(listPlugins);
-
-            #region Create list item
-
-            OMObjectList.ListItem ItemBase = new OMObjectList.ListItem();
-
-            int itemHeight = 100;
-            
-            // Generate list item background images
-            OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
-            gd.BackgroundColor1 = Color.Transparent;
-            gd.BorderColor = Color.Transparent;
-            gd.Width = listPlugins.Width;
-            gd.Height = itemHeight;
-            gd.CornerRadius = 0;
-            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
-            listPluginItem_Selected = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
-            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
-            listPluginItem_Highlighted = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
-
-            OMButton btnPluginListItem = new OMButton("btnPluginListItem", 0, 0, listPlugins.Width, itemHeight);
-            btnPluginListItem.FocusImage = listPluginItem_Highlighted;
-            btnPluginListItem.DownImage = listPluginItem_Selected;
-            btnPluginListItem.OnClick += new userInteraction(btnPluginListItem_OnClick);
-            ItemBase.Add(btnPluginListItem);
-
-            OMImage imgPluginListIcon = new OMImage("imgPluginListIcon", 5, 0, 64, 64);
-            ItemBase.Add(imgPluginListIcon);
-
-            OMCheckbox chkPluginListItemEnabled = new OMCheckbox("chkPluginListItemEnabled", listPlugins.Width - 180, 5, 160, 30);
-            chkPluginListItemEnabled.OutlineColor = Color.White;
-            chkPluginListItemEnabled.CheckedColor = Color.FromArgb(128, Color.White);
-            chkPluginListItemEnabled.OnClick += new userInteraction(chkPluginListItemEnabled_OnClick);
-            chkPluginListItemEnabled.Text = "Enabled:";
-            chkPluginListItemEnabled.Style = OMCheckbox.Styles.TextToTheLeft;
-            ItemBase.Add(chkPluginListItemEnabled);
-
-            OMLabel lblPluginListItemHeader = new OMLabel("lblPluginListItemHeader", imgPluginListIcon.Region.Right, 0, listPlugins.Width - imgPluginListIcon.Region.Right, 50);
-            lblPluginListItemHeader.Font = new Font(Font.GenericSansSerif, 30F);
-            lblPluginListItemHeader.TextAlignment = Alignment.CenterLeft;
-            lblPluginListItemHeader.NoUserInteraction = true;
-            ItemBase.Add(lblPluginListItemHeader);
-
-            OMLabel lblPluginListItemDescription = new OMLabel("lblPluginListItemDescription", imgPluginListIcon.Region.Right, 50, listPlugins.Width - imgPluginListIcon.Region.Right, 45);
-            lblPluginListItemDescription.TextAlignment = Alignment.CenterLeft;
-            lblPluginListItemDescription.Color = Color.FromArgb(128, lblPluginListItemHeader.Color);
-            lblPluginListItemDescription.Font = new Font(Font.GenericSansSerif, 16F);
-            lblPluginListItemDescription.NoUserInteraction = true;
-            ItemBase.Add(lblPluginListItemDescription);
-
-            OMImage imgPluginListItemSeparator = new OMImage("imgPluginListItemSeparator", 0, itemHeight, listPlugins.Width, 1);
-            imgPluginListItemSeparator.BackgroundColor = Color.FromArgb(50, Color.White);
-            ItemBase.Add(imgPluginListItemSeparator);
-
-            OMLabel lblPluginListItemDisabledInfo = new OMLabel("lblPluginListItemDisabledInfo", 0, 0, listPlugins.Width, itemHeight);
-            lblPluginListItemDisabledInfo.TextAlignment = Alignment.CenterCenter;
-            lblPluginListItemDisabledInfo.Color = Color.Red;
-            lblPluginListItemDisabledInfo.BackgroundColor = Color.FromArgb(178, Color.Black);
-            lblPluginListItemDisabledInfo.Transparency = 100;
-            lblPluginListItemDisabledInfo.Font = new Font(Font.GenericSansSerif, 26F);
-            lblPluginListItemDisabledInfo.NoUserInteraction = true;
-            ItemBase.Add(lblPluginListItemDisabledInfo);
-
-            // Method for setting values when adding list items
-            ItemBase.Action_SetItemInfo = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item, object[] values)
-            {
-                IBasePlugin plugin = values[8] as IBasePlugin;
-                PluginLevels pluginLevel = OpenMobile.helperFunctions.Plugins.Plugins.getPluginLevel(plugin.pluginName);
-                OSConfigurationFlags OSConfFlags = OpenMobile.helperFunctions.Plugins.Plugins.GetPluginOSConfigurationFlags(plugin);
-                bool OSConfFlagsValid = OpenMobile.helperFunctions.Plugins.Plugins.IsPluginOSConfigurationFlagsValid(plugin);
-
-                // Save button tag to go to correct plugin
-                OMButton btnItemButton = item["btnPluginListItem"] as OMButton;
-                btnItemButton.Tag = values[0] as string;
-                
-                // Icon
-                OMImage imgItemIcon = item["imgPluginListIcon"] as OMImage;
-                imgItemIcon.Image = (imageItem)values[1];
-
-                // Header text
-                OMLabel lblItemHeader = item["lblPluginListItemHeader"] as OMLabel;
-                lblItemHeader.Text = values[2] as string;
-
-                // Description text
-                OMLabel lblItemDescription = item["lblPluginListItemDescription"] as OMLabel;
-                lblItemDescription.Text = String.Format("{0}\n", values[3] as string);
-                lblItemDescription.Text += String.Format("Version {0}", values[6]);                
-                string author = values[4] as string;
-                if (!String.IsNullOrEmpty(author))
-                    lblItemDescription.Text += String.Format(" By {0}", author);
-                string email = values[5] as string;
-                if (!String.IsNullOrEmpty(email))
-                    lblItemDescription.Text += String.Format(" ({0})", email);
-
-                OMCheckbox chkItemEnabled = item["chkPluginListItemEnabled"] as OMCheckbox;
-                chkItemEnabled.Checked = (bool)values[7];
-                chkItemEnabled.Tag = plugin;
-
-                if (((pluginLevel & PluginLevels.Normal) == PluginLevels.Normal) ||
-                    ((pluginLevel & PluginLevels.UserInput) == PluginLevels.UserInput))
-                {
-                    chkItemEnabled.Transparency = 0;
-                    chkItemEnabled.NoUserInteraction = false;
-                }
-                else
-                {
-                    chkItemEnabled.Transparency = 100;
-                    chkItemEnabled.NoUserInteraction = true;
-                }
-
-                // Disabled text
-                if (!OSConfFlagsValid)
-                {
-                    OMLabel lblItemDisabledInfo = item["lblPluginListItemDisabledInfo"] as OMLabel;
-                    lblItemDisabledInfo.Transparency = 0;
-                    lblItemDisabledInfo.Text = "Plugin not supported on this system!";
-                    chkItemEnabled.Transparency = 100;
-                    chkItemEnabled.NoUserInteraction = true;
-                }
-            };
-            listPlugins.ItemBase = ItemBase;
-
-            #endregion
-
-            #region Create list item separator
-
-            listItemSeparator = new OMObjectList.ListItem();
-
-            OMLabel lblSeparator = new OMLabel("lblSeparator", 0, 0, listPlugins.Width, 20);
-            lblSeparator.BackgroundColor = Color.FromArgb(50, Color.White);
-            lblSeparator.FontSize = 14;
-            lblSeparator.Color = Color.FromArgb(178, Color.White);
-            lblSeparator.TextAlignment = Alignment.CenterLeft;
-            listItemSeparator.Add(lblSeparator);
-
-            // Method for adding list items
-            listItemSeparator.Action_SetItemInfo = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item, object[] values)
-            {
-                // Item header
-                OMLabel lblItemSeparator = item["lblSeparator"] as OMLabel;
-                lblItemSeparator.Text = values[0] as string;
-            };
-
-            #endregion
-
-            manager.loadPanel(panelPlugins);
-
-            #endregion
-
-            // Load input router panels
-            OMSettings.InputRouterScreens.Initialize(this.pluginName, manager, theHost);
-
-            // Load zones panels
-            OMSettings.ZoneSettings.Initialize(this.pluginName, manager, theHost);
+            });
 
             return OpenMobile.eLoadStatus.LoadSuccessful;
         }
@@ -608,9 +614,10 @@ namespace OMSettings
                 case "About":
                     {
                         // Change screen
-                        theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-                        theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "About");
-                        theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                        //theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+                        //theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "About");
+                        //theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+                        OM.Host.execute(eFunction.GotoPanel, screen, String.Format("{0};{1}", this.pluginName, "About"));
                         ((OMList)sender).Select(-1);
                         return;
                     }
@@ -625,9 +632,10 @@ namespace OMSettings
             }
 
             // Change screen
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", Panel);
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            OM.Host.execute(eFunction.GotoPanel, screen, String.Format("{0};{1}", this.pluginName, Panel));
+            //theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), "OMSettings");
+            //theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMSettings", Panel);
+            //theHost.execute(eFunction.ExecuteTransition, screen.ToString());
 
             ((OMList)sender).Select(-1);
         }
