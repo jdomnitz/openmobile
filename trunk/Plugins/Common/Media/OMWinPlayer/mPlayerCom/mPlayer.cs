@@ -1152,6 +1152,26 @@ namespace OpenMobile.mPlayer
             killPlayer();
         }
 
+        private void RestartPlayer()
+        {
+            WriteToSessionLog("Forced Restart of mPlayer", true);
+            PlayerStates storedState = _PlayerState;
+            string storedURL = _MediaInfo.Url;
+            int playbackPos = (int)_MediaInfo.PlaybackPos.TotalSeconds;
+            MediaData storedMedia = _MediaInfo;
+            _PlayerState = PlayerStates.None;
+
+            // Respawn player
+            SpawnPlayer(false, true);
+
+            if (storedState == PlayerStates.Playing)
+            {   // Restart previously playing media
+                _MediaInfo = storedMedia;
+                PlayFile(storedURL);
+                SeekFwd(playbackPos);
+            }
+
+        }
 
         /// <summary>
         /// Executes mPlayer in a separate process to grab the output
@@ -1183,6 +1203,7 @@ namespace OpenMobile.mPlayer
 
         #region Media data
 
+        private int _HeartBeatErrorCount = 0;
         private System.Timers.Timer _tmrMediaPoll;
         void _tmrMediaPoll_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {   // Poll player for media information
@@ -1241,6 +1262,22 @@ namespace OpenMobile.mPlayer
                     break;
             }
 
+            string filename = SendCommand<string>(Commands.Get_Filename);
+            if (String.IsNullOrEmpty(filename))
+            {
+                _HeartBeatErrorCount++;
+                WriteToSessionLog(String.Format("Heartbeat Error {0}", _HeartBeatErrorCount), true);
+                if (_HeartBeatErrorCount >= 2)
+                {
+                    _HeartBeatErrorCount = 0;
+                    WriteToSessionLog(String.Format("Too many heartbeat errors {0}, restarting player", _HeartBeatErrorCount), true);
+                    RestartPlayer();
+                }
+            }
+            else
+            {
+                _HeartBeatErrorCount = 0;
+            }
 
             Raise_OnMediaInfoUpdated();
 
@@ -1459,6 +1496,19 @@ namespace OpenMobile.mPlayer
             }
         }
 
+        /// <summary>
+        /// Finds the first occurance of the searchString and returns the rest of the string
+        /// </summary>
+        /// <param name="sourceString"></param>
+        /// <param name="searchString"></param>
+        /// <returns></returns>
+        private string FindAndGetSubString(string sourceString, string searchString)
+        {
+            if (sourceString.Contains(searchString))
+                return sourceString.Substring(sourceString.IndexOf(searchString) + searchString.Length).Trim();
+            return string.Empty;
+        }
+
         int _ProcessOutputMode = 0;
         void _PlayerProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -1516,12 +1566,14 @@ namespace OpenMobile.mPlayer
 
             // Get streaming data (if any)
                 // Genre
-                if (line.StartsWith(" 4 - icy-genre: "))
-                    _MediaInfo.Genre = line.Substring(16);
-                if (line.StartsWith(" 3 - icy-description: "))
-                    _MediaInfo.Comment = line.Substring(22);
-                if (line.StartsWith(" 7 - icy-url: "))
-                    _MediaInfo.Comment += String.Format(" ({0})", line.Substring(14));
+            if (line.Contains("- icy-name:"))
+                _MediaInfo.Title = FindAndGetSubString(line, "- icy-name:");
+            if (line.Contains("- icy-genre:"))
+                _MediaInfo.Genre = FindAndGetSubString(line, "- icy-genre:");
+            if (line.Contains("- icy-description:"))
+                _MediaInfo.Comment = FindAndGetSubString(line, "- icy-description:");
+            if (line.Contains("- icy-url:"))
+                _MediaInfo.Comment += String.Format(" ({0})", FindAndGetSubString(line, "- icy-url:"));
 
             // Set media type (if streaming)
                 if (line.StartsWith("STREAM_HTTP("))

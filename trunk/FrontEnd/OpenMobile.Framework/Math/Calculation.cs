@@ -155,7 +155,12 @@ namespace OpenMobile.Framework.Math
         /// <summary>
         /// Miles
         /// </summary>
-        miles
+        miles,
+
+        /// <summary>
+        /// Nautical miles
+        /// </summary>
+        nauticalMile
     }
 
     /// <summary>
@@ -572,6 +577,95 @@ namespace OpenMobile.Framework.Math
         public static int RandomNumber(int min, int max)
         {
             return new Random().Next(min, max);
+        }
+
+        /// <summary>
+        /// Calculates the distance between two locations
+        /// </summary>
+        /// <param name="loc1"></param>
+        /// <param name="loc2"></param>
+        /// <param name="unit"></param>
+        /// <returns></returns>
+        public static double GetLatLongDistance(Location loc1, Location loc2, distanceTypes unit = distanceTypes.kilometers)
+        {
+            return GetLatLongDistance(loc1.Latitude, loc1.Longitude, loc2.Latitude, loc2.Longitude, unit);
+        }
+
+        /// <summary>
+        /// Calculates the distance between two lat/long points
+        /// </summary>
+        /// <param name="lat1"></param>
+        /// <param name="lon1"></param>
+        /// <param name="lat2"></param>
+        /// <param name="lon2"></param>
+        /// <param name="unit"></param>
+        /// <returns></returns>
+        public static double GetLatLongDistance(double lat1, double lon1, double lat2, double lon2, distanceTypes unit = distanceTypes.kilometers)
+        {
+            double theta = lon1 - lon2;
+            double dist = System.Math.Sin(deg2rad(lat1)) * System.Math.Sin(deg2rad(lat2)) + System.Math.Cos(deg2rad(lat1)) * System.Math.Cos(deg2rad(lat2)) * System.Math.Cos(deg2rad(theta));
+            dist = System.Math.Acos(dist);
+            dist = rad2deg(dist);
+            dist = dist * 60 * 1.1515;
+
+            switch (unit)
+            {
+                case distanceTypes.centimeters:
+                    // First get it to kilometers
+                    dist *= 1.609344;
+                    // Then to centimeters
+                    dist *= 100000;
+                    break;
+                case distanceTypes.millimeters:
+                    // First get it to kilometers
+                    dist *= 1.609344;
+                    // Then to millimeters
+                    dist *= 1000000;
+                    break;
+                case distanceTypes.inches:
+                    // First get it to kilometers
+                    dist *= 1.609344;
+                    // Then to inches
+                    dist *= 39370.0787;
+                    break;
+                case distanceTypes.feet:
+                    // First get it to kilometers
+                    dist *= 1.609344;
+                    // Then to feet
+                    dist *= 3280.8399;
+                    break;
+                case distanceTypes.meters:
+                    // First get it to kilometers
+                    dist *= 1.609344;
+                    // Then to meters
+                    dist *= 1000;
+                    break;
+                case distanceTypes.kilometers:
+                    dist *= 1.609344;
+                    break;
+                case distanceTypes.miles:
+                    // First get it to kilometers
+                    dist *= 1.609344;
+                    // Then to miles
+                    dist *= 0.621371192;                    
+                    break;
+                case distanceTypes.nauticalMile:
+                    dist = dist * 0.8684;
+                    break;
+                default:
+                    break;
+            }
+            return (dist);
+        }
+
+        public static double deg2rad(double deg)
+        {
+            return (deg * System.Math.PI / 180.0);
+        }
+
+        public static double rad2deg(double rad)
+        {
+            return (rad / System.Math.PI * 180.0);
         }
     }
 }

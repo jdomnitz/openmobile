@@ -80,13 +80,50 @@ namespace OpenMobile.Controls
 
         #endregion
 
+        /// <summary>
+        /// List item
+        /// </summary>
         public class ListItem : ControlGroup
         {
+            /// <summary>
+            /// Action: Set item info
+            /// </summary>
             public SetItemInfoDelegate Action_SetItemInfo = null;
+            /// <summary>
+            /// Action: Select item
+            /// </summary>
             public ItemActionDelegate Action_Select = null;
+            /// <summary>
+            /// Action: Deselect item
+            /// </summary>
             public ItemActionDelegate Action_Deselect = null;
+            /// <summary>
+            /// Action: Highlight item
+            /// </summary>
             public ItemActionDelegate Action_Highlight = null;
+            /// <summary>
+            /// Action: Unhighlight item
+            /// </summary>
             public ItemActionDelegate Action_Unhighlight = null;
+
+            /// <summary>
+            /// A free to use object
+            /// </summary>
+            public object Tag
+            {
+                get
+                {
+                    return this._Tag;
+                }
+                set
+                {
+                    if (this._Tag != value)
+                    {
+                        this._Tag = value;
+                    }
+                }
+            }
+            private object _Tag;        
 
             internal int myIndex = -1;
 
@@ -111,6 +148,9 @@ namespace OpenMobile.Controls
                 }
             }
 
+            /// <summary>
+            /// Creates a listitem
+            /// </summary>
             public ListItem()
             {
             }
@@ -177,16 +217,20 @@ namespace OpenMobile.Controls
             {
                 ListItem newListItem = new ListItem();
                 newListItem._ItemSize = this._ItemSize;
-                newListItem.Action_SetItemInfo = Action_SetItemInfo;
-                newListItem.Action_Select = Action_Select;
-                newListItem.Action_Deselect = Action_Deselect;
-                newListItem.Action_Highlight = Action_Highlight;
-                newListItem.Action_Unhighlight = Action_Unhighlight;
+                newListItem.Action_SetItemInfo = this.Action_SetItemInfo;
+                newListItem.Action_Select = this.Action_Select;
+                newListItem.Action_Deselect = this.Action_Deselect;
+                newListItem.Action_Highlight = this.Action_Highlight;
+                newListItem.Action_Unhighlight = this.Action_Unhighlight;
+                newListItem.Tag = this.Tag;
                 for (int i = 0; i < this.Count; i++)
                     newListItem.Add((OMControl)this[i].Clone());
                 return newListItem;
             }
 
+            /// <summary>
+            /// The region this listitem occupies
+            /// </summary>
             public Rectangle Region
             {
                 get
@@ -204,6 +248,11 @@ namespace OpenMobile.Controls
             }
         }
 
+        /// <summary>
+        /// Index changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="screen"></param>
         public delegate void IndexChangedDelegate(OMObjectList sender, int screen);
         /// <summary>
         /// Occurs when the list index changes
@@ -215,24 +264,26 @@ namespace OpenMobile.Controls
         public event IndexChangedDelegate OnHighlightedIndexChanged;
 
         private ListItem _ItemBase = null;
+        /// <summary>
+        /// Set info
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="screen"></param>
+        /// <param name="item"></param>
+        /// <param name="values"></param>
         public delegate void SetItemInfoDelegate(OMObjectList sender, int screen, ListItem item, object[] values);
+        /// <summary>
+        /// Item action
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="screen"></param>
+        /// <param name="item"></param>
         public delegate void ItemActionDelegate(OMObjectList sender, int screen, ListItem item);
         private Rectangle _ItemBase_Region;
         private int _Items_SelectedIndex = -1;
         private int _Items_HighlightedIndex = -1;
 
         private List<ListItem> _Items = new List<ListItem>();
-
-        ///// <summary>
-        ///// Directions to use when adding list items
-        ///// </summary>
-        //public enum ListDirection
-        //{
-        //    Down,
-        //    Right,
-        //    Left,
-        //    Up
-        //}
 
         #region Constructors
 
@@ -274,6 +325,8 @@ namespace OpenMobile.Controls
         {
             get
             {
+                if (_Items_SelectedIndex < 0)
+                    return null;
                 return _Items[_Items_SelectedIndex];
             }
         }
@@ -298,10 +351,15 @@ namespace OpenMobile.Controls
         {
             get
             {
+                if (_Items_HighlightedIndex < 0)
+                    return null;
                 return _Items[_Items_HighlightedIndex];
             }
         }
 
+        /// <summary>
+        /// Itembase for use when adding items
+        /// </summary>
         public ListItem ItemBase
         {
             get
@@ -314,6 +372,9 @@ namespace OpenMobile.Controls
             }
         }
 
+        /// <summary>
+        /// Items contained in the list
+        /// </summary>
         public List<ListItem> Items
         {
             get
@@ -322,62 +383,21 @@ namespace OpenMobile.Controls
             }
         }
         
-        //private void ListItem_SetPlacement(int index, ListItem controls, ListDirection direction)
-        //{
-        //    // Set placement 
-        //    switch (direction)
-        //    {
-        //        case ListDirection.Down:
-        //            {
-        //                // Get placement of control above this one
-        //                Rectangle ControlPreviousArea = new Rectangle();
-        //                Rectangle ListControlArea = new Rectangle();
-        //                if (index > 0)
-        //                {
-        //                    ControlPreviousArea = _Items[index - 1].Region;//OMControl.GetControlsArea(_Items[index - 1].Controls);
-        //                    ListControlArea = this.Region;
-        //                }
-
-        //                foreach (OMControl control in controls.Controls)
-        //                    control.Top = (ControlPreviousArea.Bottom - ListControlArea.Top) + control.Top;
-        //            }
-        //            break;
-        //        case ListDirection.Right:
-        //            {
-        //                // Get placement of control to the left of this one
-        //                Rectangle ControlPreviousArea = new Rectangle();
-        //                Rectangle ListControlArea = new Rectangle();
-        //                if (index > 0)
-        //                {
-        //                    ControlPreviousArea = _Items[index - 1].Region;//OMControl.GetControlsArea(_Items[index - 1].Controls);
-        //                    ListControlArea = this.Region;
-        //                }
-
-        //                foreach (OMControl control in controls.Controls)
-        //                    control.Left = (ControlPreviousArea.Right - ListControlArea.Left) + control.Left;
-        //            }
-        //            break;
-        //        case ListDirection.Left:
-        //            break;
-        //        case ListDirection.Up:
-        //            break;
-        //        default:
-        //            break;
-        //    }
-
-        //    if (ControlAndOffsetDataOverride != null)
-        //    {
-        //        Rectangle Offset = new Rectangle();
-        //        ControlAndOffsetDataOverride(controls.Controls, ref Offset);
-        //        controls.Controls.Translate(Offset);
-        //    }
-        //}
-
+        /// <summary>
+        /// Adds an item to the list
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="values"></param>
         public void AddItemFromItemBase(ControlDirections direction, params object[] values)
         {
             AddItemFromItemBase(values, direction);
         }
 
+        /// <summary>
+        /// Adds an item to the list
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="direction"></param>
         public void AddItemFromItemBase(object[] values, ControlDirections direction)
         {
             if (this.parent == null)
@@ -404,10 +424,22 @@ namespace OpenMobile.Controls
             }
         }
 
+        /// <summary>
+        /// Adds an item to the list
+        /// </summary>
+        /// <param name="baseItem"></param>
+        /// <param name="direction"></param>
+        /// <param name="values"></param>
         public void AddItem(ListItem baseItem, ControlDirections direction, params object[] values)
         {
             AddItem(baseItem, values, direction);
         }
+        /// <summary>
+        /// Adds an item to the list
+        /// </summary>
+        /// <param name="baseItem"></param>
+        /// <param name="values"></param>
+        /// <param name="direction"></param>
         public void AddItem(ListItem baseItem, object[] values, ControlDirections direction)
         {
             if (this.parent == null)
@@ -434,7 +466,6 @@ namespace OpenMobile.Controls
             }
         }
 
-
         /// <summary>
         /// Clear list items
         /// </summary>
@@ -442,6 +473,8 @@ namespace OpenMobile.Controls
         {
             Items.Clear();
             this.ClearControls();
+            _Items_SelectedIndex = -1;
+            _Items_HighlightedIndex = -1;
             Refresh();
         }
 
@@ -474,11 +507,11 @@ namespace OpenMobile.Controls
         }
         private void Item_Highlight(int index)
         {
-            // Deselect selected item
+            // Unhighlight highlighted item
             if (_Items_HighlightedIndex >= 0)
                 _Items[_Items_HighlightedIndex].ExecuteAction_Unhighlight(this, this.parent.ActiveScreen, _Items_HighlightedIndex);
 
-            // Selected new item
+            // Highlighted new item
             _Items_HighlightedIndex = index;
             if (_Items_HighlightedIndex >= 0)
                 _Items[_Items_HighlightedIndex].ExecuteAction_Highlight(this, this.parent.ActiveScreen, _Items_HighlightedIndex);
@@ -488,15 +521,82 @@ namespace OpenMobile.Controls
                 OnHighlightedIndexChanged(this, this.parent.ActiveScreen);
         }
 
+        /// <summary>
+        /// Cancels any ongoing scrolling
+        /// </summary>
+        public void ScrollCancel()
+        {
+            _ThrowRun = false;
+        }
+
+        /// <summary>
+        /// Scrolls to the given index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="animate"></param>
+        /// <param name="animationMinTime"></param>
+        /// <param name="animationMaxTime"></param>
+        public void ScrollToIndex(int index, bool animate = false, float animationMinTime = 250f, float animationMaxTime = 1000f)
+        {
+            if (index < 0 || index >= _Items.Count)
+                return;
+            ScrollToControl(_Items[index], animate, 1.0f, animationMinTime, animationMaxTime);
+        }
+
+        /// <summary>
+        /// Gets the index of the topmost visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetTopVisibleIndex()
+        {
+            return GetItemIndexFromPoint(new Point(this.left+(this.width/2), this.top + 1));
+        }
+
+        /// <summary>
+        /// Gets the index of the bottommost visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetBottomVisibleIndex()
+        {
+            return GetItemIndexFromPoint(new Point(this.left + (this.width / 2), this.top + this.height - 1));
+        }
+
+        /// <summary>
+        /// Gets the index of the centered visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetCenterVisibleIndex()
+        {
+            return GetItemIndexFromPoint(new Point(this.left + (this.width / 2), this.top + (this.height / 2)));
+        }
+
+        /// <summary>
+        /// Gets the index of the leftmost visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetLeftVisibleIndex()
+        {
+            return GetItemIndexFromPoint(new Point(this.left + 1, this.top + (this.height / 2)));
+        }
+
+        /// <summary>
+        /// Gets the index of the rightmost visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetRightVisibleIndex()
+        {
+            return GetItemIndexFromPoint(new Point(this.left + this.width - 1, this.top + (this.height / 2)));
+        }
+
         #region IMousePreview Members
 
-        public void MouseMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
+        public void MousePreviewMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
             // Highlight item under mouse
             Item_Highlight(GetItemIndexFromPoint(e.Location));
         }
 
-        public void MouseDown(int screen, MouseButtonEventArgs e, Point StartLocation)
+        public void MousePreviewDown(int screen, MouseButtonEventArgs e, Point StartLocation)
         {
             // Cancel any active throw 
             _ThrowRun = false;
@@ -508,7 +608,7 @@ namespace OpenMobile.Controls
             Item_Highlight(GetItemIndexFromPoint(e.Location));
         }
 
-        public void MouseUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
+        public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
             if (!ThrowActive)
             {
@@ -605,5 +705,58 @@ namespace OpenMobile.Controls
 
         #endregion
 
+        internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
+        {
+            try
+            {
+                // Is this a binary data source, if so use the true/false state to show/hide control
+                if (dataSource.DataType == OpenMobile.Data.DataSource.DataTypes.binary)
+                {
+                    try
+                    {
+                        base.Visible = (bool)dataSource.Value;
+                    }
+                    catch
+                    {
+                        base.Visible = false;
+                    }
+                }
+                else
+                {
+                    var enumerable = dataSource.Value as System.Collections.IEnumerable;
+                    if (enumerable != null)
+                    {
+                        this.Clear();
+                        foreach (var item in enumerable)
+                            AddItemFromItemBase(ControlDirections.Down, item);
+                    }
+                }
+            }
+            catch
+            {
+                return;
+            }
+            _RefreshGraphic = true;
+            Refresh();
+        }
+
+        public override eModeType Mode
+        {
+            get
+            {
+                return base.Mode;
+            }
+            set
+            {
+                base.Mode = value;
+
+                switch (value)
+                {
+                    case eModeType.Normal:
+                        Item_Highlight(-1);
+                        break;
+                }
+            }
+        }
     }
 }

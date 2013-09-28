@@ -8,8 +8,8 @@
     <ProjectGuid>{5392A331-5973-4243-9EE2-EB1F0D9621BD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OMPlayer2</RootNamespace>
-    <AssemblyName>OMPlayer2</AssemblyName>
+    <RootNamespace>OMWinPlayer</RootNamespace>
+    <AssemblyName>OMWinPlayer</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMPlayer2\</OutputPath>
+    <OutputPath>..\..\..\..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMWinPlayer\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

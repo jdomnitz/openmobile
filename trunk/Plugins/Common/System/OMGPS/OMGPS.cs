@@ -107,6 +107,21 @@ namespace OMGPS
             //DLNotification = new Notification(this, "GPSDL", imageItem.NONE, imageItem.None, """, "");
             //theHost.UIHandler.AddNotification(DLNotifiction);
 
+            if (StoredData.Get(this, "GPS.AutoConnectTimer") != "")
+            {
+                if (StoredData.Get(this, "GPS.AutoConnectTimer") == "Slow")
+                    autoConnectTimer = 1200;
+                else if (StoredData.Get(this, "GPS.AutoConnectTimer") == "Medium")
+                    autoConnectTimer = 850;
+                else if (StoredData.Get(this, "GPS.AutoConnectTimer") == "Fast")
+                    autoConnectTimer = 500;
+            }
+            else
+            {
+                StoredData.Set(this, "GPS.AutoConnectTimer", "Slow");
+                autoConnectTimer = 1200;
+            }
+
             //start threads
             checkIt = new AutoResetEvent(false);
             new Thread(Checker).Start();
@@ -141,8 +156,92 @@ namespace OMGPS
             fromDisconnect = false;
             theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
 
+            OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "GPS", "Location", "ReverseGeocode", ReverseGeocode, 0, false, "Reverse Gecodes Current Lat/Long"));
+
             return eLoadStatus.LoadSuccessful;
 
+        }
+
+        private object ReverseGeocode(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            Location loc = OM.Host.CurrentLocation;
+            if ((loc.Latitude.ToString() != "") && (loc.Longitude.ToString() != ""))
+            {
+                bool found = false;
+                string state = "";
+                string zip = "";
+                string city = "";
+                string country = "";
+                try
+                {
+                    //if (System.IO.File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMGPS"))) //OMGPS db exists, attempt a lookup in it first
+                    //{
+                    //    using (SqliteConnection con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMGPS") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+                    //    {
+                    //        if (con.State != System.Data.ConnectionState.Open)
+                    //            con.Open();
+                    //        using (SqliteCommand cmd = new SqliteCommand("SELECT * FROM GeoNames WHERE Latitude = '" + loc.Latitude.ToString() + "' AND Longitude = '" + loc.Longitude.ToString() + "'", con))
+                    //        {
+                    //            using (SqliteDataReader reader = cmd.ExecuteReader())
+                    //            {
+                    //                if (reader.HasRows)
+                    //                {
+                    //                    found = true;
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                }
+                catch { }
+                if (!found) //attempt a lookup on net if possible
+                {
+                    if (OM.Host.InternetAccess)
+                    {
+                        //use geonames website
+                        try
+                        {
+                            string html;
+                            using (WebClient wc = new WebClient())
+                            {
+                                //http://api.geonames.org/findNearbyPostalCodes?lat=47&lng=9&username=demo
+                                //http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=36&lng=-79.08
+                                html = wc.DownloadString("http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=" + loc.Latitude.ToString() + "&lng=" + loc.Longitude.ToString());
+                                //html = wc.DownloadString("http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=43.0842229&lng=-79.0915813");
+                            }
+                            if (html != "{\"postalCodes\": []}")
+                            {
+                                html = html.Remove(0, html.IndexOf("postalCode") + 11);
+                                zip = html.Remove(0, html.IndexOf("postalCode") + 11);
+                                zip = zip.Remove(0, zip.IndexOf("\"") + 1);
+                                zip = zip.Substring(0, zip.IndexOf("\""));
+                                country = html.Remove(0, html.IndexOf("countryCode") + 12);
+                                country = country.Remove(0, country.IndexOf("\"") + 1);
+                                country = country.Substring(0, country.IndexOf("\""));
+                                city = html.Remove(0, html.IndexOf("placeName") + 10);
+                                city = city.Remove(0, city.IndexOf("\"") + 1);
+                                city = city.Substring(0, city.IndexOf("\""));
+                                state = html.Remove(0, html.IndexOf("adminName1") + 11);
+                                state = state.Remove(0, state.IndexOf("\"") + 1);
+                                state = state.Substring(0, state.IndexOf("\""));
+                                OM.Host.CurrentLocation.Zip = zip;
+                                OM.Host.CurrentLocation.Country = country;
+                                OM.Host.CurrentLocation.City = city;
+                                OM.Host.CurrentLocation.State = state;
+                            }
+                        }
+                        catch
+                        {
+                            OM.Host.CurrentLocation.Zip = "";
+                            OM.Host.CurrentLocation.Country = "";
+                            OM.Host.CurrentLocation.City = "";
+                            OM.Host.CurrentLocation.State = "";
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         private void getPostalCodes()
@@ -288,6 +387,7 @@ namespace OMGPS
             BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "Speed", "KMH", OpenMobile.Data.DataSource.DataTypes.raw, "GPS KMH"), 0);
             BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "Sat", "Count", OpenMobile.Data.DataSource.DataTypes.raw, "GPS Satelite count"), 0);
             BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "Sat", "Fix", OpenMobile.Data.DataSource.DataTypes.binary, "GPS Satelite fix state"), false);
+            BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "Sentence", "String", OpenMobile.Data.DataSource.DataTypes.raw, "GPS string of data"), "");
         }
 
         private void this_GPSAdded(SerialPort port)
@@ -370,11 +470,12 @@ namespace OMGPS
                         //if the port opens, test the data
                         //to make sure it IS a gps unit
                         port.Close();
-                        SerialAccess.ReleaseAccess();
+                        //SerialAccess.ReleaseAccess();
                         portsToTest.Add(port);
 
                     }
                     catch (Exception ex) { } //port not able to be opened, already in use/open???
+                    SerialAccess.ReleaseAccess();
                 }
             }
             if (portsToTest.Count == 0)
@@ -406,6 +507,7 @@ namespace OMGPS
                     GPSNotification.Text = "Testing: " + port.PortName.Trim() + " (" + port.BaudRate.ToString() + ")";
                     SerialAccess.GetAccess();
                     port.Open();
+                    SerialAccess.ReleaseAccess();
                     while (true)
                     {
                         if (killThread)
@@ -427,12 +529,12 @@ namespace OMGPS
                             return true;
 
                         }
-                        else if (sw.ElapsedMilliseconds >= 1200)
+                        else if (sw.ElapsedMilliseconds >= autoConnectTimer)
                         {
                             //test how long we've been polling and after a certain amount of time (3 sec?)
                             //close port because it doesn't contains gps data
                             port.Close();
-                            SerialAccess.ReleaseAccess();
+                            //SerialAccess.ReleaseAccess();
                             break;
                         }
                     }
@@ -440,10 +542,11 @@ namespace OMGPS
                     {
                         port.Close();
                     }
-                    SerialAccess.ReleaseAccess();
+                    //SerialAccess.ReleaseAccess();
                     sw.Reset();
                 }
                 catch (Exception ex) { }
+                SerialAccess.ReleaseAccess();
             }
             //theHost.UIHandler.RemoveNotification(this, "GPS");
             GPSNotification.Header = "No COM Port Found With GPS Data";
@@ -769,15 +872,19 @@ namespace OMGPS
 
         }
 
+        int autoConnectTimer = 1200;
         public Settings loadSettings()
         {
             //return null;
             if (settings == null)
                 settings = new Settings("OMGPS Settings");
             settings.Add(new Setting(SettingTypes.Button, "GPS.gpsButton", "", "Country Lists (Downloadables)"));
+            List<string> autoConnectTimers = new List<string>() { "Slow", "Medium", "Fast" };
+            settings.Add(new Setting(SettingTypes.MultiChoice, "GPS.AutoConnectTimer", "", "Auto Connect Time", autoConnectTimers, autoConnectTimers, StoredData.Get(this, "GPS.AutoConnectTimer")));
             settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
             return settings;
         }
+
         private void StartNetworkTimer()
         {
             //try again in 5 seconds
@@ -798,6 +905,18 @@ namespace OMGPS
             }
 
             StoredData.Set(this, s.Name, s.Value);
+
+            if (s.Name == "GPS.AutoConnectTimer")
+            {
+                if (s.Value == "Slow")
+                    autoConnectTimer = 1200;
+                else if (s.Value == "Medium")
+                    autoConnectTimer = 850;
+                else if (s.Value == "Fast")
+                    autoConnectTimer = 500;
+
+                return;
+            }
             //"OMGPS.DL.Checked.tempList[i][5]
             //s.Name = s.Name.Remove(0, s.Name.LastIndexOf(".") + 1);
             if (s.Value == "False")
@@ -998,6 +1117,7 @@ namespace OMGPS
         public static void Parse(string sentence)
         {
             string[] sentencesplit = new string[] { sentence.Substring(0, 6), sentence.Remove(0, 7) };
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMGPS;GPS.Sentence.String", sentence);
             switch (sentencesplit[0])
             {
                 case "$GPGGA":
@@ -1053,7 +1173,9 @@ namespace OMGPS
                 OMGPS.GPSNotification.IconStatusBar = OM.Host.getSkinImage("AIcons|10-device-access-location-found").image;
                 OMGPS.GPSNotification.Text = "Sats (" + data[6] + ") -- Lat: " + latitude.ToString() + " , Lon: " + longitude.ToString();
                 Location loc = new Location(latitude, longitude);
-                BuiltInComponents.Host.CurrentLocation = loc;
+                //BuiltInComponents.Host.CurrentLocation = loc;
+                BuiltInComponents.Host.CurrentLocation.Latitude = loc.Latitude;
+                BuiltInComponents.Host.CurrentLocation.Longitude = loc.Longitude;
             }
             else
             {

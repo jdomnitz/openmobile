@@ -32,21 +32,14 @@ namespace OpenMobile.Controls
     [System.Serializable]
     public class OMTextBox : OMLabel, IClickable, IHighlightable
     {
-        private float orgFontSize = 0;
-        private float fontScaleFactor = 0;
-
         /// <summary>
         /// Sets various textbox options
         /// </summary>
         protected textboxFlags flags;
         /// <summary>
-        /// The background color of the textbox
-        /// </summary>
-        protected Color background = Color.White;
-        /// <summary>
         /// The disabled background color of the textbox
         /// </summary>
-        protected Color disabledBackgroundColor = Color.Gray;
+        protected Color disabledBackgroundColor = Color.Transparent;
         /// <summary>
         /// Sets textbox option.  Note: multiple flags are allowed
         /// </summary>
@@ -83,6 +76,10 @@ namespace OpenMobile.Controls
         }
 
         private OSKShowTriggers _OSKShowTrigger = OSKShowTriggers.BeforeOnClickEvent;
+
+        /// <summary>
+        /// The trigger for when to show the OSK
+        /// </summary>
         public OSKShowTriggers OSKShowTrigger
         {
             get
@@ -109,24 +106,6 @@ namespace OpenMobile.Controls
 
         #endregion
 
-        //private bool _AutoFitText = true;
-        ///// <summary>
-        ///// Enabled or disabled automatic adjustment of font size to fit in control
-        ///// </summary>
-        //public bool AutoFitText 
-        //{
-        //    get
-        //    {
-        //        return _AutoFitText;
-        //    }
-        //    set
-        //    {
-        //        _AutoFitText = value;
-        //        _RefreshGraphic = true;
-        //        raiseUpdate(false);
-        //    }
-        //}
-
         /// <summary>
         /// Raised when the text value is changed
         /// </summary>
@@ -148,24 +127,10 @@ namespace OpenMobile.Controls
         /// </summary>
         public event userInteraction OnOSKShow;
 
-        //Same properties as a label just rendered differently
-
         /// <summary>
-        /// Controls the background color of the textbox
+        /// OSK Closed
         /// </summary>
-        public Color BackgroundColor
-        {
-            get
-            {
-                return background;
-            }
-            set
-            {
-                background = value;
-                _RefreshGraphic = true;
-                raiseUpdate(false);
-            }
-        }
+        public event userInteraction OnOSKHide;
 
         /// <summary>
         /// Controls the background color of the textbox when the control is not enabled
@@ -179,11 +144,29 @@ namespace OpenMobile.Controls
             set
             {
                 disabledBackgroundColor = value;
-                _RefreshGraphic = true;
-                raiseUpdate(false);
+                RefreshGraphic();
             }
         }
 
+        /// <summary>
+        /// The color the text should turn when the control is highlighted
+        /// </summary>
+        public Color HighlightColor
+        {
+            get
+            {
+                return _HighlightColor;
+            }
+            set
+            {
+                _HighlightColor = value;
+                RefreshGraphic();
+            }
+        }
+        /// <summary>
+        /// The color the text should turn when the control is highlighted
+        /// </summary>
+        protected Color _HighlightColor = BuiltInComponents.SystemSettings.SkinFocusColor;
 
         /// <summary>
         /// Fires the buttons OnClick event
@@ -255,12 +238,16 @@ namespace OpenMobile.Controls
                 // Mask input?
                 bool MaskInput = (flags & textboxFlags.Password) == textboxFlags.Password;
 
-                // Show OSK
-                this.Text = OSK.ShowDefaultOSK(screen, this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput);
-
                 // Trigg OSK shown event
                 if (OnOSKShow != null)
                     OpenMobile.Threading.SafeThread.Asynchronous(delegate() { OnOSKShow(this, screen); });                
+
+                // Show OSK
+                this.Text = OSK.ShowDefaultOSK(screen, this.Text, OSKHelpText, OSKDescription, _OSKType, MaskInput, (_OSKType == OSKInputTypes.KeypadSmall ? this : null));
+
+                // Trigg OSK shown hide
+                if (OnOSKHide != null)
+                    OpenMobile.Threading.SafeThread.Asynchronous(delegate() { OnOSKHide(this, screen); });                
             }
         }
 
@@ -292,32 +279,6 @@ namespace OpenMobile.Controls
                 _RefreshGraphic = true; 
                 _text = value;
 
-                //#region AutoFit
-
-                //// Autofit size of string
-                //if (fontScaleFactor != 0)
-                //{
-                //    this._font.Size = orgFontSize;
-                //    fontScaleFactor = 0;
-                //}
-                //if (AutoFitText)
-                //{
-                //    SizeF TextSize = Graphics.Graphics.MeasureString(_text, this.Font, this.Format);
-
-                //    if (TextSize.Width > this.width)
-                //    {   // Reduce text size to fit
-                //        orgFontSize = this._font.Size;
-
-                //        fontScaleFactor = TextSize.Width / this.width;
-                //        this._font.Size = this._font.Size / fontScaleFactor;
-
-                //        // Reset text texture to regenerate text
-                //        _RefreshGraphic = true;
-                //    }
-                //}
-
-                //#endregion
-
                 raiseUpdate(false);
                 try
                 {
@@ -333,15 +294,6 @@ namespace OpenMobile.Controls
                 if ((chr < 0x41 || chr > 0x5A && chr < 0x61 || chr > 0x7A) && (chr != 30))
                     return false;
             return true;
-        }
-
-        /// <summary>
-        /// Text formatting arguments
-        /// </summary>
-        [Browsable(false)]
-        public override OpenMobile.Graphics.eTextFormat Format
-        {
-            get { return OpenMobile.Graphics.eTextFormat.Normal; }
         }
 
         /// <summary>
@@ -388,8 +340,7 @@ namespace OpenMobile.Controls
             this.Top = y;
             this.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter;
             this.Format = OpenMobile.Graphics.eTextFormat.Normal;
-            this.Color = Color.Black;
-            this.OutlineColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+            this.OutlineColor = BuiltInComponents.SystemSettings.SkinTextColor;
             this.AutoFitTextMode = FitModes.Fit;
         }
 
@@ -398,18 +349,14 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g"></param>
         /// <param name="e"></param>
-        protected void Render_Background(Graphics.Graphics g, renderingParams e)
+        protected new void Render_Background(Graphics.Graphics g, renderingParams e)
         {
-            g.FillRoundRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * 255), (this.disabled ? disabledBackgroundColor : background))), left, top, width, height, 10);
-            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(_RenderingValue_Alpha * 255), this.Color), 1F), left, top, width, height, 10);
-
-            if (this.Mode == eModeType.Highlighted)
-            {
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(40 * _RenderingValue_Alpha), this.OutlineColor), 5F), left, top, width, height, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(75 * _RenderingValue_Alpha), this.OutlineColor), 4F), left, top, width, height, 10);
-                g.DrawRoundRectangle(new Pen(Color.FromArgb((int)(120 * _RenderingValue_Alpha), this.OutlineColor), 3F), left, top, width, height, 10);
-            }
+            Color fillColor = (this.disabled ? disabledBackgroundColor : background);
+            g.FillRoundRectangle(new Brush(Color.FromArgb((int)base.GetAlphaValue255(fillColor.A), fillColor)), left, top, width, height, 10);
+            g.DrawRoundRectangle(new Pen(Color.FromArgb((int)base.GetAlphaValue255(this.OutlineColor.A), this.OutlineColor), 1F), left, top, width, height, 10);
         }
+
+        eModeType previousMode = eModeType.Normal;
 
         /// <summary>
         /// Render the controls foreground
@@ -428,8 +375,23 @@ namespace OpenMobile.Controls
                     tempStr = tempStr.PadRight(_text.Length);
                 }
 
+                // Regenerate graphics?
+                if (previousMode != this.mode)
+                {
+                    previousMode = this.mode;
+                    _RefreshGraphic = true;
+                }
+
                 // Render labels foreground
-                base.Render_Foreground(g, e, tempStr);
+                if (this.mode == eModeType.Highlighted | this.mode == eModeType.Clicked)
+                {
+                    // Render labels foreground
+                    base.Render_Foreground(g, e, tempStr, _HighlightColor, _outlineColor);
+                }
+                else
+                {
+                    base.Render_Foreground(g, e, tempStr, _color, _outlineColor);
+                }
             }
         }
 
@@ -443,7 +405,10 @@ namespace OpenMobile.Controls
             base.RenderBegin(g, e);
 
             // Render labels background
-            base.Render_Background(g, e);
+            //base.Render_Background(g, e);
+
+            // Render shape (if any)
+            base.DrawShape(g, e);
 
             // Render this controls background
             Render_Background(g, e);

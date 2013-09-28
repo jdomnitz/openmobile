@@ -41,110 +41,114 @@ namespace OMMusicSkin
 
         string[] _MediaDBName;
         ButtonStrip PopUpMenuStrip = null;
+        IMediaDatabase db = null;
 
         public override eLoadStatus initialize(IPluginHost host)
         {
             OpenMobile.Threading.SafeThread.Asynchronous(() =>
             {
-            // Create a new panel
-            OMPanel panel = new OMPanel("Playlist", "Music > Current playlist");
+                // Create a new panel
+                OMPanel panel = new OMPanel("Playlist", "Music > Current playlist");
 
-            //OMButton btnSource = OMButton.PreConfigLayout_BasicStyle("btnSource", 0, 100, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Source");
-            //btnSource.OnClick += new userInteraction(btnSource_OnClick);
-            //btnSource.Visible = false;
-            //panel.addControl(btnSource);
+                //OMButton btnSource = OMButton.PreConfigLayout_BasicStyle("btnSource", 0, 100, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Source");
+                //btnSource.OnClick += new userInteraction(btnSource_OnClick);
+                //btnSource.Visible = false;
+                //panel.addControl(btnSource);
 
-            //OMButton btnPlay = OMButton.PreConfigLayout_BasicStyle("btnPlay", 0, 200, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Play");
-            //btnPlay.OnClick += new userInteraction(btnPlay_OnClick);
-            //btnPlay.Visible = false;
-            //panel.addControl(btnPlay);
+                //OMButton btnPlay = OMButton.PreConfigLayout_BasicStyle("btnPlay", 0, 200, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Play");
+                //btnPlay.OnClick += new userInteraction(btnPlay_OnClick);
+                //btnPlay.Visible = false;
+                //panel.addControl(btnPlay);
 
-            //OMButton btnStop = OMButton.PreConfigLayout_BasicStyle("btnStop", 0, 270, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Stop");
-            //btnStop.OnClick += new userInteraction(btnStop_OnClick);
-            //btnStop.Visible = false;
-            //panel.addControl(btnStop);
+                //OMButton btnStop = OMButton.PreConfigLayout_BasicStyle("btnStop", 0, 270, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Stop");
+                //btnStop.OnClick += new userInteraction(btnStop_OnClick);
+                //btnStop.Visible = false;
+                //panel.addControl(btnStop);
 
-            //OMButton btnPause = OMButton.PreConfigLayout_BasicStyle("btnPause", 0, 340, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Pause");
-            //btnPause.OnClick += new userInteraction(btnPause_OnClick);
-            //btnPause.Visible = false;
-            //panel.addControl(btnPause);
+                //OMButton btnPause = OMButton.PreConfigLayout_BasicStyle("btnPause", 0, 340, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Pause");
+                //btnPause.OnClick += new userInteraction(btnPause_OnClick);
+                //btnPause.Visible = false;
+                //panel.addControl(btnPause);
 
-            //OMButton btnFwd = OMButton.PreConfigLayout_BasicStyle("btnFwd", 0, 410, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Fwd");
-            //btnFwd.OnClick += new userInteraction(btnFwd_OnClick);
-            //btnFwd.OnHoldClick += new userInteraction(btnFwd_OnHoldClick);
-            //btnFwd.Visible = false;
-            //panel.addControl(btnFwd);
+                //OMButton btnFwd = OMButton.PreConfigLayout_BasicStyle("btnFwd", 0, 410, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Fwd");
+                //btnFwd.OnClick += new userInteraction(btnFwd_OnClick);
+                //btnFwd.OnHoldClick += new userInteraction(btnFwd_OnHoldClick);
+                //btnFwd.Visible = false;
+                //panel.addControl(btnFwd);
 
-            //OMButton btnBwd = OMButton.PreConfigLayout_BasicStyle("btnBwd", 0, 480, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Bwd");
-            //btnBwd.OnClick += new userInteraction(btnBwd_OnClick);
-            //btnBwd.OnHoldClick += new userInteraction(btnBwd_OnHoldClick);
-            //btnBwd.Visible = false;
-            //panel.addControl(btnBwd);
+                //OMButton btnBwd = OMButton.PreConfigLayout_BasicStyle("btnBwd", 0, 480, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Bwd");
+                //btnBwd.OnClick += new userInteraction(btnBwd_OnClick);
+                //btnBwd.OnHoldClick += new userInteraction(btnBwd_OnHoldClick);
+                //btnBwd.Visible = false;
+                //panel.addControl(btnBwd);
 
-            // Create a target window
-            //OMTargetWindow VideoWindow = new OMTargetWindow("VideoWindow", 150, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Right - 180, OM.Host.ClientArea_Init.Height - 20);
-            //VideoWindow.OnWindowCreated += new OMTargetWindow.WindowArgs(VideoWindow_OnWindowCreated);
-            //VideoWindow.Visible = false;
-            //panel.addControl(VideoWindow);
+                // Create a target window
+                //OMTargetWindow VideoWindow = new OMTargetWindow("VideoWindow", 150, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Right - 180, OM.Host.ClientArea_Init.Height - 20);
+                //VideoWindow.OnWindowCreated += new OMTargetWindow.WindowArgs(VideoWindow_OnWindowCreated);
+                //VideoWindow.Visible = false;
+                //panel.addControl(VideoWindow);
 
 
-            OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Bottom - 140, 700, 85,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
-            shapeBackground.Left = OM.Host.ClientArea_Init.Center.X - shapeBackground.Region.Center.X;
-            panel.addControl(shapeBackground);
+                OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Bottom - 140, 700, 85,
+                    new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+                shapeBackground.Left = OM.Host.ClientArea_Init.Center.X - shapeBackground.Region.Center.X;
+                panel.addControl(shapeBackground);
 
-            //OMImage imgBackground = new OMImage("imgBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top + 100, OM.Host.getSkinImage("Objects|CoverflowBackground"));
-            //imgBackground.Left = OM.Host.ClientArea_Init.Center.X - imgBackground.Region.Center.X;
-            //imgBackground.Opacity = 128;
-            //panel.addControl(imgBackground);
+                //OMImage imgBackground = new OMImage("imgBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top + 100, OM.Host.getSkinImage("Objects|CoverflowBackground"));
+                //imgBackground.Left = OM.Host.ClientArea_Init.Center.X - imgBackground.Region.Center.X;
+                //imgBackground.Opacity = 128;
+                //panel.addControl(imgBackground);
 
-            // Cowerflow
-            OMMediaFlow lst_ViewPlaylist_ImgFlow = new OMMediaFlow("lst_ViewPlaylist_ImgFlow", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height - 70);
-            lst_ViewPlaylist_ImgFlow.ClipRendering = false;
-            lst_ViewPlaylist_ImgFlow.Animation_FadeOutDistance = 2f;
-            lst_ViewPlaylist_ImgFlow.ReflectionsEnabled = false;
-            //lstImgFlow.overlay = OM.Host.getSkinImage("Images|Overlay-BlackBottom").image;
-            //lstImgFlow.overlay.RenderText(0, lstImgFlow.overlay.Height - 110, lstImgFlow.overlay.Width, 100, "OpenMobile Coverflow sample", new Font(Font.Arial, 25), eTextFormat.Normal, Alignment.CenterCenter, Color.White, Color.White, FitModes.Fit);
-            //lst_ViewPlaylist_ImgFlow.overlay.AddImageOverlay(lst_ViewPlaylist_ImgFlow.overlay.Width - 64, lst_ViewPlaylist_ImgFlow.overlay.Height - 64, OM.Host.getSkinImage("AIcons|9-av-play-over-video").image);
-            lst_ViewPlaylist_ImgFlow.NoMediaImage = MediaLoader.MissingCoverImage;
-            lst_ViewPlaylist_ImgFlow.MediaInfoFormatString = "{1} - {0}\n{6}";
-            lst_ViewPlaylist_ImgFlow.OnClick += new userInteraction(lst_ViewPlaylist_ImgFlow_OnClick);
-            lst_ViewPlaylist_ImgFlow.OnHoldClick += new userInteraction(lst_ViewPlaylist_ImgFlow_OnHoldClick);
-            panel.addControl(lst_ViewPlaylist_ImgFlow);
+                // Cowerflow
+                OMMediaFlow lst_ViewPlaylist_ImgFlow = new OMMediaFlow("lst_ViewPlaylist_ImgFlow", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height - 70);
+                lst_ViewPlaylist_ImgFlow.ClipRendering = false;
+                lst_ViewPlaylist_ImgFlow.Animation_FadeOutDistance = 2f;
+                lst_ViewPlaylist_ImgFlow.ReflectionsEnabled = false;
+                //lstImgFlow.overlay = OM.Host.getSkinImage("Images|Overlay-BlackBottom").image;
+                //lstImgFlow.overlay.RenderText(0, lstImgFlow.overlay.Height - 110, lstImgFlow.overlay.Width, 100, "OpenMobile Coverflow sample", new Font(Font.Arial, 25), eTextFormat.Normal, Alignment.CenterCenter, Color.White, Color.White, FitModes.Fit);
+                //lst_ViewPlaylist_ImgFlow.overlay.AddImageOverlay(lst_ViewPlaylist_ImgFlow.overlay.Width - 64, lst_ViewPlaylist_ImgFlow.overlay.Height - 64, OM.Host.getSkinImage("AIcons|9-av-play-over-video").image);
+                lst_ViewPlaylist_ImgFlow.NoMediaImage = MediaLoader.MissingCoverImage;
+                lst_ViewPlaylist_ImgFlow.MediaInfoFormatString = "{1} - {0}\n{6}";
+                lst_ViewPlaylist_ImgFlow.OnClick += new userInteraction(lst_ViewPlaylist_ImgFlow_OnClick);
+                lst_ViewPlaylist_ImgFlow.OnHoldClick += new userInteraction(lst_ViewPlaylist_ImgFlow_OnHoldClick);
+                panel.addControl(lst_ViewPlaylist_ImgFlow);
 
-            OMButton btnTest = OMButton.PreConfigLayout_BasicStyle("btnTest", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Bottom-100, 100, 70, OpenMobile.Graphics.GraphicCorners.All, "", "URL");
-            btnTest.OnClick += new userInteraction(btnTest_OnClick);
-            panel.addControl(btnTest);
+                OMButton btnTest = OMButton.PreConfigLayout_BasicStyle("btnTest", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Bottom - 100, 140, 70, OpenMobile.Graphics.GraphicCorners.All, "", "Browser");
+                btnTest.OnClick += new userInteraction(btnTest_OnClick);
+                //btnTest.Command_Click = "Screen{:S:}.Panel.Goto.OMMusicSkin.PlaylistEditor";
+                panel.addControl(btnTest);
 
-            // Connect panel events
-            panel.Entering += new PanelEvent(panel_Entering);
-            panel.Leaving += new PanelEvent(panel_Leaving);
+                // Connect panel events
+                panel.Entering += new PanelEvent(panel_Entering);
+                panel.Leaving += new PanelEvent(panel_Leaving);
 
-            // Load the panel into the local manager for panels
-            PanelManager.loadPanel(panel, true);
+                // Load the panel into the local manager for panels
+                PanelManager.loadPanel(panel, true);
 
-            _MediaDBName = new string[host.ScreenCount];
-            for (int i = 0; i < _MediaDBName.Length; i++)
-                _MediaDBName[i] = BuiltInComponents.SystemSettings.DefaultDB_Music;
+                _MediaDBName = new string[host.ScreenCount];
+                for (int i = 0; i < _MediaDBName.Length; i++)
+                    _MediaDBName[i] = BuiltInComponents.SystemSettings.DefaultDB_Music;
 
-            // Create the buttonstrip popup
-            PopUpMenuStrip = new ButtonStrip(pluginName, panel.Name, "PopUpMenuStrip_MusicSkin");
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_OpenURL", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Stream"), "Open URL", true, mnuItem_OpenURL_OnClick, null, null));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ShuffleToggle", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|9-av-shuffle"), "Toggle shuffle", false, mnuItem_ShuffleToggle_OnClick, null, null));
+                // Create the buttonstrip popup
+                PopUpMenuStrip = new ButtonStrip(pluginName, panel.Name, "PopUpMenuStrip_MusicSkin");
+                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_OpenURL", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Stream"), "Open URL", true, mnuItem_OpenURL_OnClick, null, null));
+                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ShuffleToggle", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|9-av-shuffle"), "Toggle shuffle", false, mnuItem_ShuffleToggle_OnClick, null, null));
 
-            // Now Playing panel
-            //OpenMobile.Threading.SafeThread.Asynchronous(() =>
-            //{
-            //    PanelManager.loadPanel(CreateAndLoadPanel_NowPlaying());
-            //});
+                // Now Playing panel
+                //OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                //{
+                //    PanelManager.loadPanel(CreateAndLoadPanel_NowPlaying());
+                //});
 
-            // Queue panels
-            PanelManager.QueuePanel("NowPlaying", CreateAndLoadPanel_NowPlaying);
-            PanelManager.QueuePanel("PlaylistEditor", InitializePanel_PlaylistEditor);                
+                // Queue panels
+                PanelManager.QueuePanel("NowPlaying", InitializePanel_NowPlaying);
+                //PanelManager.QueuePanel("PlaylistEditor", InitializePanel_PlaylistEditor);
+                //PanelManager.loadPanel(InitializePanel_PlaylistEditor());
+                PanelManager.loadPanel(new MediaBrowser().Initialize());
 
-            //System.Threading.Thread t = new System.Threading.Thread(CreateAndLoadPanel_NowPlaying);
-           
-            //CreateAndLoadPanel_NowPlaying();
+                //System.Threading.Thread t = new System.Threading.Thread(CreateAndLoadPanel_NowPlaying);
+
+                //CreateAndLoadPanel_NowPlaying();
 
             });
 
@@ -154,25 +158,15 @@ namespace OMMusicSkin
 
         void btnTest_OnClick(OMControl sender, int screen)
         {
-            OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.MediaProvider.PlayURL", @"http://mms-live.online.no/p4_bandit_ogg_lq");
-            base.GotoPanel(screen, "NowPlaying");
+            //OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.MediaProvider.PlayURL", @"http://mms-live.online.no/p4_bandit_ogg_lq");
+            ////OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.MediaProvider.PlayURL", @"http://stream.sbsradio.no:8000/radiorock.mp3");
+            //base.GotoPanel(screen, "NowPlaying");
+            base.GotoPanel(screen, "PlaylistEditor");
+            //OM.Host.CommandHandler.ExecuteCommand("Screen0.Panel.Goto.OMMusicSkin.PlaylistEditor");
+            //OM.Host.execute(eFunction.ShowPanel, screen, "OMMusicSkin;PlaylistEditor");
         }
 
-        #region Playlist editor panels
-
-        private OMPanel InitializePanel_PlaylistEditor()
-        {
-            // Create a new panel
-            OMPanel panel = new OMPanel("PlaylistEditor", "Music > Playlist editor");
-
-
-            return panel;
-        }
-
-
-        #endregion
-
-        private OMPanel CreateAndLoadPanel_NowPlaying()
+        private OMPanel InitializePanel_NowPlaying()
         {
             // Create a new panel
             OMPanel panel = new OMPanel("NowPlaying", "Music > Now playing");
@@ -436,6 +430,9 @@ namespace OMMusicSkin
 
         void panel_Entering(OMPanel sender, int screen)
         {
+            // Save reference to db
+            db = OM.Host.getData(eGetData.GetMediaDatabase, _MediaDBName[screen]) as IMediaDatabase;
+            
             Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
             OM.Host.execute(eFunction.unloadTunedContent, zone);
             //OM.Host.UIHandler.InfoBar_Show(screen, new InfoBar("Current PlayList"));
@@ -447,12 +444,12 @@ namespace OMMusicSkin
             OM.Host.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);
 
 
-            // Set default music indexer as MediaDb source
-            IMediaDatabase db = OM.Host.getData(eGetData.GetMediaDatabase, _MediaDBName[screen]) as IMediaDatabase;
+            //// Set default music indexer as MediaDb source
+            //IMediaDatabase db = OM.Host.getData(eGetData.GetMediaDatabase, _MediaDBName[screen]) as IMediaDatabase;
             if (db == null) return;
 
             // Initialize list with items
-            db.beginGetSongs(true, eMediaField.Album);
+            db.beginGetSongs("", "", "", "", "", -1, true, eMediaField.Album);
             //db.beginGetArtists(true);
             //db.beginGetAlbums(true);
             List<mediaInfo> mediaList = new List<mediaInfo>();
@@ -484,12 +481,25 @@ namespace OMMusicSkin
                     //foreach (mediaInfo m in mediaList)
                     //    lstImgFlow.Insert(m.coverArt);
 
-                    //zone.MediaHandler.Playlist.Save();
+                    zone.MediaHandler.Playlist.Save();
                 }
             }
 
             OMMediaFlow lstImgFlow = sender[screen, "lst_ViewPlaylist_ImgFlow"] as OMMediaFlow;
             lstImgFlow.PlayListSource = zone.MediaHandler.Playlist;
+
+            //List<Dictionary<string, object>> gasData = new List<Dictionary<string, object>>();
+
+            //// Repeat for each station
+            //Dictionary<string, object> stationData = new Dictionary<string, object>();
+            //stationData.Add("FuelType", "Regular");
+            //stationData.Add("Price", 5.23f);
+            //stationData.Add("Distance", 100);
+
+            //gasData.Add(stationData);
+
+            //stationData["FuelType"]
+
         }
 
         void panel_Leaving(OMPanel sender, int screen)
@@ -547,22 +557,22 @@ namespace OMMusicSkin
         {
             Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
 
-            // Set default music indexer as MediaDb source
-            IMediaDatabase db = OM.Host.getData(eGetData.GetMediaDatabase, _MediaDBName[screen]) as IMediaDatabase;
-            if (db == null) return;
+            //// Set default music indexer as MediaDb source
+            //IMediaDatabase db = OM.Host.getData(eGetData.GetMediaDatabase, _MediaDBName[screen]) as IMediaDatabase;
+            //if (db == null) return;
 
-            db.beginGetSongs(false, eMediaField.Artist);
-            List<mediaInfo> media = new List<mediaInfo>();
-            while (true)
-            {
-                mediaInfo info = db.getNextMedia();
-                if (info != null)
-                    media.Add(info);
-                else
-                    break;
-            }
-            db.endSearch();
-            db.Dispose();
+            //db.beginGetSongs(false, eMediaField.Artist);
+            //List<mediaInfo> media = new List<mediaInfo>();
+            //while (true)
+            //{
+            //    mediaInfo info = db.getNextMedia();
+            //    if (info != null)
+            //        media.Add(info);
+            //    else
+            //        break;
+            //}
+            //db.endSearch();
+            //db.Dispose();
 
             //zone.MediaHandler.ActiveMediaProvider.ExecuteCommand(MediaProvider_Commands.Play, zone, new mediaInfo(eMediaType.InternetRadio, @"http://mms-live.online.no/p4_bandit_ogg_lq"));
 

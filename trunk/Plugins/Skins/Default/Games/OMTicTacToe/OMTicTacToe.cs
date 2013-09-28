@@ -28,6 +28,7 @@ using OpenMobile.Framework;
 using OpenMobile.Plugin;
 using OpenMobile.helperFunctions;
 using OpenMobile.Graphics;
+using OpenMobile.Data;
 
 namespace OMTicTacToe
 {
@@ -50,7 +51,7 @@ namespace OMTicTacToe
 
             //Dim text1btn = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Text1Btn", x + 420, y + 350, 150, 80, "", "OK")
             //OMButton location_button = OMButton.PreConfigLayout_BasicStyle("locationbutton", 351, 41, 298, 48, GraphicCorners.All);
-            OMPanel TicTacToe = new OMPanel("OMTicTacToe");
+            OMPanel TicTacToe = new OMPanel("OMTicTacToe", "TicTacToe", this.pluginIcon);
             //OMButton SinglePlayer = new OMButton("SinglePlayer", (theHost.ClientArea[0].Width / 2) - 100, (theHost.ClientArea[0].Height / 2) - 75, 200, 80);
             OMButton SinglePlayer = OMButton.PreConfigLayout_BasicStyle("SinglePlayer", (theHost.ClientArea[0].Width / 2) - 100, (theHost.ClientArea[0].Height / 2) - 75, 200, 80, GraphicCorners.All);
             SinglePlayer.Text = "Single Player";
@@ -71,26 +72,37 @@ namespace OMTicTacToe
             MainMenu.OnClick += new userInteraction(MainMenu_OnClick);
             //OMButton Rematch = new OMButton("Rematch", (theHost.ClientArea[0].Width / 2) - 100, 400, 200, 100);
             //OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", (theHost.ClientArea[0].Width / 2) - 100, 400, 200, 100, GraphicCorners.All);
-            //Rematch.Text = "Rematch";
-            //Rematch.Visible = false;
+            OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", 800, 200, 200, 100, GraphicCorners.All);
+            Rematch.Text = "Rematch";
+            Rematch.Visible = false;
             //Rematch.Visible_DataSource = "TicTacToe.Game.VisibleButtons";
-            //Rematch.OnClick += new userInteraction(Rematch_OnClick);
+            Rematch.OnClick += new userInteraction(Rematch_OnClick);
+            //OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100, GraphicCorners.All);
+            OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", 800, 300, 200, 100, GraphicCorners.All);
+            Quit.Visible = false;
+            Quit.Text = "Quit";
+            //Quit.Visible_DataSource = "TicTacToe.Game.VisibleButtons";
+            Quit.OnClick += new userInteraction(Quit_OnClick);
+
             TicTacToe.addControl(SinglePlayer);
             TicTacToe.addControl(MultiPlayer);
             TicTacToe.addControl(MainMenu);
-            //TicTacToe.addControl(Rematch);
+            TicTacToe.addControl(Rematch);
+            TicTacToe.addControl(Quit);
             //TicTacToe.Entering += new PanelEvent(TicTacToe_Entering);
 
-            OMPanel MultiplayerPanel = new OMPanel("MultiplayerPanel");
+            OMPanel MultiplayerPanel = new OMPanel("MultiplayerPanel", "TicTacToe -> Multiplayer", this.pluginIcon);
             OMList MultiplayerList = new OMList("MultiplayerList", 100, 80, 390, 440);
             MultiplayerList.OnClick += new userInteraction(MultiplayerList_OnClick);
             OMList MultiplayerListPlaying = new OMList("MultiplayerListPlaying", 610, 80, 380, 440);
             MultiplayerPanel.addControl(MultiplayerList);
             MultiplayerPanel.addControl(MultiplayerListPlaying);
 
-            OMPanel GamePanel = new OMPanel("GamePanel");
-            //OMLabel statusLabel = new OMLabel("statusLabel", 0, 35, 1000, 65);
-            //statusLabel.Visible = false;
+            //OMObjectList MultiPlayerList = new OMObjectList("MultiPlayerList", 100, 80, 390, 440);
+            
+
+            OMPanel GamePanel = new OMPanel("GamePanel", "TicTacToe", this.pluginIcon);
+            
             //OMButton Quit = new OMButton("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100);
             //OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100, GraphicCorners.All);
             //Quit.Visible = false;
@@ -99,24 +111,40 @@ namespace OMTicTacToe
             //Quit.OnClick += new userInteraction(Quit_OnClick);
             //GamePanel.addControl(statusLabel);
             //GamePanel.addControl(Quit);
-            //TicTacToe.addControl(statusLabel);
+            
             //TicTacToe.addControl(Quit);
 
-           
-            //shpBackground.Visible = false;
-            //TicTacToe.addControl(shpBackground);
-            
-            //shpBackground1.Visible = false;
-            //TicTacToe.addControl(shpBackground1);
-            
-            //shpBackground2.Visible = false;
-            //TicTacToe.addControl(shpBackground2);
-            
-            //shpBackground3.Visible = false;
-            //TicTacToe.addControl(shpBackground3);
-            
-            //shpBackground4.Visible = false;
-            //TicTacToe.addControl(shpBackground4);
+            Size tileSize = new Size(140, 140);
+            OMBasicShape shapeBackgroundMain = new OMBasicShape("shapeBackgroundMain", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top + 5, tileSize.Width * 3 + 20, tileSize.Height * 3 + 20 + 40, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+            shapeBackgroundMain.Left = OM.Host.ClientArea_Init.Center.X - shapeBackgroundMain.Region.Center.X;
+            shapeBackgroundMain.Visible = false;
+            TicTacToe.addControl(shapeBackgroundMain);
+
+            OMLabel statusLabel = new OMLabel("statusLabel", shapeBackgroundMain.Region.Left + 10, shapeBackgroundMain.Region.Top + 5, shapeBackgroundMain.Region.Width - 20, 40);
+            statusLabel.Visible = false;
+            statusLabel.Color = Color.FromArgb(178, BuiltInComponents.SystemSettings.SkinTextColor);
+            statusLabel.ShapeData = new ShapeData(shapes.RoundedRectangle, Color.FromArgb(25, Color.White), Color.Transparent, 0, 5);
+            TicTacToe.addControl(statusLabel);
+
+            /*
+            OMBasicShape shpBackground = new OMBasicShape("shpBackground", 190, 90, 470, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(175, Color.Black), Color.Transparent, 0, 5));
+            shpBackground.Visible = false;
+            TicTacToe.addControl(shpBackground);
+            OMBasicShape shpBackground1 = new OMBasicShape("shpBackground1", 190, 198, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+            shpBackground1.Visible = false;
+            TicTacToe.addControl(shpBackground1);
+            OMBasicShape shpBackground2 = new OMBasicShape("shpBackground2", 190, 298, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+            shpBackground2.Visible = false;
+            TicTacToe.addControl(shpBackground2);
+            OMBasicShape shpBackground3 = new OMBasicShape("shpBackground3", 348, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+            shpBackground3.Visible = false;
+            TicTacToe.addControl(shpBackground3);
+            OMBasicShape shpBackground4 = new OMBasicShape("shpBackground4", 498, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+            shpBackground4.Visible = false;
+            TicTacToe.addControl(shpBackground4);
+            */
+
+
 
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
@@ -124,24 +152,50 @@ namespace OMTicTacToe
                 {
                     for (int c = 1; c < 4; c++) //columns
                     {
-                        OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), 50 + (150 * c), 100 * r, 150, 100);
+                        //OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), 50 + (150 * c), 100 * r, 150, 100);
+                        OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), shapeBackgroundMain.Region.Left + 10 + (tileSize.Width * (c - 1)), shapeBackgroundMain.Region.Top + 50 + (tileSize.Height * (r - 1)), tileSize.Width, tileSize.Height);
                         boardTile.Visible = false;
                         //boardTile.Image = theHost.getSkinImage("TicTacToe_B");
                         //boardTile.Image = theHost.getPluginImage(this, "Images|TicTacToe_B");
                         boardTile.OnClick += new userInteraction(boardTile_OnClick);
                         //GamePanel.addControl(boardTile);
-                        //TicTacToe.addControl(boardTile);
+                        TicTacToe.addControl(boardTile);
                         
+
                     }
                 }
                 MultiplayerList.Add("Screen: " + i.ToString());
             }
 
+            TicTacToe.Entering += new PanelEvent(TicTacToe_Entering);
+            TicTacToe.Leaving += new PanelEvent(TicTacToe_Leaving);
+
             manager.loadPanel(TicTacToe, true);
             manager.loadPanel(MultiplayerPanel);
             //manager.loadPanel(GamePanel);
 
+            theHost.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Game.MultiplayerList", Subscription_Updated);
+
             return eLoadStatus.LoadSuccessful;
+        }
+
+        private void Subscription_Updated(DataSource sensor)
+        {
+            for (int screen = 0; screen < theHost.ScreenCount; screen++)
+            {
+                //((OMList)manager[screen, "OMTicTacToe"]["multiplayerList"]).Items.Clear();
+                //((OMList)manager[screen, "OMTicTacToe"]["multiplayerList"]).Items.AddRange();
+            }
+        }
+
+        private void TicTacToe_Entering(OMPanel sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand("OMDSTicTacToe.Notifications.Disable", new object[] { screen });
+        }
+
+        private void TicTacToe_Leaving(OMPanel sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand("OMDSTicTacToe.Notifications.Enable", new object[] { screen });
         }
 
         private void MainMenu_OnClick(OMControl sender, int screen)
@@ -167,27 +221,37 @@ namespace OMTicTacToe
             theHost.DataHandler.GetDataSourceValue("TicTacToe.Game.AddGame", new object[] { screen.ToString(), "-1" }, out value);
             if (value != null)
             {
-                OMBasicShape shpBackground = new OMBasicShape("shpBackground", 190, 90, 470, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(175, Color.Black), Color.Transparent, 0, 5));
-                shpBackground.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                //((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                OMBasicShape shpBackground1 = new OMBasicShape("shpBackground1", 190, 198, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                shpBackground1.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                //((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground1"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                OMBasicShape shpBackground2 = new OMBasicShape("shpBackground2", 190, 298, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                shpBackground2.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                //((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground2"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                OMBasicShape shpBackground3 = new OMBasicShape("shpBackground3", 348, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                shpBackground3.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                //((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground3"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                OMBasicShape shpBackground4 = new OMBasicShape("shpBackground4", 498, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                shpBackground4.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                //((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground4"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                /*
+                //OMBasicShape shpBackground = new OMBasicShape("shpBackground", 190, 90, 470, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(175, Color.Black), Color.Transparent, 0, 5));
+                //shpBackground.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground"]).Visible = true;
+                //OMBasicShape shpBackground1 = new OMBasicShape("shpBackground1", 190, 198, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+                //shpBackground1.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground1"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground1"]).Visible = true;
+                //OMBasicShape shpBackground2 = new OMBasicShape("shpBackground2", 190, 298, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+                //shpBackground2.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground2"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground2"]).Visible = true;
+                //OMBasicShape shpBackground3 = new OMBasicShape("shpBackground3", 348, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+                //shpBackground3.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground3"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground3"]).Visible = true;
+                //OMBasicShape shpBackground4 = new OMBasicShape("shpBackground4", 498, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
+                //shpBackground4.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground4"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground4"]).Visible = true;
+                */
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
+                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible = true;
+
                 OMPanel p = manager[screen, "OMTicTacToe"];
-                p.addControl(shpBackground);
-                p.addControl(shpBackground1);
-                p.addControl(shpBackground2);
-                p.addControl(shpBackground3);
-                p.addControl(shpBackground4);
+                //p.addControl(shpBackground);
+                //p.addControl(shpBackground1);
+                //p.addControl(shpBackground2);
+                //p.addControl(shpBackground3);
+                //p.addControl(shpBackground4);
                 //p.MoveControlToBack(shpBackground1);
                 //p.MoveControlToBack(shpBackground2);
                 //p.MoveControlToBack(shpBackground3);
@@ -199,32 +263,40 @@ namespace OMTicTacToe
                 {
                     for (int c = 1; c < 4; c++)
                     {
-                        OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), 50 + (150 * c), 100 * r, 150, 100);
-                        boardTile.OnClick += new userInteraction(boardTile_OnClick);
-                        boardTile.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible";
-                        boardTile.DataSource_Image = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString();
-                        p.addControl(boardTile);
-                        //((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible";
-                        //((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).DataSource_Image = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString();
-                        //p.MoveControlToFront((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]);
+                        //OMButton boardTile = (OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]);
+                        //OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), 50 + (150 * c), 100 * r, 150, 100);
+                        //boardTile.OnClick += new userInteraction(boardTile_OnClick);
+                        //boardTile.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible";
+                        //boardTile.DataSource_Image = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString();
+                        //p.addControl(boardTile);
+                        ((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible";
+                        ((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).DataSource_Image = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString();
+                        ((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible = true;
+                        p.MoveControlToFront((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]);
                     }
                 }
-                OMLabel statusLabel = new OMLabel("statusLabel", 0, 35, 1000, 65);
-                p.addControl(statusLabel);
+                //OMLabel statusLabel = new OMLabel("statusLabel", 0, 35, 1000, 65);
+                //p.addControl(statusLabel);
                 ((OMLabel)manager[screen, "OMTicTacToe"]["statusLabel"]).DataSource = String.Format("TicTacToe." + Convert.ToInt32(value).ToString() + ".{0}", screen.ToString());
                 ((OMLabel)manager[screen, "OMTicTacToe"]["statusLabel"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", (theHost.ClientArea[0].Width / 2) - 100, 400, 200, 100, GraphicCorners.All);
-                Rematch.Text = "Rematch";
-                p.addControl(Rematch);
-                Rematch.OnClick += new userInteraction(Rematch_OnClick);
-                p.addControl(Rematch);
+                ((OMLabel)manager[screen, "OMTicTacToe"]["statusLabel"]).Visible = true;
+                //OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", (theHost.ClientArea[0].Width / 2) - 100, 400, 200, 100, GraphicCorners.All);
+                //Rematch.Text = "Rematch";
+                //p.addControl(Rematch);
+                //Rematch.OnClick += new userInteraction(Rematch_OnClick);
+                //p.addControl(Rematch);
+                /*
                 OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100, GraphicCorners.All);
                 Quit.Text = "Quit";
                 Quit.OnClick += new userInteraction(Quit_OnClick);
                 p.addControl(Quit);
+                */
                 //((OMButton)manager[screen, "OMTicTacToe"]["MainMenu"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleMainMenuButton";
                 ((OMButton)manager[screen, "OMTicTacToe"]["Rematch"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleRematchButton";
+                ((OMButton)manager[screen, "OMTicTacToe"]["Rematch"]).Visible = true;
                 ((OMButton)manager[screen, "OMTicTacToe"]["Quit"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleQuitButton";
+                ((OMButton)manager[screen, "OMTicTacToe"]["Quit"]).Visible = true;
+
                 ((OMButton)manager[screen, "OMTicTacToe"]["SinglePlayer"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleSinglePlayerButton";
                 ((OMButton)manager[screen, "OMTicTacToe"]["MultiPlayer"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleMultiPlayerButton";
                 theHost.DataHandler.GetDataSourceValue("TicTacToe.Game.StartGame", new object[] { Convert.ToInt32(value).ToString() }, out value);
@@ -295,7 +367,11 @@ namespace OMTicTacToe
         }
         public imageItem pluginIcon
         {
-            get { return OM.Host.getSkinImage("Icons|Icon-TicTacToe"); }
+            get 
+            { 
+                //return OM.Host.getSkinImage("Icons|Icon-TicTacToe"); 
+                return OM.Host.getPluginImage(this, "Icon-OMTicTacToe"); 
+            }
         }
         public void Dispose()
         {

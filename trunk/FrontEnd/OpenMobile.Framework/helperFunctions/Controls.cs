@@ -188,5 +188,47 @@ namespace OpenMobile.helperFunctions.Controls
         {
             ((IVisibility)control).Internal_Visibility = visibility;
         }
+
+        /// <summary>
+        /// Places a control relative to a reference control
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <param name="controlToPlace"></param>
+        /// <param name="direction"></param>
+        public static void PlaceControl(OMControl reference, OMControl controlToPlace, ControlDirections direction)
+        {
+            if (reference == null || controlToPlace == null)
+                return;
+
+            switch (direction)
+            {
+                case ControlDirections.None:
+                    return;
+                case ControlDirections.Down:
+                    controlToPlace.Left = reference.Region.Left;
+                    controlToPlace.Top = reference.Region.Bottom;
+                    break;
+                case ControlDirections.Up:
+                    controlToPlace.Left = reference.Region.Left;
+                    controlToPlace.Top = reference.Region.Top - controlToPlace.Height;
+                    break;
+                case ControlDirections.Right:
+                    controlToPlace.Left = reference.Region.Right;
+                    controlToPlace.Top = reference.Region.Top;
+                    break;
+                case ControlDirections.Left:
+                    controlToPlace.Left = reference.Region.Left - controlToPlace.Width;
+                    controlToPlace.Top = reference.Region.Top;
+                    break;
+                case ControlDirections.CenterHorizontally:
+                    controlToPlace.Left += (OM.Host.ClientArea_Init.Center.X - controlToPlace.Region.Center.X);
+                    break;
+                case ControlDirections.RelativeToParent:
+                case ControlDirections.Absolute:
+                default:
+                    return;
+            }
+        }
     }
+
 }

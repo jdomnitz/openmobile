@@ -170,6 +170,18 @@ namespace OpenMobile.Controls
         {
             this.FitControlToImage = true;
         }
+        /// <summary>
+        /// Creates a new OMImage with the given image and autofits the control to the image size
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="image"></param>
+        public OMImage(string name)
+            : base(name, 0, 0, 0, 0)
+        {
+            this.FitControlToImage = true;
+        }
 
         private bool _FitControlToImage = false;
         /// <summary>

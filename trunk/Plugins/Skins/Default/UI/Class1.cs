@@ -149,7 +149,7 @@ namespace OpenMobile
         {
             Settings settings = new Settings("UI Skin");
             settings.Add(new Setting(SettingTypes.File, "Background.Image", "", "Background image", StoredData.Get(this, "Background.Image")));
-            settings.Add(new Setting(SettingTypes.Button, "Background.Clear", String.Empty, "Clear background image", null, null));
+            settings.Add(new Setting(SettingTypes.Button, "Background.Clear", String.Empty, "Clear background image"));
             settings.Add(new Setting(SettingTypes.Range, "System.Opacitylevel", "Brightness at night", "The opacity of the screen at night", null, new List<string>() { "0", "255" }, _OpacityLevel.ToString()));
 
             // Setting for what the opacity setting should affect
@@ -1591,7 +1591,20 @@ namespace OpenMobile
         void UIHandler_OnShowInfoBar(int screen, InfoBar barData)
         {
             OMPanel panel = manager[screen, "UI"];
-            OMAnimatedLabel2 InfoLabel = panel["label_UITopBar_Info"] as OMAnimatedLabel2;
+            OMAnimatedLabel2 InfoLabel = panel[screen, "label_UITopBar_Info"] as OMAnimatedLabel2;
+            OMImage img = panel[screen, "Image_UITopBar_OMIcon"] as OMImage;
+            if (img != null)
+            {
+                if (barData.Icon == null || barData.Icon.image == null)
+                    img.Image = theHost.getSkinImage("Icons|Icon-OM");
+                else
+                {
+                    ControlLayout controls = new ControlLayout(panel, "Image_UITopBar_OMIcon");
+                    SmoothAnimator.PresetAnimation_FadeOut(controls, screen, 2);
+                    img.Image = barData.Icon;
+                    SmoothAnimator.PresetAnimation_FadeIn(screen, 2, null, 178, true, controls);
+                }
+            }
             if (InfoLabel != null)
             {
                 if (barData.Timeout > 0)
@@ -1604,7 +1617,18 @@ namespace OpenMobile
         void UIHandler_OnHideInfoBar(int screen)
         {
             OMPanel panel = manager[screen, "UI"];
-            OMAnimatedLabel2 InfoLabel = panel["label_UITopBar_Info"] as OMAnimatedLabel2;
+            OMAnimatedLabel2 InfoLabel = panel[screen, "label_UITopBar_Info"] as OMAnimatedLabel2;
+            OMImage img = panel[screen, "Image_UITopBar_OMIcon"] as OMImage;
+            if (img != null)
+            {
+                if (img.Image.image != theHost.getSkinImage("Icons|Icon-OM").image)
+                {
+                    ControlLayout controls = new ControlLayout(panel, "Image_UITopBar_OMIcon");
+                    SmoothAnimator.PresetAnimation_FadeOut(controls, screen, 2);
+                    img.Image = theHost.getSkinImage("Icons|Icon-OM");
+                    SmoothAnimator.PresetAnimation_FadeIn(screen, 2, null, 178, true, controls);
+                }
+            }
             if (InfoLabel != null)
                 InfoLabel.TransitionInText(OMAnimatedLabel2.eAnimation.SlideUpSmooth, String.Empty, 2.0f);
         }
@@ -2556,6 +2580,8 @@ namespace OpenMobile
 
         void UIPanel_Entering(OMPanel sender, int screen)
         {   // Update initial data
+
+            //OM.Host.UIHandler.Notifications_Enable(screen);
 
             //OMProgress progress_UIBottomBar_Test = new OMProgress("progress_UIBottomBar_Test", 295, theHost.UIHandler.ControlButtons.Container.Region.Top + 15, 410, 30);
             

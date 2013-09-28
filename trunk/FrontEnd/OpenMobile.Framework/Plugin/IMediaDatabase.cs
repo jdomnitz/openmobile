@@ -57,70 +57,25 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Begin listing artists
         /// </summary>
+        /// <param name="artistFilter"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetArtists(bool covers);
-        /// <summary>
-        /// Begin listing albums
-        /// </summary>
-        /// <param name="covers"></param>
-        /// <returns></returns>
-        bool beginGetAlbums(bool covers);
+        bool beginGetArtists(string artistFilter = "", bool covers = true);
         /// <summary>
         /// List albums from given artist
         /// </summary>
-        /// <param name="artist"></param>
+        /// <param name="artistFilter"></param>
+        /// <param name="albumFilter"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetAlbums(string artist, bool covers);
+        bool beginGetAlbums(string artistFilter = "", string albumFilter = "", bool covers = true);
         /// <summary>
-        /// List all songs (Added by Borte)
+        /// List all songs
         /// </summary>
         /// <param name="covers"></param>
         /// <param name="sortBy"></param>
         /// <returns></returns>
-        bool beginGetSongs(bool covers,eMediaField sortBy);
-        /// <summary>
-        /// List songs by artist
-        /// </summary>
-        /// <param name="artist"></param>
-        /// <param name="covers"></param>
-        /// <param name="sortBy"></param>
-        /// <returns></returns>
-        bool beginGetSongsByArtist(string artist, bool covers, eMediaField sortBy);
-        /// <summary>
-        /// List songs that are in the given Genre
-        /// </summary>
-        /// <param name="genre"></param>
-        /// <param name="covers"></param>
-        /// <param name="sortBy"></param>
-        /// <returns></returns>
-        bool beginGetSongsByGenre(string genre, bool covers, eMediaField sortBy);
-        /// <summary>
-        /// List songs that have the given rating
-        /// </summary>
-        /// <param name="genre"></param>
-        /// <param name="covers"></param>
-        /// <param name="sortBy"></param>
-        /// <returns></returns>
-        bool beginGetSongsByRating(string genre, bool covers, eMediaField sortBy);
-        /// <summary>
-        /// Get songs that match the given artist and album
-        /// </summary>
-        /// <param name="artist"></param>
-        /// <param name="album"></param>
-        /// <param name="covers"></param>
-        /// <param name="sortBy"></param>
-        /// <returns></returns>
-        bool beginGetSongsByAlbum(string artist, string album, bool covers, eMediaField sortBy);
-        /// <summary>
-        /// List songs that contain the given lyrics
-        /// </summary>
-        /// <param name="phrase"></param>
-        /// <param name="covers"></param>
-        /// <param name="sortBy"></param>
-        /// <returns></returns>
-        bool beginGetSongsByLyrics(string phrase, bool covers, eMediaField sortBy);
+        bool beginGetSongs(string songFilter = "", string artistFilter = "", string albumFilter = "", string genreFilter = "", string lyricsFilter = "", int minRating = -1, bool covers = true, eMediaField sortBy = eMediaField.Artist);
         /// <summary>
         /// List available Genres
         /// </summary>
@@ -206,14 +161,15 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         mediaInfo getNextPlaylistItem();
+
         /// <summary>
         /// Writes a playlist to the database
         /// </summary>
-        /// <param name="URLs"></param>
+        /// <param name="mediaList"></param>
         /// <param name="name"></param>
         /// <param name="append"></param>
         /// <returns></returns>
-        bool writePlaylist(List<string> URLs,string name,bool append);
+        bool writePlaylist(List<mediaInfo> mediaList, string name, bool append);
 
         /// <summary>
         /// Deletes a playlist from the database
@@ -227,7 +183,6 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         List<string> listPlaylists();
 
-        mediaInfo GetMediaInfoByUrl(string url);
         #endregion
 
     }

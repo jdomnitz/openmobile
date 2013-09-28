@@ -521,6 +521,12 @@ namespace OpenMobile.UI
             _Notifications = new List<Notification>[BuiltInComponents.Host.ScreenCount];
             for (int i = 0; i < _Notifications.Length; i++)
                 _Notifications[i] = new List<Notification>();
+            _QueuedNotifications = new List<Notification>[BuiltInComponents.Host.ScreenCount];
+            for (int i = 0; i < _QueuedNotifications.Length; i++)
+                _QueuedNotifications[i] = new List<Notification>();
+            _NotificationsEnabled = new bool[BuiltInComponents.Host.ScreenCount];
+            for (int i = 0; i < _NotificationsEnabled.Length; i++)
+                _NotificationsEnabled[i] = false;
 
             _IconContainer = new OMContainer("StatusBarHandler_IconContainer", 0, 0, 1000, 40);
             _IconContainer.ScrollBar_Horizontal_Enabled = false;
@@ -552,7 +558,19 @@ namespace OpenMobile.UI
 
         void Host_OnSystemEvent(eFunction function, object[] args)
         {
-            if (function == eFunction.TransitionFromPanel)
+            if (function == eFunction.TransitionToPanel)
+            {
+                OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                {
+                    System.Threading.Thread.Sleep(500);
+                    OM.Host.ForEachScreen(delegate(int screen)
+                        {
+                            Notifications_Enable(screen, true);
+                        });
+                });
+            }
+
+            else if (function == eFunction.TransitionFromPanel)
             {   // Clear popup menu when the panel that loaded it is unloaded
                 int screen = 0;
                 if (args != null && args.Length >= 3)
@@ -665,6 +683,45 @@ namespace OpenMobile.UI
 
         #region Notifications
 
+        List<Notification>[] _QueuedNotifications = null;
+        bool[] _NotificationsEnabled = null;
+
+        /// <summary>
+        /// Enables notifications (any queued notifications will be shown)
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="fast"></param>
+        public void Notifications_Enable(int screen, bool fast = false)
+        {
+            // HACK: Hack to get around a timing issue when adding icons to the notification bar at startup
+            if (!fast)
+                System.Threading.Thread.Sleep(500);
+
+            _NotificationsEnabled[screen] = true;
+            // Add any queued notifications
+            lock (_QueuedNotifications[screen])
+            {
+                while (_QueuedNotifications[screen].Count > 0)
+                {
+                    Notification notification = _QueuedNotifications[screen][0];
+                    lock (notification)
+                    {
+                        _QueuedNotifications[screen].Remove(notification);
+                        AddNotification_Internal(notification.Screen, notification, notification.Global);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disables notifications (incoming notifications will be queued)
+        /// </summary>
+        /// <param name="screen"></param>
+        public void Notifications_Disable(int screen)
+        {
+            _NotificationsEnabled[screen] = false;
+        }
+        
         #region Notification list and container
 
         /// <summary>
@@ -838,6 +895,7 @@ namespace OpenMobile.UI
         {
             return AddNotification_Internal(screen, notification, false);
         }
+
         /// <summary>
         /// Adds a new notification to the list of active notifications (specific screen)
         /// </summary>
@@ -849,6 +907,14 @@ namespace OpenMobile.UI
         {
             notification.Global = Global;
             notification.Screen = screen;
+
+            // Do we need to queue notifications?
+            if (!_NotificationsEnabled[screen])
+            {
+                _QueuedNotifications[screen].Add(notification);
+                return notification.ID;
+            }
+
             _Notifications[screen].Add(notification);
 
             notification.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(notification_PropertyChanged);
@@ -928,6 +994,7 @@ namespace OpenMobile.UI
                 }
             }
             return notification.ID;
+
         }
 
         #endregion
@@ -948,8 +1015,13 @@ namespace OpenMobile.UI
         {
             BuiltInComponents.Host.ForEachScreen(delegate(int screen)
             {
+                // Check if this is a queued notification
+                Notification notification = _QueuedNotifications[screen].Find(x => x.OwnerPlugin == OwnerPlugin && x.ID == ID);
+                if (notification != null)
+                    return;
+
                 // Get notification to update
-                Notification notification = _Notifications[screen].Find(x => x.OwnerPlugin == OwnerPlugin && x.ID == ID);
+                notification = _Notifications[screen].Find(x => x.OwnerPlugin == OwnerPlugin && x.ID == ID);
                 if (notification == null)
                     return;
 
@@ -969,8 +1041,13 @@ namespace OpenMobile.UI
         /// <param name="ID"></param>
         private void UpdateNotification(int screen, IBasePlugin OwnerPlugin, string ID)
         {
+            // Check if this is a queued notification
+            Notification notification = _QueuedNotifications[screen].Find(x => x.OwnerPlugin == OwnerPlugin && x.ID == ID);
+            if (notification != null)
+                return;
+            
             // Get notification to update
-            Notification notification = _Notifications[screen].Find(x => x.OwnerPlugin == OwnerPlugin && x.ID == ID);
+            notification = _Notifications[screen].Find(x => x.OwnerPlugin == OwnerPlugin && x.ID == ID);
             if (notification == null)
                 return;
 
@@ -990,6 +1067,11 @@ namespace OpenMobile.UI
         private void UpdateNotification(Notification notification)
         {
             if (notification == null)
+                return;
+
+            // Check if this is a queued notification
+            Notification queuedNotification = _QueuedNotifications[notification.Screen].Find(x => x.OwnerPlugin == notification.OwnerPlugin && x.ID == notification.ID);
+            if (queuedNotification != null)
                 return;
 
             // If this is a global notification then remove all instances
@@ -1229,7 +1311,16 @@ namespace OpenMobile.UI
             });
             return true;
         }
-       
+        /// <summary>
+        /// Removes all notifications that belongs to the specified plugin at the specified screen
+        /// </summary>
+        /// <param name="OwnerPlugin"></param>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        public bool RemoveAllMyNotifications(IBasePlugin OwnerPlugin, int screen)
+        {
+            return RemoveAllMyNotifications(screen, OwnerPlugin, true);
+        }       
         /// <summary>
         /// Removes all notifications that belongs to the specified plugin (specific screen)
         /// </summary>
@@ -1239,8 +1330,15 @@ namespace OpenMobile.UI
         /// <returns></returns>
         private bool RemoveAllMyNotifications(int screen, IBasePlugin OwnerPlugin, bool RemoveAllStates)
         {
+            // removed queued notifications
+            List<Notification> queudNotificationsToRemove = _QueuedNotifications[screen].FindAll(x => x.OwnerPlugin == OwnerPlugin);
+            for (int i = 0; i < queudNotificationsToRemove.Count; i++)
+            {
+                Notification notification = queudNotificationsToRemove[i];
+                _QueuedNotifications[screen].Remove(notification);
+            }
+            
             List<Notification> NotificationsToRemove = _Notifications[screen].FindAll(x => x.OwnerPlugin == OwnerPlugin);
-
             for (int i = 0; i < NotificationsToRemove.Count; i++)
             {
                 Notification notification = NotificationsToRemove[i];
@@ -1262,6 +1360,8 @@ namespace OpenMobile.UI
             BuiltInComponents.Host.ForEachScreen(delegate(int screen)
             {
                 RemoveAllNotifications_Internal(screen);
+                _QueuedNotifications[screen].Clear();
+
             });
             return true;
         }
@@ -1274,6 +1374,7 @@ namespace OpenMobile.UI
         /// <returns></returns>
         public bool RemoveAllNotifications(int screen, bool RemoveAllStates)
         {
+            _QueuedNotifications[screen].Clear();
             List<Notification> NotificationsToRemove = _Notifications[screen].FindAll(x => x.State == Notification.States.Passive);
             for (int i = 0; i < NotificationsToRemove.Count; i++)
             {

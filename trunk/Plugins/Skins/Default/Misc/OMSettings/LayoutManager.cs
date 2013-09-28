@@ -34,7 +34,7 @@ namespace OMSettings
         int ofset=87;
         internal OMPanel[] layout(IPluginHost host, OpenMobile.Plugin.Settings s)
         {
-            if (s == null)
+            if (s == null || s.Count == 0)
                 return null;
             theHost = host;
             collection = s;
@@ -94,7 +94,7 @@ namespace OMSettings
                         OMCheckbox cursor = new OMCheckbox(330, ofset, 620, 50);
                         cursor.Text = s.Description;
                         cursor.Font = new Font(Font.GenericSansSerif, 24F);
-                        cursor.OutlineColor = Color.Red;
+                        //cursor.OutlineColor = Color.Red;
                         cursor.Name = title;
                         cursor.Tag = s.Name;
                         cursor.OnClick += new userInteraction(cursor_OnClick);

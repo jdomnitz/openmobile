@@ -1379,5 +1379,42 @@ namespace OpenMobile.Controls
         }
 
         #endregion
+
+        internal override void DataSource_OnChanged(OpenMobile.Data.DataSource dataSource)
+        {
+            try
+            {
+                // Is this a binary data source, if so use the true/false state to show/hide control
+                if (dataSource.DataType == OpenMobile.Data.DataSource.DataTypes.binary)
+                {
+                    try
+                    {
+                        base.Visible = (bool)dataSource.Value;
+                    }
+                    catch
+                    {
+                        base.Visible = false;
+                    }
+                }
+                else if (dataSource.Value is List<string>)
+                {   // List data present
+                    List<string> Items = dataSource.Value as List<string>;
+                    if (Items != null)
+                        return;
+                    this.Clear();
+                    // Add items from list data
+                    foreach (string s in Items)
+                    {
+                        this.Add(new OMListItem(s));
+                    }
+                }
+            }
+            catch
+            {
+                return;
+            }
+            _RefreshGraphic = true;
+            Refresh();
+        }
     }
 }

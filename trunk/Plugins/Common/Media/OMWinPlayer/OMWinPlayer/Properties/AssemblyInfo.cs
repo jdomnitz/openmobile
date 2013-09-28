@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OMPlayer2")]
-[assembly: AssemblyDescription("Mediaplayer for OpenMobile")]
+[assembly: AssemblyTitle("OMWinPlayer")]
+[assembly: AssemblyDescription("Mediaplayer for OpenMobile on Windows")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("OMPlayer2")]
+[assembly: AssemblyProduct("OMWinPlayer")]
 [assembly: AssemblyCopyright("Copyright ©  OpenMobile DevTeam 2009-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -47,7 +47,8 @@ namespace OpenMobile.mPlayer
         NextInPlayList,
         PreviousInPlayList,
         SubTitlesCycle,
-        SubTitlesDisable
+        SubTitlesDisable,
+        Get_Filename
     }
     class mPlayerCommands
     {
@@ -76,6 +77,7 @@ namespace OpenMobile.mPlayer
             _Commands.Add(new mPlayerCommand(Commands.PreviousInPlayList, false, "pausing_keep_force pt_step -1"));
             _Commands.Add(new mPlayerCommand(Commands.SubTitlesCycle, false, "pausing_keep sub_select"));
             _Commands.Add(new mPlayerCommand(Commands.SubTitlesDisable, false, "pausing_keep sub_select -1"));
+            _Commands.Add(new mPlayerCommand(Commands.Get_Filename, false, "get_property filename", "ANS_filename="));
         }
 
         /// <summary>

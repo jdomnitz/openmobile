@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Plugin
 {
@@ -29,6 +30,8 @@ namespace OpenMobile.Plugin
     /// </summary>
     public abstract class BasePluginCode: IBasePlugin
     {
+        protected Settings MySettings = null;
+
         /// <summary>
         /// Initializes a new base plugin
         /// </summary>
@@ -61,7 +64,38 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         virtual public Settings loadSettings()
         {
-            return null;
+            MySettings = new Settings(pluginName);
+            MySettings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
+            Settings();
+            return MySettings;
+        }
+
+        /// <summary>
+        /// Sets the settings for this plugin and lets the base code handle the rest
+        /// </summary>
+        /// <returns></returns>
+        virtual public void Settings()
+        {
+        }
+
+        /// <summary>
+        /// Raised when a setting is changed
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="setting"></param>
+        private void settings_OnSettingChanged(int screen, Setting setting)
+        {
+            StoredData.Set(this, setting.Name, setting.Value);
+            setting_OnSettingChanged(screen, setting);
+        }
+
+        /// <summary>
+        /// Override this to be informed when a setting is changed
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="setting"></param>
+        virtual public void setting_OnSettingChanged(int screen, Setting setting)
+        {            
         }
 
         /// <summary>

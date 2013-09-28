@@ -53,16 +53,16 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Mouse moved over the control
         /// </summary>
-        void MouseMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance);
+        void MousePreviewMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance);
 
         /// <summary>
         /// MouseDown event for this control
         /// </summary>
-        void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation);
+        void MousePreviewDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation);
 
         /// <summary>
         /// MouseUp event for this control
         /// </summary>
-        void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance);
+        void MousePreviewUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance);
     }
 }

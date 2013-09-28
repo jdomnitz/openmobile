@@ -108,15 +108,15 @@ namespace OpenMobile.Media
             if (System.IO.File.Exists(path) == true)
             {
                 OImage img = OImage.FromFile(path);
-                if ((img.Height > 600) || (img.Width > 600))
-                {
-                    OImage newimg = new OImage(new Bitmap(600, (int)(600 * (img.Height / (float)img.Width))));
-                    System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg.image);
-                    GraphicsUnit unit = GraphicsUnit.Pixel;
-                    g.DrawImage(img.image, newimg.image.GetBounds(ref unit));
-                    g.Dispose();
-                    return newimg;
-                }
+                //if ((img.Height > 600) || (img.Width > 600))
+                //{
+                //    OImage newimg = new OImage(new Bitmap(600, (int)(600 * (img.Height / (float)img.Width))));
+                //    System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg.image);
+                //    GraphicsUnit unit = GraphicsUnit.Pixel;
+                //    g.DrawImage(img.image, newimg.image.GetBounds(ref unit));
+                //    g.Dispose();
+                //    return newimg;
+                //}
                 return img;
             }
             return null;
@@ -150,6 +150,23 @@ namespace OpenMobile.Media
         private static string cacheAlbum;
         private static OImage cacheArt;
         private static DateTime lastCheck;
+
+        /// <summary>
+        /// Coversizes to proritize when using LastFM
+        /// </summary>
+        public enum LastFMCoverSize
+        {
+            /// <summary>
+            /// Extra large covers
+            /// </summary>
+            XLarge,
+
+            /// <summary>
+            /// Mega size covers
+            /// </summary>
+            Mega
+        }
+
         /// <summary>
         /// Retrieves metadata from LastFM
         /// </summary>
@@ -157,6 +174,18 @@ namespace OpenMobile.Media
         /// <param name="album"></param>
         /// <returns></returns>
         public static OImage getLastFMImage(string artist, string album)
+        {
+            return getLastFMImage(artist, album, LastFMCoverSize.XLarge);
+        }
+
+        /// <summary>
+        /// Retrieves metadata from LastFM
+        /// </summary>
+        /// <param name="artist"></param>
+        /// <param name="album"></param>
+        /// <param name="coverSize"></param>
+        /// <returns></returns>
+        public static OImage getLastFMImage(string artist, string album, LastFMCoverSize coverSize)
         {
             if (Net.Network.IsAvailable == false)
                 return null;
@@ -185,19 +214,55 @@ namespace OpenMobile.Media
             catch (WebException) { return null; }
             catch (XmlException) { return null; }
             XmlNodeList nodes = reader.DocumentElement.ChildNodes[0].ChildNodes;
-            foreach (XmlNode node in nodes)
+
+            switch (coverSize)
             {
-                if (node.Name == "image")
-                    if (node.Attributes[0].Value == "extralarge")
+                case LastFMCoverSize.XLarge:
                     {
-                        try
+                        // try the second largest image
+                        foreach (XmlNode node in nodes)
                         {
-                            cacheArt = Net.Network.imageFromURL(node.InnerText);
+                            if (node.Name == "image")
+                            {
+                                if (node.Attributes[0].Value == "extralarge")
+                                {
+                                    try
+                                    {
+                                        cacheArt = Net.Network.imageFromURL(node.InnerText);
+                                    }
+                                    catch (WebException) { }
+                                    return cacheArt;
+                                }
+                            }
                         }
-                        catch (WebException) { }
-                        return cacheArt;
                     }
+                    break;
+                case LastFMCoverSize.Mega:
+                    {
+                        // Try to get the biggest image
+                        foreach (XmlNode node in nodes)
+                        {
+                            if (node.Name == "image")
+                            {
+                                if (node.Attributes[0].Value == "mega")
+                                {
+                                    try
+                                    {
+                                        cacheArt = Net.Network.imageFromURL(node.InnerText);
+                                    }
+                                    catch (WebException) { }
+                                    return cacheArt;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
+
+
+
             return null;
         }
         /// <summary>
@@ -228,7 +293,7 @@ namespace OpenMobile.Media
                 return null;
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                db.beginGetSongsByAlbum(artist, album, true, eMediaField.Title);
+                db.beginGetSongs("", artist, album, "", "", -1, true, eMediaField.Title);
                 mediaInfo result = db.getNextMedia();
                 if (result == null)
                     return null;

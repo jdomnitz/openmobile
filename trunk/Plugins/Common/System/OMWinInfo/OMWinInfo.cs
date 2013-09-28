@@ -61,7 +61,7 @@ namespace OMWinInfo
             Settings settings = new Settings("OMWinInfo Settings");
             settings.OnSettingChanged += new SettingChanged(settings_OnSettingChanged);
 
-            settings.Add(new Setting(SettingTypes.Button, "OMWinInfo.Show", String.Empty, "Show info form", null, null));
+            settings.Add(new Setting(SettingTypes.Button, "OMWinInfo.Show", String.Empty, "Show info form"));
 
             return settings;
         }
