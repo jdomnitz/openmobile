@@ -36,6 +36,8 @@ namespace OpenMobile.helperFunctions
         {
             static OSK OSK_Default_Keypad;
             static OSK OSK_Default_Keypad_Masked;
+            static OSK OSK_Default_KeypadSmall;
+            static OSK OSK_Default_KeypadSmall_Masked;
             static OSK OSK_Default_Numpad;
             static OSK OSK_Default_Numpad_Masked;
 
@@ -48,6 +50,12 @@ namespace OpenMobile.helperFunctions
                 OSK_Default_Keypad_Masked = new OSK("", "", "", OSKInputTypes.Keypad, true);
                 OSK_Default_Keypad_Masked.GeneratePanel();
 
+                OSK_Default_KeypadSmall = new OSK("", "", "", OSKInputTypes.KeypadSmall, false);
+                OSK_Default_KeypadSmall.GeneratePanel();
+
+                OSK_Default_KeypadSmall_Masked = new OSK("", "", "", OSKInputTypes.KeypadSmall, true);
+                OSK_Default_KeypadSmall_Masked.GeneratePanel();
+
                 OSK_Default_Numpad = new OSK("", "", "", OSKInputTypes.Numpad, false);
                 OSK_Default_Numpad.GeneratePanel();
 
@@ -55,7 +63,7 @@ namespace OpenMobile.helperFunctions
                 OSK_Default_Numpad_Masked.GeneratePanel();
             }
 
-            public static string ShowDefaultOSK(int screen, string Text, string HelpText, string Header, OSKInputTypes Style, bool MaskInput)
+            public static string ShowDefaultOSK(int screen, string Text, string HelpText, string Header, OSKInputTypes Style, bool MaskInput, OMTextBox textBoxTarget = null)
             {
                 if (Style == OSKInputTypes.None)
                     return "";
@@ -72,6 +80,14 @@ namespace OpenMobile.helperFunctions
                                 osk = (OSK)OSK_Default_Keypad_Masked.Clone();
                             else
                                 osk = (OSK)OSK_Default_Keypad.Clone();
+                        }
+                        break;
+                    case OSKInputTypes.KeypadSmall:
+                        {
+                            if (MaskInput)
+                                osk = (OSK)OSK_Default_KeypadSmall_Masked.Clone();
+                            else
+                                osk = (OSK)OSK_Default_KeypadSmall.Clone();
                         }
                         break;
                     case OSKInputTypes.Numpad:
@@ -104,6 +120,7 @@ namespace OpenMobile.helperFunctions
                 lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_Header");
                 if (lbl != null)
                 {
+                    lbl.Tag = textBoxTarget;
                     lbl.Text = Header;
                     oskData.Header = Header;
                 }
@@ -148,6 +165,44 @@ namespace OpenMobile.helperFunctions
                 /// The opacity level of the background (0 - 255)
                 /// </summary>
                 public byte BackgroundOpacity { get; set; }
+
+                /// <summary>
+                /// The Y placement of the OSK
+                /// </summary>
+                public int Left
+                {
+                    get
+                    {
+                        return this._Left;
+                    }
+                    set
+                    {
+                        if (this._Left != value)
+                        {
+                            this._Left = value;
+                        }
+                    }
+                }
+                private int _Left=-1;
+
+                /// <summary>
+                /// The X placement of the OSK
+                /// </summary>
+                public int Top
+                {
+                    get
+                    {
+                        return this._Top;
+                    }
+                    set
+                    {
+                        if (this._Top != value)
+                        {
+                            this._Top = value;
+                        }
+                    }
+                }
+                private int _Top = -1;        
 
                 #region ICloneable Members
 
@@ -332,6 +387,33 @@ namespace OpenMobile.helperFunctions
                 CloseOSK.Set();
             }
 
+            void txtBox_OnTextChange(OMControl sender, int screen)
+            {
+                OMLabel lbl = sender.Parent["OSK_Label_Header"] as OMLabel;
+                if (lbl != null)
+                {
+                    if (lbl.Tag != null && (lbl.Tag is OMTextBox))
+                    {
+                        OMTextBox textBoxTarget = lbl.Tag as OMTextBox;
+                        OMTextBox txt = sender.Parent["OSK_TextBox_Text"] as OMTextBox;
+                        if (txt != null)
+                        {
+                            if (String.IsNullOrEmpty(txt.Tag as string))
+                                textBoxTarget.Text = txt.Text;
+                            else
+                                textBoxTarget.Text = txt.Tag as string;
+                        }
+                        else
+                            textBoxTarget.Text = ((OSKData)sender.Parent.Tag).Text;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Shows a preloaded OSK (fast)
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <returns></returns>
             public string ShowPreloadedOSK(int screen)
             {
                 // Initialize the panel
@@ -345,8 +427,7 @@ namespace OpenMobile.helperFunctions
             }
 
             /// <summary>
-            /// Shows the menu and returns the zero based index (if not changed by the returntype property) of the selected menu option
-            /// <para>A negative number indicates no selection</para>
+            /// Shows the OSK and returns the text string from the OSK
             /// </summary>
             /// <param name="screen"></param>
             /// <returns></returns>
@@ -355,10 +436,10 @@ namespace OpenMobile.helperFunctions
                 return ShowOSK(screen, false);
             }
             /// <summary>
-            /// Shows the menu and returns the zero based index (if not changed by the returntype property) of the selected menu option
-            /// <para>A negative number indicates no selection</para>
+            /// Shows the OSK and returns the text string from the OSK
             /// </summary>
             /// <param name="screen"></param>
+            /// <param name="UsePreloadedPanel"></param>
             /// <returns></returns>
             public string ShowOSK(int screen, bool UsePreloadedPanel)
             {
@@ -387,13 +468,26 @@ namespace OpenMobile.helperFunctions
                     // Attach events
                     for (int i = 0; i < Panel.controlCount; i++)
                     {
-                        OMButton btn = Panel.getControl(i) as OMButton;
-                        if (btn != null)
+                        object control = Panel.getControl(i);
+                        if (control is OMButton)
                         {
-                            if (btn.Name == "OSK_Button_Cancel")
-                                btn.OnClick += new userInteraction(CancelButton_OnClick);
-                            else if (btn.Name == "OSK_Button_OK")
-                                btn.OnClick += new userInteraction(OKButton_OnClick);
+                            OMButton btn = Panel.getControl(i) as OMButton;
+                            if (btn != null)
+                            {
+                                if (btn.Name == "OSK_Button_Cancel")
+                                    btn.OnClick += new userInteraction(CancelButton_OnClick);
+                                else if (btn.Name == "OSK_Button_OK")
+                                    btn.OnClick += new userInteraction(OKButton_OnClick);
+                            }
+                        }
+                        else if (control is OMTextBox)
+                        {
+                            OMTextBox txtBox = Panel.getControl(i) as OMTextBox;
+                            if (txtBox != null)
+                            {
+                                if (txtBox.Name == "OSK_TextBox_Text")
+                                    txtBox.OnTextChange += new userInteraction(txtBox_OnTextChange);
+                            }
                         }
                     }
                 }
@@ -431,6 +525,7 @@ namespace OpenMobile.helperFunctions
 
                 return Result;
             }
+
 
             public void GeneratePanel()
             {

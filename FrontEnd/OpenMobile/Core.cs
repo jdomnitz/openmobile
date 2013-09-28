@@ -281,9 +281,10 @@ namespace OpenMobile
                 }
                 return availablePlugin;
             }
-            catch
+            catch (Exception ex)
             {
-                BuiltInComponents.Host.DebugMsg( DebugMessageType.Error, String.Format("Unable to load file: {0}", file));
+                //BuiltInComponents.Host.DebugMsg( DebugMessageType.Error, String.Format("Unable to load file: {0}", file));
+                OM.Host.DebugMsg(String.Format("Plugin Manager was unable to load file {0}", file), ex);
             }
             return null;
         }

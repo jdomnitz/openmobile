@@ -92,9 +92,9 @@ namespace OMDebug
                     List<string> OptionList = new List<string>(Enum.GetNames(typeof(DebugMessageType)));
                     settings.Add(new Setting(SettingTypes.MultiChoice, "OMDebug.OutputFilter", "Filter", "Minimum log messages level", OptionList, OptionList, setting.getSetting(this, "OMDebug.OutputFilter")));
 
-                    settings.Add(new Setting(SettingTypes.Button, "OMDebug.OpenDebugLog", String.Empty, "Open debug log", null, null));
+                    settings.Add(new Setting(SettingTypes.Button, "OMDebug.OpenDebugLog", String.Empty, "Open debug log"));
 
-                    settings.Add(new Setting(SettingTypes.Button, "OMDebug.ClearDebugLog", String.Empty, "Clear debug log!", null, null));
+                    settings.Add(new Setting(SettingTypes.Button, "OMDebug.ClearDebugLog", String.Empty, "Clear debug log!"));
                 }
                 settings.OnSettingChanged += new SettingChanged(Setting_Changed);
             }

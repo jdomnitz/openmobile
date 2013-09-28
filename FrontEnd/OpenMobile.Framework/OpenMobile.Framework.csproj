@@ -164,6 +164,7 @@
     <Compile Include="helperFunctions\Params.cs" />
     <Compile Include="helperFunctions\Serial.cs" />
     <Compile Include="helperFunctions\SmoothAnimator.cs" />
+    <Compile Include="helperFunctions\SQLite.cs" />
     <Compile Include="helperFunctions\StoredData.cs" />
     <Compile Include="IconManager.cs" />
     <Compile Include="Math\Calculation.cs" />
@@ -296,7 +297,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

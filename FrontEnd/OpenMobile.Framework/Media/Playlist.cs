@@ -704,7 +704,7 @@ namespace OpenMobile.Media
             if (o == null)
                 return false;
             IMediaDatabase db = (IMediaDatabase)o;
-            return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo), name, false);
+            return db.writePlaylist(playlist, name, false);
         }
 
         /// <summary>
@@ -1739,15 +1739,45 @@ namespace OpenMobile.Media
 
         public static bool writePlaylistToDB(string name, List<mediaInfo> playlist)
         {
+            // Do we have something to write?
             if (playlist.Count == 0)
                 return false;
-            object o;
-            using (PluginSettings s = new PluginSettings())
-                BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"), out o);
-            if (o == null)
+
+            // Get database object
+            IMediaDatabase db = BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase")) as IMediaDatabase;
+            if (db == null)
                 return false;
-            IMediaDatabase db = (IMediaDatabase)o;
-            return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo), name, false);
+
+            return db.writePlaylist(playlist, name, false);
+        }
+
+        //public static bool writePlaylistToDB(string name, List<mediaInfo> playlist)
+        //{
+        //    if (playlist.Count == 0)
+        //        return false;
+        //    object o;
+        //    using (PluginSettings s = new PluginSettings())
+        //        BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"), out o);
+        //    if (o == null)
+        //        return false;
+        //    IMediaDatabase db = (IMediaDatabase)o;
+        //    return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo), name, false);
+        //}
+
+        public static bool writePlaylistToDBasObject(string name, List<mediaInfo> playlist)
+        {
+            if (playlist.Count == 0)
+                return false;
+
+            IMediaDatabase db = BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase")) as IMediaDatabase;
+            if (db == null)
+                return false;
+
+            //string xml = helperFunctions.XML.Serializer.toXML(playlist);
+
+            //return db.writePlaylist(new List<string>() { helperFunctions.XML.Serializer.toXML(playlist) }, name, false);
+
+            return db.writePlaylist(playlist, name, false);
         }
 
 
@@ -1768,6 +1798,11 @@ namespace OpenMobile.Media
         {
             //return info.Location;
             return String.Format("{0}|{1}|{2}",info.Artist, info.Album, info.Name);
+        }
+
+        private static string convertMedaiaInfoToXML(mediaInfo info)
+        {
+            return helperFunctions.XML.Serializer.toXML(info);
         }
 
         /// <summary>
@@ -1826,6 +1861,12 @@ namespace OpenMobile.Media
         {
             return readPlaylistFromDB(name, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"));
         }
+
+        //public static List<mediaInfo> readPlaylistFromDBasObject(string name)
+        //{
+        //    return readPlaylistFromDBasObject(name, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"));
+        //}
+
         /// <summary>
         /// Reads the given playlist from the database
         /// </summary>
@@ -1841,6 +1882,7 @@ namespace OpenMobile.Media
 
             if (db.beginGetPlaylist(name) == false)
                 return playlist;
+
             mediaInfo url = db.getNextPlaylistItem();
             while (url != null)
             {
@@ -1848,14 +1890,92 @@ namespace OpenMobile.Media
                 url = db.getNextPlaylistItem();
             }
 
-            // Get additional info from DB
-            for (int i = 0; i < playlist.Count; i++)
-            {
-                playlist[i] = db.GetMediaInfoByUrl(playlist[i].Location);
-            }
-
             return playlist;
         }
+
+        ///// <summary>
+        ///// Reads the given playlist from the database
+        ///// </summary>
+        ///// <param name="name"></param>
+        ///// <param name="dbName"></param>
+        ///// <returns></returns>
+        //public static List<mediaInfo> readPlaylistFromDB(string name, string dbName)
+        //{
+        //    List<mediaInfo> playlist = new List<mediaInfo>();
+        //    IMediaDatabase db = BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName) as IMediaDatabase;
+        //    if (db == null)
+        //        return playlist;
+
+        //    if (db.beginGetPlaylist(name) == false)
+        //        return playlist;
+        //    mediaInfo url = db.getNextPlaylistItem();
+        //    while (url != null)
+        //    {
+        //        playlist.Add(url);
+        //        url = db.getNextPlaylistItem();
+        //    }
+
+        //    // Get additional info from DB
+        //    for (int i = 0; i < playlist.Count; i++)
+        //    {
+        //        playlist[i] = db.GetMediaInfoByUrl(playlist[i].Location);
+        //    }
+
+        //    return playlist;
+        //}
+
+
+        //public static List<mediaInfo> readPlaylistFromDBasObject(string name, string dbName)
+        //{
+        //    //List<mediaInfo> playlist = new List<mediaInfo>();
+        //    //IMediaDatabase db = BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName) as IMediaDatabase;
+        //    //if (db == null)
+        //    //    return playlist;
+
+        //    //if (db.beginGetPlaylist(name) == false)
+        //    //    return playlist;
+
+        //    //string xml = db.getNextPlaylistItemAsString();
+        //    //if (string.IsNullOrEmpty(xml))
+        //    //    return playlist;
+
+        //    //try
+        //    //{
+        //    //    playlist = helperFunctions.XML.Serializer.fromXML<List<mediaInfo>>(xml);
+        //    //}
+        //    //catch
+        //    //{
+        //    //    playlist = new List<mediaInfo>();
+        //    //}
+
+        //    //return playlist;
+
+        //    List<mediaInfo> playlist = new List<mediaInfo>();
+        //    IMediaDatabase db = BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName) as IMediaDatabase;
+        //    if (db == null)
+        //        return playlist;
+
+        //    if (db.beginGetPlaylist(name) == false)
+        //        return playlist;
+
+        //    try
+        //    {
+        //        string xml = db.getNextPlaylistItemAsString();
+        //        while (!string.IsNullOrEmpty(xml))
+        //        {
+        //            mediaInfo url = helperFunctions.XML.Serializer.fromXML<mediaInfo>(xml);
+        //            playlist.Add(url);
+        //            xml = db.getNextPlaylistItemAsString();
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        playlist = new List<mediaInfo>();
+        //    }
+
+        //    return playlist;
+
+        //}
 
         /// <summary>
         /// Retrieves a playlist

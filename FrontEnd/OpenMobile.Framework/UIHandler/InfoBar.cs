@@ -51,7 +51,26 @@ namespace OpenMobile
         private string _Text;
 
         /// <summary>
-        /// Time in milliseconds the text is shown (from start animation to close)
+        /// The icon to show
+        /// </summary>
+        public imageItem Icon
+        {
+            get
+            {
+                return this._Icon;
+            }
+            set
+            {
+                if (this._Icon != value)
+                {
+                    this._Icon = value;
+                }
+            }
+        }
+        private imageItem _Icon;        
+
+        /// <summary>
+        /// Time in milliseconds the text and icon is shown (from start animation to close)
         /// </summary>
         public int Timeout
         {
@@ -86,9 +105,32 @@ namespace OpenMobile
         /// Creates new InfoBar data
         /// </summary>
         /// <param name="text"></param>
+        /// <param name="icon"></param>
+        public InfoBar(string text, imageItem icon)
+        {
+            _Text = text;
+            _Icon = icon;
+        }
+
+        /// <summary>
+        /// Creates new InfoBar data
+        /// </summary>
+        /// <param name="text"></param>
         /// <param name="timeout"></param>
         public InfoBar(string text, int timeout)
             : this(text)
+        {
+            _Timeout = timeout;
+        }
+
+        /// <summary>
+        /// Creates new InfoBar data
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="icon"></param>
+        /// <param name="timeout"></param>
+        public InfoBar(string text, imageItem icon, int timeout)
+            : this(text, icon)
         {
             _Timeout = timeout;
         }

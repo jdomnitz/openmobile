@@ -84,7 +84,7 @@ namespace ControlDemo
             OMObjectList lstListControl = new OMObjectList("lstListControl", 200, 150, 400, 400);
             lstListControl._3D_CameraData = new _3D_Control(new OpenMobile.Math.Vector3d(0, -35, 0));
             //lstListControl.SkinDebug = true;
-            lstListControl.BackgroundColor = Color.Black;
+            //lstListControl.BackgroundColor = Color.Black;
             //lstListControl.SoftEdges = FadingEdge.GraphicSides.Bottom | FadingEdge.GraphicSides.Left | FadingEdge.GraphicSides.Right | FadingEdge.GraphicSides.Top;
             pOMList2Test.addControl(lstListControl);
 
@@ -176,8 +176,8 @@ namespace ControlDemo
             // List control 2
             OMObjectList lstListControl2 = new OMObjectList("lstListControl2", 600, 150, 400, 400);
             //lstListControl.SkinDebug = true;
-            lstListControl2.BackgroundColor = Color.Black;
-            lstListControl2.SoftEdges = FadingEdge.GraphicSides.Bottom | FadingEdge.GraphicSides.Left | FadingEdge.GraphicSides.Right | FadingEdge.GraphicSides.Top;
+            //lstListControl2.BackgroundColor = Color.Black;
+            //lstListControl2.SoftEdges = FadingEdge.GraphicSides.Bottom | FadingEdge.GraphicSides.Left | FadingEdge.GraphicSides.Right | FadingEdge.GraphicSides.Top;
             pOMList2Test.addControl(lstListControl2);
             ListItem_MessageType1 = CreateMessageListItem(lstListControl2, 0, 70, 300, BuiltInComponents.SystemSettings.SkinFocusColor, BuiltInComponents.SystemSettings.SkinTextColor, lstListControl2.BackgroundColor);
             ListItem_MessageType2 = CreateMessageListItem(lstListControl2, 1, 20, 300, Color.Turquoise, BuiltInComponents.SystemSettings.SkinTextColor, lstListControl2.BackgroundColor);

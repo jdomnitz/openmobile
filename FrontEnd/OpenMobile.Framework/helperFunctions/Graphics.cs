@@ -1063,4 +1063,77 @@ namespace OpenMobile.helperFunctions.Graphics
         }
     }
 
+    /// <summary>
+    /// Image helpers
+    /// </summary>
+    public static class Images
+    {
+        /// <summary>
+        /// Creates a "mosaic" effect of a list of images
+        /// </summary>
+        /// <param name="images"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        static public OImage CreateMosaic(List<OImage> images, int width, int height)
+        {
+            // Create target image
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height);
+            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                List<Rectangle> rects = GetRectangles(images.Count, width, height);
+                for (int i = 0; i < rects.Count; i++)
+			    {
+                    if (images.Count >= i)
+                        g.DrawImage(images[i].image, rects[i].ToSystemRectangle(), 0, 0, images[i].image.Width, images[i].image.Height, System.Drawing.GraphicsUnit.Pixel);
+			    }
+            }
+            return new OImage(bmp);
+        }
+
+        /// <summary>
+        /// Gets a "mosaic" effect rectangle list
+        /// </summary>
+        /// <param name="count"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        static public List<Rectangle> GetRectangles(int count, int width, int height)
+        {
+            List<Rectangle> rects = new List<Rectangle>();
+
+            rects.Add(new Rectangle(0, 0, width, height));
+
+            bool direction = true;
+            while (rects.Count < count)
+            {
+                rects.AddRange(SplitRectangle(rects[rects.Count - 1], direction));
+                rects.RemoveAt(rects.Count - 3);
+                direction = !direction;
+                if (rects.Count >= count)
+                    break;
+                if (rects[rects.Count - 1].Width < 2 || rects[rects.Count - 1].Height < 2)
+                    break;
+            }
+            return rects;
+        }
+
+        static private List<Rectangle> SplitRectangle(Rectangle rect, bool directionVertical)
+        {
+            List<Rectangle> rects = new List<Rectangle>();
+
+            if (directionVertical)
+            {
+                rects.Add(new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height / 2));
+                rects.Add(new Rectangle(rect.Left, rect.Top + rect.Height / 2, rect.Width, rect.Height / 2));
+            }
+            else
+            {
+                rects.Add(new Rectangle(rect.Left, rect.Top, rect.Width / 2, rect.Height));
+                rects.Add(new Rectangle(rect.Left + rect.Width / 2, rect.Top, rect.Width / 2, rect.Height));
+            }
+            return rects;            
+        }
+    }
+
 }

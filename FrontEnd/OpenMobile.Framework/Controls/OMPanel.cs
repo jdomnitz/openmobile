@@ -138,6 +138,45 @@ namespace OpenMobile.Controls
             addControlGroup(new Point(left, top), cg);
         }
 
+        private OMControl _LastAddedControl = null;
+
+        /// <summary>
+        /// Adds a control relative to a reference control
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="placementReference"></param>
+        /// <param name="direction"></param>
+        public void addControl(OMControl control, OMControl placementReference, ControlDirections direction)
+        {
+            helperFunctions.Controls.Controls.PlaceControl(placementReference, control, direction);
+            addControl(control);
+        }
+
+        /// <summary>
+        /// Adds a control relative to the last added control
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="direction"></param>
+        public void addControl(OMControl control, ControlDirections direction)
+        {
+            helperFunctions.Controls.Controls.PlaceControl(_LastAddedControl, control, direction);
+            addControl(control);
+        }
+
+        /// <summary>
+        /// Adds a control relative to the last added control with an additional offset
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="direction"></param>
+        /// <param name="offsetX"></param>
+        /// <param name="offsetY"></param>
+        public void addControl(OMControl control, ControlDirections direction, int offsetX, int offsetY)
+        {
+            addControl(control, direction);
+            control.Left += offsetX;
+            control.Top += offsetY;
+        }
+
         /// <summary>
         /// Adds a control to the container
         /// </summary>
@@ -163,6 +202,7 @@ namespace OpenMobile.Controls
             control.Translate(_BasePoint);
 
             containedControls.Add(control);
+            _LastAddedControl = control;
             raiseUpdate(false);
         }
 
@@ -621,6 +661,19 @@ namespace OpenMobile.Controls
         /// Create a new panel with an given name
         /// <param name="Name">Name of the panel</param>
         /// <param name="Header">Header of the panel (Descriptive text that can be shown to the user)</param>
+        /// <param name="icon">icon for the panel (Icon that will be shown when the panel is showing)</param>
+        /// </summary>
+        public OMPanel(string Name, string Header, imageItem icon)
+            : this(Name)
+        {
+            this._Header = Header;
+            this._Icon = icon;
+        }
+
+        /// <summary>
+        /// Create a new panel with an given name
+        /// <param name="Name">Name of the panel</param>
+        /// <param name="Header">Header of the panel (Descriptive text that can be shown to the user)</param>
         /// <param name="backgroundColor">background color to use for the panel</param>
         /// </summary>
         public OMPanel(string Name, string Header, Color backgroundColor)
@@ -933,6 +986,25 @@ namespace OpenMobile.Controls
             }
         }
         private string _Header;
+
+        /// <summary>
+        /// The icon for this panel
+        /// </summary>
+        public imageItem Icon
+        {
+            get
+            {
+                return this._Icon;
+            }
+            set
+            {
+                if (this._Icon != value)
+                {
+                    this._Icon = value;
+                }
+            }
+        }
+        private imageItem _Icon;        
 
         /// <summary>
         /// The transition effect to use when showing this panel

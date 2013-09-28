@@ -240,7 +240,7 @@ namespace OpenMobile.Media
             if (o == null)
                 return false;
             IMediaDatabase db = (IMediaDatabase)o;
-            return db.writePlaylist(playlist.ConvertAll<string>(convertMediaInfo), name, false);
+            return db.writePlaylist(playlist, name, false);
         }
 
         /// <summary>

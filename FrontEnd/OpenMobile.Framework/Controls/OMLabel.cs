@@ -58,7 +58,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Outline color of the text
         /// </summary>
-        protected Color _outlineColor = BuiltInComponents.SystemSettings.SkinFocusColor;//Color.Black;
+        protected Color _outlineColor = BuiltInComponents.SystemSettings.SkinTextColor;//Color.Black;
 
         /// <summary>
         /// Get's the size of the text contained in this control
@@ -329,6 +329,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="g"></param>
         /// <param name="e"></param>
+        /// <param name="text"></param>
         protected void Render_Foreground(Graphics.Graphics g, renderingParams e, string text)
         {
             // No use in rendering if text is empty
@@ -340,6 +341,25 @@ namespace OpenMobile.Controls
                 g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
             }
         }
+
+        /// <summary>
+        /// Render the controls foreground
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="e"></param>
+        /// <param name="text"></param>
+        protected void Render_Foreground(Graphics.Graphics g, renderingParams e, string text, Color textColor, Color outlineColor)
+        {
+            // No use in rendering if text is empty
+            if (!String.IsNullOrEmpty(text))
+            {
+                if (_RefreshGraphic)
+                    textTexture = g.GenerateTextTexture(textTexture, left, top, width, height, text, _font, _textFormat, _textAlignment, textColor, outlineColor, _AutoFitTextMode);
+
+                g.DrawImage(textTexture, left, top, width, height, _RenderingValue_Alpha);
+            }
+        }
+
 
         /// <summary>
         /// Draws the control

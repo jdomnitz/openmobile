@@ -2827,7 +2827,12 @@ namespace OpenMobile
         /// <summary>
         /// A onscreen numpad will be used for input
         /// </summary>
-        Numpad
+        Numpad,
+
+        /// <summary>
+        /// A small keypad that can be placed on screen with controls
+        /// </summary>
+        KeypadSmall
     }
 
     public enum OSKShowTriggers

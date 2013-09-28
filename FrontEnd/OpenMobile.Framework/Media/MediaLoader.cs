@@ -93,6 +93,7 @@ namespace OpenMobile.Media
             return item;
         }
 
+        /*
         /// <summary>
         /// Loads a list of genres
         /// </summary>
@@ -149,7 +150,7 @@ namespace OpenMobile.Media
             list.Clear();
             using (IMediaDatabase db = (IMediaDatabase)o)
             {
-                if (!db.beginGetArtists(false))
+                if (!db.beginGetArtists("",false))
                     return false;
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
@@ -186,7 +187,7 @@ namespace OpenMobile.Media
             {
                 try
                 {
-                    if (!db.beginGetAlbums(artist, true))
+                    if (!db.beginGetAlbums(artist))
                         return false;
                 }
                 catch (Mono.Data.Sqlite.SqliteException)
@@ -228,7 +229,7 @@ namespace OpenMobile.Media
             {
                 try
                 {
-                    if (!db.beginGetSongs(true, eMediaField.Title))
+                    if (!db.beginGetSongs("", "", "", "", "", -1, true, eMediaField.Title))
                         return false;
                 }
                 catch (Mono.Data.Sqlite.SqliteException)
@@ -440,5 +441,6 @@ namespace OpenMobile.Media
             }
             return true;
         }
+        */
     }
 }

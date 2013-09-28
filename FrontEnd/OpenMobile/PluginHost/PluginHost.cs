@@ -303,11 +303,6 @@ namespace OpenMobile
             tmrCurrentClock.Elapsed += new System.Timers.ElapsedEventHandler(tmrCurrentClock_Elapsed);
             tmrCurrentClock.Enabled = true;
 
-
-            // Connect network events
-            NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
-            NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(NetworkChange_NetworkAddressChanged);
-
             // Connect screen events
             SystemEvents.DisplaySettingsChanged += new EventHandler(SystemEvents_DisplaySettingsChanged);
 
@@ -355,6 +350,10 @@ namespace OpenMobile
             // Initialize data
             IPAddress = GetLocalIPAddress();
             NetWorkAvailable = GetNetWorkAvailable();
+
+            // Connect network events
+            NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
+            NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(NetworkChange_NetworkAddressChanged);
         }
 
         /// <summary>

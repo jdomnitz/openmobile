@@ -168,6 +168,32 @@ namespace OpenMobile.Data
             PollEngine_WaitHandle.Set();
         }
 
+        /// <summary> 
+        /// Removes a dataprovider 
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary> 
+        /// <param name="name"></param>
+        public bool RemoveDataSource(string name)
+        {
+            // Check for included provider reference
+            if (!name.Contains(DataSource.ProviderSeparator))
+                return false;
+
+            lock (_DataSources)
+            {
+                DataSource toRemove = GetDataSource(name);
+                if (toRemove == null)
+                    return false;
+
+                DataSourceSubscriptionCacheItem queuedItem = _DataSourceSubscriptionCache.Find(x => (x.Name == name));
+                if (queuedItem != null)
+                    _DataSourceSubscriptionCache.Remove(queuedItem);
+                _DataSources.Remove(toRemove);
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Gets all available datasources
         /// </summary>

@@ -210,18 +210,19 @@ namespace OpenMobile.Graphics
         /// Add an overlay color onto this image
         /// </summary>
         /// <param name="c"></param>
-        public void Overlay(Color c)
+        public OImage Overlay(Color c)
         {
             Overlay(c, 100, OverLayDirections.All);
+            return this;
         }
         /// <summary>
         /// Add an overlay color onto this image
         /// </summary>
         /// <param name="c"></param>
-        public void Overlay(Color c, int coverPercentage, OverLayDirections direction)
+        public OImage Overlay(Color c, int coverPercentage, OverLayDirections direction)
         {
             if (img == null)
-                return;
+                return this;
 
             // Create new Bitmap object with the size of the picture
             lock (img)
@@ -334,6 +335,69 @@ namespace OpenMobile.Graphics
                 for (int i = 0; i < _GenerateTexture.Length; i++)
                     _GenerateTexture[i] = true;
             }
+            return this;
+        }
+
+        public OImage MakeTransparentFromPixel(int pixelX, int pixelY)
+        {
+            return MakeTransparent(img.GetPixel(pixelX, pixelY));
+        }
+
+        public OImage MakeTransparent(Color colorToMakeTransparent)
+        {
+                // Set color mapping table
+                ColorMap[] colorMaps = new ColorMap[1];
+                ColorMap remap = new ColorMap();
+                remap.OldColor = colorToMakeTransparent.ToSystemColor();
+                remap.NewColor = System.Drawing.Color.Transparent;
+                colorMaps[0] = remap;
+                return RemapColors(colorMaps);
+        }
+
+        public OImage MakeTransparent(System.Drawing.Color colorToMakeTransparent)
+        {
+            // Set color mapping table
+            ColorMap[] colorMaps = new ColorMap[1];
+            ColorMap remap = new ColorMap();
+            remap.OldColor = colorToMakeTransparent;
+            remap.NewColor = System.Drawing.Color.Transparent;
+            colorMaps[0] = remap;
+            return RemapColors(colorMaps);
+        }
+
+        public OImage RemapColors(ColorMap[] colorMaps)
+        {
+            if (img == null || colorMaps == null)
+                return this;
+
+            // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                // Apply map
+                System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+                ia.SetRemapTable(colorMaps, ColorAdjustType.Bitmap);
+
+                // Draw image using color matrix
+                Bitmap bmp = new Bitmap(img.Width, img.Height);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                    g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel, ia);
+                ia.Dispose();
+
+                // Dispose original image
+                if (img != null)
+                {
+                    img.Dispose();
+                    img = null;
+                }
+
+                // Assign new image
+                img = bmp;
+
+                // Regenerate textures
+                for (int i = 0; i < _GenerateTexture.Length; i++)
+                    _GenerateTexture[i] = true;
+            }
+            return this;
         }
 
         public enum CropBase { Left, Top, Bottom, Right }
@@ -343,10 +407,10 @@ namespace OpenMobile.Graphics
         /// </summary>
         /// <param name="percentage"></param>
         /// <param name="cropBase"></param>
-        public void Crop(int percentage, CropBase cropBase)
+        public OImage Crop(int percentage, CropBase cropBase)
         {
             if (img == null)
-                return;
+                return this;
 
             float percentageF = percentage / 100f;
 
@@ -397,6 +461,7 @@ namespace OpenMobile.Graphics
                 // Assign new image
                 img = bmp;
             }
+            return this;
         }
 
         /// <summary>
@@ -404,10 +469,10 @@ namespace OpenMobile.Graphics
         /// </summary>
         /// <param name="percentage">The percentage to reduce the image with</param>
         /// <param name="backColor"></param>
-        public void AddBorder(int percentage, Color backColor)
+        public OImage AddBorder(int percentage, Color backColor)
         {
             if (img == null)
-                return;
+                return this;
 
             float percentageF = 1f - (percentage / 100f);
 
@@ -436,6 +501,7 @@ namespace OpenMobile.Graphics
                 // Assign new image
                 img = bmp;
             }
+            return this;
         }
 
         /// <summary>
@@ -443,10 +509,10 @@ namespace OpenMobile.Graphics
         /// </summary>
         /// <param name="c"></param>
         /// <param name="glowSize">Size of glow (NB! Must be an odd number)</param>
-        public void Glow(Color c, int glowSize = 31)
+        public OImage Glow(Color c, int glowSize = 31)
         {
             if (img == null)
-                return;
+                return this;
 
             // Create new Bitmap object with the size of the picture
             lock (img)
@@ -487,22 +553,24 @@ namespace OpenMobile.Graphics
                 for (int i = 0; i < _GenerateTexture.Length; i++)
                     _GenerateTexture[i] = true;
             }
+            return this;
         }
 
         /// <summary>
         /// Sets the alpha channel of the image
         /// </summary>
         /// <param name="alpha">Alpha in the range 1 to 100</param>
-        public void SetAlpha(int alpha)
+        public OImage SetAlpha(int alpha)
         {
             SetAlpha((float)(alpha / 100f));
+            return this;
         }
 
         /// <summary>
         /// Sets the alpha channel of the image
         /// </summary>
         /// <param name="alpha">Alpha in the range 0.0 to 1.0</param>
-        public void SetAlpha(float alpha)
+        public OImage SetAlpha(float alpha)
         {
             System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(new float[][]
                     {
@@ -516,9 +584,10 @@ namespace OpenMobile.Graphics
                     });
 
             UpdateAndSetImageWithMatrix(cm);
+            return this;
         }
 
-        private void UpdateAndSetImageWithMatrix(ColorMatrix cm)
+        private OImage UpdateAndSetImageWithMatrix(ColorMatrix cm)
         {
             System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
             ia.SetColorMatrix(cm);
@@ -544,9 +613,10 @@ namespace OpenMobile.Graphics
             // Regenerate textures
             for (int i = 0; i < _GenerateTexture.Length; i++)
                 _GenerateTexture[i] = true;
+            return this;
         }
 
-        public void RenderText(int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC, FitModes fitMode)
+        public OImage RenderText(int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC, FitModes fitMode)
         {
              // Create new Bitmap object with the size of the picture
             lock (img)
@@ -560,14 +630,16 @@ namespace OpenMobile.Graphics
             // Regenerate textures
             for (int i = 0; i < _GenerateTexture.Length; i++)
                 _GenerateTexture[i] = true;
+            return this;
         }
 
-        public void AddImageOverlay(int x, int y, OImage image)
+        public OImage AddImageOverlay(int x, int y, OImage image)
         {
             AddImageOverlay(x, y, image.image.Width, image.image.Height, image);
+            return this;
         }
 
-        public void AddImageOverlay(int x, int y, int w, int h, OImage image)
+        public OImage AddImageOverlay(int x, int y, int w, int h, OImage image)
         {
             // Create new Bitmap object with the size of the picture
             lock (img)
@@ -581,6 +653,7 @@ namespace OpenMobile.Graphics
             // Regenerate textures
             for (int i = 0; i < _GenerateTexture.Length; i++)
                 _GenerateTexture[i] = true;
+            return this;
         }
 
         #region Static methods

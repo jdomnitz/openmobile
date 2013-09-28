@@ -44,6 +44,16 @@ namespace OpenMobile.Controls
             return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, null, null, null, Color.Transparent, Color.Transparent, borderColor);
         }
 
+        public static OMButton PreConfigLayout_BasicStyle_NoBackground(string name, int left, int top, int width, int height, GraphicCorners? corners, Color? borderColor, int fontSize)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, null, null, null, Color.Transparent, Color.Transparent, borderColor, null, fontSize);
+        }
+
+        public static OMButton PreConfigLayout_BasicStyle_NoBackground(string name, int left, int top, int width, int height, GraphicCorners? corners, Color? borderColor, Color? textColor, string icon, string text, int fontSize)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, icon, null, text, Color.Transparent, Color.Transparent, borderColor, null, fontSize, textColor);
+        }
+
 
         /// <summary>
         /// Creates a button with a default layout
@@ -104,6 +114,25 @@ namespace OpenMobile.Controls
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <param name="opacity"></param>
+        /// <param name="corners"></param>
+        /// <param name="icon"></param>
+        /// <param name="text"></param>
+        /// <param name="fontSize"></param>
+        /// <returns></returns>
+        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, GraphicCorners? corners, string icon, string text, int fontSize)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, 255, 15, corners, icon, null, text, null, null, null, null, fontSize);
+        }
+
+        /// <summary>
+        /// Creates a button with a default layout
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="opacity"></param>
         /// <param name="cornerRadius"></param>
         /// <param name="corners"></param>
         /// <param name="icon"></param>
@@ -114,6 +143,31 @@ namespace OpenMobile.Controls
         /// <param name="borderColor"></param>
         /// <returns></returns>
         public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, int? opacity, int? cornerRadius, GraphicCorners? corners, string icon, OImage iconImg, string text, Color? backColor1, Color? backColor2, Color? borderColor)
+        {
+            return PreConfigLayout_BasicStyle(name, left, top, width, height, opacity, cornerRadius, corners, icon, iconImg, text, backColor1, backColor2, borderColor, null, null);
+        }
+
+        /// <summary>
+        /// Creates a button with a default layout
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="opacity"></param>
+        /// <param name="cornerRadius"></param>
+        /// <param name="corners"></param>
+        /// <param name="icon"></param>
+        /// <param name="iconImg"></param>
+        /// <param name="text"></param>
+        /// <param name="backColor1"></param>
+        /// <param name="backColor2"></param>
+        /// <param name="borderColor"></param>
+        /// <param name="fontName"></param>
+        /// <param name="fontSize"></param>
+        /// <returns></returns>
+        public static OMButton PreConfigLayout_BasicStyle(string name, int left, int top, int width, int height, int? opacity, int? cornerRadius, GraphicCorners? corners, string icon, OImage iconImg, string text, Color? backColor1, Color? backColor2, Color? borderColor, string fontName, int? fontSize, Color? textColor = null)
         {
             OMButton btn = new OMButton(name, left, top, width, height);
 
@@ -137,6 +191,19 @@ namespace OpenMobile.Controls
                 gd.CornersRadiusAppliesTo = (GraphicCorners)corners;
             if (icon != null)
                 gd.Icon = icon;
+            
+            // Default font data            
+            Font f = OpenMobile.Graphics.Font.Arial;
+            f.Size = 36;
+            if (!String.IsNullOrEmpty(fontName))
+                f = new Font(fontName, 36);
+            if (fontSize.HasValue)
+                f.Size = fontSize.Value;
+            gd.TextFont = f;
+
+            if (textColor.HasValue)
+                gd.TextColor = textColor.Value;
+
             if (text != null)
                 gd.Text = text;
             gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;

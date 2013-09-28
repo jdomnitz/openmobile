@@ -41,8 +41,11 @@ namespace ControlDemo
         {
             OMPanel p = new OMPanel("Images");
 
-            OMImage imgNoCover = new OMImage("imgNoCover", 0, 100, new imageItem(MediaLoader.MissingCoverImage));
-            p.addControl(imgNoCover);
+            //OMImage imgNoCover = new OMImage("imgNoCover", 0, 100, new imageItem(MediaLoader.MissingCoverImage));
+            //p.addControl(imgNoCover);
+
+            OMImage imgIconTest = new OMImage("imgIconTest", 0, 100, 200, 200, OM.Host.getSkinImage("Icons|Icon-Glass-Gas"));
+            p.addControl(imgIconTest);
 
             OMImage imgBackground = new OMImage("imgBackground", 330, 100, OM.Host.getSkinImage("OMIconBlack_Transparent"));
             imgBackground.BackgroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;
@@ -50,9 +53,10 @@ namespace ControlDemo
             imgBackground.Top = 300 - (imgBackground.Image.image.Height / 2);
             p.addControl(imgBackground);
 
-            OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 730, 130, 200, 200, OM.Host.getSkinImage("Unknown Album.png"));
+            OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 730, 130, 200, 250, OM.Host.getSkinImage("Unknown Album.png"));
             //imgReflectionTestSource.Rotation = new OpenMobile.Math.Vector3(0, 0, 45);
-            imgReflectionTestSource.OnImageChange += new userInteraction(imgReflectionTestSource_OnImageChange);
+            //imgReflectionTestSource.OnImageChange += new userInteraction(imgReflectionTestSource_OnImageChange);
+            imgReflectionTestSource.ReflectionData = new ReflectionsData(Color.White, Color.Transparent, 0.5f);
             p.addControl(imgReflectionTestSource);
 
             OMButton btnChangeSource = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("btnChangeSource", 400, 500, 200, 90, "", "Source");
@@ -95,11 +99,11 @@ namespace ControlDemo
             //Slider_RotationZ.OnSliderMoved += new OMSlider.slidermoved(Slider_Rotation_OnSliderMoved);
             //p.addControl(Slider_RotationZ);
 
-            OMImage imgReflectionTestTarget = new OMImage("imgReflectionTestTarget", imgReflectionTestSource.Left, imgReflectionTestSource.Top + imgReflectionTestSource.Height, imgReflectionTestSource.Width, imgReflectionTestSource.Height);
-            if (imgReflectionTestSource.Image != null)
-                imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, 0.7f, true);
-                //imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, true);
-            p.addControl(imgReflectionTestTarget);
+            //OMImage imgReflectionTestTarget = new OMImage("imgReflectionTestTarget", imgReflectionTestSource.Left, imgReflectionTestSource.Top + imgReflectionTestSource.Height, imgReflectionTestSource.Width, imgReflectionTestSource.Height);
+            //if (imgReflectionTestSource.Image != null)
+            //    imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, 0.7f, true);
+            //    //imgReflectionTestTarget.Image = OpenMobile.Graphics.GDI.Reflection.GetReflection(imgReflectionTestSource.Image, true);
+            //p.addControl(imgReflectionTestTarget);
 
             return p;
         }
@@ -114,7 +118,11 @@ namespace ControlDemo
 
         static void btnChangeSource_OnClick(OMControl sender, int screen)
         {
-            ((OMImage)sender.Parent[screen,"imgReflectionTestSource"]).Image = new imageItem(OpenMobile.Net.Network.imageFromURL("http://farm4.staticflickr.com/3273/2996054575_a08a46fdb8.jpg"));
+            //((OMImage)sender.Parent[screen,"imgReflectionTestSource"]).Image = new imageItem(OpenMobile.Net.Network.imageFromURL("http://farm4.staticflickr.com/3273/2996054575_a08a46fdb8.jpg"));
+
+            OImage img = OpenMobile.Net.Network.imageFromURL("http://upload.wikimedia.org/wikipedia/commons/a/a4/IgM_white_background.png");
+            img.MakeTransparent(Color.White);
+            ((OMImage)sender.Parent[screen, "imgReflectionTestSource"]).Image = new imageItem(img);
         }
 
         static void Slider_Rotation_OnSliderMoved(OMSlider sender, int screen)

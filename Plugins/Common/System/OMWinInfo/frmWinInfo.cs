@@ -370,9 +370,17 @@ namespace OMWinInfo
                 if (datasource != null)
                 {
                     if (datasource.Value is OpenMobile.Graphics.OImage)
-                        pictureBox1.Image = ((OpenMobile.Graphics.OImage)datasource.Value).image;
+                    {
+                        OpenMobile.Graphics.OImage img = ((OpenMobile.Graphics.OImage)datasource.Value);
+                        if (img.image != null)
+                            pictureBox1.Image = img.image;
+                    }
                     else if (datasource.Value is OpenMobile.imageItem)
-                        pictureBox1.Image = ((OpenMobile.imageItem)datasource.Value).image.image;
+                    {
+                        imageItem img = ((OpenMobile.imageItem)datasource.Value);
+                        if (img.image != null)
+                            pictureBox1.Image = img.image.image;
+                    }
                     else
                         pictureBox1.Image = null;
 

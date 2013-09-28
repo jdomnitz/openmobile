@@ -68,6 +68,124 @@ namespace OpenMobile.Plugin
     public sealed class Setting
     {
         /// <summary>
+        /// A list of options or values for a setting
+        /// </summary>
+        public class OptionValueList : List<string>
+        {
+            /// <summary>
+            /// Creates a new list
+            /// </summary>
+            public OptionValueList()
+            {
+            }
+
+            /// <summary>
+            /// Creates a new list and adds items to it
+            /// </summary>
+            /// <param name="param"></param>
+            public OptionValueList(params string[] param)
+            {
+                foreach (string s in param)
+                    this.Add(s);
+            }
+
+            /// <summary>
+            /// Creates a new list with the names in the referenced enum
+            /// </summary>
+            /// <param name="enumType"></param>
+            public OptionValueList(Type enumType)
+            {
+                if (enumType.BaseType != typeof(Enum))
+                    return;
+
+                string[] strings = Enum.GetNames(enumType);
+                foreach (string s in strings)
+                    this.Add(s);
+            }
+
+            /// <summary>
+            /// Creates a new list with the names in the referenced enum
+            /// </summary>
+            /// <param name="enumType"></param>
+            public OptionValueList(Enum enumData)
+            {
+                string[] strings = Enum.GetNames(enumData.GetType());
+                foreach (string s in strings)
+                    this.Add(s);
+            }
+
+        }
+
+        #region static setting types
+
+        /// <summary>
+        /// Creates a new boolean setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="header"></param>
+        /// <param name="description"></param>
+        /// <param name="currentValue"></param>
+        /// <returns></returns>
+        public static Setting BooleanSetting(string name, string header, string description, string currentValue)
+        {
+            return new Setting(SettingTypes.MultiChoice, name, header, description, Setting.BooleanList, Setting.BooleanList, currentValue);
+        }
+
+        /// <summary>
+        /// Creates a new folder selection setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="header"></param>
+        /// <param name="description"></param>
+        /// <param name="currentValue"></param>
+        /// <returns></returns>
+        public static Setting FolderSelection(string name, string header, string description, string currentValue)
+        {
+            return new Setting(SettingTypes.Folder, name, header, description, currentValue);
+        }
+
+        /// <summary>
+        /// Creates a new text entry setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="header"></param>
+        /// <param name="description"></param>
+        /// <param name="currentValue"></param>
+        /// <returns></returns>
+        public static Setting TextEntry(string name, string header, string description, string currentValue)
+        {
+            return new Setting(SettingTypes.Text, name, header, description, currentValue);
+        }
+
+        /// <summary>
+        /// Creates a new enum setting using the enum names as available options to the user
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="header"></param>
+        /// <param name="description"></param>
+        /// <param name="currentValue"></param>
+        /// <returns></returns>
+        public static Setting EnumSetting<T>(string name, string header, string description, string currentValue)
+        {
+            return new Setting(SettingTypes.MultiChoice, name,header, description, new Setting.OptionValueList(typeof(T)), currentValue);
+        }
+
+        /// <summary>
+        /// Creates a new button setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="buttonText"></param>
+        /// <returns></returns>
+        public static Setting ButtonSetting(string name, string buttonText)
+        {
+            return new Setting(SettingTypes.Button, name, String.Empty, buttonText);
+        }
+
+
+        #endregion
+
+        /// <summary>
         /// The type of setting to be displayed/set
         /// </summary>
         public SettingTypes Type = SettingTypes.Text;
@@ -211,6 +329,17 @@ namespace OpenMobile.Plugin
             this.Options = Options;
             this.Values = Values;
         }
+        public Setting(SettingTypes Type, string Name, string Header, string Description, List<string> Options, string currentValue)
+        {
+            this.Type = Type;
+            this.Name = Name;
+            this.Header = Header;
+            this.Description = Description;
+            this.Options = Options;
+            this.Values = Options;
+            this.Value = currentValue;
+        }
+
         /// <summary>
         /// Creates a new MultiChoice or Range setting
         /// </summary>

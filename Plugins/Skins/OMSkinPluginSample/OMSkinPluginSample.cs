@@ -50,6 +50,12 @@ namespace OMSkinPluginSample
             // Load the panel into the local manager for panels
             base.PanelManager.loadPanel(panel, true);
 
+            // Use this to goto your local panels:
+            // base.GotoPanel(screen, panelName);
+
+            // Use this to show additional local panels:
+            // base.ShowPanel(screen, panelName);
+
             // Return
             return eLoadStatus.LoadSuccessful;
         }

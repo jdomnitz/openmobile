@@ -25,11 +25,14 @@ using OpenMobile.Data;
 
 namespace OMDataSourceSample
 {
-    public sealed class OMDataSourceSample : IBasePlugin, IDataSource
+    public sealed class OMDataSourceSample : BasePluginCode, IDataSource
     {
-        #region IBasePlugin Members
+        public OMDataSourceSample()
+            : base("OMDataSourceSample", OM.Host.getSkinImage("Icons|Icon-DataSource"), 1f, "A sample plugin for a datasource", "OM Dev team", "")
+        {
+        }
 
-        public eLoadStatus initialize(IPluginHost host)
+        public override eLoadStatus initialize(IPluginHost host)
         {
             // Create a datasource
             host.DataHandler.AddDataSource(new DataSource(this.pluginName, "DateTime", "Current", "", 1000, DataSource.DataTypes.text, DataSource_Get_DateTime, "A sample data source"));
@@ -50,60 +53,5 @@ namespace OMDataSourceSample
             return DateTime.Now.ToString();
         }
 
-        public Settings loadSettings()
-        {
-            return null;
-        }
-
-        public imageItem pluginIcon
-        {
-            get { return OM.Host.getSkinImage("Icons|Icon-DataSource"); }
-        }
-
-        public string authorName
-        {
-            get { return "OM DevTeam/Borte"; }
-        }
-
-        public string authorEmail
-        {
-            get { return ""; }
-        }
-
-        public string pluginName
-        {
-            get { return "OMDataSourceSample"; }
-        }
-
-        public float pluginVersion
-        {
-            get { return 1.0f; }
-        }
-
-        public string pluginDescription
-        {
-            get { return "Sample code for a datasource"; }
-        }
-
-        public bool incomingMessage(string message, string source)
-        {
-            return false;
-        }
-
-        public bool incomingMessage<T>(string message, string source, ref T data)
-        {
-            return false;
-        }
-
-        #endregion
-
-        #region IDisposable Members
-
-        public void Dispose()
-        {
-            //
-        }
-
-        #endregion
     }
 }

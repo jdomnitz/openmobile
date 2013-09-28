@@ -761,7 +761,7 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMousePreview)FocusedControlParent).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        ((IMousePreview)FocusedControlParent).MousePreviewMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
                     }
             }
             else
@@ -769,7 +769,7 @@ namespace OpenMobile
                 // Mouse preview interface
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        ((IMousePreview)FocusedControl).MousePreviewMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
             }
 
             // Send event data
@@ -846,14 +846,14 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMousePreview)FocusedControlParent).MouseDown(screen, eScaled, MouseMoveStartPoint);
+                        ((IMousePreview)FocusedControlParent).MousePreviewDown(screen, eScaled, MouseMoveStartPoint);
                     }
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MouseDown(screen, eScaled, MouseMoveStartPoint);
+                        ((IMousePreview)FocusedControl).MousePreviewDown(screen, eScaled, MouseMoveStartPoint);
             }
 
             // No use in doing anything if nothing is focused
@@ -930,13 +930,13 @@ namespace OpenMobile
             {   // Send event to focused control parent
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
-                        ((IMousePreview)FocusedControlParent).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                        ((IMousePreview)FocusedControlParent).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                        ((IMousePreview)FocusedControl).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
             }
 
             // Return if gesture is handled or no control has focus
@@ -1202,7 +1202,7 @@ namespace OpenMobile
                             // Show infobar text (if present)
                             if (!String.IsNullOrEmpty(panel.Header))
                             {
-                                OM.Host.UIHandler.InfoBar_Show(screen, new InfoBar(panel.Header));
+                                OM.Host.UIHandler.InfoBar_Show(screen, new InfoBar(panel.Header, panel.Icon));
                                 lastPanelTransition = panel;
                             }
                         }

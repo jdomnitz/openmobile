@@ -156,6 +156,69 @@ namespace OMOsk2
 
         #endregion
 
+        #region KeyPadSmall definitions
+        private const int _KeyPadSmall_Width = 50;
+        private const int _KeyPadSmall_Height = 50;
+        KeyInfo[] KeyPadKeysSmall = new KeyInfo[]
+            {
+                // Row 1
+                new KeyInfo("1","1","!", Key.Number1, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("2","2","@", Key.Number2, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("3","3","#", Key.Number3, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("4","4","$", Key.Number4, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("5","5","%", Key.Number5, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("6","6","^", Key.Number6, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("7","7","&", Key.Number7, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("8","8","*", Key.Number8, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("9","9","(", Key.Number9, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("0","0",")", Key.Number0, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("Del","Del","Del", Key.Back, 60, _KeyPadSmall_Height),
+
+                // Row 2
+                new KeyInfo("q","Q","-", Key.Q, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("w","W","=", Key.W, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("e","E","[", Key.E, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("r","R","]", Key.R, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("t","T","\\", Key.T, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("y","Y",";", Key.Y, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("u","U","'", Key.U, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("i","I",",", Key.I, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("o","O","/", Key.O, _KeyPadSmall_Width, _KeyPadSmall_Height), 
+                new KeyInfo("p","P","`", Key.P, _KeyPadSmall_Width, _KeyPadSmall_Height),
+
+                // Row 3
+                new KeyInfo("a","A","_", Key.A, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("s","S","+", Key.S, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("d","D","{", Key.D, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("f","F","}", Key.F, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("g","G","|", Key.G, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("h","H",":", Key.H, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("j","J","\"", Key.J, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("k","K","<", Key.K, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("l","L",">", Key.L, _KeyPadSmall_Width, _KeyPadSmall_Height), 
+
+                // Row 4
+                new KeyInfo("","","", Key.ShiftLeft, 80, _KeyPadSmall_Height) {Icon = new string[CharSets] {"5","5",""}, GlowState = new bool[CharSets] {false, true, false}},
+                new KeyInfo("z","Z","?", Key.Z, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("x","D","~", Key.X, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("c","C","|", Key.C, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("v","V","§", Key.V, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("b","B","¨", Key.B, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("n","N","~", Key.N, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo("m","M","´", Key.M, _KeyPadSmall_Width, _KeyPadSmall_Height),
+                new KeyInfo(".",".",",", Key.Period, _KeyPadSmall_Width, _KeyPadSmall_Height), 
+                new KeyInfo("","","", Key.ShiftRight, 80, _KeyPadSmall_Height) {Icon = new string[CharSets] {"5","5",""}, GlowState = new bool[CharSets] {false, true, false}},
+
+                 // Row 5
+                new KeyInfo("Cancel","Cancel","Cancel", Key.Escape, 115, _KeyPadSmall_Height),
+                new KeyInfo("Sym","Sym","ABC", Key.LAlt, 80, _KeyPadSmall_Height),
+                new KeyInfo("Space","Space","Space", Key.Space, 190, _KeyPadSmall_Height),
+                new KeyInfo("Sym","Sym","ABC", Key.RAlt, 80, _KeyPadSmall_Height),
+                new KeyInfo("Enter","Enter","Enter", Key.Enter, 115, _KeyPadSmall_Height), 
+            };
+
+        #endregion
+
         #region NumPad definitions
 
         KeyInfo[] NumPadKeys = new KeyInfo[]
@@ -519,6 +582,104 @@ namespace OMOsk2
                                         }
                                         if (CurrentKey < NumPadKeys.Length)
                                             Top += NumPadKeys[CurrentKey].Height + SpacingY;
+                                    }
+
+                                    #endregion
+                                }
+                                break;
+                            case OSKInputTypes.KeypadSmall:
+                                {
+                                    #region KeyPad
+
+                                    //Shape_AccessBlock2.Visible = false;
+                                    OSK_Label_Header.Visible = false;
+                                    OSK_TextBox_Text.Visible = false;
+                                    OSK_Label_HelpText.Visible = false;
+
+                                    // Set the correct decimal delimiter
+                                    SetDecimalDelimiter(KeyPadKeysSmall);
+
+                                    int SpacingX = 4;
+                                    int SpacingY = 4;
+
+                                    // Place controls on row 1
+                                    int Top = 320;
+                                    int KeyCount = 9;
+                                    int Left = 0;
+
+                                    if (DT.Top >= 0)
+                                        Top = DT.Top;
+                                    if (DT.Left >= 0)
+                                        Left = DT.Left;
+
+                                    Shape_AccessBlock2.Top = Top - 10;
+
+                                    int CurrentKey = 0;
+
+                                    imageItem imgBack = new imageItem();
+                                    imageItem imgFocus = new imageItem();
+
+                                    // Rows
+                                    for (int Row = 0; Row < 5; Row++)
+                                    {
+                                        // Set keys pr row
+                                        if (Row == 0)
+                                            KeyCount = 11;
+                                        else if (Row == 1)
+                                            KeyCount = 10;
+                                        else if (Row == 2)
+                                            KeyCount = 9;
+                                        else if (Row == 3)
+                                            KeyCount = 10;
+                                        else if (Row == 4)
+                                            KeyCount = 5;
+
+                                        Left = GetCenteredStartPoint(KeyPadKeysSmall, CurrentKey, CurrentKey + KeyCount, SpacingX);
+
+                                        // Add keys to row
+                                        for (int i = 0; i < KeyCount; i++)
+                                        {
+                                            OMButton btn = new OMButton(String.Format("OSK_Button_{0}", CurrentKey), Left, Top, KeyPadKeysSmall[CurrentKey].Width, KeyPadKeysSmall[CurrentKey].Height);
+
+                                            // Set background image
+                                            if (imgBack.image == null || imgBack.image.Width != KeyPadKeysSmall[CurrentKey].Width || imgBack.image.Height != KeyPadKeysSmall[CurrentKey].Height)
+                                                imgBack = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeysSmall[CurrentKey].Width, KeyPadKeysSmall[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackground));
+                                            btn.Image = imgBack;
+                                            // Set focus image
+                                            if (imgFocus.image == null || imgFocus.image.Width != KeyPadKeysSmall[CurrentKey].Width || imgFocus.image.Height != KeyPadKeysSmall[CurrentKey].Height)
+                                                imgFocus = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeysSmall[CurrentKey].Width, KeyPadKeysSmall[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonBackgroundFocused));
+                                            btn.FocusImage = imgFocus;
+
+                                            // Generate overlay images (save it to KeyInfo)
+                                            for (int i2 = 0; i2 < KeyPadKeysSmall[CurrentKey].Image.Length; i2++)
+                                            {
+                                                if (KeyPadKeysSmall[CurrentKey].GlowState[i2])
+                                                    KeyPadKeysSmall[CurrentKey].Image[i2] = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeysSmall[CurrentKey].Width, KeyPadKeysSmall[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonForegroundFocused, KeyPadKeysSmall[CurrentKey].Icon[i2], KeyPadKeysSmall[CurrentKey].Symbol[i2]));
+                                                else
+                                                    KeyPadKeysSmall[CurrentKey].Image[i2] = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(KeyPadKeysSmall[CurrentKey].Width, KeyPadKeysSmall[CurrentKey].Height, ButtonGraphic.ImageTypes.ButtonForeground, KeyPadKeysSmall[CurrentKey].Icon[i2], KeyPadKeysSmall[CurrentKey].Symbol[i2]));
+                                            }
+
+                                            // Set overlay image for button
+                                            btn.OverlayImage = KeyPadKeysSmall[CurrentKey].Image[CharSet];
+
+                                            btn.Tag = KeyPadKeysSmall[CurrentKey];
+                                            btn.Transition = eButtonTransition.None;
+                                            btn.OnClick += new userInteraction(btn_OnClick);
+                                            btn.OnHoldClick += new userInteraction(btn_OnHoldClick);
+
+                                            // Set special names (OK and cancel buttons)
+                                            if (KeyPadKeysSmall[CurrentKey].KeyCode == Key.Escape)
+                                                btn.Name = "OSK_Button_Cancel";
+                                            else if (KeyPadKeysSmall[CurrentKey].KeyCode == Key.Enter)
+                                                btn.Name = "OSK_Button_OK";
+
+                                            Panel.addControl(btn);
+
+                                            Left += KeyPadKeysSmall[CurrentKey].Width + SpacingX;
+                                            CurrentKey++;
+                                        }
+                                        if (CurrentKey < KeyPadKeysSmall.Length)
+                                            Top += KeyPadKeysSmall[CurrentKey].Height + SpacingY;
                                     }
 
                                     #endregion

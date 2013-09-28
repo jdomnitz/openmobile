@@ -29,7 +29,7 @@ using OpenMobile.mPlayer;
 using OpenMobile.Controls;
 using System.Drawing;
 
-namespace OMPlayer2
+namespace OMWinPlayer
 {
     [SupportedOSConfigurations(OSConfigurationFlags.Windows | OSConfigurationFlags.Linux)]
     public sealed class OMWinPlayer : MediaProviderBase
@@ -85,6 +85,38 @@ namespace OMPlayer2
 
         #endregion
 
+        #region Settings
+
+        private bool _Setting_Debug_Enabled = true;
+
+        public override void Settings()
+        {
+            base.MySettings.Add(Setting.BooleanSetting("Debug.Enable", String.Empty, "Enable session debug files", StoredData.Get(this, "Debug.Enable")));
+        }
+
+        private void Settings_MapVariables()
+        {
+            _Setting_Debug_Enabled = StoredData.GetBool(this, "Debug.Enable");
+            foreach (mPlayerWrapper player in _ZonePlayers.Values)
+                player.Player.SessionLog = _Setting_Debug_Enabled;
+        }
+
+        private void Settings_SetDefaultValues()
+        {
+            StoredData.SetDefaultValue(this, "Debug.Enable", false);
+
+            Settings_MapVariables();
+        }
+
+        public override void setting_OnSettingChanged(int screen, Setting setting)
+        {
+            base.setting_OnSettingChanged(screen, setting);
+
+            Settings_MapVariables();
+        }
+
+        #endregion
+
         public override eLoadStatus initialize(IPluginHost host)
         {
             if (Configuration.RunningOnMacOS)
@@ -112,6 +144,9 @@ namespace OMPlayer2
 
             // List this source as available to the host
             base.MediaSource_RegisterNew(_MediaSource_File);
+
+            // Set default values
+            Settings_SetDefaultValues();
 
             return eLoadStatus.LoadSuccessful;
         }
@@ -194,7 +229,8 @@ namespace OMPlayer2
                                             _ZonePlayers[zone].RequestedPlayBackMode = PlaybackModes.Play;
 
                                             // Inform user that we're loading media
-                                            base.MediaInfo_MediaText_Set(zone, _Text_PleaseWaitLoadingMedia, media.Location);
+                                            if (!System.IO.File.Exists(media.Location))
+                                                base.MediaInfo_MediaText_Set(zone, _Text_PleaseWaitLoadingMedia, media.Location);
                                         }
                                         return true;
                                     case eMediaType.AudioCD:
@@ -332,19 +368,11 @@ namespace OMPlayer2
                     #region StepForward
 
                     {
-                        MediaProviderInfo providerInfo = base.GetZoneSpecificDataInstance(zone).ProviderInfo;
-                        if (providerInfo.MediaSource == _MediaSource_File)
-                        {
-                            if (providerInfo.MediaSource.Playlist != null)
-                            {
-                                providerInfo.MediaSource.Playlist.GotoNextMedia();
-                            }
-                            if (_ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Play)
-                                DelayedCommand_Set(zone, 500, new MediaProvider_CommandWrapper(MediaProvider_Commands.Play));                                
-                        }
-                        else
-                            if (_ZonePlayers.ContainsKey(zone))
-                                _ZonePlayers[zone].Player.Next();
+                        Player_Command_StepForward(zone);
+
+                        // Start playing media if moving forward in playmode
+                        if (_ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Play)
+                            DelayedCommand_Set(zone, 500, new MediaProvider_CommandWrapper(MediaProvider_Commands.Play));                                
                     }
                     return true;
 
@@ -482,11 +510,30 @@ namespace OMPlayer2
             return false;
         }
 
+        private void Player_Command_StepForward(Zone zone)
+        {
+            MediaProviderInfo providerInfo = base.GetZoneSpecificDataInstance(zone).ProviderInfo;
+            if (providerInfo.MediaSource == _MediaSource_File)
+            {
+                if (providerInfo.MediaSource.Playlist != null)
+                {
+                    providerInfo.MediaSource.Playlist.GotoNextMedia();
+                }
+            }
+            else
+                if (_ZonePlayers.ContainsKey(zone))
+                    _ZonePlayers[zone].Player.Next();
+
+        }
+
         private void DelayedCommand_Set(Zone zone, int delay, MediaProvider_CommandWrapper command)
         {
             // Create new timer?
             if (_ZonePlayers[zone].tmrDelayedCommand == null || (MediaProvider_CommandWrapper)_ZonePlayers[zone].tmrDelayedCommand.Tag != command)
             {   // Yes
+                if (_ZonePlayers[zone].tmrDelayedCommand != null)
+                    _ZonePlayers[zone].tmrDelayedCommand.Dispose();
+
                 _ZonePlayers[zone].tmrDelayedCommand = new Timer(delay);
                 _ZonePlayers[zone].tmrDelayedCommand.AutoReset = false;
                 _ZonePlayers[zone].tmrDelayedCommand.Tag = command;
@@ -505,6 +552,7 @@ namespace OMPlayer2
         void tmrDelayedCommand_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             Timer tmr = sender as Timer;
+            tmr.Enabled = false;
             if (tmr.Tag != null && tmr.Tag2 != null)
                 ExecuteCommand((Zone)tmr.Tag2, (MediaProvider_CommandWrapper)tmr.Tag);
         }
@@ -722,6 +770,8 @@ namespace OMPlayer2
             player.OnPlaybackStarted += new mPlayer.PlayerEventHandler(player_OnPlaybackStarted);
             player.OnPlaybackStopped += new mPlayer.PlayerEventHandler(player_OnPlaybackStopped);
 
+            player.SessionLog = _Setting_Debug_Enabled;
+
             // Let's start the player
             player.Start(true, true);
 
@@ -780,6 +830,8 @@ namespace OMPlayer2
             // Disable the identify features of the player (this is enabled on the master)
             player.Identify = false;
 
+            player.SessionLog = _Setting_Debug_Enabled;
+            
             // Let's start the player
             player.Start(true, true);
 
@@ -913,19 +965,20 @@ namespace OMPlayer2
         {
             Zone zone = (Zone)sender.Tag;
 
-            // move to next track in playlist
-            if (_ZonePlayers.ContainsKey(zone) && _ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Play)
-            {
-                ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.StepForward));
-                System.Threading.Thread.Sleep(50);
-                ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.Play));
-            }
-
             base.MediaInfo_PlayBackState_Set((Zone)sender.Tag, MediaProvider_PlaybackState.Stopped);
 
             // Clear media info
             base.MediaInfo_Clear(zone);
             base.MediaInfo_MediaText_Set(zone, String.Empty, String.Empty);
+
+            // move to next track in playlist
+            if (_ZonePlayers.ContainsKey(zone) && _ZonePlayers[zone].RequestedPlayBackMode == PlaybackModes.Play)
+            {
+                //ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.StepForward));
+                Player_Command_StepForward(zone);
+                //System.Threading.Thread.Sleep(50);
+                ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.Play));
+            }
         }
 
         void player_OnPlaybackStarted(mPlayer sender)
