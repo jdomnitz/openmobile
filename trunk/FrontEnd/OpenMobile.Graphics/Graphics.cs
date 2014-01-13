@@ -637,6 +637,15 @@ namespace OpenMobile.Graphics
             implementation.DrawRoundRectangle(p,rect,radius);
         }
 
+        public void DrawPoint(Pen p, int x, int y, int width, int height)
+        {
+            implementation.DrawPoint(p.Color, x, y, width, height);
+        }
+        public void DrawPoint(Brush brush, int x, int y, int width, int height)
+        {
+            implementation.DrawPoint(brush.Color, x, y, width, height);
+        }
+
         /// <summary>
         /// Draws a filled ellipse
         /// </summary>

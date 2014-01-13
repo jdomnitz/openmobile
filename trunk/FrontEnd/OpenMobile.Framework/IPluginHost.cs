@@ -286,6 +286,13 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// Get an image relative to a plugins path
         /// </summary>
+        /// <param name="pluginName">Name of plugin</param>
+        /// <param name="imageName">Name of image</param>
+        /// <returns></returns>
+        imageItem getPluginImage(string pluginName, string imageName);
+        /// <summary>
+        /// Get an image relative to a plugins path
+        /// </summary>
         /// <param name="plugin"></param>
         /// <param name="imageName"></param>
         /// <returns></returns>
@@ -665,6 +672,35 @@ namespace OpenMobile.Plugin
         /// The current calculated time for sunset
         /// </summary>
         DateTime CurrentLocation_Sunset { get; }
+
+        /// <summary>
+        /// Updates the current location data
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="forceUpdate"></param>
+        void UpdateLocation(Location location, bool forceUpdate = false);
+
+        /// <summary>
+        /// Updates any field in the current location data
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="street"></param>
+        /// <param name="city"></param>
+        /// <param name="state"></param>
+        /// <param name="country"></param>
+        /// <param name="zip"></param>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="altitude"></param>
+        void UpdateLocation(string name = null,
+                    string street = null,
+                    string city = null,
+                    string state = null,
+                    string country = null,
+                    string zip = null,
+                    float? latitude = null,
+                    float? longitude = null,
+                    float? altitude = null);
 
     }
 }

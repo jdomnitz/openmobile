@@ -956,30 +956,112 @@ namespace OpenMobile
             }
             set
             {
-                // Ensure we have a valid value
-                if (value == null)
-                    return;
-
-                // Is this a new location?
-                if (_location != value)
-                {   // Yes
-                    _location = value;
-                    
-                    // Update datasource
-                    DataSource_Location_Current.SetValue(_location);
-
-                    // Update database
-                    StoredData.SetXML(BuiltInComponents.OMInternalPlugin, "Location.Current.Data", _location);
-
-                    // Update sunrise / sunset data
-                    _Update_SunSetSunrise(_location);
-
-                    // Raise event
-                    raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
-                }
+                UpdateLocation(value);
             }
         }
         private Location _location = new Location();
+
+        /// <summary>
+        /// Updates any field in the current location data
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="street"></param>
+        /// <param name="city"></param>
+        /// <param name="state"></param>
+        /// <param name="country"></param>
+        /// <param name="zip"></param>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <param name="altitude"></param>
+        public void UpdateLocation(string name = null, 
+            string street = null, 
+            string city = null,
+            string state = null,
+            string country = null,
+            string zip = null,
+            float? latitude = null,
+            float? longitude = null,
+            float? altitude = null)
+        {
+            bool dataUpdated = false;
+            Location currentLocation = CurrentLocation;
+            if (name != null)
+            {
+                currentLocation.Name = name;
+                dataUpdated = true;
+            }
+            if (street != null)
+            {
+                currentLocation.Street = street;
+                dataUpdated = true;
+            }
+            if (city != null)
+            {
+                currentLocation.City = city;
+                dataUpdated = true;
+            }
+            if (state != null)
+            {
+                currentLocation.State = state;
+                dataUpdated = true;
+            }
+            if (country != null)
+            {
+                currentLocation.Country = country;
+                dataUpdated = true;
+            }
+            if (zip != null)
+            {
+                currentLocation.Zip = zip;
+                dataUpdated = true;
+            }
+            if (latitude.HasValue)
+            {
+                currentLocation.Latitude = latitude.Value;
+                dataUpdated = true;
+            }
+            if (longitude.HasValue)
+            {
+                currentLocation.Longitude = longitude.Value;
+                dataUpdated = true;
+            }
+            if (altitude.HasValue)
+            {
+                currentLocation.Altitude = altitude.Value;
+                dataUpdated = true;
+            }
+
+            UpdateLocation(currentLocation, dataUpdated);
+        }
+
+        /// <summary>
+        /// Updates the current location data
+        /// </summary>
+        /// <param name="location"></param>
+        public void UpdateLocation(Location location, bool forceUpdate = false)
+        {
+            // Ensure we have a valid value
+            if (location == null)
+                return;
+
+            // Is this a new location?
+            if (_location != location | forceUpdate)
+            {   // Yes
+                _location = location;
+
+                // Update datasource
+                DataSource_Location_Current.SetValue(_location);
+
+                // Update database
+                StoredData.SetXML(BuiltInComponents.OMInternalPlugin, "Location.Current.Data", _location);
+
+                // Update sunrise / sunset data
+                _Update_SunSetSunrise(_location);
+
+                // Raise event
+                raiseNavigationEvent(eNavigationEvent.LocationChanged, _location.ToString());
+            }
+        }
 
         private void _Update_SunSetSunrise(Location location)
         {
@@ -1044,8 +1126,8 @@ namespace OpenMobile
                 }
             }
         }
-        private bool _CurrentLocation_Daytime;
-        private bool _CurrentLocation_Daytime_Temp;
+        private bool _CurrentLocation_Daytime = true;
+        private bool _CurrentLocation_Daytime_Temp = true;
 
         #endregion
 
@@ -3417,6 +3499,13 @@ namespace OpenMobile
             return imageItem.MISSING;
         }
 
+        public imageItem getPluginImage(string pluginName, string imageName)
+        {
+            IBasePlugin plugin = getPluginByName(pluginName);
+            if (plugin == null)
+                return imageItem.NONE;
+            return getPluginImage(plugin, imageName);
+        }
         public imageItem getPluginImage(IBasePlugin plugin, string imageName)
         {
             // Get paths

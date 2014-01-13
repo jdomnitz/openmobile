@@ -2195,6 +2195,10 @@ namespace OpenMobile
         /// </summary>
         public float Longitude;
         /// <summary>
+        /// Altitude
+        /// </summary>
+        public float Altitude;
+        /// <summary>
         /// Creates a new Address
         /// </summary>
         public Location()
@@ -2339,8 +2343,10 @@ namespace OpenMobile
         /// <returns></returns>
         public static bool operator ==(Location a, Location b)
         {
-            // If both are null, or both are same instance, return true.
-            if (System.Object.ReferenceEquals(a, b))
+            //// If both are null, or both are same instance, return true.
+            //if (System.Object.ReferenceEquals(a, b))
+            //    return true;
+            if (((object)a == null) && ((object)b == null))
                 return true;
 
             // If one is null, but not both, return false.

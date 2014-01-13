@@ -52,6 +52,11 @@ namespace OpenMobile.Controls
         /// Draws a Rounded Rectangle
         /// </summary>
         RoundedRectangle,
+
+        /// <summary>
+        /// Draws a point
+        /// </summary>
+        Point
     }
 
     /// <summary>
@@ -373,6 +378,9 @@ namespace OpenMobile.Controls
                     g.FillRoundRectangle(_FillBrush, left, top, width, height, _ShapeData.CornerRadius);
                     if (_ShapeData.BorderSize > 0)
                         g.DrawRoundRectangle(_BorderPen, left, top, width, height, _ShapeData.CornerRadius);
+                    break;
+                case shapes.Point:
+                    g.DrawPoint(_FillBrush, left, top, width, height);
                     break;
             }
         }

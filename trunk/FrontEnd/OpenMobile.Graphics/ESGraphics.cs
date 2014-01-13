@@ -247,6 +247,12 @@ namespace OpenMobile.Graphics
             DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
+        public void DrawPoint(Color color, int x, int y, int width, int height)
+        {
+            // Not implemented
+        }
+
+
         public void DrawImage(OImage image, Rectangle rect, Rectangle srcRect)
         {
             DrawImage(image, rect, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, 1F);

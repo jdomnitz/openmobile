@@ -93,6 +93,7 @@ namespace OpenMobile
             this.name = Name;
             this.image = i;
         }
+
         /// <summary>
         /// Provides the name of an image
         /// </summary>
@@ -159,6 +160,12 @@ namespace OpenMobile
         /// Represents an empty image item
         /// </summary>
         public static imageItem NONE = new imageItem();
+
+        public void Refresh()
+        {
+            if (image != null)
+                image.Refresh();
+        }
 
         #region ICloneable Members
 

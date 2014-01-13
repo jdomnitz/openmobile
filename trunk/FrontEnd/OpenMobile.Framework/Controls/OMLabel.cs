@@ -65,7 +65,15 @@ namespace OpenMobile.Controls
         /// </summary>
         public Size GetSizeOfContainedText()
         {
-            SizeF s = Graphics.Graphics.MeasureString(_text, _font, _textFormat, _textAlignment, _Region);
+            return GetSizeOfContainedText(_Region);
+        }
+
+        /// <summary>
+        /// Get's the size of the text contained in this control
+        /// </summary>
+        public Size GetSizeOfContainedText(Rectangle maxSize)
+        {
+            SizeF s = Graphics.Graphics.MeasureString(_text, _font, _textFormat, _textAlignment, maxSize);
             return new Size(s.Width, s.Height);
         }
         
@@ -121,7 +129,26 @@ namespace OpenMobile.Controls
                 }
             }
         }
-        protected FitModes _AutoFitTextMode;        
+        protected FitModes _AutoFitTextMode;
+
+        /// <summary>
+        /// Enables / Disables automatically sizing of control to fit the contained text
+        /// </summary>
+        public ControlSizeMode AutoSizeMode
+        {
+            get
+            {
+                return this._AutoSizeMode;
+            }
+            set
+            {
+                if (this._AutoSizeMode != value)
+                {
+                    this._AutoSizeMode = value;
+                }
+            }
+        }
+        protected ControlSizeMode _AutoSizeMode = ControlSizeMode.None;        
 
         /// <summary>
         /// Create a new OMLabel
@@ -262,6 +289,37 @@ namespace OpenMobile.Controls
                 
                 // Check for datasource present
                 base.DataSource_InLine(ref _text);
+
+                switch (_AutoSizeMode)
+                {
+                    case ControlSizeMode.None:
+                        break;
+                    case ControlSizeMode.GrowVertically:
+                        {
+                            Size textSize = GetSizeOfContainedText(new Rectangle(2000,2000));
+                            if (this.Region.Height != textSize.Height)
+                                this.Height = textSize.Height;
+                        }
+                        break;
+                    case ControlSizeMode.GrowHorizontally:
+                        {
+                            Size textSize = GetSizeOfContainedText(new Rectangle(2000, 2000));
+                            if (this.Region.Width != textSize.Width)
+                                this.Width = textSize.Width;
+                        }
+                        break;
+                    case ControlSizeMode.GrowBoth:
+                        {
+                            Size textSize = GetSizeOfContainedText(new Rectangle(2000, 2000));
+                            if (this.Region.Width != textSize.Width)
+                                this.Width = textSize.Width;
+                            if (this.Region.Height != textSize.Height)
+                                this.Height = textSize.Height;
+                        }
+                        break;
+                    default:
+                        break;
+                }
 
                 _RefreshGraphic = true;
                 Refresh();

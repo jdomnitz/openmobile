@@ -476,6 +476,5 @@ namespace OpenMobile.Controls
 
         #endregion
 
-
     }
 }

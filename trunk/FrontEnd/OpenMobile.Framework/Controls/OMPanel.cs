@@ -27,11 +27,17 @@ using OpenMobile.Framework;
 
 namespace OpenMobile.Controls
 {
+    public interface iPanelEvents
+    {
+        void RaiseEvent(int screen, eEventType eventType);
+    }
+
+
     /// <summary>
     /// The default control container
     /// </summary>
     [Serializable]
-    public class OMPanel
+    public class OMPanel : iPanelEvents
     {
         /// <summary>
         /// Contains the number of the currently assigned screen for this panel
@@ -889,8 +895,7 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="eventType"></param>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public void RaiseEvent(int screen, eEventType eventType)
+        void iPanelEvents.RaiseEvent(int screen, eEventType eventType)
         {
             //BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "OMPanel (" + this.name + ") Event: " + eventType.ToString() + " (screen: " + screen.ToString() + ")");
             switch (eventType)
@@ -898,6 +903,10 @@ namespace OpenMobile.Controls
                 case eEventType.Entering:
                     {
                         _IsVisible[screen] = true;
+
+                        // Show any popup menu set for the panel
+                        if (_PopUpMenu != null)
+                            OM.Host.UIHandler.PopUpMenu.SetButtonStrip(screen, _PopUpMenu);
 
                         // Raise event
                         if (Entering != null)
@@ -1046,6 +1055,24 @@ namespace OpenMobile.Controls
         }
         private eGlobalTransition _TransitionEffect_Hide;
 
+        /// <summary>
+        /// The button strip to use as a popup menu
+        /// </summary>
+        public ButtonStrip PopUpMenu
+        {
+            get
+            {
+                return this._PopUpMenu;
+            }
+            set
+            {
+                if (this._PopUpMenu != value)
+                {
+                    this._PopUpMenu = value;
+                }
+            }
+        }
+        private ButtonStrip _PopUpMenu;
     }
 
     /// <summary>

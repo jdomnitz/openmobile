@@ -29,7 +29,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Controls that support being clicked
     /// </summary>
-    public interface IClickable : ClickEvents
+    public interface IClickable : IClickEvents
     {
         /// <summary>
         /// Fires the OnClick Event
@@ -50,7 +50,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Click events
     /// </summary>
-    public interface ClickEvents
+    public interface IClickEvents
     {
         /// <summary>
         /// Click event
@@ -69,7 +69,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// Controls that support being clicked
     /// </summary>
-    public interface IClickableAdvanced : ClickEvents
+    public interface IClickableAdvanced : IClickEvents
     {
         /// <summary>
         /// Fires the OnClick Event

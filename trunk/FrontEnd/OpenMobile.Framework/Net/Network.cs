@@ -190,30 +190,61 @@ namespace OpenMobile.Net
                 return connectionStatus.InternetAccess;
             }
 
-            System.Net.WebRequest request = System.Net.HttpWebRequest.Create("http://www.google.com/");
-            request.Timeout = 5000; //Timeout after 5 seconds
-            request.Method = "HEAD";
-            System.Net.WebResponse response;
-            try
+            if (PingNetwork("pingtest.com"))
             {
-                response = request.GetResponse();
-            }
-            catch (System.Net.WebException)
-            {
-                available = 1;
-                return connectionStatus.NoInternet;
-            }
-            if (response.Headers["Server"] != "gws")
-            {
-                response.Close();
-                return connectionStatus.LoginRequired;
-            }
-            else
-            {
-                response.Close();
                 available = 2;
                 return connectionStatus.InternetAccess;
             }
+            available = 1;
+            return connectionStatus.NoInternet;
+
+            //System.Net.WebRequest request = System.Net.HttpWebRequest.Create("http://www.google.com/");
+            //request.Timeout = 5000; //Timeout after 5 seconds
+            //request.Method = "HEAD";
+            //System.Net.WebResponse response;
+            //try
+            //{
+            //    response = request.GetResponse();
+            //}
+            //catch (System.Net.WebException)
+            //{
+            //    available = 1;
+            //    return connectionStatus.NoInternet;
+            //}
+            //if (response.Headers["Server"] != "gws")
+            //{
+            //    response.Close();
+            //    return connectionStatus.LoginRequired;
+            //}
+            //else
+            //{
+            //    response.Close();
+            //    available = 2;
+            //    return connectionStatus.InternetAccess;
+            //}
+        }
+
+        public static bool PingNetwork(string hostNameOrAddress)
+        {
+            bool pingStatus = false;
+
+            using (System.Net.NetworkInformation.Ping p = new System.Net.NetworkInformation.Ping())
+            {
+                byte[] buffer = Encoding.ASCII.GetBytes("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                int timeout = 4444; // 4s
+
+                try
+                {
+                    System.Net.NetworkInformation.PingReply reply = p.Send(hostNameOrAddress, timeout, buffer);
+                    pingStatus = (reply.Status == System.Net.NetworkInformation.IPStatus.Success);
+                }
+                catch (Exception)
+                {
+                    pingStatus = false;
+                }
+            }
+
+            return pingStatus;
         }
     }
 }

@@ -27,6 +27,7 @@ using System.Diagnostics;
 using IMAPI2.Interop;
 using Microsoft.Win32;
 using System.Text;
+
 namespace OpenMobile.Framework
 {
     internal static class Windows
@@ -473,6 +474,49 @@ namespace OpenMobile.Framework
             }
             return 0;
         }
+
+        #region System Clock
+
+        [DllImport("kernel32.dll", EntryPoint = "SetSystemTime")]
+        [return: MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+        private static extern bool SetSystemTime([InAttribute()] ref SYSTEMTIME lpSystemTime);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SYSTEMTIME
+        {
+            public ushort wYear;
+            public ushort wMonth;
+            public ushort wDayOfWeek;
+            public ushort wDay;
+            public ushort wHour;
+            public ushort wMinute;
+            public ushort wSecond;
+            public ushort wMilliseconds;
+        }
+
+
+        public static void SetTime(DateTime time)
+        {
+            SYSTEMTIME systime = new SYSTEMTIME();
+
+            // Set the system clock ahead one hour. 
+            systime.wYear = (ushort)time.Year;
+            systime.wMonth = (ushort)time.Month;
+            systime.wDayOfWeek = (ushort)time.DayOfWeek;
+            systime.wDay = (ushort)time.Day;
+            systime.wHour = (ushort)time.Hour;
+            systime.wMinute = (ushort)time.Minute;
+            systime.wSecond = (ushort)time.Second;
+            systime.wMilliseconds = (ushort)time.Millisecond;
+
+            SetSystemTime(ref systime);
+        }
+
+        #endregion
+
+
+
+
 
     }
 }

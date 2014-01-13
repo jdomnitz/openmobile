@@ -97,6 +97,9 @@
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
     <Compile Include="Controls\ControlLayout.cs" />
+    <Compile Include="Controls\EventArgs.cs" />
+    <Compile Include="Controls\OMMouseHandler.cs" />
+    <Compile Include="Controls\OMObjectList2.cs" />
     <Compile Include="Controls\iVisibility.cs" />
     <Compile Include="Controls\OMMediaFlow.cs" />
     <Compile Include="Controls\OMImageFlow.cs" />

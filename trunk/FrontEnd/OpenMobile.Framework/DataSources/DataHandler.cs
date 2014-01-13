@@ -140,8 +140,11 @@ namespace OpenMobile.Data
             {
                 _DataSources.Add(dataSource);        // Add to internal sensor list
                 
-                // Get a fresh value from the sensor
-                dataSource.RefreshValue(null, true, true);
+                // Get a fresh value from the sensor (Not needed if value is already valid and present)
+                if (dataSource.Value != null)
+                    dataSource.RefreshValue(dataSource.Value, false, true, true);
+                else
+                    dataSource.RefreshValue(null, true, true);
 
                 // Prosess queue
                 SubscriptionCache_Prosess(dataSource);
@@ -229,11 +232,11 @@ namespace OpenMobile.Data
                 name = name.Substring(provider.Length + 1);
 
                 // Get datasource
-                return _DataSources.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Provider.ToLower() == provider.ToLower() && x.Valid));
+                return _DataSources.Find(x => (x.FullName.ToLower().Equals(name.ToLower()) && x.Provider.ToLower() == provider.ToLower() && x.Valid));
             }
 
             // Get normal datasource
-            DataSource dataSource = _DataSources.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Valid));
+            DataSource dataSource = _DataSources.Find(x => (x.FullName.ToLower().Equals(name.ToLower()) && x.Valid));
 
             if (dataSource == null && log)
             {
@@ -271,10 +274,26 @@ namespace OpenMobile.Data
         /// <para>Update events will still be sent to anyone subscribing to the data</para>
         /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
+        /// <param name="provider"></param>
         /// <param name="name"></param>
         /// <param name="value"></param>
+        /// <param name="forcedUpdate">Set to true to force an update of the datasource regardless of the actual value has changed or not</param>
         /// <returns></returns>
-        public bool PushDataSourceValue(string name, object value)
+        public bool PushDataSourceValue(string provider, string name, object value, bool forcedUpdate = false)
+        {
+            return PushDataSourceValue(String.Format("{0};{1}", provider, name), value, forcedUpdate);
+        }
+
+        /// <summary>
+        /// Pushes a value to a datasource without sending the value back to the source of the datasource (only if new value differs from the current one)
+        /// <para>Update events will still be sent to anyone subscribing to the data</para>
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="forcedUpdate">Set to true to force an update of the datasource regardless of the actual value has changed or not</param>
+        /// <returns></returns>
+        public bool PushDataSourceValue(string name, object value, bool forcedUpdate=false)
         {
             // Ensure we don't prosess empty data
             if (String.IsNullOrEmpty(name))
@@ -286,7 +305,7 @@ namespace OpenMobile.Data
 
             DataSource source = GetDataSource_Internal(name, true);
             if (source != null)
-                return source.RefreshValue(value, false, true);
+                return source.RefreshValue(value, false, true, forcedUpdate);
             return false;
         }
 

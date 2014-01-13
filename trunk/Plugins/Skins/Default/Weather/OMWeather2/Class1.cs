@@ -84,12 +84,36 @@ namespace OMWeather2
             current = new bool[theHost.ScreenCount];
 
             searchResults = new Dictionary<string, object>[theHost.ScreenCount];
-            for (int i = 0; i < theHost.ScreenCount; i++)
-                searchResults[i] = new Dictionary<string, object>();
 
-            OMPanel omweather = new OMPanel("OMWeather2", "Weather", this.pluginIcon);
-            //omweather.Forgotten = true;
-            omweather.Entering += new PanelEvent(omweather_entering);
+            OMPanel omweather = new OMPanel("OMWeather2", "Weather");
+
+            for (int i = 0; i < theHost.ScreenCount; i++)
+            {
+                searchResults[i] = new Dictionary<string, object>();
+                displayed[i] = "";
+                degrees[i] = "";
+                alreadyaddedstrip[i] = false;
+                favoritesList[i] = new List<string>();
+                //currenttemp.Text = "{Weather.Searched-" + i.ToString() + ".SearchedTemp}";
+                if (StoredData.Get(this, String.Format("Favorites.{0}.Count", i.ToString())) != "")
+                {
+                    favoritesCounter[i] = Convert.ToInt32(StoredData.Get(this, String.Format("Favorites.{0}.Count", i.ToString())));
+                    for (int j = 0; j < favoritesCounter[i]; j++)
+                    {
+                        favoritesList[i].Add(StoredData.Get(this, "Favorites." + i.ToString() + "." + j.ToString()));
+                    }
+                }
+                else
+                    favoritesCounter[i] = 0;
+                PopUpMenuStrip[i] = new ButtonStrip(this.pluginName, omweather.Name, "PopUpMenuStrip");
+                theHost.DataHandler.SubscribeToDataSource(String.Format("OMDSWeather;Weather.Searched.List{0}", i.ToString()), Subscription_Updated);
+                theHost.DataHandler.SubscribeToDataSource(String.Format("OMDSWeather;Weather.Info.Status{0}", i.ToString()), Subscription_Updated);
+            }
+
+
+
+
+
 
 
             OMButton current_background = OMButton.PreConfigLayout_BasicStyle("currentbackground", (int)(float)(theHost.ClientArea[0].Width * .15), theHost.ClientArea[0].Top - 6, (int)(float)(theHost.ClientArea[0].Width * .70), (int)(float)(theHost.ClientArea[0].Height * .213) + 6, GraphicCorners.All);
@@ -100,9 +124,6 @@ namespace OMWeather2
 
             OMBasicShape currentbackground = new OMBasicShape("currentbackground", (int)(float)(theHost.ClientArea[0].Width * .15), theHost.ClientArea[0].Top - 6, (int)(float)(theHost.ClientArea[0].Width * .70), (int)(float)(theHost.ClientArea[0].Height * .213) + 6);
             currentbackground.ShapeData = new ShapeData(shapes.RoundedRectangle, Color.Gray, Color.White, 1);
-            //currentbackground.FillColor = Color.Gray;
-            //currentbackground.BorderColor = Color.White;
-            //currentbackground.BorderSize = 1;
 
             OMButton currentposition = new OMButton("currentposition", 0, 0, 0, 0);
             currentposition.Text = "Current Position Weather";
@@ -117,34 +138,26 @@ namespace OMWeather2
             locationbackground.ShapeData = new ShapeData(shapes.RoundedRectangle, Color.Gray, Color.White, 1);
             //OMImage currentimage = new OMImage("currentimage", 151, 41, 198, 98);
 
-            //OMButton location_button = OMButton.PreConfigLayout_BasicStyle("locationbutton", 351, 41, 298, 48, GraphicCorners.All);
-            ////location_button.Text = "No Location Found";
-            //location_button.DataSource = string.Format("Screen{0}.Weather.Searched.Area", DataSource.DataTag_Screen);
-            //location_button.AutoFitTextMode = FitModes.FitFill;
-            //location_button.BorderColor = Color.White;
-            //location_button.BorderSize = 1;
-            //location_button.OnClick += new userInteraction(locationbutton_onclick);
-
-            OMBasicShape shpDay1Background = new OMBasicShape("shpDay1Background", 10, 150, 180, 380,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
-            shpDay1Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh1";
-            //omweather.addControl(shpDay1Background);
-            OMBasicShape shpDay2Background = new OMBasicShape("shpDay2Background", shpDay1Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
-            shpDay2Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh2";
-            //omweather.addControl(shpDay2Background);
-            OMBasicShape shpDay3Background = new OMBasicShape("shpDay4Background", shpDay2Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
-            shpDay3Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh3";
-            //omweather.addControl(shpDay3Background);
-            OMBasicShape shpDay4Background = new OMBasicShape("shpDay5Background", shpDay3Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
-            shpDay4Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh4";
-            //omweather.addControl(shpDay4Background);
-            OMBasicShape shpDay5Background = new OMBasicShape("shpDay6Background", shpDay4Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
-                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
-            shpDay5Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh5";
-            //omweather.addControl(shpDay5Background);
+            //OMBasicShape shpDay1Background = new OMBasicShape("shpDay1Background", 10, 150, 180, 380,
+            //    new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
+            //shpDay1Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh1";
+            ////omweather.addControl(shpDay1Background);
+            //OMBasicShape shpDay2Background = new OMBasicShape("shpDay2Background", shpDay1Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
+            //    new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
+            //shpDay2Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh2";
+            ////omweather.addControl(shpDay2Background);
+            //OMBasicShape shpDay3Background = new OMBasicShape("shpDay4Background", shpDay2Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
+            //    new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
+            //shpDay3Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh3";
+            ////omweather.addControl(shpDay3Background);
+            //OMBasicShape shpDay4Background = new OMBasicShape("shpDay5Background", shpDay3Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
+            //    new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
+            //shpDay4Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh4";
+            ////omweather.addControl(shpDay4Background);
+            //OMBasicShape shpDay5Background = new OMBasicShape("shpDay6Background", shpDay4Background.Region.Right + 20, shpDay1Background.Region.Top, shpDay1Background.Region.Width, shpDay1Background.Region.Height,
+            //    new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5));
+            //shpDay5Background.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh5";
+            ////omweather.addControl(shpDay5Background);
 
             OMButton location_button = new OMButton("locationbutton", currentbackground.Region.Left, currentbackground.Region.Top + 10, currentbackground.Region.Width, currentbackground.Region.Height - 15);
             //OMButton location_button = new OMButton("locationbutton", 351, 41, 298, 48);
@@ -176,188 +189,53 @@ namespace OMWeather2
             ////////currentdesc.DataSource = string.Format("Screen{0}.Weather.Searched.Description", DataSource.DataTag_Screen);
             //currentdesc.Text = "Cloudy";
 
-            OMButton locationbutton = new OMButton("locationbutton", 351, 41, 298, 48);
-            locationbutton.Transition = eButtonTransition.None;
-            locationbutton.Text = "No Location Found";
-            locationbutton.BorderColor = Color.White;
-            locationbutton.BorderSize = 1;
-            locationbutton.Opacity = 178;
-            locationbutton.AutoFitTextMode = FitModes.FitFillSingleLine;
-            //locationbutton.FillColor = Color.Black;
-            //locationbutton.Color = Color.White;
-            locationbutton.OnClick += new userInteraction(locationbutton_onclick);
+
 
             omweather.addControl(currentposition);
             omweather.addControl(searchedposition);
             omweather.addControl(current_background);
-            //omweather.addControl(currentbackground);
-            //omweather.addControl(locationbackground);
             omweather.addControl(currentimage);
             omweather.addControl(currentdesc);
-            //omweather.addControl(currenttemp);
             omweather.addControl(location_button);
-            //omweather.addControl(locationbutton);
             omweather.addControl(currenttemp);
 
-            OMPanel locations = new OMPanel("locations", "Weather location");
-            locations.Forgotten = true;
-
-            OMLabel searching = new OMLabel("searching", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height);
-            searching.BackgroundColor = Color.FromArgb(128, Color.Black);
-            searching.TextAlignment = Alignment.CenterCenter;
-            searching.Text = "Searching, Please Wait...";
-            searching.Visible = false;
-
-            //locations.addControl(locationslabel);
-            //locations.addControl(locationstextbox);
-            //locations.addControl(search);
-            //locations.addControl(locationslist);
-            //locations.addControl(searching);
-            omweather.addControl(searching);
-
-            OMPanel forecast = new OMPanel("forecast");
-            forecast.Forgotten = true;
-            //int smallheight = (int)(float)(theHost.ClientArea[0].Height*.088);
-
-
-            OMPanel hourly = new OMPanel("hourly");
-            hourly.Forgotten = true;
-
-            //currentpanels
-            OMPanel currentpositionforecast = new OMPanel("currentpositionforecast");
-
-            OMPanel currentpositionhourly = new OMPanel("currentpositionhourly");
-
             OMContainer mainContainer = new OMContainer("mainContainer", theHost.ClientArea[0].Left, currentimage.Top + currentimage.Height + 5, theHost.ClientArea[0].Width, theHost.ClientArea[0].Top + theHost.ClientArea[0].Height - (currentimage.Top + currentimage.Height + 40)); //341=height
-            //mainContainer.Image = OM.Host.getSkinImage("MediaBorder")
             mainContainer.Visible_DataSource = "OMWeather.mainContainer.Visible";
             mainContainer.ScrollBar_ColorNormal = Color.Transparent;
             mainContainer.BackgroundColor = Color.Transparent;
             mainContainer.Opacity = 0;
-            //mainContainer.Visible = false;
             omweather.addControl(mainContainer);
 
             OMLabel updatedTime = new OMLabel("updatedTime", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top + theHost.ClientArea[0].Height - 35, theHost.ClientArea[0].Width, 35);
             updatedTime.Text = "";
+            updatedTime.Opacity = 80;
+            updatedTime.FontSize = 14;
             omweather.addControl(updatedTime);
 
-            for (int i = 0; i < theHost.ScreenCount; i++)
-            {
-                displayed[i] = "";
-                degrees[i] = "";
-                alreadyaddedstrip[i] = false;
-                favoritesList[i] = new List<string>();
-                //currenttemp.Text = "{Weather.Searched-" + i.ToString() + ".SearchedTemp}";
-                if (StoredData.Get(this, String.Format("Favorites.{0}.Count", i.ToString())) != "")
-                {
-                    favoritesCounter[i] = Convert.ToInt32(StoredData.Get(this, String.Format("Favorites.{0}.Count", i.ToString())));
-                    for (int j = 0; j < favoritesCounter[i]; j++)
-                    {
-                        favoritesList[i].Add(StoredData.Get(this, "Favorites." + i.ToString() + "." + j.ToString()));
-                    }
-                }
-                else
-                    favoritesCounter[i] = 0;
-                PopUpMenuStrip[i] = new ButtonStrip(this.pluginName, omweather.Name, "PopUpMenuStrip");
-
-                theHost.DataHandler.SubscribeToDataSource("OMDSWeather;Weather.Searched.List" + i.ToString(), Subscription_Updated);
-            }
+            OMBasicShape searchProgressBackground = new OMBasicShape("searchProgressBackground", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(175, Color.Black), Color.Transparent, 0, 5));
+            //searchProgressBackground.Visible_DataSource = String.Format("Screen{0}.Weather.Visible.SearchProgressBackground", DataSource.DataTag_Screen);
+            searchProgressBackground.Visible = false;
+            omweather.addControl(searchProgressBackground);
+            OMImage searchProgressImage = new OMImage("searchProgressImage", 250, 200, 100, 80);
+            //searchProgressImage.Visible_DataSource = String.Format("Screen{0}.Weather.Visible.SearchProgressImage", DataSource.DataTag_Screen);
+            searchProgressImage.Visible = false;
+            searchProgressImage.Image = theHost.getSkinImage("BusyAnimationTransparent.gif");
+            omweather.addControl(searchProgressImage);
+            OMLabel searchProgressLabel = new OMLabel("searchProgressLabel", 350, 200, 400, 80);
+            searchProgressLabel.Text = "Please wait, refreshing data...";
+            //searchProgressLabel.Visible_DataSource = String.Format("Screen{0}.Weather.Visible.SearchProgressLabel", DataSource.DataTag_Screen);
+            searchProgressLabel.Visible = false;
+            omweather.addControl(searchProgressLabel);
 
 
-
-                for (int k = 0; k < 5; k++)
-                {
-                    OMLabel forecastday = new OMLabel("forecastday" + (k + 1).ToString(), 1 + (200 * k), 155, (int)(float)(theHost.ClientArea[0].Width / 5), (int)(float)(theHost.ClientArea[0].Height * .082));
-                    forecastday.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastDay" + (k + 1).ToString();
-                    forecastday.DataSource = "Screen{:S:}.Weather.Searched.ForecastDay" + (k + 1).ToString();
-                    forecastday.Opacity = 178;
-                    //forecastday.Font = new Font(forecastday.Font.Name, 17);
-                    forecastday.AutoFitTextMode = FitModes.FitFillSingleLine;
-                    OMImage forecastimage = new OMImage("forecastimage" + (k + 1).ToString(), 1 + (200 * k), 186, (int)(float)(theHost.ClientArea[0].Width / 5), (int)(float)(theHost.ClientArea[0].Height * .307));
-                    forecastimage.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastImage" + (k + 1).ToString();
-                    forecastimage.DataSource = "Screen{:S:}.Weather.Searched.ForecastImage" + (k + 1).ToString();
-                    OMLabel forecastdesc = new OMLabel("forecastdesc" + (k + 1).ToString(), 1 + (200 * k), 339, (int)(float)(theHost.ClientArea[0].Width / 5), (int)(float)(theHost.ClientArea[0].Height * .211));
-                    forecastdesc.TextAlignment = Alignment.WordWrap | Alignment.CenterCenter;
-                    forecastdesc.AutoFitTextMode = FitModes.Fit;
-                    forecastdesc.FontSize = 20;
-                    forecastdesc.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastDescription" + (k + 1).ToString();
-                    forecastdesc.DataSource = "Screen{:S:}.Weather.Searched.ForecastDescription" + (k + 1).ToString();
-                    OMLabel forecasthigh = new OMLabel("forecasthigh" + (k + 1).ToString(), 1 + (200 * k), 445, (int)(float)(theHost.ClientArea[0].Width / 5), (int)(float)(theHost.ClientArea[0].Height * .080));
-                    forecasthigh.AutoFitTextMode = FitModes.FitFillSingleLine;
-                    forecasthigh.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastHigh" + (k + 1).ToString();
-                    forecasthigh.DataSource = "Screen{:S:}.Weather.Searched.ForecastHigh" + (k + 1).ToString();
-                    forecasthigh.Opacity = 178;
-                    //forecasthigh.Font = new Font(forecasthigh.Font.Name, 18);
-                    OMLabel forecastlow = new OMLabel("forecastlow" + (k + 1).ToString(), 1 + (200 * k), 490, (int)(float)(theHost.ClientArea[0].Width / 5), (int)(float)(theHost.ClientArea[0].Height * .080));
-                    forecastlow.AutoFitTextMode = FitModes.FitFillSingleLine;
-                    forecastlow.Visible_DataSource = "Screen{:S:}.Weather.Visible.ForecastLow" + (k + 1).ToString();
-                    forecastlow.Opacity = 178;
-                    forecastlow.DataSource = "Screen{:S:}.Weather.Searched.ForecastLow" + (k + 1).ToString();
-                    //forecastlow.Font = new Font(forecastlow.Font.Name, 18);
-
-                    //omweather.addControl(forecastday);
-                    //omweather.addControl(forecastimage);
-                    //omweather.addControl(forecastdesc);
-                    //omweather.addControl(forecasthigh);
-                    //omweather.addControl(forecastlow);
-
-
-
-
-
-
-
-
-                OMBasicShape searchProgressBackground = new OMBasicShape("searchProgressBackground", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, theHost.ClientArea[0].Width, theHost.ClientArea[0].Height, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(175, Color.Black), Color.Transparent, 0, 5));
-                searchProgressBackground.Visible_DataSource = "Screen{:S:}.Weather.Visible.SearchProgressBackground";
-                OMImage searchProgressImage = new OMImage("searchProgressImage", 250, 200, 100, 80);
-                searchProgressImage.Visible_DataSource = "Screen{:S:}.Weather.Visible.SearchProgressImage";
-                searchProgressImage.Image = theHost.getSkinImage("BusyAnimationTransparent.gif");
-
-                //searchProgressImage.Animate = 
-                OMLabel searchProgressLabel = new OMLabel("searchProgressLabel", 350, 200, 400, 80);
-                searchProgressLabel.Text = "Please wait, refreshing data...";
-                searchProgressLabel.Visible_DataSource = "Screen{:S:}.Weather.Visible.SearchProgressLabel";
-
-                OMLabel locationslabel = new OMLabel("locationslabel", theHost.ClientArea[0].Left, currentbackground.Top + currentbackground.Height + 1, theHost.ClientArea[0].Width, (int)(float)(theHost.ClientArea[0].Height * .153));
-                locationslabel.Text = "Please enter zip code or city and state...";
-                locationslabel.Visible_DataSource = "Screen{:S:}.Weather.Visible.LocationLabel";
-                //OMTextBox locationstextbox = new OMTextBox("locationstextbox", 250, 276, 249, 75);
-                OMTextBox locationstextbox = new OMTextBox("locationstextbox", (int)(float)(theHost.ClientArea[0].Width / 5), locationslabel.Top + locationslabel.Height + 1, ((int)(float)(theHost.ClientArea[0].Width / 2) - 1) - (int)(float)(theHost.ClientArea[0].Width / 5), (int)(float)(theHost.ClientArea[0].Height * .153));
-                locationstextbox.OSKType = OSKInputTypes.Keypad;
-                locationstextbox.OnOSKShow += new userInteraction(search_onclick);
-                locationstextbox.Visible_DataSource = "Screen{:S:}.Weather.Visible.LocationTextBox";
-                //locationstextbox.OnClick += new userInteraction(locationstextbox_onclick);
-                //OMButton search = new OMButton("search", 501, 276, 249, 75);
-                OMButton search = OMButton.PreConfigLayout_BasicStyle("search", ((int)(float)(theHost.ClientArea[0].Width / 2) + 1), locationstextbox.Top, locationstextbox.Width, locationstextbox.Height, GraphicCorners.All);
-                search.Text = "Search";
-                search.Visible_DataSource = "Screen{:S:}.Weather.Visible.LocationSearchButton";
-                search.OnClick += new userInteraction(search_onclick);
-                //OMList locationslist = new OMList("locationslist", 250, 276, 499, 150);
-                OMList locationslist = new OMList("locationslist", locationstextbox.Left, locationstextbox.Top, locationstextbox.Width + 2 + search.Width, (int)(float)(theHost.ClientArea[0].Height * .645));
-                locationslist.ListItemHeight = 32;
-                locationslist.Visible_DataSource = "Screen{:S:}.Weather.Visible.LocationMultipleAreaList";
-                locationslist.OnClick += new userInteraction(locationslist_onclick);
-                //omweather.addControl(locationslabel);
-                //omweather.addControl(locationstextbox);
-                //omweather.addControl(search);
-                //omweather.addControl(locationslist);
-                omweather.addControl(searchProgressBackground);
-                omweather.addControl(searchProgressImage);
-                omweather.addControl(searchProgressLabel);
-
-
-            }
-
-            manager.loadPanel(omweather, true);
-            //manager.loadSinglePanel(omweather, i, true);
-            //manager.loadPanel(locations);
-            //manager.loadPanel(forecast);
-            //}
-
+            omweather.Entering += new PanelEvent(omweather_entering);
             theHost.OnPowerChange += new PowerEvent(theHost_OnPowerChange);
             //theHost.DataHandler.SubscribeToDataSource(String.Format("OMDSWeather;Weather.Searched.List{0}", DataSource.DataTag_Screen), Subscription_Updated);
-            theHost.DataHandler.SubscribeToDataSource(String.Format("OMDSWeather;Weather.Searched.List0", DataSource.DataTag_Screen), Subscription_Updated);
+            //theHost.DataHandler.SubscribeToDataSource("OMDSWeather;Weather.Searched.List{:S:}", Subscription_Updated);
+
+            manager.loadPanel(omweather, true);
+
+
 
             return eLoadStatus.LoadSuccessful;
 
@@ -370,15 +248,39 @@ namespace OMWeather2
                 return;
             if (sensor.Value == null)
                 return;
-            int screen = Convert.ToInt32(sensor.NameLevel3.Remove(0, 4));
-            searchResults[screen] = (Dictionary<string,object>)sensor.Value;
-            if (needToUpdate)
+            int screen = 0;
+
+            if (sensor.NameLevel2 == "Info")
             {
-                Update(screen);
-                needToUpdate = false;
+                if (sensor.Value.ToString() == "Searching")
+                {
+                    screen = Convert.ToInt32(sensor.NameLevel3.Remove(0, 6));
+                    //visible
+                    ((OMBasicShape)manager[screen, "OMWeather2"]["searchProgressBackground"]).Visible = true;
+                    ((OMImage)manager[screen, "OMWeather2"]["searchProgressImage"]).Visible = true;
+                    ((OMLabel)manager[screen, "OMWeather2"]["searchProgressLabel"]).Visible = true;
+                }
+                else
+                {
+                    screen = Convert.ToInt32(sensor.NameLevel3.Remove(0, 6));
+                    //not visible
+                    ((OMBasicShape)manager[screen, "OMWeather2"]["searchProgressBackground"]).Visible = false;
+                    ((OMImage)manager[screen, "OMWeather2"]["searchProgressImage"]).Visible = false;
+                    ((OMLabel)manager[screen, "OMWeather2"]["searchProgressLabel"]).Visible = false;
+                }
             }
             else
-                needToUpdate = true;
+            {
+                screen = Convert.ToInt32(sensor.NameLevel3.Remove(0, 4));
+                searchResults[screen] = (Dictionary<string, object>)sensor.Value;
+                if (needToUpdate)
+                {
+                    Update(screen);
+                    needToUpdate = false;
+                }
+                else
+                    needToUpdate = true;
+            }
         }
 
         private void theHost_OnPowerChange(OpenMobile.ePowerEvent e)
@@ -521,7 +423,7 @@ namespace OMWeather2
             current[screen] = true;
 
             theHost.CommandHandler.ExecuteCommand("Weather.Search.CurrentLocation", new object[] { screen });
-		return;
+            return;
 
 
 
@@ -583,15 +485,15 @@ namespace OMWeather2
             OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
             current[screen] = false;
 
-		if (((OMButton)sender).Text != "Click To Search Weather") //successful search at least once
-            	{
-                    theHost.CommandHandler.ExecuteCommand("Weather.Search.SearchLocation", new object[] { ((OMButton)sender).Text, screen });
-		}
-		else
-		{
-			locationbutton_onclick(sender, screen);
-		}
-		return;
+            if (((OMButton)sender).Text != "Click To Search Weather") //successful search at least once
+            {
+                theHost.CommandHandler.ExecuteCommand("Weather.Search.SearchLocation", new object[] { ((OMButton)sender).Text, screen });
+            }
+            else
+            {
+                locationbutton_onclick(sender, screen);
+            }
+            return;
 
 
 
@@ -608,7 +510,7 @@ namespace OMWeather2
             else
             {
                 locationbutton_onclick(sender, screen);
-                
+
             }
             return;
 
@@ -689,7 +591,7 @@ namespace OMWeather2
             current[screen] = false;
 
             theHost.CommandHandler.ExecuteCommand("Weather.Search.SearchLocation", new object[] { ((OMButton)sender).Text, screen });
-		return;
+            return;
 
 
 
@@ -738,7 +640,6 @@ namespace OMWeather2
         private void favorite_onholdclick(OMControl sender, int screen)
         {
             OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
-
             //remove
             PopUpMenuStrip[screen].Buttons.Remove("popupfavoriteposition." + screen.ToString() + "." + ((OMButton)sender).Text);
             favoritesList[screen].Remove(((OMButton)sender).Text);
@@ -780,7 +681,7 @@ namespace OMWeather2
             if ((searchResult != null) && (searchResult != ""))
             {
                 theHost.CommandHandler.ExecuteCommand("Weather.Search.SearchLocation", new object[] { searchResult, screen });
-		return;
+                return;
 
                 if (theHost.CommandHandler.ExecuteCommand("OMDSWeather.Weather.Search", new object[] { searchResult, screen }) != null)
                 {

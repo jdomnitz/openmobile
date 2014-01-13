@@ -149,6 +149,16 @@ namespace OpenMobile
             long longFlags = Convert.ToInt64(flags);
             return (Convert.ToInt64(value) & longFlags) == longFlags;
         }
+
+        /// <summary>
+        /// Returns the enums values
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEnumerable<T> GetValues<T>()
+        {
+            return (T[])Enum.GetValues(typeof(T));
+        }
     }
 
     /// <summary>
@@ -204,7 +214,7 @@ namespace OpenMobile
 
     }
 
-    public static class DateTimeExtenstions
+    public static class DateTimeExtensions
     {
         public static bool IsBetween(this DateTime time, DateTime startTime, DateTime endTime)
         {

@@ -30,7 +30,7 @@ namespace OpenMobile.Plugin
     /// </summary>
     public abstract class BasePluginCode: IBasePlugin
     {
-        protected Settings MySettings = null;
+        public Settings MySettings = null;
 
         /// <summary>
         /// Initializes a new base plugin

@@ -92,10 +92,11 @@ namespace OMDSWeather
                 //if (searchedDictionary[i] == null)
                 searchedDictionary.Add(i, new Dictionary<string, object>());
                 theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Weather", "Searched", "List" + i.ToString(), DataSource.DataTypes.raw, "Searched Weather Results"));
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Weather", "Info", "Status" + i.ToString(), DataSource.DataTypes.raw, "Provides Status Of DataSource"));
 
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "Screen" + i.ToString(), "Weather", "Visible.SearchProgressImage", DataSource.DataTypes.binary, ""), false);
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "Screen" + i.ToString(), "Weather", "Visible.SearchProgressLabel", DataSource.DataTypes.binary, ""), false);
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "Screen" + i.ToString(), "Weather", "Visible.SearchProgressBackground", DataSource.DataTypes.binary, ""), false);
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "Screen" + i.ToString(), "Weather", "Visible.SearchProgressImage", DataSource.DataTypes.binary, ""), false);
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "Screen" + i.ToString(), "Weather", "Visible.SearchProgressLabel", DataSource.DataTypes.binary, ""), false);
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "Screen" + i.ToString(), "Weather", "Visible.SearchProgressBackground", DataSource.DataTypes.binary, ""), false);
 
             }
 
@@ -401,15 +402,17 @@ namespace OMDSWeather
         {
             if (visible)
             {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressImage", true);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressLabel", true);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressBackground", true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Weather.Info.Status" + screen.ToString(), "Searching");
+                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressImage", true);
+                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressLabel", true);
+                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressBackground", true);
             }
             else
             {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressImage", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressLabel", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressBackground", false);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Weather.Info.Status" + screen.ToString(), "Done Searching");
+                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressImage", false);
+                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressLabel", false);
+                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Screen" + screen.ToString() + ".Weather.Visible.SearchProgressBackground", false);
             }
         }
 
@@ -419,6 +422,7 @@ namespace OMDSWeather
             int screen = Convert.ToInt32(param[0]);
 
             Dictionary<string, object> Results = new Dictionary<string, object>();
+
             VisibleSearchProgress(true, screen);
             //here we need to get the city,state,zip from OMGPS...
             theHost.CommandHandler.ExecuteCommand("OMGPS;GPS.Location.ReverseGeocode");
@@ -427,9 +431,9 @@ namespace OMDSWeather
             if ((loc.Zip != "") && (loc.State != "") && (loc.Country != "") && (loc.City != ""))
             {
                 if (loc.Country == "US")
-                    searchResults = WeatherInfo.SearchArea(loc.Zip, screen);
+                    searchResults = SearchArea(loc.Zip, screen);
                 else
-                    searchResults = WeatherInfo.SearchArea(loc.City + ", " + loc.State, screen);
+                    searchResults = SearchArea(loc.City + ", " + loc.State, screen);
 
                 if (searchResults.Keys.ElementAt(0) == "AreaFound")
                 {

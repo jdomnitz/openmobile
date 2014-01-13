@@ -36,4 +36,4 @@ using System;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.8.1.0")]
-[assembly: AssemblyFileVersion("0.8.2013.0925")]
+[assembly: AssemblyFileVersion("0.8.2014.0113")]
