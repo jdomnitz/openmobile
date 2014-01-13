@@ -39,6 +39,8 @@ using Mono.Data.Sqlite;
 
 namespace OMGPS
 {
+
+
     //[PluginLevel(PluginLevels.System)]
     public class OMGPS : IHighLevel, IDataSource
     {
@@ -162,84 +164,206 @@ namespace OMGPS
 
         }
 
+        private double DegreeToRadian(double angle)
+        {
+            return Math.PI * angle / 180.0;
+            //example ---> double angle = Math.Cos(DegreeToRadian(45));
+        }
+
         private object ReverseGeocode(OpenMobile.Command command, object[] param, out bool result)
         {
             result = true;
+            bool leaveBlank = false;
+            string statusMessage = "";
+            string state = "";
+            string zip = "";
+            string city = "";
+            string country = "";
             Location loc = OM.Host.CurrentLocation;
-            if ((loc.Latitude.ToString() != "") && (loc.Longitude.ToString() != ""))
+            if ((loc.Latitude.ToString() == "") || (loc.Longitude.ToString() == ""))
             {
+                leaveBlank = true;
+                statusMessage = "Blank Latitude/Longitude";
+            }
+            else if (!(bool)theHost.DataHandler.GetDataSource("OMGPS;GPS.Sat.Fix").Value)
+            {
+                leaveBlank = true;
+                statusMessage = "No GPS Fix";
+            }
+            else
+            {
+                double distanceMiles = 10;
+                double rectLong1;
+                double rectLong2;
+                double rectLat1;
+                double rectLat2;
+
                 bool found = false;
-                string state = "";
-                string zip = "";
-                string city = "";
-                string country = "";
+
                 try
                 {
-                    //if (System.IO.File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMGPS"))) //OMGPS db exists, attempt a lookup in it first
-                    //{
-                    //    using (SqliteConnection con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMGPS") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
-                    //    {
-                    //        if (con.State != System.Data.ConnectionState.Open)
-                    //            con.Open();
-                    //        using (SqliteCommand cmd = new SqliteCommand("SELECT * FROM GeoNames WHERE Latitude = '" + loc.Latitude.ToString() + "' AND Longitude = '" + loc.Longitude.ToString() + "'", con))
-                    //        {
-                    //            using (SqliteDataReader reader = cmd.ExecuteReader())
-                    //            {
-                    //                if (reader.HasRows)
-                    //                {
-                    //                    found = true;
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
+                    //not working yet...
+                    rectLong1 = loc.Longitude - distanceMiles / Math.Abs(Math.Cos(DegreeToRadian(loc.Latitude)) * 69);
+                    rectLong2 = loc.Longitude + distanceMiles / Math.Abs(Math.Cos(DegreeToRadian(loc.Latitude)) * 69);
+                    rectLat1 = loc.Latitude - (distanceMiles / 69);
+                    rectLat2 = loc.Latitude + (distanceMiles / 69);
+
+                    string query = "SELECT *, 3956 * ASIN(SQRT(POWER(SIN((" + loc.Longitude + " - Latitude) * PI()/180/2), 2) + COS(" + loc.Latitude + " * PI()/180) * COS(Latitude * PI()/180) * POWER(SIN((" + loc.Longitude + " - Longitude) * PI()/180/2),2))) AS Distance FROM GeoNames WHERE Longitude BETWEEN " + rectLong1 + " AND " + rectLong2 + " AND Latitude BETWEEN " + rectLat1 + " AND " + rectLat2 + " ORDER BY Distance LIMIT 1";
+                    if (System.IO.File.Exists(OpenMobile.Path.Combine(theHost.DataPath, "OMGPS"))) //OMGPS db exists, attempt a lookup in it first
+                    {
+                        using (SqliteConnection con = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMGPS") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0;journal_mode=WAL"))
+                        {
+                            if (con.State != System.Data.ConnectionState.Open)
+                                con.Open();
+
+                            using (SqliteCommand cmd1 = new SqliteCommand(query, con))
+                            {
+                                using (SqliteDataReader reader = cmd1.ExecuteReader())
+                                {
+                                    if (reader.HasRows)
+                                    {
+                                        found = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 catch { }
                 if (!found) //attempt a lookup on net if possible
                 {
                     if (OM.Host.InternetAccess)
                     {
-                        //use geonames website
+                        //try
+                        //{
+                        string html = "";
+                        //try geocoder first
                         try
                         {
-                            string html;
                             using (WebClient wc = new WebClient())
                             {
-                                //http://api.geonames.org/findNearbyPostalCodes?lat=47&lng=9&username=demo
-                                //http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=36&lng=-79.08
-                                html = wc.DownloadString("http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=" + loc.Latitude.ToString() + "&lng=" + loc.Longitude.ToString());
-                                //html = wc.DownloadString("http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=43.0842229&lng=-79.0915813");
-                            }
-                            if (html != "{\"postalCodes\": []}")
-                            {
-                                html = html.Remove(0, html.IndexOf("postalCode") + 11);
-                                zip = html.Remove(0, html.IndexOf("postalCode") + 11);
-                                zip = zip.Remove(0, zip.IndexOf("\"") + 1);
-                                zip = zip.Substring(0, zip.IndexOf("\""));
-                                country = html.Remove(0, html.IndexOf("countryCode") + 12);
-                                country = country.Remove(0, country.IndexOf("\"") + 1);
-                                country = country.Substring(0, country.IndexOf("\""));
-                                city = html.Remove(0, html.IndexOf("placeName") + 10);
-                                city = city.Remove(0, city.IndexOf("\"") + 1);
-                                city = city.Substring(0, city.IndexOf("\""));
-                                state = html.Remove(0, html.IndexOf("adminName1") + 11);
-                                state = state.Remove(0, state.IndexOf("\"") + 1);
-                                state = state.Substring(0, state.IndexOf("\""));
-                                OM.Host.CurrentLocation.Zip = zip;
-                                OM.Host.CurrentLocation.Country = country;
-                                OM.Host.CurrentLocation.City = city;
-                                OM.Host.CurrentLocation.State = state;
+                                html = wc.DownloadString("http://geocoder.ca/?latt=" + loc.Latitude.ToString() + "&longt=" + loc.Longitude.ToString() + "&geoit=xml&range=1&reverse=Reverse+GeoCode+it!");
                             }
                         }
                         catch
                         {
-                            OM.Host.CurrentLocation.Zip = "";
-                            OM.Host.CurrentLocation.Country = "";
-                            OM.Host.CurrentLocation.City = "";
-                            OM.Host.CurrentLocation.State = "";
+                            leaveBlank = true;
+                            statusMessage = "Problem Contacting Geocode Website";
                         }
+                        if (!leaveBlank)
+                        {
+
+                            if (!html.Contains("The latitude and longitude you provided are not in the valid range"))
+                            {
+                                try
+                                {
+                                    if (html.ToLower().Contains("<uscity>"))
+                                    {
+                                        city = html.Remove(0, html.IndexOf("<uscity>") + 8);
+                                        city = city.Substring(0, city.IndexOf("</"));
+                                        zip = html.Remove(0, html.IndexOf("<zip>") + 5);
+                                        zip = zip.Substring(0, zip.IndexOf("</"));
+                                        state = html.Remove(0, html.IndexOf("<state>") + 7);
+                                        state = state.Substring(0, state.IndexOf("</"));
+                                        country = "US";
+                                    }
+                                    else
+                                    {
+                                        city = html.Remove(0, html.IndexOf("<city>") + 6);
+                                        city = city.Substring(0, city.IndexOf("</"));
+                                        zip = html.Remove(0, html.IndexOf("<postal>") + 8);
+                                        zip = zip.Substring(0, zip.IndexOf("</"));
+                                        state = html.Remove(0, html.IndexOf("<prov>") + 6);
+                                        state = state.Substring(0, state.IndexOf("<"));
+                                        country = "CA"; //canada???
+                                    }
+
+
+                                }
+                                catch
+                                {
+                                    leaveBlank = true;
+                                    statusMessage = "Problem Parsing Geocode Website Results";
+                                }
+                            }
+                            else
+                            {
+                                //if we need to, use geonames
+                                try
+                                {
+                                    using (WebClient wc = new WebClient())
+                                    {
+                                        //http://api.geonames.org/findNearbyPostalCodes?lat=47&lng=9&username=demo
+                                        //http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=36&lng=-79.08
+                                        html = wc.DownloadString("http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=" + loc.Latitude.ToString() + "&lng=" + loc.Longitude.ToString());
+                                        //html = wc.DownloadString("http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=43.0842229&lng=-79.0915813");
+                                    }
+                                }
+                                catch
+                                {
+                                    leaveBlank = true;
+                                    statusMessage = "Problem Contacting Geonames Website";
+                                }
+                                if (html != "{\"postalCodes\": []}")
+                                {
+                                    try
+                                    {
+                                        html = html.Remove(0, html.IndexOf("postalCode") + 11);
+                                        zip = html.Remove(0, html.IndexOf("postalCode") + 11);
+                                        zip = zip.Remove(0, zip.IndexOf("\"") + 1);
+                                        zip = zip.Substring(0, zip.IndexOf("\""));
+                                        country = html.Remove(0, html.IndexOf("countryCode") + 12);
+                                        country = country.Remove(0, country.IndexOf("\"") + 1);
+                                        country = country.Substring(0, country.IndexOf("\""));
+                                        city = html.Remove(0, html.IndexOf("placeName") + 10);
+                                        city = city.Remove(0, city.IndexOf("\"") + 1);
+                                        city = city.Substring(0, city.IndexOf("\""));
+                                        state = html.Remove(0, html.IndexOf("adminName1") + 11);
+                                        state = state.Remove(0, state.IndexOf("\"") + 1);
+                                        state = state.Substring(0, state.IndexOf("\""));
+                                    }
+                                    catch
+                                    {
+                                        leaveBlank = true;
+                                        statusMessage = "Problem Parsing Geonames Website Results";
+                                    }
+                                }
+                            }
+                        }
+
+                        //}
+                        //catch
+                        //{
+                        //    OM.Host.CurrentLocation.Zip = "";
+                        //    OM.Host.CurrentLocation.Country = "";
+                        //    OM.Host.CurrentLocation.City = "";
+                        //    OM.Host.CurrentLocation.State = "";
+                        //}
                     }
+                    else
+                    {
+                        leaveBlank = true;
+                        statusMessage = "No Internet Connection";
+                    }
+
+
                 }
+            }
+            //push statusMessage
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMGPS;GPS.ReverseGeocode.StatusMessage", statusMessage);
+            if (!leaveBlank)
+            {
+                OM.Host.CurrentLocation.Zip = zip;
+                OM.Host.CurrentLocation.Country = country;
+                OM.Host.CurrentLocation.City = city;
+                OM.Host.CurrentLocation.State = state;
+            }
+            else
+            {
+                OM.Host.CurrentLocation.Zip = "";
+                OM.Host.CurrentLocation.Country = "";
+                OM.Host.CurrentLocation.City = "";
+                OM.Host.CurrentLocation.State = "";
             }
             return null;
         }
@@ -388,6 +512,7 @@ namespace OMGPS
             BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "Sat", "Count", OpenMobile.Data.DataSource.DataTypes.raw, "GPS Satelite count"), 0);
             BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "Sat", "Fix", OpenMobile.Data.DataSource.DataTypes.binary, "GPS Satelite fix state"), false);
             BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "Sentence", "String", OpenMobile.Data.DataSource.DataTypes.raw, "GPS string of data"), "");
+            BuiltInComponents.Host.DataHandler.AddDataSource(new OpenMobile.Data.DataSource(this.pluginName, "GPS", "ReverseGeocode", "StatusMessage", OpenMobile.Data.DataSource.DataTypes.raw, "GPS status message of reverse geocoding"), "");
         }
 
         private void this_GPSAdded(SerialPort port)

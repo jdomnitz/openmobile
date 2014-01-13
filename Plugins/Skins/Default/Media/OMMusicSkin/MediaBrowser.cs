@@ -62,15 +62,15 @@ namespace OMMusicSkin
             panel.addControl(shapeBackground);
 
             // Media list
-            OMObjectList lstMedia = new OMObjectList("lstMedia", shapeBackground.Region.Left + 10, shapeBackground.Region.Top + 10, shapeBackground.Region.Width - 80, shapeBackground.Region.Height - 20);
-            lstMedia.OnSelectedIndexChanged += new OMObjectList.IndexChangedDelegate(lstMedia_OnSelectedIndexChanged);
+            OMObjectList2 lstMedia = new OMObjectList2("lstMedia", shapeBackground.Region.Left + 10, shapeBackground.Region.Top + 10, shapeBackground.Region.Width - 80, shapeBackground.Region.Height - 20);
+            lstMedia.OnSelectedIndexChanged += new OMObjectList2.IndexChangedDelegate(lstMedia_OnSelectedIndexChanged);
             panel.addControl(lstMedia);
             // Media list item
             #region Configure list item
 
             #region List item controls
 
-            OMObjectList.ListItem ItemBase = new OMObjectList.ListItem();
+            OMObjectList2.ListControlItem ItemBase = new OMObjectList2.ListControlItem();
             OMBasicShape shpListItemBackground = new OMBasicShape("shpListItemBackground", 0, 0, lstMedia.Width, 86,
                 new ShapeData(shapes.Rectangle, Color.Empty, Color.Empty, 1));
             ItemBase.Add(shpListItemBackground);
@@ -118,7 +118,7 @@ namespace OMMusicSkin
             #region Action: Add list items 
 
             // Method for adding list items
-            ItemBase.Action_SetItemInfo = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item, object[] values)
+            ItemBase.Action_SetItemInfo = delegate(OMObjectList2 sender, int screen, OMObjectList2.ListControlItem item, object[] values)
             {
                 if (values == null || values.Length == 0)
                     return;
@@ -177,7 +177,7 @@ namespace OMMusicSkin
             #region Action:Select / deselect
 
             // Method for selecting list items
-            ItemBase.Action_Select = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item)
+            ItemBase.Action_Select = delegate(OMObjectList2 sender, int screen, OMObjectList2.ListControlItem item)
             {
                 //OMBasicShape shpItemBackground = item["shpListItemBackground"] as OMBasicShape;
                 //ShapeData shpData = shpItemBackground.ShapeData;
@@ -196,7 +196,7 @@ namespace OMMusicSkin
                 //};
             };
             // Method for deselecting list items
-            ItemBase.Action_Deselect = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item)
+            ItemBase.Action_Deselect = delegate(OMObjectList2 sender, int screen, OMObjectList2.ListControlItem item)
             {
                 OMBasicShape shpItemBackground = item["shpListItemBackground"] as OMBasicShape;
                 shpItemBackground.ShapeData = itemShapeData_Normal;
@@ -210,13 +210,13 @@ namespace OMMusicSkin
             #region Action: Highlight/unhighlight
 
             // Method for highlighting list items
-            ItemBase.Action_Highlight = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item)
+            ItemBase.Action_Highlight = delegate(OMObjectList2 sender, int screen, OMObjectList2.ListControlItem item)
             {
                 OMBasicShape shpItemBackground = item["shpListItemBackground"] as OMBasicShape;
                 shpItemBackground.ShapeData = itemShapeData_Highlighted;
             };
             // Method for unhighlighting list items
-            ItemBase.Action_Unhighlight = delegate(OMObjectList sender, int screen, OMObjectList.ListItem item)
+            ItemBase.Action_Unhighlight = delegate(OMObjectList2 sender, int screen, OMObjectList2.ListControlItem item)
             {
                 OMBasicShape shpItemBackground = item["shpListItemBackground"] as OMBasicShape;
                 if (sender.SelectedItem == item)
@@ -297,7 +297,7 @@ namespace OMMusicSkin
             return panel;
         }
 
-        void lstMedia_OnSelectedIndexChanged(OMObjectList sender, int screen)
+        void lstMedia_OnSelectedIndexChanged(OMObjectList2 sender, int screen)
         {
             mediaInfo media = sender.SelectedItem.Tag as mediaInfo;
             if (media == null)
@@ -327,7 +327,7 @@ namespace OMMusicSkin
             // Save reference to db
             db = OM.Host.getData(eGetData.GetMediaDatabase, "") as IMediaDatabase;
 
-            OMObjectList lst = sender[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = sender[screen, "lstMedia"] as OMObjectList2;
             if (lst != null)
             {
                 if (lst.Items.Count == 0)
@@ -375,7 +375,7 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList lst = panel[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
             if (txt.Tag == null || !(txt.Tag is int))
@@ -403,7 +403,7 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList lst = panel[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
             if (txt.Tag == null || !(txt.Tag is int))
@@ -431,7 +431,7 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList lst = panel[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
             if (txt.Tag == null || !(txt.Tag is int))
@@ -505,7 +505,7 @@ namespace OMMusicSkin
             OMTextBox txtBox = sender.Parent[screen, "txtMediaFilter"] as OMTextBox;
             txtBox.Top += txtMediaFilterOSKOffset;
 
-            OMObjectList lst = sender.Parent[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
             lst.Height += txtMediaFilterOSKOffset;
 
             OMButton btn = sender.Parent[screen, "btnList_ScrollDown"] as OMButton;
@@ -517,7 +517,7 @@ namespace OMMusicSkin
             OMTextBox txtBox = sender.Parent[screen, "txtMediaFilter"] as OMTextBox;
             txtBox.Top -= txtMediaFilterOSKOffset;
 
-            OMObjectList lst = sender.Parent[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
             lst.Height -= txtMediaFilterOSKOffset;
 
             OMButton btn = sender.Parent[screen, "btnList_ScrollDown"] as OMButton;
@@ -532,7 +532,7 @@ namespace OMMusicSkin
 
             //if (db == null) return;
 
-            //OMObjectList lst = sender.Parent[screen, "lstMedia"] as OMObjectList;
+            //OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
             //OMLabel lbl = sender.Parent[screen, "lblMediaFilterInfo"] as OMLabel;
             //OMTextBox txt = sender as OMTextBox;
             //if (txt.Tag == null || !(txt.Tag is int))
@@ -571,12 +571,12 @@ namespace OMMusicSkin
 
         void btnList_ScrollUp_OnClick(OMControl sender, int screen)
         {
-            OMObjectList lst = sender.Parent[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
             lst.ScrollToIndex(lst.GetCenterVisibleIndex() - 1, true, 25f);
         }
         void btnList_ScrollUp_OnHoldClick(OMControl sender, int screen)
         {
-            OMObjectList lst = sender.Parent[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
             OpenMobile.Threading.SafeThread.Asynchronous(() => { lst.ScrollToIndex(0, true, 100f, 10000f); });
             while (sender.Mode == eModeType.Clicked)
                 System.Threading.Thread.Sleep(100);
@@ -584,12 +584,12 @@ namespace OMMusicSkin
         }
         void btnList_ScrollDown_OnClick(OMControl sender, int screen)
         {
-            OMObjectList lst = sender.Parent[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
             lst.ScrollToIndex(lst.GetCenterVisibleIndex() + 1, true, 25f);
         }
         void btnList_ScrollDown_OnHoldClick(OMControl sender, int screen)
         {
-            OMObjectList lst = sender.Parent[screen, "lstMedia"] as OMObjectList;
+            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
             OpenMobile.Threading.SafeThread.Asynchronous(() => { lst.ScrollToIndex(lst.Items.Count - 1, true, 100f, 10000f); });
             while (sender.Mode == eModeType.Clicked)
                 System.Threading.Thread.Sleep(100);

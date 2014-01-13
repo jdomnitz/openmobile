@@ -374,6 +374,157 @@ namespace OpenMobile.Graphics
             }
         }
 
+        public static void PresetAnimation_Resize(int screen, float speed, AnimatorControl control, Rectangle endRegion, ControlLayout mainGroup, params ControlLayout[] slaveGroups)
+        {
+            if (control != null && control.Cancel)
+                return;
+
+            // Activate animation?
+            if (mainGroup.Region == endRegion)
+                return;
+
+            // Calculate directions
+            int directionX = 0;
+            if (mainGroup.Region.Left < endRegion.X)
+                directionX = 1;
+            else if (mainGroup.Region.Left > endRegion.X)
+                directionX = -1;
+            int directionY = 0;
+            if (mainGroup.Region.Top < endRegion.Y)
+                directionY = 1;
+            else if (mainGroup.Region.Top > endRegion.Y)
+                directionY = -1;
+            int directionWidth = 0;
+            if (mainGroup.Region.Width < endRegion.Width)
+                directionWidth = 1;
+            else if (mainGroup.Region.Width > endRegion.Width)
+                directionWidth = -1;
+            int directionHeight = 0;
+            if (mainGroup.Region.Height < endRegion.Height)
+                directionHeight = 1;
+            else if (mainGroup.Region.Height > endRegion.Height)
+                directionHeight = -1;
+
+            // Animate
+            SmoothAnimator Animation = new SmoothAnimator(speed * BuiltInComponents.SystemSettings.TransitionSpeed);
+            Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
+            {
+                // Check for cancel
+                if (control != null && control.Cancel)
+                    return false;
+
+                bool animationCompleted = true;
+
+                // Animate X direction
+                if (directionX > 0)
+                {
+                    mainGroup.Left += AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Left += AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Left < endRegion.X)
+                        animationCompleted = false;
+                }
+                else if (directionX < 0)
+                {
+                    mainGroup.Left -= AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Left -= AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Left > endRegion.X)
+                        animationCompleted = false;
+                }
+
+                // Animate Y direction
+                if (directionY > 0)
+                {
+                    mainGroup.Top += AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Top += AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Top < endRegion.Y)
+                        animationCompleted = false;
+                }
+                else if (directionY < 0)
+                {
+                    mainGroup.Top -= AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Top -= AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Top > endRegion.Y)
+                        animationCompleted = false;
+                }
+
+                // Animate width
+                if (directionWidth > 0)
+                {
+                    mainGroup.Width += AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Width += AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Width < endRegion.Width)
+                        animationCompleted = false;
+                }
+                else if (directionWidth < 0)
+                {
+                    mainGroup.Width -= AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Width -= AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Width > endRegion.Width)
+                        animationCompleted = false;
+                }
+
+                // Animate height
+                if (directionHeight > 0)
+                {
+                    mainGroup.Height += AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Height += AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Height < endRegion.Height)
+                        animationCompleted = false;
+                }
+                else if (directionHeight < 0)
+                {
+                    mainGroup.Height -= AnimationStep;
+                    for (int i = 0; i < slaveGroups.Length; i++)
+                        slaveGroups[i].Height -= AnimationStep;
+
+                    // Animation completed?
+                    if (mainGroup.Height > endRegion.Height)
+                        animationCompleted = false;
+                }
+
+                if (animationCompleted)
+                    return false;
+
+                // Continue animation
+                return true;
+            });
+
+            // Set final values
+            Rectangle distanceError = endRegion - mainGroup.Region;
+            mainGroup.Left += distanceError.X;
+            mainGroup.Top += distanceError.Y;
+            mainGroup.Width += distanceError.Width;
+            mainGroup.Height += distanceError.Height;
+            for (int i = 0; i < slaveGroups.Length; i++)
+            {
+                slaveGroups[i].Left += distanceError.X;
+                slaveGroups[i].Top += distanceError.Y;
+                slaveGroups[i].Width += distanceError.Width;
+                slaveGroups[i].Height += distanceError.Height;
+            }
+        }
+
         #endregion
 
 

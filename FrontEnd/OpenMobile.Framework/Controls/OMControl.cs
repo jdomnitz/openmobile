@@ -197,7 +197,7 @@ namespace OpenMobile.Controls
                     top = _Region.Top;
                     width = Region.Width;
                     height = Region.Height;
-                    onSizeChanged();
+                    onSizeChanged_Internal();
                     Refresh();
                 }
             }
@@ -212,14 +212,14 @@ namespace OpenMobile.Controls
             top = _Region.Top;
             width = Region.Width;
             height = Region.Height;
-            onSizeChanged();
+            onSizeChanged_Internal();
             Refresh();
         }
 
         /// <summary>
         /// Requests a redraw/update of this control
         /// </summary>
-        public void Refresh()
+        public virtual void Refresh()
         {
             raiseUpdate(false);
         }
@@ -369,7 +369,7 @@ namespace OpenMobile.Controls
         private void UpdateRegion()
         {
             _Region = new Rectangle(left, top, width, height);
-            onSizeChanged();
+            onSizeChanged_Internal();
         }
 
         /// <summary>
@@ -383,7 +383,7 @@ namespace OpenMobile.Controls
                 {
                     height = value;
                     _Region.Height = value;
-                    onSizeChanged();
+                    onSizeChanged_Internal();
                     Refresh();
                 }
             }
@@ -399,7 +399,7 @@ namespace OpenMobile.Controls
                 {
                     width = value;
                     _Region.Width = value;
-                    onSizeChanged();
+                    onSizeChanged_Internal();
                     Refresh();
                 }
             }
@@ -1141,6 +1141,17 @@ namespace OpenMobile.Controls
             // No action
         }
 
+        public event userInteraction OnResize;
+        private void onSizeChanged_Internal()
+        {
+            onSizeChanged();
+            if (this.parent != null)
+            {
+                if (OnResize != null)
+                    OnResize(this, this.containingScreen());
+            }
+        }
+
         /// <summary>
         /// Sets or gets the status of the internal visibility control variable
         /// </summary>
@@ -1160,5 +1171,16 @@ namespace OpenMobile.Controls
             }
         }
         private bool _Internal_Visibility = true;
+
+        /// <summary>
+        /// Converts a global point in OM to a point that is local to a control
+        /// </summary>
+        /// <param name="absolutePoint"></param>
+        /// <returns></returns>
+        protected Point GetLocalControlPoint(Point absolutePoint)
+        {
+            return absolutePoint - this.Region.Location;
+        }
+
     }
 }

@@ -231,6 +231,41 @@ namespace OpenMobile.Data
         private object _Value;
 
         /// <summary>
+        /// Gets the value as the specified type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetValue<T>()
+        {
+            try
+            {
+                return (T)Value;
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+
+        /// <summary>
+        /// Gets the value as the specified type but returns the specified value in case of a conversion error 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="defaultvalue"></param>
+        /// <returns></returns>
+        public T GetValue<T>(T defaultvalue)
+        {
+            try
+            {
+                return (T)Value;
+            }
+            catch
+            {
+                return defaultvalue;
+            }
+        }
+
+        /// <summary>
         /// Returns the formated value as a string
         /// </summary>
         /// <returns></returns>
@@ -492,6 +527,7 @@ namespace OpenMobile.Data
             : this(provider, nameLevel1, nameLevel2, nameLevel3, 0, dataType, null, description)
         {
             _Value = initialValue;
+            _Valid = true;
         }
 
         /// <summary>
@@ -713,8 +749,10 @@ namespace OpenMobile.Data
         /// </summary>
         /// <param name="value"></param>
         /// <param name="useGetter"></param>
+        /// <param name="spawn"></param>
+        /// <param name="force"></param>
         /// <returns></returns>
-        internal bool RefreshValue(object value, bool useGetter, bool spawn)
+        internal bool RefreshValue(object value, bool useGetter, bool spawn, bool force = false)
         {
             try
             {
@@ -734,7 +772,7 @@ namespace OpenMobile.Data
                         {
                             if (newValue == null)
                             {
-                                if (newValue != _Value)
+                                if (force || newValue != _Value)
                                 {
                                     _Value = newValue;
                                     Changed = true;
@@ -742,7 +780,7 @@ namespace OpenMobile.Data
                             }
                             else
                             {
-                                if (!newValue.Equals(_Value))
+                                if (force || !newValue.Equals(_Value))
                                 {
                                     _Value = newValue;
                                     Changed = true;
@@ -754,7 +792,7 @@ namespace OpenMobile.Data
                 else
                 {
                     _Valid = true;
-                    if (_Value == null || value == null || !value.Equals(_Value))
+                    if (force || _Value == null || value == null || !value.Equals(_Value))
                     {
                         _Value = value;
                         Changed = true;

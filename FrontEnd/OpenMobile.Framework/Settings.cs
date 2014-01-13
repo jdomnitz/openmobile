@@ -114,6 +114,12 @@ namespace OpenMobile.Plugin
                     this.Add(s);
             }
 
+            public OptionValueList(IEnumerable<string> texts)
+            {
+                this.AddRange(texts);
+            }
+
+
         }
 
         #region static setting types
@@ -169,6 +175,24 @@ namespace OpenMobile.Plugin
         public static Setting EnumSetting<T>(string name, string header, string description, string currentValue)
         {
             return new Setting(SettingTypes.MultiChoice, name,header, description, new Setting.OptionValueList(typeof(T)), currentValue);
+        }
+
+        /// <summary>
+        /// Creates a new text list setting using the ToString representation for each item in the values enumerable
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="header"></param>
+        /// <param name="description"></param>
+        /// <param name="currentValue"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static Setting TextList<T>(string name, string header, string description, string currentValue, IEnumerable<T> values)
+        {
+            List<string> stringValues = new List<string>();
+            foreach (var value in values)
+                stringValues.Add(value.ToString());
+            return new Setting(SettingTypes.MultiChoice, name, header, description, stringValues, currentValue);
         }
 
         /// <summary>

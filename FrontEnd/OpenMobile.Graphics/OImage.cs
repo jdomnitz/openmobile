@@ -98,11 +98,16 @@ namespace OpenMobile.Graphics
             }
         }
 
-        private void SetBmp(System.Drawing.Bitmap bmp)
+        public void SetBmp(System.Drawing.Bitmap bmp, bool disposeOldImg = false)
         {
             // Error check
             if (bmp == null)
                 return;
+            if (disposeOldImg)
+            {
+                if (img != null)
+                    img.Dispose();
+            }
             img = bmp;
             lock (img)
             {
@@ -113,6 +118,12 @@ namespace OpenMobile.Graphics
             for (int i = 0; i < _GenerateTexture.Length; i++)
                 _GenerateTexture[i] = true;
             //_GenerateTexture = true;
+        }
+
+        public void Refresh()
+        {
+            for (int i = 0; i < _GenerateTexture.Length; i++)
+                _GenerateTexture[i] = true;
         }
 
         /// <summary>

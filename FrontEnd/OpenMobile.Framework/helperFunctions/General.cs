@@ -480,6 +480,13 @@ namespace OpenMobile.helperFunctions
             }
             return err;
         }
+
+        public static void SetUTCTime(DateTime time)
+        {
+            if (Configuration.RunningOnWindows)
+                OpenMobile.Framework.Windows.SetTime(time);
+        }
+
     }
 
     public static class DataHelpers

@@ -236,6 +236,29 @@ namespace OpenMobile.Graphics
     }
 
     /// <summary>
+    /// Control size modes
+    /// </summary>
+    public enum ControlSizeMode
+    {
+        /// <summary>
+        /// No automatically sizing of control
+        /// </summary>
+        None,
+        /// <summary>
+        /// Control can grow vertically to fit content
+        /// </summary>
+        GrowVertically,
+        /// <summary>
+        /// Control can grow horizontally to fit content
+        /// </summary>
+        GrowHorizontally,
+        /// <summary>
+        /// Control can grow in both direction to fit content
+        /// </summary>
+        GrowBoth
+    }
+
+    /// <summary>
     /// The angle to rotate the control
     /// </summary>
     public enum eAngle
@@ -381,6 +404,26 @@ namespace OpenMobile.Graphics
             GL.Disable(EnableCap.LineSmooth);
             GL.Disable(EnableCap.PointSmooth);
         }
+
+        public void DrawPoint(Color color, int x, int y, int width, int height)
+        {
+            //// Save matrix
+            //GL.PushMatrix();
+
+            //// Move base point to 0,0,0
+            //_3D_Translate(0, 0, 0);
+
+            //GL.Color4(pen.Color);
+            //GL.PointSize(System.Math.Min(width, height));
+
+            //GL.Begin(BeginMode.Points);
+            //GL.Vertex3(x, y, 0);
+            //GL.End();
+
+            //// Restore matrix
+            //GL.PopMatrix();
+        }
+
         public void DrawImage(OImage image, Point[] destPoints)
         {
             if (destPoints.Length != 4)

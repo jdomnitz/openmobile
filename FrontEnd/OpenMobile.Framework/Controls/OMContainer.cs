@@ -1243,7 +1243,7 @@ namespace OpenMobile.Controls
                 return _Controls.Find(p => p.Contains(name));
             }
         }
-
+          
         /// <summary>
         /// The controlgroups contained in this container
         /// </summary>

@@ -32,6 +32,44 @@ namespace OpenMobile.helperFunctions
     /// </summary>
     public static class StoredData
     {
+
+        /// <summary>
+        /// Gets an enum setting from the database
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static T GetEnum<T>(IBasePlugin plugin, string name)
+        {
+            return GetEnum<T>(plugin, name, default(T));
+        }
+
+        /// <summary>
+        /// Gets an enum setting from the database, if setting is not present in DB it returns the defaultValue
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="plugin"></param>
+        /// <param name="name"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public static T GetEnum<T>(IBasePlugin plugin, string name, T defaultValue)
+        {
+            string value = "";
+            using (PluginSettings setting = new PluginSettings())
+                value = setting.getSetting(plugin, name);
+
+            try
+            {
+                return (T)Enum.Parse(typeof(T), value, true);
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+
         /// <summary>
         /// Gets a setting as a bool value from the database
         /// </summary>

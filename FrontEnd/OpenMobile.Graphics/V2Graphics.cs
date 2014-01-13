@@ -232,38 +232,6 @@ namespace OpenMobile.Graphics
             DrawArc(pen, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
         }
 
-        public void DrawEllipse(Pen pen, int x, int y, int width, int height)
-        {
-            // Save matrix
-            GL.PushMatrix();
-
-            // Move base point to 0,0,0
-            _3D_Translate(0, 0, 0);
-
-            GL.Color4(pen.Color);
-            GL.LineWidth(pen.Width);
-
-            float yrad = height / 2F;
-            float xrad = width / 2F;
-            float[] arr = new float[720];
-            for (int t = 0; t < 360; t++)
-            {
-                double rad = MathHelper.DegreesToRadians(t);
-                arr[2*t]=x + xrad + (float)(xrad * System.Math.Cos(rad));
-                arr[(2*t)+1]=y + yrad + (float)(yrad * System.Math.Sin(rad));
-            }
-            GL.EnableClientState(ArrayCap.VertexArray);
-            GL.VertexPointer(2, VertexPointerType.Float, 0, arr);
-            GL.DrawArrays(BeginMode.LineLoop, 0, 360);
-            GL.DisableClientState(ArrayCap.VertexArray);
-
-            // Restore matrix
-            GL.PopMatrix();
-        }
-        public void DrawEllipse(Pen pen, Rectangle rect)
-        {
-            DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
-        }
 
         int[] normalTex;
         public void DrawImage(OImage image, Rectangle rect, Rectangle srcRect)
@@ -688,6 +656,23 @@ namespace OpenMobile.Graphics
         {
             DrawLine(pen, points);
         }
+        public void FillPolygon(Brush brush, Point[] points)
+        {
+            // Save matrix
+            GL.PushMatrix();
+
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            GL.Color4(brush.Color);
+            GL.Begin(BeginMode.Polygon);
+            for (int i = 0; i < points.Length; i++)
+                GL.Vertex2(points[i].X, points[i].Y);
+            GL.End();
+
+            // Restore matrix
+            GL.PopMatrix();
+        }
 
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
@@ -955,21 +940,37 @@ namespace OpenMobile.Graphics
             // Save matrix
             GL.PushMatrix();
 
+            // Set color
+            GL.Color4(brush.Color);
+
             // Move base point to 0,0,0
             _3D_Translate(0, 0, 0);
 
-            GL.Color4(brush.Color);
-            int[] arr=new int[722];
-            arr[720]=x + (width / 2);
-            arr[721]=y + (height / 2);
-            for (int angle = 0; angle < 360; angle++)
+            int steps = 100;
+            double step = MathHelper.DegreesToRadians(360) / steps;
+            double startAngle = MathHelper.DegreesToRadians(0);
+            double radiusW = width / 2;
+            double radiusH = height / 2;
+
+            // Inital array definition
+            double[] points = new double[(steps + 3) * 2];
+            // Base point      
+            points[0] = x + radiusW; points[1] = y + radiusH;
+            // Start point
+            points[2] = x; points[3] = y + radiusH;
+            // Corner points
+            int index = 4;
+            for (int i = 0; i <= steps; i++)
             {
-                arr[angle*2]=(int)(x + (width / 2) + System.Math.Sin(angle) * (width / 2));
-                arr[(angle*2)+1]= (int)(y + (height / 2) + System.Math.Cos(angle) * (height / 2));
+                points[index] = points[0] + (radiusW * (float)System.Math.Cos(startAngle + (step * (i + 1))));
+                points[index + 1] = points[1] + (radiusH * (float)System.Math.Sin(startAngle + (step * (i + 1))));
+                index += 2;
             }
+
+            // Render triangles
             GL.EnableClientState(ArrayCap.VertexArray);
-            GL.VertexPointer(2, VertexPointerType.Int, 0, arr);
-            GL.DrawArrays(BeginMode.TriangleFan, 0, 361);
+            GL.VertexPointer(2, VertexPointerType.Double, 0, points);
+            GL.DrawArrays(BeginMode.TriangleFan, 0, points.Length / 2);
             GL.DisableClientState(ArrayCap.VertexArray);
 
             // Restore matrix
@@ -979,7 +980,7 @@ namespace OpenMobile.Graphics
         {
             FillEllipse(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
-        public void FillPolygon(Brush brush, Point[] points)
+        public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
             // Save matrix
             GL.PushMatrix();
@@ -987,15 +988,52 @@ namespace OpenMobile.Graphics
             // Move base point to 0,0,0
             _3D_Translate(0, 0, 0);
 
-            GL.Color4(brush.Color);
-            GL.Begin(BeginMode.Polygon);
-            for (int i = 0; i < points.Length; i++)
-                GL.Vertex2(points[i].X, points[i].Y);
+            GL.Color4(pen.Color);
+            GL.LineWidth(pen.Width);
+
+            float yrad = height / 2F;
+            float xrad = width / 2F;
+            float[] arr = new float[720];
+            for (int t = 0; t < 360; t++)
+            {
+                double rad = MathHelper.DegreesToRadians(t);
+                arr[2 * t] = x + xrad + (float)(xrad * System.Math.Cos(rad));
+                arr[(2 * t) + 1] = y + yrad + (float)(yrad * System.Math.Sin(rad));
+            }
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.VertexPointer(2, VertexPointerType.Float, 0, arr);
+            GL.DrawArrays(BeginMode.LineLoop, 0, 360);
+            GL.DisableClientState(ArrayCap.VertexArray);
+
+            // Restore matrix
+            GL.PopMatrix();
+        }
+        public void DrawEllipse(Pen pen, Rectangle rect)
+        {
+            DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
+        }
+
+        public void DrawPoint(Color color, int x, int y, int width, int height)
+        {
+            // Save matrix
+            GL.PushMatrix();
+
+            // Move base point to 0,0,0
+            _3D_Translate(0, 0, 0);
+
+            float radius = System.Math.Min(width, height) / 2f;
+
+            GL.Color4(color);
+            GL.PointSize(radius * 2);
+
+            GL.Begin(BeginMode.Points);
+            GL.Vertex3(x + radius, y + radius, 0);
             GL.End();
 
             // Restore matrix
-            GL.PopMatrix();          
+            GL.PopMatrix();
         }
+
 
         public void FillRectangle(GradientData gradient, Rectangle rect, float opacity)
         {

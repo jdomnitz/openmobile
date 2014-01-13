@@ -173,6 +173,15 @@ namespace OpenMobile.Controls
             }
         }
 
+        public void OffsetSize(int width, int height)
+        {
+            foreach (OMControl control in _Controls)
+            {
+                control.Width += width;
+                control.Height += height;
+            }
+        }
+
         /// <summary>
         /// The absolute top value of this group
         /// </summary>
@@ -238,6 +247,32 @@ namespace OpenMobile.Controls
             {
                 int OffsetX = value - this.Region.Right;
                 Offset(OffsetX, 0);
+            }
+        }
+
+        public int Width
+        {
+            get
+            {
+                return this.Region.Width;
+            }
+            set
+            {
+                int offsetValue = value - this.Region.Width;
+                OffsetSize(offsetValue, 0);
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                return this.Region.Height;
+            }
+            set
+            {
+                int offsetValue = value - this.Region.Height;
+                OffsetSize(0, offsetValue);
             }
         }
 

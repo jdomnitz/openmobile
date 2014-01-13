@@ -458,7 +458,7 @@ namespace OpenMobile.Controls
         /// <param name="OnHoldClick"></param>
         /// <param name="OnLongClick"></param>
         /// <returns></returns>
-        static public Button CreateMenuItem(string name, Size size, int opacity, imageItem icon, string text, bool showSeparator, userInteraction OnClick, userInteraction OnHoldClick, userInteraction OnLongClick)
+        static public Button CreateMenuItem(string name, Size size, int opacity, imageItem icon, string text, bool showSeparator, userInteraction OnClick = null, userInteraction OnHoldClick = null, userInteraction OnLongClick = null, string cmdOnClick = "", string cmdOnHoldClick = "", string cmdOnLongClick = "")
         {
             Button btn = new Button(name);
 
@@ -502,6 +502,11 @@ namespace OpenMobile.Controls
             btnCtrl.OnClick += OnClick;
             btnCtrl.OnHoldClick += OnHoldClick;
             btnCtrl.OnLongClick += OnLongClick;
+
+            // Map commands
+            btnCtrl.Command_Click = cmdOnClick;
+            btnCtrl.Command_HoldClick = cmdOnHoldClick;
+            btnCtrl.Command_LongClick = cmdOnLongClick;
 
             btn.Add(btnCtrl);
 
@@ -1288,7 +1293,7 @@ namespace OpenMobile.Controls
                 }
             }
             else
-            {   // Access a specifc container
+            {   // Access a specific container
                 OMContainer container = _Container.Parent[(int)screen, _Container.Name] as OMContainer;
                 container.addControl((Button)_ButtonStrip[(int)screen].Buttons[index].Clone(), GetOMContainerDirection(_Alignment));
             }

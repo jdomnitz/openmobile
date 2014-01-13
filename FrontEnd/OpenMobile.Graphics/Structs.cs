@@ -2675,6 +2675,14 @@ namespace OpenMobile.Graphics
             get { return Height + Y; }
             set { Height = value - Y; }
         }
+        public Rectangle(int width, int height)
+        {
+            this._X = 0;
+            this._Y = 0;
+            this._Width = width;
+            this._Height = height;
+            //this.PropertyChanged = null;
+        }
         public Rectangle(int x, int y, int width, int height)
         {
             this._X = x;

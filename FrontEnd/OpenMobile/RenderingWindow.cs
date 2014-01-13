@@ -1197,7 +1197,7 @@ namespace OpenMobile
                             panel.Mode = eModeType.Normal;
 
                             // Raise event for entering panel
-                            panel.RaiseEvent(screen, eEventType.Entering);
+                            ((iPanelEvents)panel).RaiseEvent(screen, eEventType.Entering);
 
                             // Show infobar text (if present)
                             if (!String.IsNullOrEmpty(panel.Header))
@@ -1213,7 +1213,7 @@ namespace OpenMobile
                             panel.UpdateThisControl -= UpdateThisControl;
 
                             // Raise event for leaving panel
-                            panel.RaiseEvent(screen, eEventType.Leaving);
+                            ((iPanelEvents)panel).RaiseEvent(screen, eEventType.Leaving);
 
                             // Remove infobar text
                             if (!String.IsNullOrEmpty(panel.Header) && (lastPanelTransition == panel))
@@ -1245,7 +1245,7 @@ namespace OpenMobile
                     insertPanel(newP);
 
                     // Raise panel event
-                    newP.RaiseEvent(screen, eEventType.Loaded);
+                    ((iPanelEvents)newP).RaiseEvent(screen, eEventType.Loaded);
 
                     return true;
                 }
@@ -1272,7 +1272,7 @@ namespace OpenMobile
                 oldP.Mode = eModeType.transitioningOut;
 
                 // Raise panel event
-                oldP.RaiseEvent(screen, eEventType.Unloaded);
+                ((iPanelEvents)oldP).RaiseEvent(screen, eEventType.Unloaded);
 
                 return true;
             }
@@ -1297,7 +1297,7 @@ namespace OpenMobile
                         RenderingQueue[i].Mode = eModeType.transitioningOut;
 
                         // Raise panel event
-                        RenderingQueue[i].RaiseEvent(screen, eEventType.Unloaded);
+                        ((iPanelEvents)RenderingQueue[i]).RaiseEvent(screen, eEventType.Unloaded);
                     }
                 }
                 return true;

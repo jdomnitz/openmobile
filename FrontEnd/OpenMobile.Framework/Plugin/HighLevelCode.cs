@@ -51,7 +51,7 @@ namespace OpenMobile.Plugin
         /// <summary>
         /// The panel manager for this plugin
         /// </summary>
-        protected ScreenManager PanelManager = null;
+        public ScreenManager PanelManager = null;
 
         /// <summary>
         /// Loads the panels from this plugin
@@ -79,7 +79,7 @@ namespace OpenMobile.Plugin
         /// <param name="screen"></param>
         /// <param name="panelName"></param>
         /// <returns></returns>
-        protected bool GotoPanel(int screen, string panelName)
+        public bool GotoPanel(int screen, string panelName)
         {
             return OM.Host.execute(eFunction.GotoPanel, screen, String.Format("{0};{1}", this.pluginName, panelName));
         }
@@ -90,7 +90,7 @@ namespace OpenMobile.Plugin
         /// <param name="panelName"></param>
         /// <param name="transition"></param>
         /// <returns></returns>
-        protected bool GotoPanel(int screen, string panelName, eGlobalTransition transition)
+        public bool GotoPanel(int screen, string panelName, eGlobalTransition transition)
         {
             return OM.Host.execute(eFunction.GotoPanel, screen, String.Format("{0};{1}", this.pluginName, panelName), transition);
         }
@@ -101,7 +101,7 @@ namespace OpenMobile.Plugin
         /// <param name="screen"></param>
         /// <param name="panelName"></param>
         /// <returns></returns>
-        protected bool ShowPanel(int screen, string panelName)
+        public bool ShowPanel(int screen, string panelName)
         {
             return OM.Host.execute(eFunction.ShowPanel, screen, String.Format("{0};{1}", this.pluginName, panelName));
         }
@@ -112,9 +112,101 @@ namespace OpenMobile.Plugin
         /// <param name="panelName"></param>
         /// <param name="transition"></param>
         /// <returns></returns>
-        protected bool ShowPanel(int screen, string panelName, eGlobalTransition transition)
+        public bool ShowPanel(int screen, string panelName, eGlobalTransition transition)
         {
             return OM.Host.execute(eFunction.ShowPanel, screen, String.Format("{0};{1}", this.pluginName, panelName), transition);
+        }
+
+        /// <summary>
+        /// Goes back to the previous screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        public bool GoBack(int screen)
+        {
+            return OM.Host.execute(eFunction.goBack, screen);
+        }
+        /// <summary>
+        /// Goes back to the previous screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="transition"></param>
+        /// <returns></returns>
+        public bool GoBack(int screen, eGlobalTransition transition)
+        {
+            return OM.Host.execute(eFunction.goBack, screen, transition);
+        }
+
+        /// <summary>
+        /// Unloads all panels and goes back to the main menu
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        public bool GoHome(int screen)
+        {
+            return OM.Host.execute(eFunction.goHome, screen);
+        }
+        /// <summary>
+        /// Unloads all panels and goes back to the main menu
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        public bool GoHome(int screen, eGlobalTransition transition)
+        {
+            return OM.Host.execute(eFunction.goHome, screen, transition);
+        }
+
+        /// <summary>
+        /// Closes all other panels and shows my settings panel
+        /// </summary>
+        /// <param name="screen"></param>
+        public void GotoMySettingsPanel(int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(GetCmdString_GotoMySettingsPanel(screen));
+        }
+
+        /// <summary>
+        /// Gets the command string to go to my settings panel
+        /// </summary>
+        public string GetCmdString_GotoMySettingsPanel(int screen = -1)
+        {
+            if (screen == -1)
+                return String.Format("Screen{0}.Panel.Goto.OMSettings.{1}_Settings", Command.DataTag_Screen, this.pluginName);
+            else
+                return String.Format("Screen{0}.Panel.Goto.OMSettings.{1}_Settings", screen, this.pluginName);
+        }
+
+        /// <summary>
+        /// Gets the command string to go to home
+        /// </summary>
+        public string GetCmdString_GoHome(int screen = -1)
+        {
+            if (screen == -1)
+                return String.Format(String.Format("Screen{0}.Panel.Goto.Home", Command.DataTag_Screen));
+            else
+                return String.Format("Screen{0}.Panel.Goto.Home", screen);
+        }
+
+        /// <summary>
+        /// Gets the command string to go back
+        /// </summary>
+        public string GetCmdString_GoBack(int screen = -1)
+        {
+            if (screen == -1)
+                return String.Format(String.Format("Screen{0}.Panel.Goto.Previous", Command.DataTag_Screen));
+            else
+                return String.Format("Screen{0}.Panel.Goto.Previous", screen);
+        }
+
+        /// <summary>
+        /// Gets the command string to go to a specific panel
+        /// </summary>
+        public string GetCmdString_GotoPanel(string panelName, int screen = -1)
+        {
+            if (screen == -1)
+                return String.Format("Screen{0}.Panel.Goto.{1}.{2}", Command.DataTag_Screen, this.pluginName, panelName);
+            else
+                return String.Format("Screen{0}.Panel.Goto.{1}.{2}", screen, this.pluginName, panelName);
         }
 
     }

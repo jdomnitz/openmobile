@@ -34,6 +34,7 @@ namespace OpenMobile.Graphics
         void DrawRectangle(Pen pen, int x, int y, int width, int height);
         void DrawRectangle(Pen pen, Rectangle rect);
         void DrawReflection(int X, int Y, int Width, int Height, OImage image, float percent, float angle);
+        void DrawPoint(Color color, int x, int y, int width, int height);
         void DrawRoundRectangle(Pen pen, int x, int y, int width, int height, int radius);
         void DrawRoundRectangle(Pen p, Rectangle rect, int radius);
         void FillEllipse(Brush brush, int x, int y, int width, int height);

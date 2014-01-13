@@ -342,6 +342,7 @@ namespace OpenMobile.Controls
             this.Format = OpenMobile.Graphics.eTextFormat.Normal;
             this.OutlineColor = BuiltInComponents.SystemSettings.SkinTextColor;
             this.AutoFitTextMode = FitModes.Fit;
+            this.BackgroundColor = Color.FromArgb(128, Color.Black);
         }
 
         /// <summary>

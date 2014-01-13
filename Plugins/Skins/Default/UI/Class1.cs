@@ -54,7 +54,7 @@ namespace OpenMobile
         }
 
         private OpacityModes _OpacityMode = OpacityModes.None;
-        private int _OpacityLevel = 255;
+        private int _OpacityLevel = 0;
 
         //private StatusBarHandler.DropDownButtonStripContainer DropDown_MainButtonStrip = null;
         //private StatusBarHandler.DropDownButtonStripContainer DropDown_PowerOptionsStrip = null;
@@ -167,25 +167,26 @@ namespace OpenMobile
 
         void settings_OnSettingChanged(int screen, Setting setting)
         {
-            StoredData.Set(this, setting.Name, setting.Value);
 
             if (setting.Name == "Background.Image")
+            {
+                StoredData.Set(this, setting.Name, setting.Value);
                 BackgroundImage_Change(screen, setting.Value);
-
-            if (setting.Name == "Background.Clear")
+            }
+            else if (setting.Name == "Background.Clear")
             {
                 StoredData.Set(this, "Background.Image", String.Empty);
                 BackgroundImage_Change(screen, String.Empty);
             }
-
-            if (setting.Name == "System.Opacitylevel")
+            else if (setting.Name == "System.Opacitylevel")
             {
+                StoredData.Set(this, setting.Name, setting.Value);
                 _OpacityLevel = StoredData.GetInt(this, "System.Opacitylevel");
-                SetDayNightMode_SetOpacityManually(screen, StoredData.GetInt(this, "System.Opacitylevel"));
+                SetDayNightMode_SetOpacityManually(screen, _OpacityLevel);
             }
-
-            if (setting.Name == "System.OpacityMode")
+            else if (setting.Name == "System.OpacityMode")
             {
+                StoredData.Set(this, setting.Name, setting.Value);
                 _OpacityMode = (OpacityModes)StoredData.GetInt(this, "System.OpacityMode", 0);
             }
         }
@@ -198,7 +199,7 @@ namespace OpenMobile
             StoredData.SetDefaultValue(this, "System.OpacityMode", 0);
 
             _OpacityMode = (OpacityModes)StoredData.GetInt(this, "System.OpacityMode", 0);
-            _OpacityLevel = StoredData.GetInt(this, "System.Opacitylevel", (_OpacityMode == OpacityModes.BackgroundOnly ? 255 : 0));
+            _OpacityLevel = StoredData.GetInt(this, "System.Opacitylevel", (_OpacityMode == OpacityModes.BackgroundOnly ? 0 : 255));
         }
 
         #endregion
@@ -1033,7 +1034,7 @@ namespace OpenMobile
 
             OMBasicShape shpBrightnessAdjustment = new OMBasicShape("shpBrightnessAdjustment", OM.Host.ClientFullArea.Left, OM.Host.ClientFullArea.Top, OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height,
                 new ShapeData(shapes.Rectangle, Color.Black));
-            shpBrightnessAdjustment.Opacity = (OM.Host.CurrentLocation_Daytime ? 255 : StoredData.GetInt(this, "System.Opacitylevel", 0));
+            shpBrightnessAdjustment.Opacity = (OM.Host.CurrentLocation_Daytime ? 0 : 255 - _OpacityLevel);
             shpBrightnessAdjustment.NoUserInteraction = true;
             if (_OpacityMode != OpacityModes.All)
                 shpBrightnessAdjustment.Visible = false;
@@ -1147,7 +1148,7 @@ namespace OpenMobile
             
             // Set opacity based on day/night setting
             if (_OpacityMode == OpacityModes.BackgroundOnly)
-                backgroundImage.Opacity = (OM.Host.CurrentLocation_Daytime ? 255 : StoredData.GetInt(this, "System.Opacitylevel"));
+                backgroundImage.Opacity = (OM.Host.CurrentLocation_Daytime ? 255 : _OpacityLevel);
             background.addControl(backgroundImage);             
 
             manager.loadPanel(background);
@@ -3433,7 +3434,7 @@ namespace OpenMobile
                         {
                             OMControl control = panel["shpBrightnessAdjustment"] as OMControl;
                             if (control != null)
-                                control.Opacity = opacity;
+                                control.Opacity = 255 - opacity;
                         }
                     }
                     break;
@@ -3481,7 +3482,7 @@ namespace OpenMobile
                 case OpacityModes.All:
                      {
                         if (!night)
-                        {
+                        {   // Daytime
                             theHost.ForEachScreen(delegate(int screen)
                             {
                                 OMPanel panel = manager[screen, "UI"];
@@ -3494,7 +3495,7 @@ namespace OpenMobile
                             });
                         }
                         else
-                        {
+                        {   // Nighttime
                             theHost.ForEachScreen(delegate(int screen)
                             {
                                 OMPanel panel = manager[screen, "UI"];
@@ -3502,7 +3503,7 @@ namespace OpenMobile
                                 {
                                     ControlLayout backgroundGroup = new ControlLayout(panel, "shpBrightnessAdjustment");
                                     backgroundGroup.Visible = true;
-                                    SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, _OpacityLevel, false, backgroundGroup);
+                                    SmoothAnimator.PresetAnimation_FadeIn(screen, 1.2f, null, 255 - _OpacityLevel, false, backgroundGroup);
                                 }
                             });
                         }
@@ -3511,7 +3512,7 @@ namespace OpenMobile
                 case OpacityModes.BackgroundOnly:
                     {
                         if (!night)
-                        {
+                        {   // Daytime
                             theHost.ForEachScreen(delegate(int screen)
                             {
                                 OMPanel panel = manager[screen, "background"];
@@ -3523,7 +3524,7 @@ namespace OpenMobile
                             });
                         }
                         else
-                        {
+                        {   // Nighttime
                             theHost.ForEachScreen(delegate(int screen)
                             {
                                 OMPanel panel = manager[screen, "background"];
