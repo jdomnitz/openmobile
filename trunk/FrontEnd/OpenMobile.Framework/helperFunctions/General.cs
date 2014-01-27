@@ -35,6 +35,7 @@ namespace OpenMobile.helperFunctions
     /// </summary>
     public static class General
     {
+        /* Code removed due to invalid API
         /// <summary>
         /// Translates a place name, location name or address string into a full Location
         /// </summary>
@@ -104,6 +105,7 @@ namespace OpenMobile.helperFunctions
             ret.Street = ret.Street.Trim();
             return ret;
         }
+        */
 
         /// <summary>
         /// Synchronously get keyboard input from the On Screen Keyboard

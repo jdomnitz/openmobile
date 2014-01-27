@@ -1790,7 +1790,7 @@ namespace OpenMobile
             {
                 if ((bool)dataSource.Value == true)
                 {
-                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen.Value).Buttons["Btn3"] =
+                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen).Buttons["Btn3"] =
                         Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), ControlButton_Play_OnClick, null, null, false, false);
                 }
             }
@@ -1798,7 +1798,7 @@ namespace OpenMobile
             {
                 if ((bool)dataSource.Value == true)
                 {
-                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen.Value).Buttons["Btn3"] =
+                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen).Buttons["Btn3"] =
                         Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-pause"), ControlButton_Pause_OnClick, null, null, false, false);
                 }
             }
@@ -1806,7 +1806,7 @@ namespace OpenMobile
             {
                 if ((bool)dataSource.Value == true)
                 {
-                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen.Value).Buttons["Btn3"] =
+                    OM.Host.UIHandler.ControlButtons.GetButtonStrip(dataSource.Screen).Buttons["Btn3"] =
                         Button.PreConfigLayout_MenuBarStyle("Btn3", theHost.UIHandler.ControlButtons.ButtonSize, 178, theHost.getSkinImage("AIcons|9-av-play"), ControlButton_Play_OnClick, null, null, false, false);
                 }
             }

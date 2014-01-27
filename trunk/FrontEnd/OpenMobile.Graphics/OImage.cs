@@ -213,8 +213,56 @@ namespace OpenMobile.Graphics
                 catch { }
                 return false;
             }
-        }        
-        
+        }
+
+        public OImage Resize(int height = 0, int width = 0)
+        {
+            if (img == null)
+                return this;
+
+            // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                if (height == 0 && width == 0)
+                    return this;
+
+                float ratio = img.Width / img.Height;
+                if (height > 0 && width == 0)
+                {
+                    width = (int)(height * ratio);
+                }
+                else if (width > 0 && height == 0)
+                {
+                    height = (int)(width * ratio);
+                }
+
+                Bitmap bmp = new Bitmap(width, height);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+                    g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    g.DrawImage(img, new System.Drawing.RectangleF(0, 0, bmp.Width, bmp.Height), new System.Drawing.RectangleF(0, 0, img.Width, img.Height), GraphicsUnit.Pixel);
+                }
+
+                // Dispose original image
+                if (img != null)
+                {
+                    img.Dispose();
+                    img = null;
+                }
+
+                // Assign new image
+                img = bmp;
+
+                // Regenerate textures
+                for (int i = 0; i < _GenerateTexture.Length; i++)
+                    _GenerateTexture[i] = true;
+
+                return this;
+            }
+        }
+
         public enum OverLayDirections { All, LeftToRight, RightToLeft, TopToBottom, BottomToTop }
 
         /// <summary>

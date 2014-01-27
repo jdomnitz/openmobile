@@ -221,6 +221,17 @@ namespace OpenMobile.helperFunctions.Forms
         /// <summary>
         /// Initializes the messagebox class
         /// </summary>
+        /// <param name="Plugin"></param>
+        /// <param name="Panel"></param>
+        public dialog(IBasePlugin ownerPlugin, string panelName)
+            : this()
+        {
+            OwnerPlugin = ownerPlugin.pluginName;
+            OwnerPanel = panelName;
+        }
+        /// <summary>
+        /// Initializes the messagebox class
+        /// </summary>
         /// <param name="ownerPlugin"></param>
         /// <param name="ownerPanel"></param>
         public dialog(IBasePlugin ownerPlugin, OMPanel ownerPanel)

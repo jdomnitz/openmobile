@@ -35,50 +35,33 @@ using System.Collections.Generic;
 using OpenMobile.helperFunctions;
 using System.Text;
 
-namespace OMSkinPluginSample
+namespace OMMaps2
 {
-    public sealed class OMSkinPluginSample : HighLevelCode
+    public sealed class OMMaps : HighLevelCode
     {
         #region Private variables
 
-        private GMapImageRender _Map;
-        private GMapOverlay _Map_Overlay = new GMapOverlay();
-        private GMapOverlay _Map_Overlay_Objects = new GMapOverlay("objects");
-        private GMapOverlay _Map_Overlay_Routes = new GMapOverlay("routes");
-        private GMapOverlay _Map_Overlay_Polygons = new GMapOverlay("polygons");
-        private PointLatLng _Map_Point_RouteStart = new PointLatLng();
-        private PointLatLng _Map_Point_RouteEnd = new PointLatLng();
-        private GMarkerGoogle _Map_Marker_CurrentPosition;
-        private GMarkerGoogle _Map_Marker_HomePosition;
-        private GMapMarker _Map_Marker_RouteStart;
-        private GMapMarker _Map_Marker_RouteEnd;
-        private bool _Map_FollowsCurrentLoc = true;
-        private List<GMapProvider> _Map_AvailableProviders;
-        private GMapProvider _Map_CurrentProvider;
-        private AccessMode _Map_AccessMode;
-        private bool _SettingsChanged = false;
-        private NavigationRoute _Map_ActiveNavigationRoute;
+        private NavigationRoute[] _Map_ActiveNavigationRoute;
 
         #endregion
 
         #region Skin Init and Dispose
 
-        public OMSkinPluginSample()
-            : base("OMMaps", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "A map provider for OpenMobile", "OMMaps", "OM Dev team", "")
+        public OMMaps()
+            : base("OMMaps", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "A map frontend for OpenMobile", "OMMaps", "OM Dev team", "")
         {
         }
 
         public override eLoadStatus initialize(IPluginHost host)
         {
-            // Settings
-            Settings_SetDefaultValues();
-            Settings_MapVariables();
+            _Map_ActiveNavigationRoute = new NavigationRoute[OM.Host.ScreenCount];
+
+            // Datasources
+            DataSources_Subscribe();
 
             // Queue panels
             base.PanelManager.QueuePanel("OMMaps", InitializeMapPanel, true);
-
-            OM.Host.OnNavigationEvent += new NavigationEvent(Host_OnNavigationEvent);
-
+            
             // Return
             return eLoadStatus.LoadSuccessful;
         }
@@ -90,44 +73,31 @@ namespace OMSkinPluginSample
 
         #endregion
 
-        #region Settings
+        #region Datasources
 
-        public override void Settings()
-        {            
-            base.MySettings.Add(Setting.TextList<GMapProvider>("OMMaps.MapProvider", "Select provider", "Available map providers", StoredData.Get(this, "OMMaps.MapProvider"), _Map_AvailableProviders));
-            base.MySettings.Add(Setting.EnumSetting<AccessMode>("OMMaps.MapMode", "Map mode", "NB! Server requires internet connection", StoredData.Get(this, "OMMaps.MapMode")));
-        }
-
-        private void Settings_MapVariables()
+        void DataSources_Subscribe()
         {
-            if (_Map_AvailableProviders == null)
-                _Map_AvailableProviders = GMapProviders.List;
+            // Subscribe to the multiscreen datasource (no use in looping over screens anymore, framework automatically takes care of this if no screen is specified)
+            OM.Host.DataHandler.SubscribeToDataSource("Map.Show.MapPlugin", (x) =>
+            {
+                if ((bool)x.Value)
+                    base.GotoPanel(x.Screen, "OMMaps");
+            });
 
-            _Map_CurrentProvider = _Map_AvailableProviders.Find(x => x.Name == StoredData.Get(this, "OMMaps.MapProvider"));
-            _Map_AccessMode = StoredData.GetEnum<AccessMode>(this, "OMMaps.MapMode", AccessMode.ServerAndCache);
-        }
-
-        private void Settings_SetDefaultValues()
-        {
-            StoredData.SetDefaultValue(this, "OMMaps.MapProvider", GMapProviders.OpenStreetMap);
-            StoredData.SetDefaultValue(this, "OMMaps.MapMode", AccessMode.ServerAndCache);
-            Settings_MapVariables();
-        }
-
-        public override void setting_OnSettingChanged(int screen, Setting setting)
-        {
-            base.setting_OnSettingChanged(screen, setting);
-
-            // Update local variables
-            Settings_MapVariables();
-
-            // Inform skin that settings was changed
-            _SettingsChanged = true;
+            // Subscribe to datasource updates for map route data
+            OM.Host.DataHandler.SubscribeToDataSource("Map.RouteData", (x) =>
+            {   // Map route object as OpenMobile.NavEngine.NavigationRoute
+                _Map_ActiveNavigationRoute[x.Screen] = (NavigationRoute)x.Value;
+                if (_Map_ActiveNavigationRoute[x.Screen] != null)
+                    GUI_RoutePanel(x.Screen, true, header: "Route summary", text: _Map_ActiveNavigationRoute[x.Screen].RouteText);
+                else
+                    GUI_RoutePanel(x.Screen, false, header: "Route summary", text: "No route active");
+            });
         }
 
         #endregion
 
-        #region Map panel
+        #region Map panel and GUI
 
         private OMPanel InitializeMapPanel()
         {
@@ -168,6 +138,8 @@ namespace OMSkinPluginSample
             panel.addControl(btn_InfoGroup_Hide);
 
             OMImage img_MapGroup_Map = new OMImage("img_MapGroup_Map", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height);
+            img_MapGroup_Map.BackgroundColor = Color.Black;
+            img_MapGroup_Map.DataSource = "Screen{:S:}.Map.Image";
             img_MapGroup_Map.OnResize += new userInteraction(imgMap_OnResize);
             panel.addControl(img_MapGroup_Map);
 
@@ -180,269 +152,69 @@ namespace OMSkinPluginSample
 
             OMButton btn_MapGroup_ZoomIn = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomIn", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Top + 10, 60, 60, null, null, GraphicCorners.All, "", null, "+", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
             btn_MapGroup_ZoomIn.Opacity = 100;
-            btn_MapGroup_ZoomIn.OnClick += new userInteraction(btnZoomIn_OnClick);
+            btn_MapGroup_ZoomIn.Command_Click = "{:S:}Map.Zoom.In";
             panel.addControl(btn_MapGroup_ZoomIn);
 
             OMButton btn_MapGroup_ZoomOut = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomOut", img_MapGroup_Map.Region.Right - 70, img_MapGroup_Map.Region.Top + 10, 60, 60, null, null, GraphicCorners.All, "", null, "-", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
             btn_MapGroup_ZoomOut.Opacity = 100;
-            btn_MapGroup_ZoomOut.OnClick += new userInteraction(btnZoomOut_OnClick);
+            btn_MapGroup_ZoomOut.Command_Click = "{:S:}Map.Zoom.Out";
             panel.addControl(btn_MapGroup_ZoomOut);
 
             OMButton btn_MapGroup_CurrentLoc = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_CurrentLoc", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Bottom - 70, 60, 60, null, null, GraphicCorners.All, "", OM.Host.getSkinImage("AIcons|10-device-access-location-found").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinTextColor), "", null, null, null);
             btn_MapGroup_CurrentLoc.Opacity = 100;
-            btn_MapGroup_CurrentLoc.OnClick += new userInteraction(btn_MapGroup_CurrentLoc_OnClick);
+            btn_MapGroup_CurrentLoc.Command_Click = "{:S:}Map.Goto.Current";
+            
             panel.addControl(btn_MapGroup_CurrentLoc);
 
             OMImage img_MapGroup_Updating = new OMImage("img_MapGroup_Updating", OM.Host.ClientArea_Init.Left + (OM.Host.ClientArea_Init.Width / 2), OM.Host.ClientArea_Init.Top + (OM.Host.ClientArea_Init.Height / 2), OM.Host.getSkinImage("BusyAnimationTransparent.gif"));
             img_MapGroup_Updating.Left -= img_MapGroup_Updating.Image.image.Width / 2;
             img_MapGroup_Updating.Top -= img_MapGroup_Updating.Image.image.Height / 2;
-            img_MapGroup_Updating.Visible = false;
+            img_MapGroup_Updating.DataSource = "{:S:}Map.Busy";
+            img_MapGroup_Updating.DataSourceControlsVisibility = true;
+            img_MapGroup_Updating.Visible = true;
             panel.addControl(img_MapGroup_Updating);
 
             // Create the buttonstrip popup
             ButtonStrip PopUpMenuStrip = new ButtonStrip(pluginName, panel.Name, "OMMaps_PopUpMenuStrip");
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ShowSettings", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Settings", true, cmdOnClick: base.GetCmdString_GotoMySettingsPanel()));
-            //PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Render", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Render", true, OnClick: btnTest_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Goto", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Goto", true, OnClick: mnuItem_Goto_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Route", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Route", true, OnClick: mnuItem_Route_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_RouteByMapMarkers", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Route from map", true, OnClick: mnuItem_RouteByMapMarkers_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ShowRouteInfo", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Show route info", true, OnClick: mnuItem_ShowRouteInfo_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_CurrentLocation", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Current location", true, OnClick: mnuItem_CurrentLocation_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Goto", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|7-location-map"), "Goto", true, OnClick: mnuItem_Goto_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Route", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|7-location-directions"), "Route", true, OnClick: mnuItem_Route_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_RouteByMapMarkers", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|7-location-directions"), "Route from map", true, OnClick: mnuItem_RouteByMapMarkers_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ShowRouteInfo", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-about"), "Show route info", true, OnClick: mnuItem_ShowRouteInfo_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_CurrentLocation", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|7-location-place"), "Current location", true, OnClick: mnuItem_CurrentLocation_OnClick));
+            //PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Test", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Test", true, OnClick: mnuItem_Test_OnClick));
+            //PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Test2", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Settings"), "Test", true, OnClick: mnuItem_Test2_OnClick));
             panel.PopUpMenu = PopUpMenuStrip;
 
-            OpenMobile.Threading.MessagePump.CreateMessagePump(this.pluginName, () =>
-            {
-                Map_Initialize(img_MapGroup_Map.Width, img_MapGroup_Map.Height);
-            });
-
             panel.Entering += new PanelEvent(panel_Entering);
-
-            OM.Host.OnSystemEvent += new SystemEvent(Host_OnSystemEvent);
 
             return panel;
         }
 
+        void mouseMapHandler_OnClick(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Mouse.EmulateMouseClick", e.Button, e.MouseLocalPosition);
+        }
+        void mouseMapHandler_OnMouseUp(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Mouse.EmulateMouseUp", e.Button, e.MouseLocalPosition);
+        }
+        void mouseMapHandler_OnMouseMove(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Mouse.EmulateMouseMove", e.Button, e.MouseLocalPosition);
+        }
+        void mouseMapHandler_OnMouseDown(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Mouse.EmulateMouseDown", e.Button, e.MouseLocalPosition);
+        }
+
         void panel_Entering(OMPanel sender, int screen)
         {
-            // Error handling
-            if (_Map == null)
-                return;
-
-            // Update map settings
-            if (_SettingsChanged)
-            {
-                _SettingsChanged = false;
-                _Map.MapProvider = _Map_CurrentProvider;
-                _Map.Manager.Mode = _Map_AccessMode;
-
-                // Force a redraw of the map with the new data
-                _Map.Refresh();
-            }
-
-            // Update mapdata
-            _Map_Marker_HomePosition.Position = ConvertOMLocationToLatLng(BuiltInComponents.SystemSettings.Location_Home);
-            _Map_Marker_CurrentPosition.Position = ConvertOMLocationToLatLng(OM.Host.CurrentLocation);
-            if (_Map_FollowsCurrentLoc)
-                _Map.Refresh();
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Refresh");
         }
 
         void btn_InfoGroup_Hide_OnClick(OMControl sender, int screen)
         {
             GUI_RoutePanel(screen, false);
-        }
-
-        void btn_MapGroup_CurrentLoc_OnClick(OMControl sender, int screen)
-        {
-            _Map_FollowsCurrentLoc = true;
-            _Map_Marker_CurrentPosition.Position = ConvertOMLocationToLatLng(OM.Host.CurrentLocation);
-            _Map.Position = _Map_Marker_CurrentPosition.Position;
-            _Map.Zoom = CalculateZoomLevel();
-        }
-
-        void btnZoomIn_OnClick(OMControl sender, int screen)
-        {
-            _Map.Zoom++;
-        }
-        void btnZoomOut_OnClick(OMControl sender, int screen)
-        {
-            _Map.Zoom--;
-        }
-
-        void btnTest_OnClick(OMControl sender, int screen)
-        {
-            OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
-            _Map.Refresh();
-        }
-
-        #endregion
-
-        #region Host events
-
-        void Host_OnNavigationEvent(eNavigationEvent type, string arg)
-        {
-            switch (type)
-            {
-                case eNavigationEvent.Unknown:
-                    break;
-                case eNavigationEvent.GPSStatusChange:
-                    break;
-                case eNavigationEvent.RouteChanged:
-                    break;
-                case eNavigationEvent.TurnApproaching:
-                    break;
-                case eNavigationEvent.LocationChanged:
-                    if (_Map != null)
-                    {
-                        if (_Map_FollowsCurrentLoc)
-                        {
-                            _Map_Marker_CurrentPosition.Position = ConvertOMLocationToLatLng(OM.Host.CurrentLocation);
-                            _Map.Position = _Map_Marker_CurrentPosition.Position;
-                            _Map.Zoom = CalculateZoomLevel();
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-                
-        void Host_OnSystemEvent(eFunction function, object[] args)
-        {
-            if (function == eFunction.RenderingWindowResized)
-            {
-                // Ensure we scale the map when the window is resized so whe have "pixel perfect" map
-                PointF scaleFactors = (PointF)args[3];
-                OM.Host.ForEachScreen((screen) =>
-                    {
-                        OMPanel panel = base.PanelManager[screen, "OMMaps"];
-                        if (panel != null)
-                        {
-                            OMImage imgMap = panel["img_MapGroup_Map"] as OMImage;
-                            if (imgMap != null)
-                            {
-                                _Map.Width = (int)(imgMap.Width * scaleFactors.X);
-                                _Map.Height = (int)(imgMap.Height * scaleFactors.Y);
-                            }
-                        }
-                    });
-            }
-        }
-
-        #endregion
-
-        #region Map
-
-        void Map_Initialize(int mapWidth, int mapHeight)
-        {
-            _Map = new GMapImageRender(mapWidth, mapHeight);
-            _Map.Position = new PointLatLng(OM.Host.CurrentLocation.Latitude, OM.Host.CurrentLocation.Longitude);
-            _Map.MinZoom = 1;
-            _Map.MaxZoom = 17;
-            //MainMap.Zoom = 1;
-            //MainMap.Position = new PointLatLng(0, 0);
-            _Map.MapProvider = _Map_CurrentProvider;
-            _Map.Manager.Mode = _Map_AccessMode;
-            _Map.OnImageUpdated += new GMapImageUpdatedDelegate(Map_OnImageUpdated);
-            _Map.OnImageAssigned += new GMapImageUpdatedDelegate(Map_OnImageAssigned);
-            _Map.Overlays.Add(_Map_Overlay_Routes);
-            _Map.Overlays.Add(_Map_Overlay_Polygons);
-            _Map.Overlays.Add(_Map_Overlay_Objects);
-            _Map.Overlays.Add(_Map_Overlay);
-            if (_Map_Overlay_Objects.Markers.Count > 0)
-                _Map.ZoomAndCenterMarkers(null);
-            //MainMap.EmptyMapBackground = System.Drawing.Color.Transparent;
-            //MainMap.EmptyTileColor = 
-            _Map.EmptyTileText = "Missing images on this level";
-            _Map.EmptyTileBorders.Color = BuiltInComponents.SystemSettings.SkinTextColor.ToSystemColor();
-            _Map.OnTileLoadStart += new TileLoadStart(Map_OnTileLoadStart);
-            _Map.OnTileLoadComplete += new TileLoadComplete(Map_OnTileLoadComplete);
-
-            // set current marker
-            _Map_Marker_CurrentPosition = new GMarkerGoogle(ConvertOMLocationToLatLng(OM.Host.CurrentLocation), GMarkerGoogleType.blue_small);
-            _Map_Marker_CurrentPosition.IsHitTestVisible = false;
-            _Map_Overlay.Markers.Add(_Map_Marker_CurrentPosition);
-
-            _Map_Marker_HomePosition = new GMarkerGoogle(ConvertOMLocationToLatLng(BuiltInComponents.SystemSettings.Location_Home), GMarkerGoogleType.green_pushpin);
-            //markerHomePosition.IsHitTestVisible = false;
-            _Map_Marker_HomePosition.ToolTipText = "Home\r\nAs set in settings";
-            _Map_Marker_HomePosition.ToolTipMode = MarkerTooltipMode.OnMouseOver;
-            _Map_Overlay_Objects.Markers.Add(_Map_Marker_HomePosition);
-
-            _Map.Position = _Map_Marker_CurrentPosition.Position;
-            _Map.Zoom = CalculateZoomLevel();
-        }
-
-        void Map_OnTileLoadComplete(long ElapsedMilliseconds)
-        {
-            OM.Host.ForEachScreen((screen) =>
-            {
-                Map_GUI_RefreshIcon(screen, false);
-            });
-        }
-
-        void Map_OnTileLoadStart()
-        {
-            OM.Host.ForEachScreen((screen) =>
-            {
-                Map_GUI_RefreshIcon(screen, true);
-            });
-        }
-
-        void Map_GUI_RefreshIcon(int screen, bool show)
-        {
-            OMImage imgMap = base.PanelManager[screen, "OMMaps"]["img_MapGroup_Updating"] as OMImage;
-            if (imgMap != null)
-                imgMap.Visible = show;
-        }
-
-        void Map_OnImageAssigned(object sender, GMapImageUpdatedEventArgs e)
-        {
-            OM.Host.ForEachScreen((screen) =>
-            {
-                OMImage imgMap = base.PanelManager[screen, "OMMaps"]["img_MapGroup_Map"] as OMImage;
-                if (imgMap != null)
-                    imgMap.Image = new imageItem(new OImage(_Map.TargetImage));
-            });
-        }
-        void Map_OnImageUpdated(object sender, GMapImageUpdatedEventArgs e)
-        {
-            OM.Host.ForEachScreen((screen) =>
-            {
-                OMImage imgMap = base.PanelManager[screen, "OMMaps"]["img_MapGroup_Map"] as OMImage;
-                if (imgMap != null)
-                {
-                    if (imgMap.Image == imageItem.NONE)
-                        imgMap.Image = new imageItem(new OImage(_Map.TargetImage));
-                    imgMap.Image.Refresh();
-                }
-            });
-        }
-
-        void mouseMapHandler_OnClick(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
-        {
-            _Map_Point_RouteStart = _Map_Point_RouteEnd;
-            _Map_Point_RouteEnd = _Map.FromLocalToLatLng(e.MouseLocalPosition.X, e.MouseLocalPosition.Y);
-
-            // Initialize markers
-            Map_UpdateRouteMarkers();
-
-            _Map.EmulateMouseClick(System.Windows.Forms.MouseButtons.Left, e.MouseLocalPosition.X, e.MouseLocalPosition.Y);
-        }
-        void mouseMapHandler_OnMouseUp(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
-        {
-            _Map.EmulateMouseUp(_Map.DragButton, e.MouseLocalPosition.X, e.MouseLocalPosition.Y);
-        }
-        void mouseMapHandler_OnMouseMove(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
-        {
-            if (e.Button == OpenMobile.Input.MouseButton.Left)
-            {   // Map is being dragged, disable current location following
-                _Map_FollowsCurrentLoc = false;
-            }
-            _Map.EmulateMouseMove(_Map.DragButton, e.MouseLocalPosition.X, e.MouseLocalPosition.Y);
-        }
-        void mouseMapHandler_OnMouseDown(int screen, OMControl sender, OMMouseHandler.MouseEventArgs e)
-        {
-            _Map.EmulateMouseDown(_Map.DragButton, e.MouseLocalPosition.X, e.MouseLocalPosition.Y);
         }
 
         void imgMap_OnResize(OMControl sender, int screen)
@@ -455,221 +227,11 @@ namespace OMSkinPluginSample
             }
         }
 
-        #endregion
-
-        #region Menu items
-
-        void mnuItem_Goto_OnClick(OMControl sender, int screen)
-        {
-            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
-
-            string location = OSK.ShowDefaultOSK(screen, "", "location keyword", "Enter location/adress to go to", OSKInputTypes.Keypad, false);
-
-            GeoCoderStatusCode status = _Map.SetPositionByKeywords(location);
-            if (status != GeoCoderStatusCode.G_GEO_SUCCESS)
-            {
-                OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this.pluginName, sender.Parent.Name);
-                dialog.Header = "Unknown location";
-                dialog.Text = String.Format("{0} can't find: '{1}'\r\nreason: {2}", this.pluginName, location, status);
-                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
-                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
-                dialog.ShowMsgBox(screen);
-            }
-            else
-                _Map.Zoom = CalculateZoomLevel();
-        }
-        
-        void mnuItem_Route_OnClick(OMControl sender, int screen)
-        {
-            //Route_ShowRoute(sender.Parent, screen, ConvertOMLocationToLatLng(OM.Host.CurrentLocation).ToGoogleLatLngString(), "Nedre torvgate 1 gjøvik");
-
-            string startLocation = OSK.ShowDefaultOSK(screen, "", "Route start location (leave empty to use current)", "Enter start location or leave empty to use current", OSKInputTypes.Keypad, false);
-            string endLocation = OSK.ShowDefaultOSK(screen, "", "Route end location", "Enter end location or adress", OSKInputTypes.Keypad, false);
-
-            if (String.IsNullOrEmpty(startLocation))
-                startLocation = ConvertOMLocationToLatLng(OM.Host.CurrentLocation).ToGoogleLatLngString();
-            if (String.IsNullOrEmpty(endLocation))
-            {
-                OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, sender.Parent);
-                dialog.Header = "Invalid input";
-                dialog.Text = "Route end location can't be nothing!\r\nTry again";
-                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
-                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
-                dialog.ShowMsgBox(screen);
-                return;
-            }
-            //GeoCoderStatusCode geoCodeResult = GetPositionByKeywords(endLocation, out _Map_Point_RouteEnd);
-            //if (geoCodeResult != GeoCoderStatusCode.G_GEO_SUCCESS)
-            //{
-            //    OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, sender.Parent);
-            //    dialog.Header = "Unable to get route end position data";
-            //    dialog.Text = String.Format("{0} can't get position for: '{1}'\r\nreason: {2}", this.pluginName, endLocation, geoCodeResult);
-            //    dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
-            //    dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
-            //    dialog.ShowMsgBox(screen);
-            //    return;
-            //}
-
-            Route_ShowRoute(sender.Parent, screen, startLocation, endLocation);
-        }
-
-        void mnuItem_ShowRouteInfo_OnClick(OMControl sender, int screen)
-        {
-            OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
-            GUI_RoutePanel(screen, true);
-        }
-
-        void mnuItem_RouteByMapMarkers_OnClick(OMControl sender, int screen)
-        {
-            OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
-            Route_ShowRoute(sender.Parent, screen, _Map_Point_RouteStart, _Map_Point_RouteEnd);
-        }
-
-        void mnuItem_CurrentLocation_OnClick(OMControl sender, int screen)
-        {
-            _Map.Position = _Map_Marker_CurrentPosition.Position;
-            _Map.Zoom = CalculateZoomLevel();
-        }
-
-        #endregion
-
-        #region private helpers
-
-        private PointLatLng ConvertOMLocationToLatLng(Location location)
-        {
-            return new PointLatLng(location.Latitude, location.Longitude);
-        }
-
-        /// <summary>
-        /// This method is supposed to adjust zoom level based on speed
-        /// </summary>
-        /// <returns></returns>
-        private int CalculateZoomLevel()
-        {   // TODO
-            return 15;
-        }
-
-        private GeoCoderStatusCode GetPositionByKeywords(string keys, out PointLatLng position)
-        {
-            GeoCoderStatusCode status = GeoCoderStatusCode.Unknow;
-            position = PointLatLng.Empty;
-
-            GeocodingProvider gp = _Map.MapProvider as GeocodingProvider;
-            if (gp == null)
-                gp = GMapProviders.OpenStreetMap as GeocodingProvider;
-
-            if (gp != null)
-            {
-                var pt = gp.GetPoint(keys, out status);
-                if (status == GeoCoderStatusCode.G_GEO_SUCCESS && pt.HasValue)
-                {
-                    position = pt.Value;
-                }
-            }
-
-            return status;
-        }
-
-        #endregion
-
-        #region Route
-
-        private void Route_ShowRoute(OMPanel panel, int screen, object routeStart, object routeEnd)
-        {
-            OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
-            Map_GUI_RefreshIcon(screen, true);
-            Map_ClearRoute();
-
-            RoutingProvider rp = GMapProviders.GoogleMap as RoutingProvider;
-            MapRoute route = null;
-            if (routeStart is PointLatLng)
-                route = rp.GetRoute((PointLatLng)routeStart, (PointLatLng)routeEnd, false, false, (int)_Map.Zoom);
-            else if (routeStart is string)
-                route = rp.GetRoute((string)routeStart, (string)routeEnd, false, false, (int)_Map.Zoom);
-            if (route != null)
-            {
-                // Get start point info
-                //GeoCoderStatusCode geoCodeStatus;
-                //var routeStartInfo = GMapProviders.GoogleMap.GetPlacemark(routeStart, out geoCodeStatus);
-                //var routeEndInfo = GMapProviders.GoogleMap.GetPlacemark(routeEnd, out geoCodeStatus);
-
-                // add route
-                GMapRoute r = new GMapRoute(route.Points, route.Name);
-                GDirections s = null;
-                DirectionsStatusCode directionResult = DirectionsStatusCode.UNKNOWN_ERROR;
-                if (routeStart is PointLatLng)
-                    directionResult = GMapProviders.GoogleMap.GetDirections(out s, (PointLatLng)routeStart, (PointLatLng)routeEnd, false, false, false, false, true);
-                else if (routeStart is string)
-                    directionResult = GMapProviders.GoogleMap.GetDirections(out s, (string)routeStart, (string)routeEnd, false, false, false, false, true);
-                if (directionResult == DirectionsStatusCode.OK)
-                {
-                    _Map_ActiveNavigationRoute = new NavigationRoute(r, s);
-
-                    Map_AddRoute(r);
-                    Map_UpdateRouteMarkers();
-
-                    GUI_RoutePanel(screen, true, header: "Route summary", text: _Map_ActiveNavigationRoute.RouteText);
-                    _Map.ZoomAndCenterRoute(r);
-                }
-                else
-                {
-                    Map_GUI_RefreshIcon(screen, false);
-                    OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, panel);
-                    dialog.Header = "Unable to get directions";
-                    dialog.Text = String.Format("{0} is unable to get directions!\r\nReason: {1}", this.pluginName, directionResult);
-                    dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
-                    dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
-                    dialog.ShowMsgBox(screen);
-                }
-            }
-            else
-            {
-                Map_GUI_RefreshIcon(screen, false);
-                OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, panel);
-                dialog.Header = "Unable to get route";
-                dialog.Text = String.Format("{0} is unable to get route!\r\nNo additional info is available", this.pluginName);
-                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
-                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
-                dialog.ShowMsgBox(screen);
-            }
-            Map_GUI_RefreshIcon(screen, false);
-        }
-
-        private void Map_ClearRoute()
-        {
-            _Map_Overlay_Routes.Routes.Clear();
-        }
-        private void Map_AddRoute(GMapRoute route)
-        {
-            _Map_Overlay_Routes.Routes.Add(route);
-        }
-
-        private void Map_UpdateRouteMarkers()
-        {
-            // Initialize markers
-            if (_Map_Marker_RouteStart == null)
-                _Map_Marker_RouteStart = new GMarkerGoogle(_Map_Point_RouteStart, GMarkerGoogleType.green_big_go);
-            if (_Map_Marker_RouteEnd == null)
-                _Map_Marker_RouteEnd = new GMarkerGoogle(_Map_Point_RouteEnd, GMarkerGoogleType.red_big_stop);
-
-            // Add to map
-            if (!_Map_Point_RouteStart.IsEmpty)
-            {
-                _Map_Marker_RouteStart.Position = _Map_Point_RouteStart;
-                if (!_Map_Overlay_Objects.Markers.Contains(_Map_Marker_RouteStart))
-                    _Map_Overlay_Objects.Markers.Add(_Map_Marker_RouteStart);
-            }
-            if (!_Map_Point_RouteEnd.IsEmpty)
-            {
-                _Map_Marker_RouteEnd.Position = _Map_Point_RouteEnd;
-                if (!_Map_Overlay_Objects.Markers.Contains(_Map_Marker_RouteEnd))
-                    _Map_Overlay_Objects.Markers.Add(_Map_Marker_RouteEnd);
-            }
-        }
-
         private void GUI_RoutePanel(int screen, bool show, bool fast = false, string header = null, string text = null)
         {
             OMPanel panel = base.PanelManager[screen, "OMMaps"];
+            if (panel == null)
+                return;
 
             OMLabel lblHeader = panel["lbl_InfoGroup_Header"] as OMLabel;
             if (lblHeader != null && header != null)
@@ -715,8 +277,8 @@ namespace OMSkinPluginSample
                         }
                         return !animationComplete;
                     });
-                    _Map.Width = imgMap.Region.Width;
-                    _Map.Height = imgMap.Region.Height;
+
+                    OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Size.Set", imgMap.Region.Width, imgMap.Region.Height);
 
                     #endregion
                 }
@@ -748,14 +310,121 @@ namespace OMSkinPluginSample
                         }
                         return !animationComplete;
                     });
-                    _Map.Width = imgMap.Region.Width;
-                    _Map.Height = imgMap.Region.Height;
+                    OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Size.Set", imgMap.Region.Width, imgMap.Region.Height);
 
                     #endregion
                 }
-
-                _Map.Refresh();
+                OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Refresh");
+                imgMap.RefreshGraphic();
             }
+        }
+
+        #endregion
+
+        #region Menu items
+
+        void mnuItem_Test_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+            //OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Show.MapPlugin");
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", new Location(60.7263800, 10.6171800), this.pluginName, "testmarker", 1, "Raufoss");
+            //OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Markers.Clear");
+            //Location loc = new Location("Storgaten, Raufoss, Norge");
+            //Location loc = new Location();
+            //loc.Keyword = "Wallmart";
+            //Location loc = OM.Host.CommandHandler.ExecuteCommand<Location>("Map.Lookup.Location", loc);
+            //Location loc = OM.Host.CommandHandler.ExecuteCommand<Location>("Map.Lookup.Location", OM.Host.CurrentLocation);
+        }
+        void mnuItem_Test2_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+            //OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", new Location(60.7263800, 10.6171800), this.pluginName, "testmarker", OM.Host.getSkinImage("OMFuel|Logos|Shell").image.Copy().Resize(30), "Shell\r\n$1.222 (Regular)");
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.ZoomAll", this.pluginName);
+        }
+
+        void mnuItem_Goto_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+            string location = OSK.ShowDefaultOSK(screen, "", "location keyword", "Enter location/adress to go to", OSKInputTypes.Keypad, false);
+            string reply = OM.Host.CommandHandler.ExecuteCommand<string>(screen, "Map.Goto.Location", location);
+            if (reply != String.Empty)
+            {
+                OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, "OMMaps");
+                dialog.Header = "Unknown location";
+                dialog.Text = String.Format("{0} can't find: '{1}'\r\nreason: {2}", this.pluginName, location, reply);
+                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
+                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                dialog.ShowMsgBox(screen);
+            }
+        }
+
+        void mnuItem_CurrentLocation_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Goto.Current");
+        }
+
+        void mnuItem_Route_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+
+            string startLocation = OSK.ShowDefaultOSK(screen, "", "Route start location (leave empty to use current)", "Enter start location or leave empty to use current", OSKInputTypes.Keypad, false);
+            string endLocation = OSK.ShowDefaultOSK(screen, "", "Route end location", "Enter end location or adress", OSKInputTypes.Keypad, false);
+
+            if (String.IsNullOrEmpty(endLocation))
+            {
+                OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, "OMMaps");
+                dialog.Header = "Invalid input";
+                dialog.Text = "Route end location can't be nothing!\r\nTry again";
+                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
+                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                dialog.ShowMsgBox(screen);
+                return;
+            }
+            //GeoCoderStatusCode geoCodeResult = GetPositionByKeywords(endLocation, out _Map_Point_RouteEnd);
+            //if (geoCodeResult != GeoCoderStatusCode.G_GEO_SUCCESS)
+            //{
+            //    OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, sender.Parent);
+            //    dialog.Header = "Unable to get route end position data";
+            //    dialog.Text = String.Format("{0} can't get position for: '{1}'\r\nreason: {2}", this.pluginName, endLocation, geoCodeResult);
+            //    dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
+            //    dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+            //    dialog.ShowMsgBox(screen);
+            //    return;
+            //}
+
+            string reply = OM.Host.CommandHandler.ExecuteCommand<string>(screen, "Map.Route", startLocation, endLocation);
+            if (reply != string.Empty)
+            {
+                OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, base.PanelManager[screen, "OMMaps"]);
+                dialog.Header = "Unable to get directions";
+                dialog.Text = String.Format("{0} is unable to get directions!\r\nReason: {1}", this.pluginName, reply);
+                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
+                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                dialog.ShowMsgBox(screen);
+            }
+        }
+
+        void mnuItem_RouteByMapMarkers_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
+            string reply = OM.Host.CommandHandler.ExecuteCommand<string>(screen, "Map.Route.ByMarkers");
+            if (reply != string.Empty)
+            {
+                OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(this, base.PanelManager[screen, "OMMaps"]);
+                dialog.Header = "Unable to get directions";
+                dialog.Text = String.Format("{0} is unable to get directions!\r\nReason: {1}", this.pluginName, reply);
+                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Exclamation;
+                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                dialog.ShowMsgBox(screen);
+            }
+
+        }
+
+        void mnuItem_ShowRouteInfo_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
+            GUI_RoutePanel(screen, true);
         }
 
         #endregion

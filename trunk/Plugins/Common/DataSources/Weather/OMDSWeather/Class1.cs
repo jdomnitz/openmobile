@@ -78,12 +78,13 @@ namespace OMDSWeather
             searchedArea = new string[theHost.ScreenCount];
 
             polling = new Thread(poller);
-            //polling.Start();
+            polling.Start();
             //tmr = new System.Timers.Timer[theHost.ScreenCount];
 
             //theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Weather", "Searched", "List", DataSource.DataTypes.raw, "Searched Weather Results"), searchedDictionary);
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Search", "SearchLocation", SearchWeather2, 2, false, "Searches for weather at the specified search area"));
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Search", "CurrentLocation", SearchCurrentWeather, 1, false, "Searches for weather at the current location"));
+            OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Refresh", "All", RefreshWeather, 0, false, "Refreshes Searched and Current Location Weather"));
 
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
@@ -109,7 +110,7 @@ namespace OMDSWeather
 
             tmr = new OpenMobile.Timer[OM.Host.ScreenCount];
 
-            OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Refresh", "All", RefreshWeather, 0, false, "Refreshes Searched and Current Location Weather"));
+            
 
             //OM.Host.DataHandler.RemoveDataSource("Provider;name.name.name.name");
 
@@ -190,9 +191,10 @@ namespace OMDSWeather
             pollsw.Start();
             while (stillpolling)
             {
-                if ((pollsw.ElapsedMilliseconds >= refreshRate) || (manualRefresh))
+                if ((pollsw.ElapsedMilliseconds >= refreshRate) || (manualRefresh) || ((refreshQueue) && (pollsw.ElapsedMilliseconds >= 15000)))
                 {
                     manualRefresh = false;
+                    refreshQueue = false;
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         VisibleSearchProgress(true, i);
                     if (OM.Host.InternetAccess)
@@ -212,6 +214,7 @@ namespace OMDSWeather
                                     Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"], i));
                                     Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"], i));
                                     GetSearchedForecast(searchResults["ForecastHtml"], i, Results);
+                                    Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"], i));
                                 }
                                 else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
                                 {
@@ -244,6 +247,7 @@ namespace OMDSWeather
                                         Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"], i));
                                         Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"], i));
                                         GetSearchedForecast(searchResults["ForecastHtml"], i, Results);
+                                        Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"], i));
                                     }
                                     else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
                                     {
@@ -422,7 +426,7 @@ namespace OMDSWeather
             int screen = Convert.ToInt32(param[0]);
 
             Dictionary<string, object> Results = new Dictionary<string, object>();
-
+            fromCurrent[screen] = true;
             VisibleSearchProgress(true, screen);
             //here we need to get the city,state,zip from OMGPS...
             theHost.CommandHandler.ExecuteCommand("OMGPS;GPS.Location.ReverseGeocode");
@@ -472,7 +476,8 @@ namespace OMDSWeather
             //param[1] = screen
             result = true;
             int screen = Convert.ToInt32(param[1]);
-
+            searchedArea[screen] = param[0].ToString();
+            fromCurrent[screen] = false;
             Dictionary<string, object> Results = new Dictionary<string, object>();
             VisibleSearchProgress(true, screen);
             //Dictionary<string, string> searchResults = WeatherInfo.SearchArea(param[0].ToString(), Convert.ToInt32(param[1]));
@@ -480,12 +485,13 @@ namespace OMDSWeather
             if (searchResults.Keys.ElementAt(0) == "AreaFound")
             {
                 Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
-                searchedArea[screen] = Results["Area"].ToString();
+                //searchedArea[screen] = Results["Area"].ToString();
                 Results.Add("Temp", GetSearchedTemp(searchResults["SearchHtml"], screen));
                 Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"], screen));
                 Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"], screen));
                 GetSearchedForecast(searchResults["ForecastHtml"], screen, Results);
                 Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"], screen));
+                Results.Add("RealSearchedArea", searchedArea[screen]);
             }
             else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
             {
@@ -582,6 +588,8 @@ namespace OMDSWeather
             int i = 1;
             while (html.Contains("wx-daypart"))
             {
+                if (i == 11)
+                    break;
                 html = html.Remove(0, html.IndexOf("wx-daypart") + 10);
                 html = html.Remove(0, html.IndexOf("wx-label") + 10);
                 string forecastdaystr = html.Substring(0, html.IndexOf("<"));
@@ -711,6 +719,9 @@ namespace OMDSWeather
                 html = html.Remove(0, html.IndexOf("wx-show-alert-links"));
                 while (html.Contains("wx-alert-link-"))
                 {
+                    string alertURL = html.Substring(0, html.IndexOf("local_alert_list_today"));
+                    alertURL = html.Remove(0, alertURL.LastIndexOf("a href=") + 8);
+                    alertURL = "www.weather.com" + alertURL.Substring(0, alertURL.IndexOf(" ") - 1);
                     html = html.Remove(0, html.IndexOf("local_alert_list_today") + 24);
                     string alertDescription = html.Substring(0, html.IndexOf("<"));
                     string alertTime = "";
@@ -738,6 +749,9 @@ namespace OMDSWeather
             }
             else if (html.Contains("wx-alert-text")) //1 alert
             {
+                string alertURL = html.Substring(0, html.IndexOf("local_alert_primary_today"));
+                alertURL = html.Remove(0, alertURL.LastIndexOf("a href=") + 8);
+                alertURL = "www.weather.com" + alertURL.Substring(0, alertURL.IndexOf(" ") - 1);
                 html = html.Remove(0, html.IndexOf("local_alert_primary_today") + 27);
                 string alertDescription = html.Substring(0, html.IndexOf("<"));
                 string alertTime = "";
@@ -799,9 +813,37 @@ namespace OMDSWeather
                 currentdegree = ps.getSetting(this, "OMDSWeather.Degree");
             }
             if (newdegree == "Fahrenheit")
-                newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), false).ToString();
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), false).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
             else if (newdegree == "Celcius")
-                newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), true).ToString();
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), true).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
+            if (newtemp.IndexOf(".") >= 0)
+            {
+                string degreesymbol2 = degreesymbol + "F";
+                if (newtemp.IndexOf("C") >= 0)
+                {
+                    degreesymbol2 = degreesymbol + "C";
+                }
+                newtemp = newtemp.Remove(newtemp.IndexOf("."));
+                newtemp = newtemp + degreesymbol2;
+            }
             return newtemp;
         }
 
@@ -1408,6 +1450,9 @@ namespace OMDSWeather
                 html = html.Remove(0, html.IndexOf("wx-show-alert-links"));
                 while (html.Contains("wx-alert-link-"))
                 {
+                    string alertURL = html.Substring(0, html.IndexOf("local_alert_list_today"));
+                    alertURL = html.Remove(0, alertURL.LastIndexOf("a href=") + 8);
+                    alertURL = "www.weather.com" + alertURL.Substring(0, alertURL.IndexOf(" ") - 1);
                     html = html.Remove(0, html.IndexOf("local_alert_list_today") + 24);
                     string alertDescription = html.Substring(0, html.IndexOf("<"));
                     string alertTime = "";
@@ -1435,6 +1480,9 @@ namespace OMDSWeather
             }
             else if (html.Contains("wx-alert-text")) //1 alert
             {
+                string alertURL = html.Substring(0, html.IndexOf("local_alert_primary_today"));
+                alertURL = html.Remove(0, alertURL.LastIndexOf("a href=") + 8);
+                alertURL = "www.weather.com" + alertURL.Substring(0, alertURL.IndexOf(" ") - 1);
                 html = html.Remove(0, html.IndexOf("local_alert_primary_today") + 27);
                 string alertDescription = html.Substring(0, html.IndexOf("<"));
                 string alertTime = "";

@@ -263,26 +263,70 @@ namespace OpenMobile.Plugin
         /// <param name="data"></param>
         /// <returns></returns>
         bool sendMessage<T>(string to, string from, string message, ref T data);
+
         /// <summary>
-        /// Get the specified image from the skin directory
+        /// Loads a sprite from the skin folder
         /// </summary>
-        /// <param name="imageName"></param>
+        /// <param name="baseImageName"></param>
+        /// <param name="sprites">An array of Sprite data (name and coordinates)</param>
+        /// <returns></returns>
+        bool LoadSkinSprite(string baseImageName, params Sprite[] sprites);
+
+        /// <summary>
+        /// Loads a sprite from the plugin folder
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="baseImageName"></param>
+        /// <param name="sprites">An array of Sprite data (name and coordinates)</param>
+        /// <returns></returns>
+        bool LoadPluginSprite(IBasePlugin plugin, string baseImageName, params Sprite[] sprites);
+
+        /// <summary>
+        /// Loads an image from a file located in the skin folder
+        /// </summary>
+        /// <param name="imageName">Name of image to return ("|" is used as path separator)</param>
         /// <returns></returns>
         imageItem getSkinImage(string imageName);
+
         /// <summary>
-        /// Get the specified image from the skin directory
+        /// Loads an spirite image from a file located in the skin folder
         /// </summary>
-        /// <param name="imageName"></param>
-        /// <param name="noCache">Dont cache the image in the gloabl cache</param>
+        /// <param name="imageName">Filename of base image for sprite ("|" is used as path separator)</param>
+        /// <param name="spriteName">Name of sprite to return</param>
+        /// <returns></returns>
+        imageItem getSkinImage(string imageName, string spriteName);
+
+        /// <summary>
+        /// Loads an image from a file located in the skin folder
+        /// </summary>
+        /// <param name="imageName">Filename of image to return ("|" is used as path separator)</param>
+        /// <param name="noCache">Force a load from file rather than using the internal cache</param>
         /// <returns></returns>
         imageItem getSkinImage(string imageName, bool noCache);
+
+        /// <summary>
+        /// Loads an image sprite from a file located in the skin folder
+        /// </summary>
+        /// <param name="imageName">Filename of image to return ("|" is used as path separator)</param>
+        /// <param name="noCache">Force a load from file rather than using the internal cache</param>
+        /// <param name="spriteName">Name of sprite to return</param>
+        /// <returns></returns>
+        imageItem getSkinImage(string imageName, bool noCache, string spriteName);
+
+        /// <summary>
+        /// Loads an ninePatch image from a file located in the skin folder
+        /// </summary>
+        /// <param name="ninePatchImageName"></param>
+        /// <param name="ninePatchImageSize"></param>
+        /// <returns></returns>
+        imageItem getSkinImage(string ninePatchImageName, Size ninePatchImageSize);
 
         /// <summary>
         /// Gets a image from a full image path
         /// </summary>
         /// <param name="fullImageName"></param>
         /// <returns></returns>
-        imageItem getImageFromFile(string fullImageName);
+        imageItem getImageFromFile(string fullImageName, bool noCache = false);
         /// <summary>
         /// Get an image relative to a plugins path
         /// </summary>
@@ -290,6 +334,16 @@ namespace OpenMobile.Plugin
         /// <param name="imageName">Name of image</param>
         /// <returns></returns>
         imageItem getPluginImage(string pluginName, string imageName);
+
+        /// <summary>
+        /// Loads an image sprite from a file located in the plugin folder
+        /// </summary>
+        /// <param name="pluginName"></param>
+        /// <param name="imageName"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        imageItem getPluginImage(string pluginName, string imageName, string spriteName);
+
         /// <summary>
         /// Get an image relative to a plugins path
         /// </summary>
@@ -297,6 +351,24 @@ namespace OpenMobile.Plugin
         /// <param name="imageName"></param>
         /// <returns></returns>
         imageItem getPluginImage(IBasePlugin plugin, string imageName);
+
+        /// <summary>
+        /// Loads an image from a file located in the plugin folder
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="imageName"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        imageItem getPluginImage(IBasePlugin plugin, string imageName, string spriteName);
+
+        /// <summary>
+        /// Loads an ninePatch image from a file located in the skin folder
+        /// </summary>
+        /// <param name="ninePatchImageName"></param>
+        /// <param name="ninePatchImageSize"></param>
+        /// <returns></returns>
+        imageItem getPluginImage(IBasePlugin plugin, string ninePatchImageName, Size ninePatchImageSize);
+
         /// <summary>
         /// Gets information on the currently playing media
         /// </summary>
@@ -693,6 +765,7 @@ namespace OpenMobile.Plugin
         /// <param name="longitude"></param>
         /// <param name="altitude"></param>
         void UpdateLocation(string name = null,
+                    string address = null,
                     string street = null,
                     string city = null,
                     string state = null,

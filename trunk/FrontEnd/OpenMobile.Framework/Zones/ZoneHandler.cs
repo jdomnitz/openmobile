@@ -742,47 +742,90 @@ namespace OpenMobile.Zones
             // Create data sources for zones at all available screens
             for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
             {
+                //// Volume
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Volume", 0, DataSource.DataTypes.percent, ZoneDataProvider, "Volume for currently active zone at the screen"));
+
+                //// Mute
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Volume.Mute", 0, DataSource.DataTypes.binary, ZoneDataProvider, "Mute state for currently active zone at the screen"));
+
+                //// Zone name
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Name", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name for currently active zone at the screen"));
+
+                //// Zone audiodevice
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "AudioDevice", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name of Audiodevice for currently active zone at the screen"));
+
+                //// Mediahandler: mediaInfo.Artist
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Artist", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Artist as text", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Album", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Album as text", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Genre", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Genre as text", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Length", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Length in seconds", -1));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Location", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Media location as text", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Name", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Name as text", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Rating", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Rating as int 0 - 5 (-1 is not set)", -1));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.TrackNumber", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: TrackNumber as int", -1));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Type", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Type of media as text", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.CoverArt", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: CoverArt of media as OImage", null));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Playback.Pos", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Current playback position as timespan", 0));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Playback.Length", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Length of current playback as timespan", 0));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Playback.PosPercent", DataSource.DataTypes.percent, "MediaInfo from current mediaSource: Current playback position as percentage completed (int)", 0));
+
+                //// MediaHandler: ProviderInfo
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaText1", DataSource.DataTypes.text, "MediaProvider: Media text string 1 as string", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaText2", DataSource.DataTypes.text, "MediaProvider: Media text string 2 as string", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaSource.Name", DataSource.DataTypes.text, "MediaProvider: Name of current media source as string", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaSource.Icon", DataSource.DataTypes.raw, "MediaProvider: Icon of current media source as OImage", null));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaType.Text", DataSource.DataTypes.raw, "MediaProvider: Text representing the current media type as string", String.Empty));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaType.Icon", DataSource.DataTypes.raw, "MediaProvider: Icon of current media type as OImage", null));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Playback.Stopped", DataSource.DataTypes.binary, "MediaProvider: Playback is stopped as bool", false));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Playback.Playing", DataSource.DataTypes.binary, "MediaProvider: Playback is active as bool", false));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Playback.Paused", DataSource.DataTypes.binary, "MediaProvider: Playback is paused as bool", false));
+
+                //// MediaHandler: Misc data
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Shuffle", DataSource.DataTypes.binary, "MediaProvider: Suffle state", false));
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Repeat", DataSource.DataTypes.binary, "MediaProvider: Repeat state", false));
+
+
                 // Volume
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Volume", 0, DataSource.DataTypes.percent, ZoneDataProvider, "Volume for currently active zone at the screen"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "Volume", "", 0, DataSource.DataTypes.percent, ZoneDataProvider, "Volume for currently active zone at the screen"));
 
                 // Mute
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Volume.Mute", 0, DataSource.DataTypes.binary, ZoneDataProvider, "Mute state for currently active zone at the screen"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "Volume", "Mute", 0, DataSource.DataTypes.binary, ZoneDataProvider, "Mute state for currently active zone at the screen"));
 
                 // Zone name
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "Name", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name for currently active zone at the screen"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "Name", "", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name for currently active zone at the screen"));
 
                 // Zone audiodevice
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "AudioDevice", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name of Audiodevice for currently active zone at the screen"));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "AudioDevice", "", 0, DataSource.DataTypes.text, ZoneDataProvider, "Name of Audiodevice for currently active zone at the screen"));
 
                 // Mediahandler: mediaInfo.Artist
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Artist", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Artist as text", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Album", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Album as text", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Genre", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Genre as text", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Length", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Length in seconds", -1));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Location", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Media location as text", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Name", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Name as text", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Rating", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Rating as int 0 - 5 (-1 is not set)", -1));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.TrackNumber", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: TrackNumber as int", -1));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Type", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Type of media as text", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.CoverArt", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: CoverArt of media as OImage", null));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Playback.Pos", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Current playback position as timespan", 0));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Playback.Length", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Length of current playback as timespan", 0));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaInfo.Playback.PosPercent", DataSource.DataTypes.percent, "MediaInfo from current mediaSource: Current playback position as percentage completed (int)", 0));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Artist", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Artist as text", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Album", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Album as text", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Genre", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Genre as text", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Length", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Length in seconds", -1));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Location", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Media location as text", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Name", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Name as text", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Rating", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Rating as int 0 - 5 (-1 is not set)", -1));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "TrackNumber", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: TrackNumber as int", -1));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Type", DataSource.DataTypes.text, "MediaInfo from current mediaSource: Type of media as text", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "CoverArt", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: CoverArt of media as OImage", null));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Playback.Pos", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Current playback position as timespan", 0));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Playback.Length", DataSource.DataTypes.raw, "MediaInfo from current mediaSource: Length of current playback as timespan", 0));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaInfo", "Playback.PosPercent", DataSource.DataTypes.percent, "MediaInfo from current mediaSource: Current playback position as percentage completed (int)", 0));
 
                 // MediaHandler: ProviderInfo
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaText1", DataSource.DataTypes.text, "MediaProvider: Media text string 1 as string", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaText2", DataSource.DataTypes.text, "MediaProvider: Media text string 2 as string", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaSource.Name", DataSource.DataTypes.text, "MediaProvider: Name of current media source as string", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaSource.Icon", DataSource.DataTypes.raw, "MediaProvider: Icon of current media source as OImage", null));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaType.Text", DataSource.DataTypes.raw, "MediaProvider: Text representing the current media type as string", String.Empty));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.MediaType.Icon", DataSource.DataTypes.raw, "MediaProvider: Icon of current media type as OImage", null));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Playback.Stopped", DataSource.DataTypes.binary, "MediaProvider: Playback is stopped as bool", false));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Playback.Playing", DataSource.DataTypes.binary, "MediaProvider: Playback is active as bool", false));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Playback.Paused", DataSource.DataTypes.binary, "MediaProvider: Playback is paused as bool", false));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "MediaText1", DataSource.DataTypes.text, "MediaProvider: Media text string 1 as string", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "MediaText2", DataSource.DataTypes.text, "MediaProvider: Media text string 2 as string", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "MediaSource.Name", DataSource.DataTypes.text, "MediaProvider: Name of current media source as string", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "MediaSource.Icon", DataSource.DataTypes.raw, "MediaProvider: Icon of current media source as OImage", null));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "MediaType.Text", DataSource.DataTypes.raw, "MediaProvider: Text representing the current media type as string", String.Empty));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "MediaType.Icon", DataSource.DataTypes.raw, "MediaProvider: Icon of current media type as OImage", null));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "Playback.Stopped", DataSource.DataTypes.binary, "MediaProvider: Playback is stopped as bool", false));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "Playback.Playing", DataSource.DataTypes.binary, "MediaProvider: Playback is active as bool", false));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "Playback.Paused", DataSource.DataTypes.binary, "MediaProvider: Playback is paused as bool", false));
 
                 // MediaHandler: Misc data
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Shuffle", DataSource.DataTypes.binary, "MediaProvider: Suffle state", false));
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Repeat", DataSource.DataTypes.binary, "MediaProvider: Repeat state", false));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "Shuffle", DataSource.DataTypes.binary, "MediaProvider: Suffle state", false));
+                BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "Repeat", DataSource.DataTypes.binary, "MediaProvider: Repeat state", false));
             }
         }
 
@@ -790,21 +833,35 @@ namespace OpenMobile.Zones
         {
             result = true;
 
-            // Update volume data
-            if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Volume")
-                return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Volume;
+            switch (dataSource.FullNameWithoutScreen)
+            {
+                case "Zone.Volume":
+                    return GetZone(dataSource.Screen).AudioDevice.Volume;
+                case "Zone.Volume.Mute":
+                    return GetZone(dataSource.Screen).AudioDevice.Mute;
+                case "Zone.Name":
+                    return GetZone(dataSource.Screen).Name;
+                case "Zone.AudioDevice":
+                    return GetZone(dataSource.Screen).AudioDevice.Name;
+                default:
+                    break;
+            }
 
-            // Update mute data
-            else if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Volume.Mute")
-                return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Mute;
+            //// Update volume data
+            //if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Volume")
+            //    return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Volume;
 
-            // Update Name data
-            else if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Name")
-                return GetZone(GetScreenFromString(dataSource.NameLevel1)).Name;
+            //// Update mute data
+            //else if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Volume.Mute")
+            //    return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Mute;
 
-            // Update AudioDevice data
-            else if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "AudioDevice")
-                return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Name;
+            //// Update Name data
+            //else if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "Name")
+            //    return GetZone(GetScreenFromString(dataSource.NameLevel1)).Name;
+
+            //// Update AudioDevice data
+            //else if (dataSource.NameLevel2 == "Zone" && dataSource.NameLevel3 == "AudioDevice")
+            //    return GetZone(GetScreenFromString(dataSource.NameLevel1)).AudioDevice.Name;
 
             result = false;
             return null;

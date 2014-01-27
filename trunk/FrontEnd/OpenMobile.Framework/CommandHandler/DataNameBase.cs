@@ -53,6 +53,11 @@ namespace OpenMobile
         public const string DataTag_Loop = "{:L:}";
 
         /// <summary>
+        /// The string ID used in front of screen specific names
+        /// </summary>
+        public const string ScreenString = "Screen";
+
+        /// <summary>
         /// Returns a fully referenced name from the separate parts
         /// </summary>
         /// <param name="provider"></param>
@@ -66,9 +71,81 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// The full name of this command (Provider;Level1.Level2.Level3)
+        /// The currently assigned screen number for this command (or -1 if not used)
         /// </summary>
-        public string FullName
+        [System.ComponentModel.Browsable(false)]
+        public virtual int Screen
+        {
+            get
+            {
+                return this._Screen;
+            }
+            set
+            {
+                if (this._Screen != value)
+                {
+                    this._Screen = value;
+                }
+            }
+        }
+        private int _Screen = -1;
+
+        /// <summary>
+        /// The full name of this command with screen reference (if present) (Screen.Level1.Level2.Level3)
+        /// </summary>
+        public virtual string FullName
+        {
+            get
+            {
+                if (_Screen >= 0)
+                    return String.Format("{0}.{1}", GetScreenString(_Screen), FullNameWithoutScreen);
+                else
+                    return FullNameWithoutScreen;
+            }
+        }
+
+        /// <summary>
+        /// Returns the formatted screen string
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <returns></returns>
+        static public string GetScreenString(int screen)
+        {
+            return String.Format("{0}{1}", DataNameBase.ScreenString, screen);
+        }
+
+        /// <summary>
+        /// Gets the full dataname with a screen reference in front
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        static public string GetDataNameWithScreen(int screen, string name)
+        {
+            // Check for special dataref of screen present 
+            if (name.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+            {   // Present, replace with screen reference
+                if (name.StartsWith(OpenMobile.Data.DataSource.DataTag_Screen))
+                {
+                    if (name.Substring(OpenMobile.Data.DataSource.DataTag_Screen.Length, 1).Equals("."))
+                        name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, DataNameBase.GetScreenString(screen));
+                    else
+                        name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, String.Format("{0}.", DataNameBase.GetScreenString(screen)));
+                }
+                else
+                    name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, screen.ToString());
+            }
+            else
+            {   // Add screen tag in front
+                name = String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name);
+            }
+            return name;
+        }
+
+        /// <summary>
+        /// The full name of this command without screen reference (Level1.Level2.Level3)
+        /// </summary>
+        public virtual string FullNameWithoutScreen
         {
             get
             {
@@ -83,7 +160,7 @@ namespace OpenMobile
         /// The Provider of this command (usually plugin name, OM if provided by OpenMobile framework)
         /// </summary>
         [System.ComponentModel.Browsable(false)]
-        public string Provider
+        public virtual string Provider
         {
             get
             {
@@ -103,7 +180,7 @@ namespace OpenMobile
         /// The level 1 name (usally main type) of this command (System for OM provided, could be weather for weather data)
         /// </summary>
         [System.ComponentModel.Browsable(false)]
-        public string NameLevel1
+        public virtual string NameLevel1
         {
             get
             {
@@ -123,7 +200,7 @@ namespace OpenMobile
         /// The level 2 name (usually category) for this command
         /// </summary>
         [System.ComponentModel.Browsable(false)]
-        public string NameLevel2
+        public virtual string NameLevel2
         {
             get
             {
@@ -143,7 +220,7 @@ namespace OpenMobile
         /// The level 3 name (usally name) of this command
         /// </summary>
         [System.ComponentModel.Browsable(false)]
-        public string NameLevel3
+        public virtual string NameLevel3
         {
             get
             {
@@ -162,7 +239,7 @@ namespace OpenMobile
         /// <summary>
         /// Description 
         /// </summary>
-        public string  Description
+        public virtual string Description
         {
             get
             {
@@ -181,7 +258,7 @@ namespace OpenMobile
         /// <summary>
         /// The full name of this data (Provider.Category.Name)
         /// </summary>
-        public string FullNameWithProvider
+        public virtual string FullNameWithProvider
         {
             get
             {
