@@ -609,6 +609,35 @@ namespace OpenMobile.helperFunctions
             }
 
             /// <summary>
+            /// Gets a property by full name
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <param name="name"></param>
+            /// <returns></returns>
+            public T GetProperty<T>(string name)
+            {
+                if (_Data.ContainsKey(name))
+                    return (T)_Data[name];
+                else
+                    return default(T);
+            }
+
+            /// <summary>
+            /// Gets a property by full name
+            /// </summary>
+            /// <typeparam name="T"></typeparam>
+            /// <param name="name"></param>
+            /// <param name="defaultValue"></param>
+            /// <returns></returns>
+            public T GetProperty<T>(string name, T defaultValue)
+            {
+                if (_Data.ContainsKey(name))
+                    return (T)_Data[name];
+                else
+                    return defaultValue;
+            }
+
+            /// <summary>
             /// Gets a property for a given screen and returns it as the given type. Returns default value for the given type if property is not available
             /// </summary>
             /// <typeparam name="T"></typeparam>
@@ -631,6 +660,22 @@ namespace OpenMobile.helperFunctions
                 return (T)GetProperty_Internal(screen, name, defaultValue);
             }
 
+            /// <summary>
+            /// Get's a list of all propertynames that matches the name field for the specified screen
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <param name="name"></param>
+            /// <returns></returns>
+            public List<string> ListPropertyNames(int screen, string name = "")
+            {
+                string keyName = GetPropertyName(screen, name);
+                List<string> keys = new List<string>();
+                foreach (var key in _Data.Keys)
+                    if (key.StartsWith(keyName))
+                        keys.Add(key);
+                return keys;
+            }
+
             private string GetPropertyName(int screen, string name)
             {
                 return string.Format("{0}_{1}", screen, name);
@@ -640,10 +685,29 @@ namespace OpenMobile.helperFunctions
             /// Removes a property from all screens
             /// </summary>
             /// <param name="name"></param>
-            public void RemoveProperty(string name)
+            public void RemovePropertyFromAllScreens(string name)
             {
                 for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
                     _Data.Remove(GetPropertyName(i, name));
+            }
+
+            /// <summary>
+            /// Removes a named property from a screen
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <param name="name"></param>
+            public void RemoveProperty(int screen, string name)
+            {
+                _Data.Remove(GetPropertyName(screen, name));
+            }
+
+            /// <summary>
+            /// Removes a named property
+            /// </summary>
+            /// <param name="name"></param>
+            public void RemoveProperty(string name)
+            {
+                _Data.Remove(name);
             }
 
             /// <summary>
@@ -654,6 +718,21 @@ namespace OpenMobile.helperFunctions
                 _Data.Clear();
             }
 
+            /// <summary>
+            /// Removes all items for the specified screen
+            /// </summary>
+            /// <param name="screen"></param>
+            /// <param name="name"></param>
+            public void Clear(int screen, string name = "")
+            {
+                string keyName = GetPropertyName(screen, String.Empty);
+                List<string> keysToRemove = new List<string>();
+                foreach (var key in _Data.Keys)
+                    if (key.StartsWith(keyName))
+                        keysToRemove.Add(key);
+                foreach (var key in keysToRemove)
+                    _Data.Remove(key);
+            }
             /// <summary>
             /// Saves the collection to the database
             /// </summary>

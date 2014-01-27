@@ -66,16 +66,16 @@ namespace OpenMobile.helperFunctions
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="param"></param>
-        /// <param name="paramCount"></param>
+        /// <param name="paramNumber"></param>
         /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public static T GetParam<T>(object[] param, int paramCount, T defaultValue)
+        public static T GetParam<T>(object[] param, int paramNumber, T defaultValue)
         {
-            if (IsParamsValid(param, paramCount))
+            if (IsParamsValid(param, paramNumber))
             {
                 try
                 {
-                    return (T)Convert.ChangeType(param[paramCount], typeof(T));
+                    return (T)Convert.ChangeType(param[paramNumber], typeof(T));
                 }
                 catch
                 {

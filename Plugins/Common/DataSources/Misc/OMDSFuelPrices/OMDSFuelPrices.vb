@@ -45,7 +45,7 @@ Imports OpenMobile.Graphics
 Imports OpenMobile.Data
 Imports OpenMobile.Threading
 Imports OpenMobile.helperFunctions
-Imports System.Windows.Forms
+'Imports System.Windows.Forms
 
 Namespace OMDSFuelPrices
 
@@ -61,28 +61,163 @@ Namespace OMDSFuelPrices
         Implements IDataSource
 
         Private status As Integer = 0
+        Private status_msg As String = ""
         Private scrapeCounter As Integer = 0
-        Private refreshRate As Double = 30000
+
         Private WithEvents theHost As IPluginHost
-        Private myNotification As Notification
-        Private PriceList(5, 0)
-        Private maxRecords As Integer = 30
+        Private myNotification As Notification = New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "", AddressOf myNotification_clickAction, AddressOf myNotification_clearAction)
+
+        Private maxWait As Integer = 5000               ' Max interval (ms) between checking GPS fixed
+        Private PriceList(6, 0)
+        Private maxRecords As Integer = 20              ' Max price records to fetch (per Grade)
+        Private maxAge As Integer = 24                  ' Max age of price data
         Private myLatitude As String
         Private myLongitude As String
+        Private gps_fix As Boolean
+        Private favZip As String = ""                   ' Skin request to search specific postal code
+        Private favCountry As String = ""               ' Skin request to search specific country
         Private searchGrade As String = "A"             ' Fuel Grade to search for
-        Private searchLocation As String = ""           ' Not required?
-        Private searchZip As String = "14305"           ' The ZIP/Postal code
+        Private searchZip As String = ""                ' The ZIP/Postal code
+        Private searchCountry As String = ""            ' The Country
+        Private searchCity As String = ""               ' The City
+        Private searchState As String = ""              ' The State/Prov
         Private searchParam As String = ""              ' The string to scrape with
-        Private searchCity As String = "Niagara Falls"  ' The City
-        Private searchState As String = "NY"            ' The State/Prov
-        Private searchCountry As String = "US"          ' The Country
-        Private searchCurrent As Boolean = True         ' Search current location (via GPS)?
-
-        Private WithEvents m_Refresh_tmr As New Timers.Timer(refreshRate)
+        Private searchFormat As Integer = 1             ' Ajdusts the searched price (Canadian is in pennies, not dollars)
+        Private searchDecimal As Integer = 2            ' The number of currency decimal places that the fuel price should be shown in
 
         Public Sub New()
 
-            MyBase.New("OMDSFuelPrices", OM.Host.getSkinImage("Icons|Icon-Gas"), 0.1, "Retrieve local gas prices", "John Mullan", "jmullan99@gmail.com")
+            MyBase.New("OMDSFuelPrices", OM.Host.getSkinImage("Icons|Icon-Gas"), 0.1, "Fetch gas prices - Geocoding by Geocoder.ca", "John Mullan", "jmullan99@gmail.com")
+        End Sub
+
+        Public Function CommandExecutor(ByVal command As Command, ByVal param() As Object, ByRef result As Boolean) As Object
+
+            'theHost.DebugMsg("OMDSFuelPrices - CommandExecutor()", String.Format("Processing command {0}.", command.FullName))
+
+            Dim loc As Location = OM.Host.CurrentLocation
+            Dim mFilter As String = ""
+
+            'theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Messages.Text", "")
+            'theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Price.List", "")
+
+            result = False
+
+            Select Case command.NameLevel2
+                Case "Refresh"
+                    mFilter = command.NameLevel3
+                    If mFilter = "Last" Then
+                        mFilter = StoredData.Get(Me, "last.Filter")
+                    End If
+                    StoredData.Set(Me, "last.Filter", mFilter)
+                    Select Case mFilter
+                        Case "Current"
+                            ' This is dependant on GPS availability.
+                            ' We should attempt it a few times just in case GPS is not ready (if exists at all)
+                            Dim tries As Integer = 5
+                            Do While tries > 0
+                                If locate_US() Then
+                                    status_msg = ""
+                                    result = refreshData()
+                                    Exit Do
+                                End If
+                                System.Threading.Thread.Sleep(1000)
+                                tries -= 1
+                            Loop
+                            'Dim startTime As DateTime
+                            'Dim elapsedTime As TimeSpan
+                            'Dim lastSeconds As Integer = 0
+                            'startTime = Now
+                            'Do While True
+                            'If locate_US() Then
+                            'result = refreshData()
+                            'Exit Do
+                            'End If
+                            'elapsedTime = Now().Subtract(startTime)
+                            'If elapsedTime.Seconds > maxWait Then
+                            'set_message("Locate failed (GPS?).")
+                            'theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_US()"), "Locate failed waiting for GPS.")
+                            'myNotification.Text = status_msg
+                            'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                            'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                            'Exit Do
+                            'End If
+                            'Loop
+                        Case "Favorite"
+                            If param Is Nothing Then
+                                ' Load the values we need
+                                searchZip = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.Code").FormatedValue
+                                searchCity = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.City").FormatedValue
+                                searchState = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.State").FormatedValue
+                                searchCountry = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.Country").FormatedValue
+                            Else
+                                ' Extract the favorite to the search variables
+                                searchZip = param(0)
+                                searchCity = param(1)
+                                searchState = param(2)
+                                If Not String.IsNullOrEmpty(searchZip) Then
+                                    locate_by_CODE(searchZip)
+                                Else
+                                    If Not String.IsNullOrEmpty(searchCity) And _
+                                        Not String.IsNullOrEmpty(searchState) Then
+                                        locate_by_CITY(searchCity, searchState)
+                                    End If
+                                End If
+                            End If
+                            result = refreshData()
+                        Case "Home"
+                            If param Is Nothing Then
+                                ' Load the values we need
+                                searchZip = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.Code").FormatedValue
+                                searchCity = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.City").FormatedValue
+                                searchState = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.State").FormatedValue
+                                searchCountry = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.Country").FormatedValue
+                            Else
+                                ' Extract the favorite to the search variables
+                                searchZip = param(0)
+                                searchCity = param(1)
+                                searchState = param(2)
+                                If Not String.IsNullOrEmpty(searchZip) Then
+                                    locate_by_CODE(searchZip)
+                                Else
+                                    If Not String.IsNullOrEmpty(searchCity) And _
+                                        Not String.IsNullOrEmpty(searchState) Then
+                                        locate_by_CITY(searchCity, searchState)
+                                    End If
+                                End If
+                            End If
+                            result = refreshData()
+                        Case Else
+                            result = False
+                    End Select
+                    StoredData.Set(Me, "last.Filter", mFilter)
+                    theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Filter", mFilter)
+                    If Not String.IsNullOrEmpty(status_msg) Then
+                        theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Messages.Text", status_msg)
+                        status_msg = ""
+                    End If
+                Case "Save"
+                    ' We really don't save anything here. Skin manages favorites
+                    ' Maybe sometime in the future
+                    Select Case command.NameLevel3
+                        Case Else
+                            result = False
+                    End Select
+                Case Else
+                    result = False
+            End Select
+
+            Return result
+
+        End Function
+
+        Private Sub systemEvents(ByVal eFunction As eFunction, ByVal args As Object()) Handles theHost.OnSystemEvent
+
+            Select Case eFunction
+                Case eFunction.connectedToInternet
+
+                Case eFunction.disconnectedFromInternet
+
+            End Select
 
         End Sub
 
@@ -90,362 +225,706 @@ Namespace OMDSFuelPrices
 
             theHost = host
 
+            theHost.UIHandler.AddNotification(myNotification)
+
+            If Not String.IsNullOrEmpty(StoredData.Get(Me, "refreshRate")) Then
+                StoredData.Delete(Me, "refreshRate")
+            End If
+
+            ' Set up max returned records
+            StoredData.SetDefaultValue(Me, "settings.max.Records", maxRecords)
+            maxRecords = Val(StoredData.Get(Me, "settings.max.Records")) ' Maximum results to fetch
+
+            ' Set data age 
+            StoredData.SetDefaultValue(Me, "settings.max.Age", maxAge)
+            maxAge = Val(StoredData.Get(Me, "settings.max.Age")) ' Maximum age
+
+            ' Set up settings values
+            'theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating data items...")
+
+            Dim city As String, state As String, country As String, code As String, filter As String
+
+            StoredData.SetDefaultValue(Me, "last.Update", "")
+            StoredData.SetDefaultValue(Me, "last.Code", "")
+            code = StoredData.Get(Me, "last.Code")
+
+            StoredData.SetDefaultValue(Me, "last.Country", "")
+            country = StoredData.Get(Me, "last.Country")
+
+            StoredData.SetDefaultValue(Me, "last.City", "")
+            city = StoredData.Get(Me, "last.City")
+
+            StoredData.SetDefaultValue(Me, "last.State", "")
+            state = StoredData.Get(Me, "last.State")
+
+            StoredData.SetDefaultValue(Me, "last.Filter", "Current")
+            filter = StoredData.Get(Me, "last.Filter")
+
             ' Set up data source
-            theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating datasource.")
-            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Price", "Count", DataSource.DataTypes.raw, "Number of available fuel prices", -1))
+            'theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating datasource...")
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Price", "List", DataSource.DataTypes.raw, "Fuel Price Scrape Results"))
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Messages", "Text", DataSource.DataTypes.text, "Latest status/error message", ""))
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "Filter", DataSource.DataTypes.text, "Last search filter", filter))
+            theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Filter", filter)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "City", DataSource.DataTypes.text, "Last searched city", city))
+            theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.City", city)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "State", DataSource.DataTypes.text, "Last searched state", state))
+            theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.State", state)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "Code", DataSource.DataTypes.text, "Last searched zip", code))
+            theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Code", code)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "Country", DataSource.DataTypes.text, "Last searched country", country))
+            theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Country", country)
 
-            m_Refresh_tmr.Enabled = False
-            m_Refresh_tmr.AutoReset = False
+            ' Set up commands
+            'theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating commands...")
+            theHost.CommandHandler.AddCommand(New Command(Me.pluginName, "OMDSFuelPrices", "Refresh", "Current", AddressOf CommandExecutor, 0, True, "Update prices for local area"))
+            theHost.CommandHandler.AddCommand(New Command(Me.pluginName, "OMDSFuelPrices", "Refresh", "Favorite", AddressOf CommandExecutor, 4, True, "Update prices for specified area"))
+            theHost.CommandHandler.AddCommand(New Command(Me.pluginName, "OMDSFuelPrices", "Refresh", "Home", AddressOf CommandExecutor, 0, True, "Update prices for Home area"))
+            theHost.CommandHandler.AddCommand(New Command(Me.pluginName, "OMDSFuelPrices", "Refresh", "Last", AddressOf CommandExecutor, 0, True, "Update prices for last selected"))
+            theHost.CommandHandler.AddCommand(New Command(Me.pluginName, "OMDSFuelPrices", "Save", "Home", AddressOf CommandExecutor, 0, True, "Saves current location as HOME"))
 
-            theHost.DebugMsg("OMDSFuelPrices - initialze()", "Initialization invoked.")
+            ' Subscribe to datasources
+            theHost.DataHandler.SubscribeToDataSource("OMGPS;GPS.Sat.Fix", AddressOf Subscription_Updated)
 
-            StoredData.Set(Me, "Data.SearchCurrent", searchCurrent)
-            StoredData.Set(Me, "Data.DefaultCountry", searchCountry)
-            StoredData.Set(Me, "Data.DefaultState", searchState)
-            StoredData.Set(Me, "Data.DefaultZip", searchZip)
-
-            ' Do first fetch of prices (after which the timer will be started)
-            ' Cannot refresh if no internet.  Perhaps set a thread to do the waiting
-
-            SafeThread.Asynchronous(AddressOf BackgroundLoad, theHost)
+            SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
 
             Return eLoadStatus.LoadSuccessful
 
         End Function
 
+        Private Sub Subscription_Updated(ByVal sensor As OpenMobile.Data.DataSource)
+
+            Select Case sensor.FullName
+                Case "GPS.Sat.Fix"
+                    gps_fix = sensor.Value
+                Case "Location.Current"
+
+            End Select
+
+        End Sub
+
+        Private Sub myNotification_clickAction(notification As Notification, screen As Integer, ByRef cancel As Boolean)
+            'notification.State = OpenMobile.Notification.States.Active
+            'notification.Style = OpenMobile.Notification.Styles.IconOnly
+            cancel = True
+        End Sub
+
+        Private Sub myNotification_clearAction(notification As Notification, screen As Integer, ByRef cancel As Boolean)
+            'notification.State = OpenMobile.Notification.States.Passive
+            'notification.Style = OpenMobile.Notification.Styles.IconOnly
+            'cancel = True
+        End Sub
+
         Private Sub BackgroundLoad()
 
-            Dim timeout As Integer = 30000
-            Dim startTime As DateTime
-            Dim elapsedTime As TimeSpan
-            Dim lastSeconds As Integer = 0
-            startTime = Now
+            Dim result As Boolean = False
+            Dim city As String, state As String, country As String, code As String
 
-            Do While True
+            code = StoredData.Get(Me, "last.Code")
+            city = StoredData.Get(Me, "last.City")
+            state = StoredData.Get(Me, "last.State")
+            country = StoredData.Get(Me, "last.Country")
 
-                If theHost.InternetAccess Then
-                    ' we have internet access, lets do the first fetch
-                    getPrices()
-                    m_Refresh_tmr.Enabled = True
-                    m_Refresh_tmr.Start()
-                    Exit Sub
-                End If
+            result = theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Last", {code, city, state, country})
 
-                If elapsedTime.Seconds > timeout Then
-                    ' We didn't get any internet so start the timer anyway
-                    getPrices()
-                    m_Refresh_tmr.Enabled = True
-                    m_Refresh_tmr.Start()
-                    Exit Sub
-                End If
+        End Sub
 
-            Loop
+        Private Sub set_message(ByVal message As String)
+
+            status_msg = message
+            'theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Messages.Text", message)
 
         End Sub
 
         Public Function refreshData() As Boolean
+            ' This is the standard method for loading price data
 
-            ' Reset timer stuff in case we were called via a manual refresh
-            theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("Stopping/Resetting timer."))
-            m_Refresh_tmr.Stop()
-            m_Refresh_tmr.Enabled = False
-            'm_Refresh_tmr.Interval = refreshRate
+            Dim result = False
 
-            If status = 0 Then
-                If theHost.InternetAccess Then
-                    ' flag that the task has been queued
-                    status = -1
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("Initiating data scrape."))
-                    OpenMobile.Threading.SafeThread.Asynchronous(AddressOf getPrices, theHost)
-                    'OpenMobile.Threading.TaskManager.QueueTask(getPrices, OpenMobile.ePriority.Normal, "Update Fuel Prices")
-                    Return True
-                Else
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("No internet connection available."))
-                    theHost.execute(eFunction.dataUpdated, "OMDSFuelPrices")
-                    Return False
-                End If
-            Else
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("Scrape already in progress."))
-                theHost.execute(eFunction.dataUpdated, "OMDSFuelPrices")
-                Return True
+            'If Not netConnection Then
+            '    set_message("No internet access")
+            'Return False
+            'End If
+
+            ' Status must be 0 to start a new scrape
+
+            If status <> 0 Then
+                Return False
             End If
 
-        End Function
+            ' flag that the task has been queued
+            status = 1
 
-        Private Function getPrices()
+            'theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("Attempting scrape."))
 
-            theHost.DebugMsg(String.Format("OMDSFuelPrices - getPrices()"), String.Format("Attempting scrape."))
-            theHost.UIHandler.RemoveAllMyNotifications(Me)
+            result = getInfo()
 
-            If getInfo() Then
+            'theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("Returned from scrape."))
+
+            If result Then
                 scrapeCounter += 1
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - getPrices()"), String.Format("Completed scrape #{0}.", scrapeCounter))
-                StoredData.Set(Me, "LastUpdate", DateTime.Now.ToString("s"))
+                'theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("Completed scrape #{0}.", scrapeCounter))
+                StoredData.Set(Me, "last.Update", DateTime.Now.ToString("s"))
+                theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.City", searchCity.ToUpper)
+                helperFunctions.StoredData.Set(Me, "last.City", searchCity.ToUpper)
+                theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.Code", searchZip.ToUpper)
+                helperFunctions.StoredData.Set(Me, "last.Code", searchZip.ToUpper)
+                theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.State", searchState.ToUpper)
+                helperFunctions.StoredData.Set(Me, "last.State", searchState.ToUpper)
+                theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.Country", searchCountry.ToUpper)
+                helperFunctions.StoredData.Set(Me, "last.Country", searchCountry.ToUpper)
                 theHost.execute(eFunction.dataUpdated, "OMDSFuelPrices")
             Else
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - getPrices()"), String.Format("Scrape failed."))
+                ' Tell the user we cannot scrape
+                theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), "Update failed.")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Update failed."))
+                myNotification.Text = "Update failed"
             End If
-
-            ' Scrape was completed, reset flag
+            ' Scrape process is completed, reset flag
             status = 0
 
-            ' Restart the timer
-            theHost.DebugMsg(String.Format("OMDSFuelPrices - getPrices()"), String.Format("Restarting timer."))
-            System.Threading.Thread.Sleep(2000)
-            theHost.UIHandler.RemoveAllMyNotifications(Me)
-            m_Refresh_tmr.Enabled = True
-            m_Refresh_tmr.Start()
-
-            Return True
+            Return result
 
         End Function
 
         Private Function getInfo() As Boolean
 
-            Dim abc As OpenMobile.Location = theHost.CurrentLocation
-            Dim geoLocate As Boolean = False
+            ' We only need a zip/postal code to search with
+            ' This may not work for other countries in the future
+            'theHost.DebugMsg("OMDSFuelPrices - getInfo()", "Entering...")
 
-            ' Is location.zip set?
-            If Not String.IsNullOrEmpty(abc.Zip) Then
-                searchZip = abc.Zip
-            Else
-                geoLocate = True
-            End If
+            'theHost.UIHandler.RemoveAllMyNotifications(Me)
+            'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Updating..."))
+            myNotification.Text = "Updating..."
 
-            ' Is location.zip set?
-            If Not String.IsNullOrEmpty(abc.Country) Then
-                searchCountry = abc.Country
-            Else
-                geoLocate = True
-            End If
-
-            ' Is location.zip set?
-            If Not String.IsNullOrEmpty(abc.State) Then
-                searchState = abc.State
-            Else
-                geoLocate = True
-            End If
-
-            ' Is location.zip set?
-            If Not String.IsNullOrEmpty(abc.City) Then
-                searchCity = abc.City
-            Else
-                geoLocate = True
-            End If
-
-            If Not searchCurrent Then
-                ' We want to search the default location
-                If Not String.IsNullOrEmpty(StoredData.Get(Me, "Data.DefaultCountry")) Then
-                    searchCountry = StoredData.Get(Me, "Data.DefaultCountry")
-                Else
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("No default country set."))
-                End If
-                If Not String.IsNullOrEmpty(StoredData.Get(Me, "Data.DefaultZip")) Then
-                    ' We have a default location city
-                    searchZip = StoredData.Get(Me, "Data.DefaultZip")
-                Else
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("No default Zip set."))
-                End If
-                If Not String.IsNullOrEmpty(StoredData.Get(Me, "Data.DefaultState")) Then
-                    ' We have a default state
-                    searchState = StoredData.Get(Me, "Data.DefaultState")
-                Else
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("No default state/prov set."))
-                End If
-                If Not String.IsNullOrEmpty(StoredData.Get(Me, "Data.DefaultCity")) Then
-                    ' We have a default location city
-                    searchCity = StoredData.Get(Me, "Data.DefaultCity")
-                Else
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("No default city set."))
-                End If
-            Else
-                If geoLocate Then
-                    locate_US()
-                End If
-            End If
+            Dim result As Boolean = False
 
             Select Case searchCountry
-
                 Case "US" ' United States
                     If String.IsNullOrEmpty(searchZip) Then
-                        theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("Insufficient data to perform search."))
-                        Return False
+                        set_message("Insufficient data to perform search.")
+                        result = False
+                    Else
+                        searchFormat = 1
+                        searchDecimal = 2
+                        searchParam = "http://www.gasbuddy.com/findsite.aspx?zip=" & searchZip
+                        result = scrape_gasbuddy()
                     End If
-                    searchParam = "http://www.gasbuddy.com/findsite.asp?zip=" & searchZip
                 Case "CA" ' Canada
-                    If String.IsNullOrEmpty(searchState) Or String.IsNullOrEmpty(searchCity) Then
+                    If String.IsNullOrEmpty(searchZip) Then
                         ' cannot search without info
-                        theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("Insufficient data to perform search."))
-                        Return False
+                        set_message("Insufficient data to perform search.")
+                        result = False
+                    Else
+                        searchFormat = 100
+                        searchDecimal = 3
+                        ' This one accepts Canadian Postal Codes as well as ZIP codes
+                        searchParam = "http://www.gasbuddy.com/findsite.aspx?search=" & searchZip
+                        result = scrape_gasbuddy()
                     End If
-                    searchParam = "http://www.gasbuddy.com/GasPriceSearch.aspx?typ=adv&fuel=" & searchGrade & "&srch=1&state=" & searchState & "&area=" & searchCity & "&tme_limit=24"
+                Case ""
+                    set_message("No location information.")
+                    result = False
                 Case Else ' Unknown country
-                    Return False
-
+                    set_message(String.Format("Unsupported country code {0}.", searchCountry))
+                    result = False
             End Select
 
-            scrape_gasbuddy()
+            'theHost.UIHandler.RemoveAllMyNotifications(Me)
+            If result Then
+                'theHost.DebugMsg("OMDSFuelPrices - getInfo()", String.Format("Updated {0}: {1},{2}", StoredData.Get(Me, "last.Filter"), searchCity, searchState))
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, String.Format("Updated {0}: {1},{2}", StoredData.Get(Me, "last.Filter"), searchCity, searchState)))
+                myNotification.Text = String.Format("Updated {0}: {1},{2}", StoredData.Get(Me, "last.Filter"), searchCity, searchState)
+            Else
+                theHost.DebugMsg("OMDSFuelPrices - getInfo()", status_msg)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                myNotification.Text = status_msg
+            End If
 
-            'Dim ddata As Object = scrape_motortrend(zip)
+            Return result
+
+        End Function
+
+        Private Sub locate_by_CITY(ByVal theCity As String, ByVal theState As String)
+
+            Dim wc As WebClient = New WebClient
+            Dim x As Integer, y As Integer, z As Integer
+            Dim latt As String = "", longt As String = ""
+            Dim eCode As String = "", eDesc As String = ""
+            Dim postal As String = "", country As String = "", city As String = "", address As String = "", street As String = "", state As String = ""
+            Dim html As String = ""
+
+            Dim theURL1 As String = "http://geocoder.ca/?city=" & theCity & "&prov=" & theState & "&geoit=XML&addresst=&stno=&showpostal=1&topmatches=1"
+            Dim theURL2 As String
+
+            ' Fetch theURL1 to get the long/lat
+            Try
+                ' Find the long/lat of city/state
+                html = wc.DownloadString(theURL1)
+                x = html.IndexOf("<error>")
+                If x >= 0 Then
+                    ' There was an error
+                    z = html.IndexOf("<code>")
+                    If z >= 0 And x >= 0 Then
+                        x = html.IndexOf("<code>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</code>", x)
+                            eCode = html.Substring(x + 5, y - (x + 5))
+                        End If
+                        x = html.IndexOf("<description>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</description>", x)
+                            eDesc = html.Substring(x + 12, y - (x + 12))
+                        End If
+                        ' An error was returned
+                        set_message(String.Format("GEO ERROR: {0}.", eCode))
+                        'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                        'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                        myNotification.Text = status_msg
+                    End If
+                    Exit Sub
+                End If
+
+                x = html.IndexOf("latt>")
+                If x >= 0 Then
+                    y = html.IndexOf("</", x)
+                    latt = html.Substring(x + 5, y - (x + 5)).ToUpper
+                End If
+                x = html.IndexOf("longt>")
+                If x >= 0 Then
+                    y = html.IndexOf("</", x)
+                    longt = html.Substring(x + 6, y - (x + 6)).ToUpper
+                End If
+
+                theURL2 = "http://geocoder.ca/?latt=" & latt & "&longt=" & longt & "&geoit=xml&range=1&reverse=Reverse+GeoCode+it!"
+
+                ' Find the long/lat of city/state
+                html = wc.DownloadString(theURL2)
+                x = html.IndexOf("<error>")
+                If x >= 0 Then
+                    ' There was an error
+                    z = html.IndexOf("<code>")
+                    If z >= 0 And x >= 0 Then
+                        x = html.IndexOf("<code>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</code>", x)
+                            eCode = html.Substring(x + 5, y - (x + 5))
+                        End If
+                        x = html.IndexOf("<description>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</description>", x)
+                            eDesc = html.Substring(x + 12, y - (x + 12))
+                        End If
+                        ' An error was returned
+                        set_message(String.Format("GEO ERROR: {0}.", eCode))
+                        'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                        'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                        myNotification.Text = status_msg
+                    End If
+                    Exit Sub
+                End If
+
+                x = html.IndexOf("state>")
+                If x >= 0 Then
+                    country = "US"
+                    y = html.IndexOf("</", x)
+                    state = html.Substring(x + 6, y - (x + 6)).ToUpper
+                    x = html.IndexOf("zip>")
+                    If x >= 0 Then
+                        y = html.IndexOf("</", x)
+                        searchZip = html.Substring(x + 4, y - (x + 4)).ToUpper
+                    End If
+                    x = html.IndexOf("uscity>")
+                    If x >= 0 Then
+                        y = html.IndexOf("</", x)
+                        city = html.Substring(x + 7, y - (x + 7)).ToUpper
+                    End If
+                Else
+                    x = html.IndexOf("prov>")
+                    If x >= 0 Then
+                        country = "CA"
+                        y = html.IndexOf("</", x)
+                        state = html.Substring(x + 5, y - (x + 5)).ToUpper
+                        x = html.IndexOf("postal>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</", x)
+                            searchZip = html.Substring(x + 7, y - (x + 7)).ToUpper
+                        End If
+                        x = html.IndexOf("city>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</", x)
+                            city = html.Substring(x + 5, y - (x + 5)).ToUpper
+                        End If
+                    End If
+                End If
+
+            Catch ex As Exception
+                ' Problem fetching the URL
+                theHost.DebugMsg("OMDSFuelPrices - locate_by_CODE()", String.Format("Problem geolocating. Exception: {0}.", ex.Message))
+                set_message("Geolocating failed")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                myNotification.Text = status_msg
+            End Try
+
+            searchCity = city
+            searchState = state
+            searchCountry = country
+
+            'theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_by_CITY()"), "Web data fetched.")
+
+        End Sub
+
+        Private Sub locate_by_CODE(ByVal theCode As String)
+
+            ' Find City/State using ZIP/POSTAL code
+
+            If String.IsNullOrEmpty(theCode) Then
+                Exit Sub
+            End If
+
+            Dim x As Integer, y As Integer, z As Integer
+            Dim eCode As String = "", eDesc As String = ""
+            Dim postal As String = "", country As String = "", city As String = "", address As String = "", street As String = "", state As String = ""
+            Dim wc As WebClient = New WebClient
+            Dim url_US As String, url_CA As String
+            Dim html As String = ""
+
+            url_US = "http://geocoder.ca/?zip=" + theCode + "&geoit=xml&range=1"
+            url_CA = "http://geocoder.ca/?postal=" + theCode + "&geoit=xml&range=1"
+
+            Try
+                ' Try the US URL first
+                html = wc.DownloadString(url_US)
+                x = html.IndexOf("<error>")
+                If x >= 0 Then
+                    ' There was an error, try Canada URL
+                    html = wc.DownloadString(url_CA)
+                    x = html.IndexOf("<error>")
+                    If x >= 0 Then
+                        ' That failed also, we're done
+                        z = html.IndexOf("<code>")
+                        If z >= 0 And x >= 0 Then
+                            x = html.IndexOf("<code>")
+                            If x >= 0 Then
+                                y = html.IndexOf("</code>", x)
+                                eCode = html.Substring(x + 5, y - (x + 5))
+                            End If
+                            x = html.IndexOf("<description>")
+                            If x >= 0 Then
+                                y = html.IndexOf("</description>", x)
+                                eDesc = html.Substring(x + 12, y - (x + 12))
+                            End If
+                            ' An error was returned
+                            set_message(String.Format("GEO ERROR: {0}.", eCode))
+                            'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                            'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                            myNotification.Text = status_msg
+                            Exit Sub
+                        End If
+                    Else
+                        ' Seems that we're okay with the CANADA search
+                        country = "CA"
+                        ' "city>"
+                        x = html.IndexOf("city>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</", x)
+                            city = html.Substring(x + 5, y - (x + 5)).ToUpper
+                        End If
+                        x = html.IndexOf("prov>")
+                        If x >= 0 Then
+                            y = html.IndexOf("</", x)
+                            state = html.Substring(x + 5, y - (x + 5)).ToUpper
+                        End If
+                    End If
+                Else
+                    ' We should have a record for US
+                    country = "US"
+                    ' "city>"
+                    x = html.IndexOf("city>")
+                    If x >= 0 Then
+                        y = html.IndexOf("</", x)
+                        city = html.Substring(x + 5, y - (x + 5)).ToUpper
+                    End If
+                    x = html.IndexOf("state>")
+                    If x >= 0 Then
+                        y = html.IndexOf("</", x)
+                        state = html.Substring(x + 6, y - (x + 6)).ToUpper
+                    End If
+                End If
+            Catch ex As Exception
+                ' Problem fetching the URL
+                theHost.DebugMsg("OMDSFuelPrices - locate_by_CODE()", String.Format("Problem geolocating. Exception: {0}.", ex.Message))
+                set_message("Geolocating failed")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                myNotification.Text = status_msg
+            End Try
+
+            searchCity = city
+            searchState = state
+            searchCountry = country
+            searchZip = theCode
+
+            'theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_by_CODE()"), "Web data fetched.")
+
+        End Sub
+
+        Private Function locate_US() As Boolean
+
+            ' Finds our city/state/country/ZIP from GPS coordinates
+
+            Dim loc As OpenMobile.Location = OM.Host.CurrentLocation
+
+            ' Canadian Location
+            'myLatitude = "43.0842229"
+            'myLongitude = "-79.0915813"
+            ' US Location
+            'myLatitude = "43.084756"
+            'myLongitude = "-78.962663"
+            ' Gjovik Norway
+            'myLatitude = "60.8789"
+            'myLongitude = "10.5219"
+
+            If ((myLatitude <> "0") And (myLongitude <> "0")) Then
+
+                Try
+                    'theHost.CommandHandler.ExecuteCommand("OMGPS;GPS.Location.ReverseGeocode")
+                    theHost.CommandHandler.ExecuteCommand("OMGPS;GPS.Location.ReverseGeocode")
+                    loc = OM.Host.CurrentLocation
+                    If String.IsNullOrEmpty(loc.Zip) Or String.IsNullOrEmpty(loc.Country) Or String.IsNullOrEmpty(loc.City) Or String.IsNullOrEmpty(loc.State) Then
+                        set_message("Location not determined")
+                        'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                        'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                        myNotification.Text = status_msg
+                        Return False
+                    Else
+                        searchZip = loc.Zip
+                        searchCountry = loc.Country
+                        searchCity = loc.City
+                        searchState = loc.State
+                    End If
+                Catch ex As Exception
+                    set_message("Error - Internet Problem")
+                    'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                    'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                    myNotification.Text = status_msg
+                    Return False
+                End Try
+
+            End If
 
             Return True
 
         End Function
 
-        Private Sub locate_US()
-
-            Dim loc As OpenMobile.Location = OM.Host.CurrentLocation
-
-            myLatitude = loc.Latitude.ToString
-            myLongitude = loc.Longitude.ToString
-
-            ' for testing when I don't have a GPS
-            'If myLatitude = "0" Or myLongitude = "0" Then
-            'myLatitude = "43.0842229"
-            'myLongitude = "-79.0915813"
-            'End If
-
-            ' Sometimes internet connection is not detected before initialization is complete
-            'System.Threading.Thread.Sleep(5000)
-
-            If ((myLatitude <> "0") And (myLongitude <> "0")) Then
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_US()"), String.Format("System says:  {0}  {1}.", loc.Latitude, loc.Longitude))
-                If (theHost.InternetAccess) Then
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_US()"), "Finding ZIP using GPS...")
-                    'use geonames website
-                    Try
-                        Dim html As String = ""
-                        Dim wc As WebClient = New WebClient
-                        html = wc.DownloadString("http://ws.geonames.org/findNearbyPostalCodesJSON?formatted=true&lat=" + loc.Latitude.ToString() + "&lng=" + loc.Longitude.ToString())
-                        wc.Dispose()
-                        If html.Contains("postalCodes") Then
-                            html = html.Remove(0, html.IndexOf("postalCode") + 11)
-                            searchZip = html.Remove(0, html.IndexOf("postalCode") + 11)
-                            searchZip = searchZip.Remove(0, searchZip.IndexOf("""") + 1)
-                            searchZip = searchZip.Substring(0, searchZip.IndexOf(""""))
-                            searchCountry = html.Remove(0, html.IndexOf("countryCode") + 12)
-                            searchCountry = searchCountry.Remove(0, searchCountry.IndexOf("""") + 1)
-                            searchCountry = searchCountry.Substring(0, searchCountry.IndexOf(""""))
-                            searchCity = html.Remove(0, html.IndexOf("placeName") + 10)
-                            searchCity = searchCity.Remove(0, searchCity.IndexOf("""") + 1)
-                            searchCity = searchCity.Substring(0, searchCity.IndexOf(""""))
-                            strip_city()
-                            searchState = html.Remove(0, html.IndexOf("adminCode1") + 11)
-                            searchState = searchState.Remove(0, searchState.IndexOf("""") + 1)
-                            searchState = searchState.Substring(0, searchState.IndexOf(""""))
-                            theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_US()"), String.Format("Found: {0}, {1}, {2}, {3}", searchCity, searchState, searchCountry, searchZip))
-                        Else
-                            theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_US()"), "Could not validate.")
-                        End If
-
-                    Catch
-
-                    End Try
-                Else
-                    theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_US()"), "No Internet access.")
-                End If
-            Else
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - locate_US()"), "No GPS coordinates provided.")
-            End If
-
-        End Sub
-
-        Private Sub strip_city()
-
-            searchCity = searchCity.Replace(" Central", "")
-            searchCity = searchCity.Replace(" Southeast", "")
-
-            For x = Len(searchCity) To 0 Step -1
-
-            Next
-
-        End Sub
-
-        Private Function scrape_gasbuddy() As Object
+        Private Function scrape_gasbuddy() As Boolean
 
             Dim client As WebClient = New WebClient
+            Dim x As Integer = 0
+            Dim y As Integer = 0
             Dim data As String = ""
+            Dim baseAddress As String = ""
+            Dim URL_Grade(-1) As String ' Array of available fuel grades
+            Dim URL_Paths(-1) As String ' Array of grade URLs
+            Dim URL_Regular = ""        ' URL for regular fuel listings
+            Dim URL_Midgrade = ""       ' URL for mid-grade fuel listings
+            Dim URL_Premium = ""        ' URL for premium fuel listings
+            Dim URL_Diesel = ""         ' URL for diesel fuel listings
+
+            'theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), String.Format("Scraping for: {0}.", searchZip))
 
             Try
-                'theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), String.Format("Searching location: {0}.", zip))
-                data = client.DownloadString(searchParam)
+                If True Then
+                    'If (netConnection) Then
+                    'theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Requesting page...")
+                    ' We should work on a time-out for this in case the site is not responding
+                    data = client.DownloadString(searchParam)
+                Else
+                    ' No Internet
+                    set_message("Lost internet")
+                    theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Lost internet. Aborting scrape.")
+                    'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                    'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                    myNotification.Text = status_msg
+                    Return False
+                End If
 
             Catch ex As Exception
+                theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), String.Format("SearchParam: {0}.", searchParam))
                 theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), String.Format("Exception: {0}.", ex.Message))
+                set_message("Error fetching data.")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, status_msg))
+                myNotification.Text = status_msg
                 Return False
 
             End Try
 
-            ' Find the other fuel grade URLs <ul class="p_ft">
-            ' ctl00_Content_P_hlMidgrade
-            Dim x As Integer = data.IndexOf("ctl00_Content_P_hlMidgrade")
+            ' Pull the base URI for subsequent requests
+            x = data.IndexOf("ctl00_head_base"" href=""")
             If x < 0 Then
-                ' No URL found
-                Return False
+                ' We didn't find a base address
+                set_message("No results.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the base address.")
             End If
-
-            ' grab the URL
-            Dim y As Integer = data.IndexOf(""">", x)
-            Dim URL_Midgrade = data.Substring(x + 8, y - (x + 8))
-            'theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Regular: {0}", URL_Midgrade))
-
-            ' ctl00_Content_P_hlPremium then
-            x = data.IndexOf("ctl00_Content_P_hlPremium")
-            If x < 0 Then
-                ' No URL found
-            End If
-            ' grab the URL
             y = data.IndexOf(""">", x)
-            Dim URL_Premium = data.Substring(x + 8, y - (x + 8))
-            'theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Premium: {0}", URL_Premium))
-
-            ' ctl00_Content_P_hlDiesel
-            x = data.IndexOf("ctl00_Content_P_hlDiesel")
-            If x < 0 Then
-                ' No URL found
-            End If
-            ' grab the URL
-            y = data.IndexOf(""">", x)
-            Dim URL_Diesel = data.Substring(x + 8, y - (x + 8))
-            'theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Diesel: {0}", URL_Diesel))
-
-            ' Start loop for the fuel grade pages
+            baseAddress = data.Substring(x + 23, y - (x + 23))
 
             ' Find the start of the price table
             x = data.IndexOf("<div id=""pp_table"">")
             If x < 0 Then
                 ' Did not find what we need
-                'theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Did not find a data table")
+                set_message("No results.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Did not find a data table")
                 Return False
             End If
 
+            ' Find the other fuel grade URLs <ul class="p_ft">
+            ' Not currently saving this.  But we will when we save our datasource(s) as a list
+
+            ' ctl00_Content_P_hlRegular
+            ' Our initial scrape is always using regular so we really don't need the link
+            '  but I captured it anyway
+            x = data.IndexOf("ctl00_Content_P_hlRegular")
+            If x < 0 Then
+                ' No URL found
+                set_message("Unexpected format.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Data not in expected format."))
+                myNotification.Text = "Data not in expected format."
+            End If
+
+            ' grab the URL
+            y = data.IndexOf(""">", x)
+            If y >= 0 Then
+                URL_Regular = baseAddress & data.Substring(x + 33, y - (x + 33)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Regular"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Regular
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Regular: {0}", URL_Regular))
+            End If
+
+            ' ctl00_Content_P_hlMidgrade
+            x = data.IndexOf("ctl00_Content_P_hlMidgrade")
+            If x < 0 Then
+                ' No URL found
+                set_message("Unexpected format.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Data not in expected format."))
+                myNotification.Text = "Data not in expected format."
+            End If
+
+            ' grab the URL
+            y = data.IndexOf(""">", x)
+            If y >= 0 Then
+                URL_Midgrade = baseAddress & data.Substring(x + 34, y - (x + 34)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Midgrade"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Midgrade
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Midgrade: {0}", URL_Midgrade))
+            End If
+
+            ' ctl00_Content_P_hlPremium
+            x = data.IndexOf("ctl00_Content_P_hlPremium")
+            If x < 0 Then
+                ' No URL found
+                set_message("Unexpected format.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Data not in expected format."))
+                myNotification.Text = "Data not in expected format."
+            End If
+
+            ' grab the URL
+            y = data.IndexOf(""">", x)
+            If y >= 0 Then
+                URL_Premium = baseAddress & data.Substring(x + 33, y - (x + 33)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Premium"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Premium
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Premium: {0}", URL_Premium))
+            End If
+
+            ' ctl00_Content_P_hlDiesel
+            x = data.IndexOf("ctl00_Content_P_hlDiesel")
+            If x < 0 Then
+                ' No URL found
+                set_message("Unexpected format.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
+                'theHost.UIHandler.RemoveAllMyNotifications(Me)
+                'theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Data not in expected format."))
+                myNotification.Text = "Data not in expected format."
+            End If
+
+            ' grab the URL
+            y = data.IndexOf(""">", x)
+            If y >= 0 Then
+                URL_Diesel = baseAddress & data.Substring(x + 32, y - (x + 32)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Diesel"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Diesel
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Diesel: {0}", URL_Diesel))
+            End If
+
+            ' If count of URL_Grade = 0 then there was no fuel grades found
+            ' (although we should always find regular or we wouldn't have found anything)
+            If URL_Grade.Length < 0 Then
+                set_message("No prices found")
+                theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Price.List", Nothing)
+                Return False
+            End If
+
+            ' Start loop for the fuel grade pages
+
             Dim row_counter As Integer = 0
             Dim z As Integer = 0
+            Dim a As Integer = 0
+            Dim b As Integer = 0
+            Dim c As Integer = 0
             Dim w As String = ""
             Dim price As String = ""
+            Dim dprice As Double = 0
             Dim name As String = ""
             Dim address As String = ""
             Dim area As String = ""
-            Dim dt As String = ""
-            Dim grade As String = "Regular"
+            Dim timeStamp As String = ""
             Dim record As String = ""
             Dim result As Boolean = False
-            ReDim PriceList(5, 0)
+            ReDim PriceList(6, 0)
 
-            Do While True
+            y = 0
 
-                ' Set grade here
+            ' Create the higher level dictionary
+            Dim Grades As New Dictionary(Of String, Dictionary(Of Integer, Dictionary(Of String, String)))
+
+            For v = 0 To URL_Grade.GetUpperBound(0)
+
+                v = v
+                row_counter = 0
+
+                ' The linking level dictionary
+                Dim Results As New Dictionary(Of Integer, Dictionary(Of String, String))
 
                 ' Loop here
                 Do While True
+
                     ' Find the start of row entry
                     w = "<tr id=""rrlow_" & row_counter.ToString
                     x = data.IndexOf(w, x)
                     If x < 0 Then
                         ' No Gas data or table not found
+                        theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("Data not found for {0}.", URL_Grade(v)))
                         Exit Do
                     End If
-                    'theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("Found record: {0}", w))
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("Found record: {0}", w))
                     ' Find the start of the price line
                     y = data.IndexOf("<div class=""sp_p", x)
                     ' Find the end of the price line
@@ -465,13 +944,27 @@ Namespace OMDSFuelPrices
                     'theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("Found price: {0}", price))
 
                     x = data.IndexOf("<dl class=""address"">", z)
-                    x = data.IndexOf("index.aspx"">", x)
-                    z = data.IndexOf("</a>", x)
-                    name = data.Substring(x + 12, z - (x + 12))
-                    name = name.Replace("&amp;", "&")
-                    name = name.Replace("'", "")
+                    a = data.IndexOf("<dt>", x)
+                    b = data.IndexOf("</dt>", a)
+                    w = data.Substring(a + 4, b - (a + 4))
+                    c = w.IndexOf("index.aspx"">", 0)
+                    ' Search w to see if a name or a logo
+                    If c < 0 Then
+                        ' we should have a logo (no name found)
+                        a = w.IndexOf("src=""", 0)
+                        b = w.IndexOf("""", a + 5)
+                        name = w.Substring(a + 5, b - (a + 5))
+                        'name = "unknown"
+                    Else
+                        ' we should have a name, fetch it
+                        a = w.IndexOf(""">", 0)
+                        b = w.IndexOf("</a>", a + 2)
+                        name = w.Substring(a + 2, b - (a + 2))
+                        name = name.Replace("&amp;", "&")
+                        name = name.Replace("'", "")
+                    End If
 
-                    x = data.IndexOf("<dd>", z)
+                    x = data.IndexOf("<dd>", x)
                     z = data.IndexOf("</dd>", x)
                     address = data.Substring(x + 4, z - (x + 4))
                     address = address.Replace("&amp;", "&")
@@ -482,22 +975,38 @@ Namespace OMDSFuelPrices
 
                     x = data.IndexOf("title=""", z)
                     z = data.IndexOf(""">", x)
-                    dt = data.Substring(x + 7, z - (x + 7))
+                    timeStamp = data.Substring(x + 7, z - (x + 7))
 
-                    ReDim Preserve PriceList(5, row_counter)
-                    PriceList(0, row_counter) = grade
-                    PriceList(1, row_counter) = price
-                    PriceList(2, row_counter) = name
-                    PriceList(3, row_counter) = address
-                    PriceList(4, row_counter) = area
-                    PriceList(5, row_counter) = dt
+                    ' This array will ultimately be the datasource
+                    '  (but probably as a list or something
 
-                    record = "|" & grade & "|" & price & "|" & name & "|" & address & "|" & area & "|" & dt & "|"
+                    dprice = Double.Parse(price, System.Globalization.CultureInfo.InvariantCulture) / searchFormat
+                    record = "|" & URL_Grade(v) & "|" & dprice & "|" & name & "|" & address & "|" & area & "|" & timeStamp & "|" & searchDecimal & "|"
 
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", record)
+                    ' Empty the innermost dictionary
+                    Dim GasPrices As New Dictionary(Of String, String)
 
-                    result = Push_Data_Source(record, row_counter)
+                    'GasPrices.Add(row_counter, record)
+                    GasPrices.Add("Grade", URL_Grade(v))
+                    GasPrices.Add("Price", dprice.ToString)
+                    GasPrices.Add("Name", name)
+                    GasPrices.Add("Address", address)
+                    GasPrices.Add("Area", area)
+                    GasPrices.Add("TimeStamp", timeStamp)
+                    GasPrices.Add("Decimal", searchDecimal)
 
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("Found: {0}|{1}|{2}|{3}|{4}|{5}|{6}", _
+                                                                                        GasPrices("Grade"), _
+                                                                                         GasPrices("Price"), _
+                                                                                         GasPrices("Name"), _
+                                                                                         GasPrices("Address"), _
+                                                                                         GasPrices("Area"), _
+                                                                                         GasPrices("TimeStamp"), _
+                                                                                         GasPrices("Decimal")))
+
+                    Results.Add(row_counter, GasPrices)
+
+                    ' Something from here to the top of the loop we lose data.
                     row_counter += 1
 
                     If row_counter > maxRecords - 1 Then
@@ -506,166 +1015,43 @@ Namespace OMDSFuelPrices
 
                     x = z
 
-                Loop
+                Loop ' Loop through results for grade
 
-                theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Price.Count", row_counter)
+                If Results.Count = 0 Then
+                    Exit For
+                End If
 
-                Exit Do
+                Grades.Add(URL_Grade(v), Results)
 
-                ' Call for the next grade data
+                ' Fetch the page for the next grade
 
-                ' loop around to process the next fuel grade page
+                If v < URL_Grade.GetUpperBound(0) Then
 
-            Loop
+                    Try
+                        theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Requesting page: " & URL_Paths(v + 1))
+                        data = client.DownloadString(URL_Paths(v + 1))
+                    Catch
+                        set_message("Lost internet?")
+                        theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Lost internet mid scrape.")
+                        Return False
+                    End Try
 
-            Return True
+                End If
 
-        End Function
+                x = 0
 
-        Private Function Push_Data_Source(ByVal record As String, ByVal index As Integer) As Boolean
+            Next ' Loop through grades
 
-            ' This works in OMLCD so why not here?
-            '  Now added pluginName to the parameter
-            'Dim sourceGroup As String = Me.pluginName & ";Fuel.Prices"
-
-            Dim sourceName As String = Me.pluginName & ";Fuel.Prices." & index.ToString
-            Dim sourceDesc As String = "Fuel Price #" & index.ToString
-            Dim sourceValue As String = ""
-
-            Try
-                sourceValue = theHost.DataHandler.GetDataSource(sourceName).Value
-                theHost.DataHandler.PushDataSourceValue(sourceName, record)
-            Catch ex As Exception
-                theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Prices", index.ToString, DataSource.DataTypes.text, sourceDesc, record))
-                theHost.DataHandler.PushDataSourceValue(sourceName, record)
-            End Try
-
-            'theHost.DebugMsg(String.Format("OMDSFuelPrices - Push_Data_Source()"), record)
-
-            Return True
-
-        End Function
-
-        Private Function scrape_motortrend(ByVal zip As String) As Object
-
-            Dim client As WebClient = New WebClient
-            Dim data As String = ""
-            Try
-
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_mototrend()"), String.Format("Searching location: {0}.", zip))
-                data = client.DownloadString("http://www.motortrend.com/gas_prices/34/" + zip + "/index.html")
-
-            Catch ex As Exception
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("Exception: {0}.", ex.Message))
-                Return False
-            End Try
-
-            Dim x As Integer = data.IndexOf("w800 brdr1 gp_data_tbl")
-            If x < 0 Then
-                Return False
+            If Grades.Count > 0 Then
+                theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Price.List", Grades)
+            Else
+                set_message("No prices")
+                theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Price.List", Nothing)
             End If
 
-            data = data.Substring(x)
-            x = data.IndexOf("b clr20'>") + 9
-            Dim xend As Integer = data.IndexOf("</table>")
-            Dim y, z As Integer
-
-            Dim stations As GasStations = New GasStations
-
-            If Not stations.beginWrite() Then
-                Return False
-            End If
-
-            Dim station As GasStations.gasStation = New GasStations.gasStation
-
-            Do While x >= 0
-
-                station.postalCode = zip
-                y = data.IndexOf("<", x)
-                station.name = data.Substring(x, y - x).Trim()
-                x = data.IndexOf("pad brdr1_b"">", x) + 13
-                If (x = 12) Then
-                    Return True
-                End If
-                y = data.IndexOf("</", x)
-                station.location = data.Substring(x, y - x).Trim().Replace("<br>", "\n")
-                y = data.IndexOf("'lft sub' >", x) + 11
-                z = data.IndexOf("pad brdr1_b"">", x) + 13
-                If ((y > z) Or (y = 10)) Then
-                    x = z
-                Else
-                    x = y
-                End If
-                y = data.IndexOf("<", x)
-                station.priceRegular = data.Substring(x, y - x).Trim()
-                y = data.IndexOf("'lft sub' >", x) + 11
-                z = data.IndexOf("pad brdr1_b"">", x) + 13
-                If ((y > z) Or (y = 10)) Then
-                    x = z
-                Else
-                    x = y
-                End If
-                y = data.IndexOf("<", x)
-                station.pricePlus = data.Substring(x, y - x).Trim()
-                y = data.IndexOf("'lft sub' >", x) + 11
-                z = data.IndexOf("pad brdr1_b"">", x) + 13
-                If ((y > z) Or (y = 10)) Then
-                    x = z
-                Else
-                    x = y
-                End If
-                y = data.IndexOf("<", x)
-                station.pricePremium = data.Substring(x, y - x).Trim()
-                y = data.IndexOf("'lft sub' >", x) + 11
-                z = data.IndexOf("pad brdr1_b"">", x) + 13
-                If ((y > z) Or (y = 10)) Then
-                    x = z
-                Else
-                    x = y
-                End If
-                y = data.IndexOf("<", x)
-                station.priceDiesel = data.Substring(x, y - x)
-                station.dateAdded = DateTime.Now
-                If (station.priceRegular = "N/A") Then
-                    station.priceRegular = ""
-                End If
-                If (station.pricePlus = "N/A") Then
-                    station.pricePlus = ""
-                End If
-                If (station.pricePremium = "N/A") Then
-                    station.pricePremium = ""
-                End If
-                If (station.priceDiesel = "N/A") Then
-                    station.priceDiesel = ""
-                End If
-
-                stations.writeNext(station)
-
-                theHost.DebugMsg(String.Format("OMDSFuelPrices - getInfo()"), String.Format("Found: {0} {1} {2} {3} {4}.", station.name, station.location, station.priceRegular, station.pricePremium, station.priceDiesel))
-
-                x = data.IndexOf("b clr20'>", x) + 9
-
-            Loop
-
             Return True
 
         End Function
-
-        Public Function dataSource_Get_Count()
-
-            Dim ret As Integer
-            ret = PriceList.GetLength(1) - 1
-            Return ret
-
-        End Function
-
-        Private Sub m_Refresh_tmr_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_Refresh_tmr.Elapsed
-
-            ' do a data refresh
-            theHost.DebugMsg("OMDSFuelPrices - m_Refresh_tmr_Elapsed()", "Timer elapsed.  Time to scrape.")
-            refreshData()
-
-        End Sub
 
         Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
 
@@ -674,12 +1060,45 @@ Namespace OMDSFuelPrices
             ' Create a handler for settings changes
             AddHandler mySettings.OnSettingChanged, AddressOf mySettings_OnSettingChanged
 
+            Dim cOptions2 As List(Of String) = New List(Of String)
+            cOptions2.Add("4")
+            cOptions2.Add("8")
+            cOptions2.Add("12")
+            cOptions2.Add("24")
+            cOptions2.Add("36")
+            Dim settingMaxAge = New Setting(SettingTypes.MultiChoice, "maxAge", "Max Age", "Max age of prices (hours)", cOptions2, cOptions2)
+            settingMaxAge.Value = StoredData.Get(Me, "max.Age")
+            'mySettings.Add(settingMaxAge)
+
+            Dim cOptions3 As List(Of String) = New List(Of String)
+            cOptions3.Add("5")
+            cOptions3.Add("10")
+            cOptions3.Add("20")
+            cOptions3.Add("25")
+            cOptions3.Add("30")
+            Dim settingMaxRecords = New Setting(SettingTypes.MultiChoice, "maxRecords", "Max Records", "Maximum results to fetch", cOptions3, cOptions3)
+            settingMaxRecords.Value = StoredData.Get(Me, "max.Records")
+            mySettings.Add(settingMaxRecords)
+
+            Dim cOptions4 As List(Of String) = New List(Of String)
+            cOptions4.Add("CA")
+            cOptions4.Add("US")
+            Dim settingHomeCountry = New Setting(SettingTypes.MultiChoice, "homeCountry", "Home Country", "Set Home Country Code", cOptions4, cOptions4)
+            settingHomeCountry.Value = StoredData.Get(Me, "home.Country")
+            mySettings.Add(settingHomeCountry)
+
+            Dim settingHomeCode = New Setting(SettingTypes.Text, "home.Code", "Home Zip/Postal", "Set Home Zip / Postal Code", OpenMobile.helperFunctions.StoredData.Get(Me, "homeCode"))
+            mySettings.Add(settingHomeCode)
+
             Return mySettings
 
         End Function
 
         Private Sub mySettings_OnSettingChanged(ByVal screen As Integer, ByVal settings As Setting)
             ' Setting was changed, update database
+
+            OpenMobile.helperFunctions.StoredData.Set(Me, settings.Name, settings.Value)
+
         End Sub
 
     End Class

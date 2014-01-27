@@ -306,15 +306,14 @@ namespace OpenMobile
 
                     case "Location.Home.UserEntered":
                         {   // Try to get a location based on the info the user entered
-                            if (Host.InternetAccess)
-                            {   // Use webservice to get the info
-                                BuiltInComponents.SystemSettings.Location_Home = helperFunctions.General.lookupLocation(setting.Value);
+                            Location newLoc;
+                            if (Location.TryParse(setting.Value, out newLoc))
+                            {   // We where able to parse it, use it directly
+                                BuiltInComponents.SystemSettings.Location_Home = newLoc;
                             }
                             else
-                            {   // Parse info directly
-                                Location newLoc;
-                                if (Location.TryParse(setting.Value, out newLoc))
-                                    BuiltInComponents.SystemSettings.Location_Home = helperFunctions.General.lookupLocation(setting.Value);
+                            {   // No parsing was possible, use it as a keyword and hope that some plugin catches it..
+                                BuiltInComponents.SystemSettings.Location_Home = Location.FromKeyword(setting.Value);
                             }
                         }
                         break;

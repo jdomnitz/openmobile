@@ -44,8 +44,24 @@ namespace ControlDemo
             //OMImage imgNoCover = new OMImage("imgNoCover", 0, 100, new imageItem(MediaLoader.MissingCoverImage));
             //p.addControl(imgNoCover);
 
-            OMImage imgIconTest = new OMImage("imgIconTest", 0, 100, 200, 200, OM.Host.getSkinImage("Icons|Icon-Glass-Gas"));
+            OM.Host.LoadSkinSprite("maneuvers-2x", 
+                new Sprite("TurnSharpLeft", 0, 2, 38, 30),
+                new Sprite("TurnLeft", 0, 36, 38, 27),
+                new Sprite("UTurnRight", 0, 71, 38, 30)
+                );
+            OMImage imgIconTest = new OMImage("imgSpriteTest", 0, 100, OM.Host.getSkinImage("maneuvers-2x", "TurnSharpLeft"));
             p.addControl(imgIconTest);
+            p.addControl(new OMImage("imgSpriteTest2", 0, 0, OM.Host.getSkinImage("maneuvers-2x", "TurnLeft")), ControlDirections.Down);
+            p.addControl(new OMImage("imgSpriteTest3", 0, 0, OM.Host.getSkinImage("maneuvers-2x", "UTurnRight")), ControlDirections.Down);
+
+            OMImage img9PatchProgressbar1 = new OMImage("img9PatchProgressbar1", 0, 0, OM.Host.getSkinImage("9Patch|progress_bar_fill_bg.9", new Size(250, 36)));
+            p.addControl(img9PatchProgressbar1, ControlDirections.Down);
+            OMImage img9PatchProgressbar2 = new OMImage("img9PatchProgressbar2", img9PatchProgressbar1.Left + 2, img9PatchProgressbar1.Top + 2, OM.Host.getSkinImage("9Patch|red_progress_bar_fill.9", new Size(img9PatchProgressbar1.Width - 40, img9PatchProgressbar1.Height - 4)));
+            p.addControl(img9PatchProgressbar2);
+
+            p.addControl(new OMImage("img9PatchTest", 0, 0, OM.Host.getSkinImage("9Patch|box_launcher_top_normal.9", new Size(150, 90))), ControlDirections.Down);
+            p.addControl(new OMImage("img9PatchTest3", 0, 0, OM.Host.getSkinImage("9Patch|box_launcher_top_normal.9", new Size(250, 90))), ControlDirections.Down);
+            p.addControl(new OMImage("img9PatchTest4", 0, 0, OM.Host.getSkinImage("9Patch|box_launcher_top_normal.9", new Size(250, 60))), ControlDirections.Down);
 
             OMImage imgBackground = new OMImage("imgBackground", 330, 100, OM.Host.getSkinImage("OMIconBlack_Transparent"));
             imgBackground.BackgroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;

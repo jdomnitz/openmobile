@@ -64,7 +64,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// Data source
     /// </summary>
-    public class DataSource : DataNameBase
+    public class DataSource : DataNameBase, ICloneable
     {
         /// <summary>
         /// Event is raised when the data in the datasource changes
@@ -141,22 +141,22 @@ namespace OpenMobile.Data
 
         #region Properties
 
-        /// <summary>
-        /// Get's the screen number from this datasource (if existent, if not returns null)
-        /// </summary>
-        public int? Screen
-        {
-            get
-            {
-                if (this._NameLevel1.ToUpper().Contains("SCREEN"))
-                {
-                    int screen = 0;
-                    if (int.TryParse(_NameLevel1.Substring(_NameLevel1.ToUpper().IndexOf("SCREEN")+6,1), out screen))
-                        return screen;
-                }
-                return null;
-            }
-        }
+        ///// <summary>
+        ///// Get's the screen number from this datasource (if existent, if not returns null)
+        ///// </summary>
+        //public int? Screen
+        //{
+        //    get
+        //    {
+        //        if (this._NameLevel1.ToUpper().Contains("SCREEN"))
+        //        {
+        //            int screen = 0;
+        //            if (int.TryParse(_NameLevel1.Substring(_NameLevel1.ToUpper().IndexOf("SCREEN")+6,1), out screen))
+        //                return screen;
+        //        }
+        //        return null;
+        //    }
+        //}
 
         /// <summary>
         /// Does this source provide valid data?
@@ -188,19 +188,19 @@ namespace OpenMobile.Data
             }
         }
 
-        /// <summary>
-        /// The full name of this DataSource (Provider;Level1.Level2.Level3)
-        /// </summary>
-        public string FullName
-        {
-            get
-            {
-                if (String.IsNullOrEmpty(_NameLevel3))
-                    return String.Format("{0}{1}{2}", _NameLevel1, Separator, _NameLevel2);
-                else
-                    return String.Format("{0}{1}{2}{3}{4}", _NameLevel1, Separator, _NameLevel2, Separator, _NameLevel3);
-            }
-        }
+        ///// <summary>
+        ///// The full name of this DataSource (Provider;Level1.Level2.Level3)
+        ///// </summary>
+        //public string FullName
+        //{
+        //    get
+        //    {
+        //        if (String.IsNullOrEmpty(_NameLevel3))
+        //            return String.Format("{0}{1}{2}", _NameLevel1, Separator, _NameLevel2);
+        //        else
+        //            return String.Format("{0}{1}{2}{3}{4}", _NameLevel1, Separator, _NameLevel2, Separator, _NameLevel3);
+        //    }
+        //}
 
         /// <summary>
         /// The current value for this DataSource
@@ -488,6 +488,19 @@ namespace OpenMobile.Data
         }
         private DateTime _Timestamp;
 
+        public override string NameLevel1
+        {
+            get
+            {
+                return base.NameLevel1;
+            }
+            internal set
+            {
+                base.NameLevel1 = value;
+                Init();
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -511,8 +524,21 @@ namespace OpenMobile.Data
         public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description)
             : this(provider, nameLevel1, nameLevel2, nameLevel3, 0, dataType, null, description)
         {
+            Init();
         }
-
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="dataType"></param>
+        /// <param name="description"></param>
+        public DataSource(IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description)
+            : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, dataType, description)
+        {
+        }
         /// <summary>
         /// Creates a new DataSource object with an initial value 
         /// </summary>
@@ -528,6 +554,21 @@ namespace OpenMobile.Data
         {
             _Value = initialValue;
             _Valid = true;
+            Init();
+        }
+        /// <summary>
+        /// Creates a new DataSource object with an initial value 
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="dataType"></param>
+        /// <param name="description"></param>
+        /// <param name="initialValue"></param>
+        public DataSource(IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description, object initialValue)
+            : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, dataType, description, initialValue)
+        {
         }
 
         /// <summary>
@@ -552,8 +593,23 @@ namespace OpenMobile.Data
             this._AccessType =  AccessTypes.Read;
             this._DataType = dataType;
             this._Description = description;
+            Init();
         }
 
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="pollRate"></param>
+        /// <param name="dataType"></param>
+        /// <param name="getter"></param>
+        public DataSource(IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, string description)
+            : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, description)
+        {
+        }
         /// <summary>
         /// Creates a new DataSource object
         /// </summary>
@@ -576,139 +632,33 @@ namespace OpenMobile.Data
             this._AccessType = AccessTypes.Both;
             this._DataType = dataType;
             this._Description = description;
+            Init();
         }
-
-
-        ///// <summary>
-        ///// Creates a new DataSource object
-        ///// </summary>
-        ///// <param name="provider"></param>
-        ///// <param name="nameLevel1"></param>
-        ///// <param name="nameLevel2"></param>
-        ///// <param name="nameLevel3"></param>
-        ///// <param name="pollRate"></param>
-        ///// <param name="accessType"></param>
-        ///// <param name="dataType"></param>
-        ///// <param name="setter"></param>
-        ///// <param name="getter"></param>
-        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, AccessTypes accessType, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
-        //{
-        //    this._Provider = provider;
-        //    this._NameLevel1 = nameLevel1;
-        //    this._NameLevel2 = nameLevel2;
-        //    this._NameLevel3 = nameLevel3;
-        //    this._PollRate = pollRate;
-        //    this._Setter = setter;
-        //    this._Getter = getter;
-        //    this._AccessType = accessType;
-        //    this._DataType = dataType;
-        //}
-
-        ///// <summary>
-        ///// Creates a new DataSource object
-        ///// </summary>
-        ///// <param name="provider"></param>
-        ///// <param name="nameLevel1"></param>
-        ///// <param name="nameLevel2"></param>
-        ///// <param name="nameLevel3"></param>
-        ///// <param name="pollRate"></param>
-        ///// <param name="accessType"></param>
-        ///// <param name="dataType"></param>
-        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType)
-        //{
-        //    this._Provider = provider;
-        //    this._NameLevel1 = nameLevel1;
-        //    this._NameLevel2 = nameLevel2;
-        //    this._NameLevel3 = nameLevel3;
-        //    this._PollRate = 0;
-        //    this._Setter = null;
-        //    this._Getter = null;
-        //    this._AccessType = AccessTypes.Read;
-        //    this._DataType = dataType;
-        //}
-
-        ///// <summary>
-        ///// Creates a new DataSource object
-        ///// </summary>
-        ///// <param name="provider"></param>
-        ///// <param name="nameLevel1"></param>
-        ///// <param name="nameLevel2"></param>
-        ///// <param name="nameLevel3"></param>
-        ///// <param name="pollRate"></param>
-        ///// <param name="dataType"></param>
-        ///// <param name="setter"></param>
-        ///// <param name="getter"></param>
-        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
-        //{
-        //    this._Provider = provider;
-        //    this._NameLevel1 = nameLevel1;
-        //    this._NameLevel2 = nameLevel2;
-        //    this._NameLevel3 = nameLevel3;
-        //    this._PollRate = pollRate;
-        //    this._Setter = setter;
-        //    this._Getter = getter;
-        //    this._DataType = dataType;
-        //    this._AccessType = AccessTypes.Read;
-        //}
-        ///// <summary>
-        ///// Creates a new DataSource object
-        ///// </summary>
-        ///// <param name="provider"></param>
-        ///// <param name="nameLevel1"></param>
-        ///// <param name="nameLevel2"></param>
-        ///// <param name="nameLevel3"></param>
-        ///// <param name="pollRate"></param>
-        ///// <param name="dataType"></param>
-        ///// <param name="setter"></param>
-        ///// <param name="getter"></param>
-        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceSetDelegate setter, DataSourceGetDelegate getter, out DataSourceManualUpdateDelegate manual)
-        //    : this(provider, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, setter, getter)
-        //{
-        //    manual = new DataSourceManualUpdateDelegate(manualSetterMethod);
-        //}
-        ///// <summary>
-        ///// Creates a new DataSource object
-        ///// </summary>
-        ///// <param name="provider"></param>
-        ///// <param name="nameLevel1"></param>
-        ///// <param name="nameLevel2"></param>
-        ///// <param name="nameLevel3"></param>
-        ///// <param name="pollRate"></param>
-        ///// <param name="setter"></param>
-        ///// <param name="getter"></param>
-        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
-        //{
-        //    this._Provider = provider;
-        //    this._NameLevel1 = nameLevel1;
-        //    this._NameLevel2 = nameLevel2;
-        //    this._NameLevel3 = nameLevel3;
-        //    this._PollRate = pollRate;
-        //    this._Setter = setter;
-        //    this._Getter = getter;
-        //    this._DataType = DataTypes.raw;
-        //    this._AccessType = AccessTypes.Read;
-        //}
-        ///// <summary>
-        ///// Creates a new DataSource object
-        ///// </summary>
-        ///// <param name="provider"></param>
-        ///// <param name="nameLevel1"></param>
-        ///// <param name="nameLevel2"></param>
-        ///// <param name="nameLevel3"></param>
-        ///// <param name="setter"></param>
-        ///// <param name="getter"></param>
-        //public DataSource(string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataSourceSetDelegate setter, DataSourceGetDelegate getter)
-        //{
-        //    this._Provider = provider;
-        //    this._NameLevel1 = nameLevel1;
-        //    this._NameLevel2 = nameLevel2;
-        //    this._NameLevel3 = nameLevel3;
-        //    this._PollRate = 0;
-        //    this._Setter = setter;
-        //    this._Getter = getter;
-        //    this._DataType = DataTypes.raw;
-        //    this._AccessType = AccessTypes.Read;
-        //}
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="pollRate"></param>
+        /// <param name="dataType"></param>
+        /// <param name="getter"></param>
+        /// <param name="setter"></param>
+        /// <param name="description"></param>
+        public DataSource(IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, DataSourceSetDelegate setter, string description)
+            : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, setter, description)
+        {
+        }
+        private void Init()
+        {
+            //if (this._NameLevel1.ToUpper().Contains("SCREEN"))
+            //{
+            //    int screen = 0;
+            //    if (int.TryParse(_NameLevel1.Substring(_NameLevel1.ToUpper().IndexOf("SCREEN") + 6, 1), out screen))
+            //        base.Screen = screen;
+            //}
+        }
 
         #endregion
 
@@ -993,5 +943,14 @@ namespace OpenMobile.Data
         }
 
         #endregion
+
+        /// <summary>
+        /// Clones this datasource
+        /// </summary>
+        /// <returns></returns>
+        object ICloneable.Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }

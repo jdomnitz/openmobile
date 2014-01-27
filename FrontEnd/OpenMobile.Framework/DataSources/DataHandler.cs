@@ -83,6 +83,26 @@ namespace OpenMobile.Data
         }
 
         /// <summary>
+        /// Get's or set's the value of a datasource.
+        /// NB! When setting a datasource value the full name with provider must be used
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public object this[string name]
+        {
+            get
+            {
+                object value;
+                GetDataSourceValue(name, null, out value);
+                return value;
+            }
+            set
+            {
+                PushDataSourceValue(name, value, true);
+            }
+        }
+
+        /// <summary>
         /// The polling engine for datasources
         /// </summary>
         private void PollEngine()
@@ -128,6 +148,44 @@ namespace OpenMobile.Data
                 }
 	        }
             
+        }
+
+        /// <summary>
+        /// Adds a new command provider
+        /// </summary>
+        /// <param name="command"></param>
+        public void AddDataSource(bool screenSpecific, DataSource dataSource)
+        {
+            if (!screenSpecific)
+                AddDataSource(dataSource);
+            else
+            {
+                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                {
+                    DataSource specificSource = (DataSource)((ICloneable)dataSource).Clone();
+                    specificSource.Screen = i;
+                    AddDataSource(specificSource);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds a new command provider
+        /// </summary>
+        /// <param name="command"></param>
+        public void AddDataSource(bool screenSpecific, DataSource dataSource, object initialValue)
+        {
+            if (!screenSpecific)
+                AddDataSource(dataSource, initialValue);
+            else
+            {
+                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                {
+                    DataSource specificSource = (DataSource)((ICloneable)dataSource).Clone();
+                    specificSource.Screen = i;
+                    AddDataSource(specificSource, initialValue);
+                }
+            }
         }
 
         /// <summary>
@@ -246,7 +304,19 @@ namespace OpenMobile.Data
             return dataSource;
         }
 
-
+        /// <summary>
+        /// Gets a datasource and supports sending parameters along in the request
+        /// <para>Name can be part of a datasources name or a full datasource name WITHOUT a provider (example: Zone.Volume)</para>
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool GetDataSourceValue(int screen, string name, object[] param, out object value)
+        {
+            return GetDataSourceValue(String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name), param, out value);
+        }
         /// <summary>
         /// Gets a datasource and supports sending parameters along in the request
         /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
@@ -274,6 +344,36 @@ namespace OpenMobile.Data
         /// <para>Update events will still be sent to anyone subscribing to the data</para>
         /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="provider"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="forcedUpdate">Set to true to force an update of the datasource regardless of the actual value has changed or not</param>
+        /// <returns></returns>
+        public bool PushDataSourceValue(int screen, string provider, string name, object value, bool forcedUpdate = false)
+        {
+            return PushDataSourceValue(String.Format("{0};{1}.{2}", provider, DataNameBase.GetScreenString(screen), name), value, forcedUpdate);
+        }
+        /// <summary>
+        /// Pushes a value to a datasource without sending the value back to the source of the datasource (only if new value differs from the current one)
+        /// <para>Update events will still be sent to anyone subscribing to the data</para>
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="provider"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="forcedUpdate">Set to true to force an update of the datasource regardless of the actual value has changed or not</param>
+        /// <returns></returns>
+        public bool PushDataSourceValue(int screen, OpenMobile.Plugin.IBasePlugin provider, string name, object value, bool forcedUpdate = false)
+        {
+            return PushDataSourceValue(String.Format("{0};{1}.{2}", provider.pluginName, DataNameBase.GetScreenString(screen), name), value, forcedUpdate);
+        }
+        /// <summary>
+        /// Pushes a value to a datasource without sending the value back to the source of the datasource (only if new value differs from the current one)
+        /// <para>Update events will still be sent to anyone subscribing to the data</para>
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary>
         /// <param name="provider"></param>
         /// <param name="name"></param>
         /// <param name="value"></param>
@@ -282,6 +382,21 @@ namespace OpenMobile.Data
         public bool PushDataSourceValue(string provider, string name, object value, bool forcedUpdate = false)
         {
             return PushDataSourceValue(String.Format("{0};{1}", provider, name), value, forcedUpdate);
+        }
+
+        /// <summary>
+        /// Pushes a value to a datasource without sending the value back to the source of the datasource (only if new value differs from the current one)
+        /// <para>Update events will still be sent to anyone subscribing to the data</para>
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="forcedUpdate">Set to true to force an update of the datasource regardless of the actual value has changed or not</param>
+        /// <returns></returns>
+        public bool PushDataSourceValue(OpenMobile.Plugin.IBasePlugin provider, string name, object value, bool forcedUpdate = false)
+        {
+            return PushDataSourceValue(String.Format("{0};{1}", provider.pluginName, name), value, forcedUpdate);
         }
 
         /// <summary>
@@ -325,7 +440,19 @@ namespace OpenMobile.Data
             // Check for special dataref of screen present 
             if (name.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
             {   // Present, replace with screen reference
-                name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, screen.ToString());
+                if (name.StartsWith(OpenMobile.Data.DataSource.DataTag_Screen))
+                {
+                    if (name.Substring(OpenMobile.Data.DataSource.DataTag_Screen.Length + 1, 1).Equals(".")) 
+                        name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, DataNameBase.GetScreenString(screen));
+                    else
+                        name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, String.Format("{0}.", DataNameBase.GetScreenString(screen)));
+                }
+                else
+                    name = name.Replace(OpenMobile.Data.DataSource.DataTag_Screen, screen.ToString());
+            }
+            else
+            {   // Add screen tag in front
+                name = String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name);
             }
 
             return SubscribeToDataSource_Internal(name, onDataSourceChanged, true);
@@ -352,10 +479,28 @@ namespace OpenMobile.Data
             DataSource dataSource = GetDataSource_Internal(name, true);
             if (dataSource == null)
             {                
-                // Add this item to the subscription queue
-                if (UseQueue)
-                    SubscriptionCache_Add(name, onDataSourceChanged);
-                return false;
+                // Look for multiscreen datasource
+                bool multiScreen = false;
+                for (int i = 0; i < OM.Host.ScreenCount; i++)
+                {
+                    string tmpName = String.Format("{0}.{1}", DataNameBase.GetScreenString(i), name);
+                    dataSource = GetDataSource_Internal(tmpName, false);
+                    if (dataSource != null)
+                    {
+                        dataSource.OnDataSourceChanged += onDataSourceChanged;
+                        multiScreen = true;
+                    }
+                }
+                if (multiScreen)
+                    return true;
+
+                if (dataSource == null)
+                {
+                    // Add this item to the subscription queue
+                    if (UseQueue)
+                        SubscriptionCache_Add(name, onDataSourceChanged);
+                    return false;
+                }
             }
 
             dataSource.OnDataSourceChanged += onDataSourceChanged;

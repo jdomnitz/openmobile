@@ -42,7 +42,26 @@ namespace OpenMobile
         private List<Command> _Commands = new List<Command>();
 
         /// <summary>
-        /// Adds a new dataprovider
+        /// Adds a new command provider
+        /// </summary>
+        /// <param name="command"></param>
+        public void AddCommand(bool screenSpecific, Command command)
+        {
+            if (!screenSpecific)
+                AddCommand(command);
+            else
+            {
+                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                {
+                    Command specificCommand = (Command)((ICloneable)command).Clone();
+                    specificCommand.Screen = i;
+                    AddCommand(specificCommand);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds a new command provider
         /// </summary>
         /// <param name="command"></param>
         public void AddCommand(Command command)
@@ -147,6 +166,19 @@ namespace OpenMobile
         }
 
         /// <summary>
+        /// Executes a command
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public object ExecuteCommand(int screen, string name, object[] param, out bool result)
+        {
+            return ExecuteCommand(String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name), param, out result);
+        }
+
+        /// <summary>
         /// Executes a command with no parameters
         /// </summary>
         /// <param name="name"></param>
@@ -158,7 +190,48 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Executes a command with parameters but without result check
+        /// Executes a command with no parameters and converts the returned data to the type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public T ExecuteCommand<T>(string name)
+        {
+            bool result = false;
+            object reply = ExecuteCommand(name, null, out result); ;
+            try
+            {
+                return (T)reply;
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+
+        /// <summary>
+        /// Executes a command with no parameters and converts the returned data to the type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public T ExecuteCommand<T>(int screen, string name)
+        {
+            bool result = false;
+            object reply = ExecuteCommand(screen, name, null, out result); ;
+            try
+            {
+                return (T)reply;
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+
+        /// <summary>
+        /// Executes a command with parameters
         /// </summary>
         /// <param name="name"></param>
         /// <param name="param"></param>
@@ -167,6 +240,60 @@ namespace OpenMobile
         {
             bool result = false;
             return ExecuteCommand(name, param, out result);
+        }
+        /// <summary>
+        /// Executes a command with parameters
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public object ExecuteCommand(int screen, string name, params object[] param)
+        {
+            bool result = false;
+            return ExecuteCommand(String.Format("{0}.{1}",DataNameBase.GetScreenString(screen), name), param, out result);
+        }
+
+        /// <summary>
+        /// Executes a command with no parameters and converts the returned data to the type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public T ExecuteCommand<T>(int screen, string name, params object[] param)
+        {
+            bool result = false;
+            object reply = ExecuteCommand(screen, name, param, out result); ;
+            try
+            {
+                return (T)reply;
+            }
+            catch
+            {
+                return default(T);
+            }
+        }
+        /// <summary>
+        /// Executes a command with parameters and converts the returned data to the type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public T ExecuteCommand<T>(string name, params object[] param)
+        {
+            bool result = false;
+            object reply = ExecuteCommand(name, param, out result);;
+            try
+            {
+                return (T)reply;
+            }
+            catch
+            {
+                return default(T);
+            }
         }
 
         /// <summary>

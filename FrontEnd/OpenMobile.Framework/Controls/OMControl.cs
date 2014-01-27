@@ -910,11 +910,7 @@ namespace OpenMobile.Controls
                 // Check for special dataref of screen present 
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (value.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
-                    {   // Present, replace with screen reference
-                        value = value.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
-                        this._DataSource = value;
-                    }
+                    this._DataSource = DataNameBase.GetDataNameWithScreen(this.parent.ActiveScreen, value);
                 }
                
                 // Subscribe to updates
@@ -1123,10 +1119,12 @@ namespace OpenMobile.Controls
             // Check for special dataref of screen present 
             if (!string.IsNullOrEmpty(command))
             {
-                if (command.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
-                {   // Present, replace with screen reference
-                    command = command.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
-                }
+                command = DataNameBase.GetDataNameWithScreen(this.parent.ActiveScreen, command);
+
+                //if (command.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+                //{   // Present, replace with screen reference
+                //    command = command.Replace(OpenMobile.Data.DataSource.DataTag_Screen, this.parent.ActiveScreen.ToString());
+                //}
 
                 return OM.Host.CommandHandler.ExecuteCommand(command);
             }

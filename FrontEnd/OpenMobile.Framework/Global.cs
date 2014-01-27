@@ -2152,20 +2152,31 @@ namespace OpenMobile
         /// <returns></returns>
         public bool IsEmpty()
         {
-            return (String.IsNullOrEmpty(Name) && 
+            return (String.IsNullOrEmpty(Name) &&
+                String.IsNullOrEmpty(Address) &&
                 String.IsNullOrEmpty(Street) && 
                 String.IsNullOrEmpty(City) && 
                 String.IsNullOrEmpty(State) && 
                 String.IsNullOrEmpty(Country) && 
-                String.IsNullOrEmpty(Zip) && 
+                String.IsNullOrEmpty(Zip) &&
+                String.IsNullOrEmpty(Keyword) && 
                 Latitude == 0f && 
                 Longitude == 0f);
         }
 
         /// <summary>
+        /// A freely used keyword field for this location (can be used for other lookups)
+        /// </summary>
+        public string Keyword;
+
+        /// <summary>
         /// The name of the location
         /// </summary>
         public string Name;
+        /// <summary>
+        /// The full address string
+        /// </summary>
+        public string Address;
         /// <summary>
         /// The street portion of an address
         /// </summary>
@@ -2198,6 +2209,17 @@ namespace OpenMobile
         /// Altitude
         /// </summary>
         public float Altitude;
+
+        /// <summary>
+        /// Creates a new location based on a keyword
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        static public Location FromKeyword(string keyword)
+        {
+            return new Location() { Keyword = keyword };
+        }        
+        
         /// <summary>
         /// Creates a new Address
         /// </summary>
@@ -2242,6 +2264,17 @@ namespace OpenMobile
             Longitude = lng;
             Latitude = lat;
         }
+
+        /// <summary>
+        /// Creates a new Address for the given coordinates
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lng"></param>
+        public Location(double lat, double lng)
+        {
+            Longitude = (float)lng;
+            Latitude = (float)lat;
+        }
         /// <summary>
         /// Creates a new Address
         /// </summary>
@@ -2281,7 +2314,7 @@ namespace OpenMobile
         /// <returns></returns>
         public static bool TryParse(string address, out Location result)
         {
-            if (address == null)
+            if (String.IsNullOrEmpty(address))
             {
                 result = null;
                 return false;
@@ -2316,23 +2349,74 @@ namespace OpenMobile
             }
             return false;
         }
+
+        /// <summary>
+        /// Tries to parse a string that describes a latitude / longitude to a location data
+        /// The text has to be presented in the format 0.00000,0.00000
+        /// </summary>
+        /// <param name="latlng"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static bool TryParseLatLng(string latlng, out Location result)
+        {
+            if (String.IsNullOrEmpty(latlng))
+            {
+                result = null;
+                return false;
+            }
+            result = null;
+            string[] args = latlng.Split(new char[] { ',', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (args.Length == 2)
+            {
+                float val1;
+                float val2;
+                if (float.TryParse(args[0], out val1) == true)
+                    if (float.TryParse(args[1], out val2) == true)
+                    {
+                        result = new Location(val1, val2);
+                        return true;
+                    }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Creates a copy of this Address
         /// </summary>
         /// <returns></returns>
         public object Clone()
         {
-            return new Location(String.Copy(Street), String.Copy(City), String.Copy(State), String.Copy(Zip), String.Copy(Country));
+            return this.MemberwiseClone();
         }
         /// <summary>
         /// Converts an Address to a string
         /// </summary>
         /// <returns></returns>
+        public string ToStringFormatted()
+        {
+            return String.Format("{0}, \n{1}, \n{2}, \n{3} \n[{4};{5}]", Street, City, State, Country, Latitude, Longitude); 
+        }
+        public string ToStringAddress()
+        {
+            return String.Format("{0}", Address); 
+        }
         public override string ToString()
         {
-            //if (string.IsNullOrEmpty(Street) && (Latitude != 0) && String.IsNullOrEmpty(City))
-            //    return Latitude.ToString() + "," + Longitude.ToString();
-            return String.Format("{0}, \n{1}, \n{2}, \n{3} \n[{4};{5}]", Street, City, State, Country, Latitude, Longitude); //   Street + "\n" + City + ", " + State;
+            return String.Format("{0} {1} {2} {3} {4}[{5};{6}]", Name, Street, City, State, Country, Latitude, Longitude); 
+        }
+        public string ToKeyword()
+        {
+            return String.Format("{0} {1} {2} {3} {4}", Name, Street, City, State, Country);
+        }
+        /// <summary>
+        /// Returns a latitude / longitude value as a string 
+        /// String example: "60.7993125915527, 10.6513748168945"
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public string ToLatLngString()
+        {
+            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}, {1}", Latitude, Longitude);
         }
 
         /// <summary>
@@ -2974,6 +3058,50 @@ namespace OpenMobile
             this.Location = location;
             this.Size = size;
             this.ScaleFactors = scaleFactors;
+        }
+    }
+
+    /// <summary>
+    /// Base data for sprite.
+    /// Imagesprite is a big image mad up with several small onces inside. This struct can be used to describe the placement of one of those sub images.
+    /// </summary>
+    public struct Sprite
+    {
+        /// <summary>
+        /// Name of sprite
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Coordinates of a the sprite
+        /// </summary>
+        public Rectangle Coordinates { get; set; }
+
+        /// <summary>
+        /// Creates a new sprite
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="coordinates"></param>
+        public Sprite(string name, Rectangle coordinates)
+            : this()
+        {
+            Name = name;
+            Coordinates = coordinates;
+        }
+
+        /// <summary>
+        /// Creates a new sprite
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public Sprite(string name, int left, int top, int width, int height)
+            : this()
+        {
+            Name = name.Trim();
+            Coordinates = new Rectangle(left, top, width, height);
         }
     }
 

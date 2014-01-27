@@ -1,0 +1,69 @@
+﻿---- < Distributed >-----
+20140127 
+	+ Added support for subscribing to multiscreen datasources (datasources that begins with "Screen") by using this string as a 
+	  direct datasource link for a comtrol, notice that even the full name of the datasource is Screen0.Map.Busy we drop the screen part: 
+		img_MapGroup_Updating.DataSource = "{:S:}Map.Busy";
+	+ Added support for executing a multiscreen command (commands that begins with "Screen") by using this command as a 
+	  direct command for a button (and other controls), notice that even the full name of the command is Screen0.Map.Zoom.In we drop the screen part: 
+		btn_MapGroup_ZoomIn.Command_Click = "{:S:}Map.Zoom.In";
+	+ OMMapProvider: Added some more datasources and commands, see OMWinInfo for details
+
+---- < Distributed >-----
+20140124
+	+ Separated OMNavigationProvider and OMMaps into one map per screen. Datasources and commands are also on a per screen basis.
+	+ Added extra methods to DataHandler and CommandHandler to support calling commands and subscribing to datasources on a per screen basis as well. 
+      Also added extra methods for easily adding new commands and datasources on a per screen basis:
+		OM.Host.CommandHandler.AddCommand(bool screenSpecific, Command command) 
+		OM.Host.DataHandler.AddDataSource(bool screenSpecific, DataSource dataSource)
+	
+---- < Distributed >-----
+20140123
+	+ Added misc methods to CommandHandler and DataHandler
+	+ Split Navigation into a separate navigation/map provider (OMMapProvider) and a simple skin frontend (OMMaps)
+		Use OMWinInfo to see the different commands and datasources exposed by the OMMapProvider plugin. See OMMaps for samples for how to use them.
+
+---- < Distributed >-----
+20140119
+	+ Support for 9Patch images 
+		Info about format here: http://developer.android.com/tools/help/draw9patch.html
+		Online editor here: http://android-ui-utils.googlecode.com/hg/asset-studio/dist/nine-patches.html
+
+		Method is found here: OM.Host.getSkinImage("9patchImageName", new Size(100, 100))
+		Sample:
+			Return a 9patch at the requested size from a file located in the skin folder:
+				OM.Host.getSkinImage("9Patch|progress_bar_fill_bg.9", new Size(250, 36));
+
+			Return a 9patch at the requested size from a file located in the plugin folder:
+				OM.Host.getPluginImage("9Patch|progress_bar_fill_bg.9", new Size(250, 36));
+							
+
+20140118
+	+ Support for loading sprite graphics (one large image with several small resource images in it) from skin and plugin folders
+		Method is found here: OM.Host.LoadSkinSprite
+		Sample:
+			Read sprites from file in skin folder into OM's image cache:
+				OM.Host.LoadSkinSprite("maneuvers-2x", 
+					new Sprite("TurnSharpLeft", 0, 2, 38, 30),
+					new Sprite("TurnLeft", 0, 36, 38, 27),
+					new Sprite("UTurnRight", 0, 71, 38, 30)
+					);
+
+			Load sprites from OM's image cache for usage in a control for a skin image
+				OM.Host.getSkinImage("maneuvers-2x", "TurnLeft")
+
+
+			Read sprites from file in plugin folder into OM's image cache:
+				OM.Host.LoadPluginSprite("maneuvers-2x", 
+					new Sprite("TurnSharpLeft", 0, 2, 38, 30),
+					new Sprite("TurnLeft", 0, 36, 38, 27),
+					new Sprite("UTurnRight", 0, 71, 38, 30)
+					);
+
+			Load sprites from OM's image cache for usage in a control for a plugin image
+				OM.Host.getPluginImage("maneuvers-2x", "TurnLeft")
+
+	
+	Legend:
+	+ Added
+	- Removed
+	* Updated/Changed

@@ -39,7 +39,7 @@ namespace OpenMobile
     /// <summary>
     /// A openmobile command 
     /// </summary>
-    public class Command : DataNameBase
+    public class Command : DataNameBase, ICloneable
     {
         #region Static methods
 
@@ -130,7 +130,7 @@ namespace OpenMobile
                 }
             }
         }
-        private int _RequiredParamCount;        
+        private int _RequiredParamCount;
 
         /// <summary>
         /// The execute delegate
@@ -179,6 +179,29 @@ namespace OpenMobile
             return Execute(null, out result);
         }
 
+        /// <summary>
+        /// Creates a new command
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="execDelegate"></param>
+        /// <param name="requiredParamCount"></param>
+        /// <param name="returnsValue"></param>
+        /// <param name="description"></param>
+        public Command(IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, CommandExecDelegate execDelegate, int requiredParamCount, bool returnsValue, string description)
+        {
+            this._Provider = provider.pluginName;
+            this._NameLevel1 = nameLevel1;
+            this._NameLevel2 = nameLevel2;
+            this._NameLevel3 = nameLevel3;
+            this._ExecDelegate = execDelegate;
+            this._RequiredParamCount = requiredParamCount;
+            this._ReturnsValue = returnsValue;
+            this._Description = description;
+        }
+
 
         /// <summary>
         /// Creates a new command
@@ -206,6 +229,15 @@ namespace OpenMobile
         public override string ToString()
         {
             return FullNameWithProvider;
+        }
+
+        /// <summary>
+        /// Clones this command
+        /// </summary>
+        /// <returns></returns>
+        object ICloneable.Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

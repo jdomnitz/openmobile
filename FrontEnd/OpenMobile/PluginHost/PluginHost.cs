@@ -973,7 +973,8 @@ namespace OpenMobile
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
         /// <param name="altitude"></param>
-        public void UpdateLocation(string name = null, 
+        public void UpdateLocation(string name = null,
+            string address = null,
             string street = null, 
             string city = null,
             string state = null,
@@ -988,6 +989,11 @@ namespace OpenMobile
             if (name != null)
             {
                 currentLocation.Name = name;
+                dataUpdated = true;
+            }
+            if (address != null)
+            {
+                currentLocation.Address = address;
                 dataUpdated = true;
             }
             if (street != null)
@@ -3379,7 +3385,162 @@ namespace OpenMobile
         #region Skin and plugin image handling
 
         /// <summary>
-        /// Returns the given skin image
+        /// Loads a sprite from the skin folder
+        /// </summary>
+        /// <param name="baseImageName"></param>
+        /// <param name="sprites">An array of Sprite data (name and coordinates)</param>
+        /// <returns></returns>
+        public bool LoadSkinSprite(string baseImageName, params Sprite[] sprites)
+        {
+            imageItem baseImage;
+            string fullImageName = Path.Combine(SkinPath, baseImageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
+
+            #region load image file without using the cache
+
+            if (imageCache.ContainsKey(fullImageName)) //(im.image != null)
+            {
+                baseImage = imageCache[fullImageName];
+            }
+            else
+            {
+                try
+                {
+                    // Try to load from current skin path
+                    imageItem im = getImageFromFile(fullImageName, true);
+
+                    // try to load from default skin path
+                    if (im.image == null)
+                        im = getImageFromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), baseImageName.Replace('|', System.IO.Path.DirectorySeparatorChar)), true);
+
+                    if (im.image == null)
+                    {
+                        // Write log entry
+                        DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing skin sprite: {0}", fullImageName));
+                        return false;
+                    }
+                    else
+                        baseImage = im;
+                }
+                catch (System.ArgumentException)
+                {
+                    return false;
+                }
+            }
+
+            #endregion
+
+            if (baseImage == imageItem.NONE || baseImage.image == null || baseImage.image.image == null)
+                return false;
+
+            System.Drawing.Bitmap baseBmp = baseImage.image.image;
+
+            try
+            {
+                // Process sprites
+                for (int i = 0; i < sprites.Length; i++)
+                {
+                    System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(sprites[i].Coordinates.Width, sprites[i].Coordinates.Height);
+                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                        g.DrawImage(baseBmp, new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), sprites[i].Coordinates.ToSystemRectangle(), System.Drawing.GraphicsUnit.Pixel);
+
+                    if (bmp == null)
+                        continue;
+
+                    // Load to cache
+                    imageItem im = new imageItem(new OImage(bmp), String.Format("{0}:{1}", fullImageName, sprites[i].Name));
+                    imageCache.Add(im.name, im);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Loads a sprite from the plugin folder
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="baseImageName"></param>
+        /// <param name="sprites">An array of Sprite data (name and coordinates)</param>
+        /// <returns></returns>
+        public bool LoadPluginSprite(IBasePlugin plugin, string baseImageName, params Sprite[] sprites)
+        {
+            imageItem baseImage;
+
+            // Get paths
+            string PluginPath = System.Reflection.Assembly.GetAssembly(plugin.GetType()).Location;
+            PluginPath = System.IO.Path.GetDirectoryName(PluginPath);
+            string fullImageName = Path.Combine(PluginPath, baseImageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
+
+            #region load image file without using the cache
+
+            if (imageCache.ContainsKey(fullImageName)) //(im.image != null)
+            {
+                baseImage = imageCache[fullImageName];
+            }
+            else
+            {
+                try
+                {
+                    // Try to load from current skin path
+                    imageItem im = getImageFromFile(fullImageName);
+
+                    // try to load from default skin path
+                    if (im.image == null)
+                        im = getImageFromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), baseImageName.Replace('|', System.IO.Path.DirectorySeparatorChar)));
+
+                    if (im.image == null)
+                    {
+                        // Write log entry
+                        DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing plugin sprite: {0}", fullImageName));
+                        return false;
+                    }
+                    else
+                        baseImage = im;
+                }
+                catch (System.ArgumentException)
+                {
+                    return false;
+                }
+            }
+
+            #endregion
+
+            if (baseImage == imageItem.NONE || baseImage.image == null || baseImage.image.image == null)
+                return false;
+
+            System.Drawing.Bitmap baseBmp = baseImage.image.image;
+
+            try
+            {
+                // Process sprites
+                for (int i = 0; i < sprites.Length; i++)
+                {
+                    System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(sprites[i].Coordinates.Width, sprites[i].Coordinates.Height);
+                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                        g.DrawImage(baseBmp, new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), sprites[i].Coordinates.ToSystemRectangle(), System.Drawing.GraphicsUnit.Pixel);
+
+                    if (bmp == null)
+                        continue;
+
+                    // Load to cache
+                    imageItem im = new imageItem(new OImage(bmp), String.Format("{0}:{1}", fullImageName, sprites[i].Name));
+                    imageCache.Add(im.name, im);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Loads an image from a file located in the skin folder
         /// </summary>
         /// <param name="imageName">Name of image to return ("|" is used as path separator)</param>
         /// <returns></returns>
@@ -3389,14 +3550,56 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Returns the given skin image
+        /// Loads an spirite image from a file located in the skin folder
         /// </summary>
-        /// <param name="imageName">Name of image to return ("|" is used as path separator)</param>
+        /// <param name="imageName">Filename of base image for sprite ("|" is used as path separator)</param>
+        /// <param name="spriteName">Name of sprite to return</param>
+        /// <returns></returns>
+        public imageItem getSkinImage(string imageName, string spriteName)
+        {
+            return getSkinImage(imageName, false, spriteName);
+        }
+
+        /// <summary>
+        /// Loads an image from a file located in the skin folder
+        /// </summary>
+        /// <param name="imageName">Filename of image to return ("|" is used as path separator)</param>
         /// <param name="noCache">Force a load from file rather than using the internal cache</param>
         /// <returns></returns>
         public imageItem getSkinImage(string imageName, bool noCache)
         {
+            return getSkinImage(imageName, false, String.Empty);
+        }
+
+        /// <summary>
+        /// Loads an image sprite from a file located in the skin folder
+        /// </summary>
+        /// <param name="imageName">Filename of image to return ("|" is used as path separator)</param>
+        /// <param name="noCache">Force a load from file rather than using the internal cache</param>
+        /// <param name="spriteName">Name of sprite to return</param>
+        /// <returns></returns>
+        public imageItem getSkinImage(string imageName, bool noCache, string spriteName)
+        {
             string fullImageName = Path.Combine(SkinPath, imageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
+
+            if (!String.IsNullOrEmpty(spriteName))
+            {
+                // Get sprite name
+                fullImageName = String.Format("{0}:{1}", fullImageName, spriteName);
+
+                // Check for sprite in cache
+                if (imageCache.ContainsKey(fullImageName)) //(im.image != null)
+                {
+                    return imageCache[fullImageName];
+                }
+                else
+                {
+                    // Write log entry
+                    DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing skin sprite: {0}", fullImageName));
+                    return imageItem.MISSING;
+                }
+            }
+
             if (noCache == false)
             {
                 if (imageCache.ContainsKey(fullImageName)) //(im.image != null)
@@ -3453,7 +3656,79 @@ namespace OpenMobile
             }
         }
 
-        public imageItem getImageFromFile(string fullImageName)
+        /// <summary>
+        /// Loads an ninePatch image from a file located in the skin folder
+        /// </summary>
+        /// <param name="ninePatchImageName"></param>
+        /// <param name="ninePatchImageSize"></param>
+        /// <returns></returns>
+        public imageItem getSkinImage(string ninePatchImageName, Size ninePatchImageSize)
+        {
+            string fullImageName = Path.Combine(SkinPath, ninePatchImageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
+
+            imageItem im = imageItem.NONE;
+
+            // Check for size already present
+            string sizedImageName = String.Format("{0}:9Patch:{1}", fullImageName, ninePatchImageSize);
+            if (imageCache.ContainsKey(sizedImageName))
+                return imageCache[sizedImageName];
+
+            string baseImageName = String.Format("{0}:9Patch:base", fullImageName);
+            if (imageCache.ContainsKey(baseImageName)) //(im.image != null)
+            {
+                im = imageCache[baseImageName];
+            }
+            else
+            {
+                try
+                {
+                    // Try to load from current skin path
+                    im = getImageFromFile(fullImageName, true);
+
+                    // try to load from default skin path
+                    if (im.image == null)
+                        im = getImageFromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), ninePatchImageName.Replace('|', System.IO.Path.DirectorySeparatorChar)));
+
+                    if (im.image == null)
+                    {
+                        // Write log entry
+                        DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing skin image: {0}", fullImageName));
+                        return imageItem.MISSING;
+                    }
+
+                    // Save base image to cache
+                    im.name = String.Format("{0}:9Patch:base", fullImageName);
+                    imageCache.Add(im.name, im);
+                }
+                catch (System.ArgumentException)
+                {
+                    return imageItem.MISSING;
+                }
+            }
+
+            // if requested size is the same as what we already have, return original image
+            if (im.image.Width == ninePatchImageSize.Width && im.image.Height == ninePatchImageSize.Height)
+                return im;
+
+            // Create new nine patch image
+            Rectangle contentArea;
+            OImage img = new OImage(NinePatch.GetImageSizeOf(im.image.image, ninePatchImageSize.Width, ninePatchImageSize.Height, out contentArea));
+
+            // Save new image size to cache
+            imageItem sizedIm = new imageItem(img, String.Format("{0}:9Patch:{1}", fullImageName, ninePatchImageSize));
+            imageCache.Add(sizedIm.name, sizedIm);
+
+            return sizedIm;
+        }
+
+
+        /// <summary>
+        /// Loads an image from a file path
+        /// </summary>
+        /// <param name="fullImageName"></param>
+        /// <param name="noCache"></param>
+        /// <returns></returns>
+        public imageItem getImageFromFile(string fullImageName, bool noCache = false)
         {
             if (imageCache.ContainsKey(fullImageName))
             {
@@ -3486,7 +3761,10 @@ namespace OpenMobile
                         if (im.image != null)
                         {
                             im.name = fullImageName;
-                            imageCache.Add(im.name, im);
+
+                            if (!noCache)
+                                imageCache.Add(im.name, im);
+
                             return im;
                         }
                     }
@@ -3497,8 +3775,14 @@ namespace OpenMobile
                 }
             }
             return imageItem.MISSING;
-        }
+        }        
 
+        /// <summary>
+        /// Loads an image from a file located in the plugin folder
+        /// </summary>
+        /// <param name="pluginName"></param>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
         public imageItem getPluginImage(string pluginName, string imageName)
         {
             IBasePlugin plugin = getPluginByName(pluginName);
@@ -3506,12 +3790,64 @@ namespace OpenMobile
                 return imageItem.NONE;
             return getPluginImage(plugin, imageName);
         }
+
+        /// <summary>
+        /// Loads an image sprite from a file located in the plugin folder
+        /// </summary>
+        /// <param name="pluginName"></param>
+        /// <param name="imageName"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        public imageItem getPluginImage(string pluginName, string imageName, string spriteName)
+        {
+            IBasePlugin plugin = getPluginByName(pluginName);
+            if (plugin == null)
+                return imageItem.NONE;
+            return getPluginImage(plugin, imageName, spriteName);
+        }
+
+        /// <summary>
+        /// Loads an image from a file located in the plugin folder
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
         public imageItem getPluginImage(IBasePlugin plugin, string imageName)
+        {
+            return getPluginImage(plugin, imageName, String.Empty);
+        }
+
+        /// <summary>
+        /// Loads an image from a file located in the plugin folder
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="imageName"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        public imageItem getPluginImage(IBasePlugin plugin, string imageName, string spriteName)
         {
             // Get paths
             string PluginPath = System.Reflection.Assembly.GetAssembly(plugin.GetType()).Location;
             PluginPath = System.IO.Path.GetDirectoryName(PluginPath);
             string fullImageName = Path.Combine(PluginPath, imageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
+
+            if (!String.IsNullOrEmpty(spriteName))
+            {
+                // Get sprite name
+                fullImageName = String.Format("{0}:{1}", fullImageName, spriteName);
+
+                // Check for sprite in cache
+                if (imageCache.ContainsKey(fullImageName)) //(im.image != null)
+                {
+                    return imageCache[fullImageName];
+                }
+                else
+                {
+                    // Write log entry
+                    DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing skin sprite: {0}", fullImageName));
+                    return imageItem.MISSING;
+                }
+            }
 
             try
             {
@@ -3541,6 +3877,75 @@ namespace OpenMobile
             catch (System.ArgumentException) { }
             return imageItem.MISSING;
         }
+
+        /// <summary>
+        /// Loads an ninePatch image from a file located in the skin folder
+        /// </summary>
+        /// <param name="ninePatchImageName"></param>
+        /// <param name="ninePatchImageSize"></param>
+        /// <returns></returns>
+        public imageItem getPluginImage(IBasePlugin plugin, string ninePatchImageName, Size ninePatchImageSize)
+        {
+            // Get paths
+            string PluginPath = System.Reflection.Assembly.GetAssembly(plugin.GetType()).Location;
+            PluginPath = System.IO.Path.GetDirectoryName(PluginPath);
+            string fullImageName = Path.Combine(PluginPath, ninePatchImageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
+
+            imageItem im = imageItem.NONE;
+
+            // Check for size already present
+            string sizedImageName = String.Format("{0}:9Patch:{1}", fullImageName, ninePatchImageSize);
+            if (imageCache.ContainsKey(sizedImageName))
+                return imageCache[sizedImageName];
+
+            string baseImageName = String.Format("{0}:9Patch:base", fullImageName);
+            if (imageCache.ContainsKey(baseImageName)) //(im.image != null)
+            {
+                im = imageCache[baseImageName];
+            }
+            else
+            {
+                try
+                {
+                    // Try to load from current skin path
+                    im = getImageFromFile(fullImageName, true);
+
+                    // try to load from default skin path
+                    if (im.image == null)
+                        im = getImageFromFile(Path.Combine(Path.Combine(Application.StartupPath, "Skins", "Default"), ninePatchImageName.Replace('|', System.IO.Path.DirectorySeparatorChar)));
+
+                    if (im.image == null)
+                    {
+                        // Write log entry
+                        DebugMsg(DebugMessageType.Warning, "PluginHost", String.Format("Unable to load missing skin image: {0}", fullImageName));
+                        return imageItem.MISSING;
+                    }
+
+                    // Save base image to cache
+                    im.name = String.Format("{0}:9Patch:base", fullImageName);
+                    imageCache.Add(im.name, im);
+                }
+                catch (System.ArgumentException)
+                {
+                    return imageItem.MISSING;
+                }
+            }
+
+            // if requested size is the same as what we already have, return original image
+            if (im.image.Width == ninePatchImageSize.Width && im.image.Height == ninePatchImageSize.Height)
+                return im;
+
+            // Create new nine patch image
+            Rectangle contentArea;
+            OImage img = new OImage(NinePatch.GetImageSizeOf(im.image.image, ninePatchImageSize.Width, ninePatchImageSize.Height, out contentArea));
+
+            // Save new image size to cache
+            imageItem sizedIm = new imageItem(img, String.Format("{0}:9Patch:{1}", fullImageName, ninePatchImageSize));
+            imageCache.Add(sizedIm.name, sizedIm);
+
+            return sizedIm;
+        }
+
 
         #endregion
 
