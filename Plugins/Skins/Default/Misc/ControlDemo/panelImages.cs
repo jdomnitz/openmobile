@@ -37,12 +37,35 @@ namespace ControlDemo
 {
     public static class panelImages
     {
+        public class Bricks : OMImage
+        {
+            public Bricks()
+                : base("imgBricks", OM.Host.ClientArea_Init.Center.X - (75 / 2), OM.Host.ClientArea_Init.Top + 10, OM.Host.getSkinImage("Icons|OMBricks-Bricks_Gray.png"))
+            {
+            }
+
+            public void ShowOverlay(imageItem image)
+            {
+                this.Image = new imageItem(Image.Copy().image.AddImageOverlay(0, 0, image.image));
+                base.RefreshGraphic();
+                base.Refresh();
+            }
+        }
+
         public static OMPanel Initialize()
         {
             OMPanel p = new OMPanel("Images");
 
             //OMImage imgNoCover = new OMImage("imgNoCover", 0, 100, new imageItem(MediaLoader.MissingCoverImage));
             //p.addControl(imgNoCover);
+
+            //OMImage imgOverlayTest = new OMImage("imgOverlayTest", OM.Host.ClientArea_Init.Center.X - (75 / 2), OM.Host.ClientArea_Init.Top + 10, OM.Host.getSkinImage("Icons|OMBricks-Bricks_Gray.png"));
+            //imgOverlayTest.Image = new imageItem(imgOverlayTest.Image.Copy().image.AddImageOverlay(0, 0, OM.Host.getSkinImage("Icons|OMBricks-Bricks_OL_Lasers").image));
+            //p.addControl(imgOverlayTest);
+
+            Bricks brick = new Bricks();
+            p.addControl(brick);
+
 
             OM.Host.LoadSkinSprite("maneuvers-2x", 
                 new Sprite("TurnSharpLeft", 0, 2, 38, 30),
@@ -65,11 +88,16 @@ namespace ControlDemo
 
             OMImage imgBackground = new OMImage("imgBackground", 330, 100, OM.Host.getSkinImage("OMIconBlack_Transparent"));
             imgBackground.BackgroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+            imgBackground.Image.image.ShaderEffect = OMShaders.MouseDot;
             imgBackground.Left = 500 - (imgBackground.Image.image.Width / 2);
             imgBackground.Top = 300 - (imgBackground.Image.image.Height / 2);
             p.addControl(imgBackground);
 
+            //imageItem img = new imageItem(OM.Host.getSkinImage("Unknown Album.png").image);
+            //img.image.ShaderEffect = OMShaders.Negative;
             OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 730, 130, 200, 250, OM.Host.getSkinImage("Unknown Album.png"));
+            imgReflectionTestSource.Image.image.ShaderEffect = OMShaders.MouseDot;
+            //imgReflectionTestSource.Image.image.ShaderEffect = OMShaders.Radar;
             //imgReflectionTestSource.Rotation = new OpenMobile.Math.Vector3(0, 0, 45);
             //imgReflectionTestSource.OnImageChange += new userInteraction(imgReflectionTestSource_OnImageChange);
             imgReflectionTestSource.ReflectionData = new ReflectionsData(Color.White, Color.Transparent, 0.5f);
@@ -134,11 +162,14 @@ namespace ControlDemo
 
         static void btnChangeSource_OnClick(OMControl sender, int screen)
         {
+
+            ((Bricks)sender.Parent[screen, "imgBricks"]).ShowOverlay(OM.Host.getSkinImage("Icons|OMBricks-Bricks_OL_Lasers"));
+
             //((OMImage)sender.Parent[screen,"imgReflectionTestSource"]).Image = new imageItem(OpenMobile.Net.Network.imageFromURL("http://farm4.staticflickr.com/3273/2996054575_a08a46fdb8.jpg"));
 
-            OImage img = OpenMobile.Net.Network.imageFromURL("http://upload.wikimedia.org/wikipedia/commons/a/a4/IgM_white_background.png");
-            img.MakeTransparent(Color.White);
-            ((OMImage)sender.Parent[screen, "imgReflectionTestSource"]).Image = new imageItem(img);
+            //OImage img = OpenMobile.Net.Network.imageFromURL("http://upload.wikimedia.org/wikipedia/commons/a/a4/IgM_white_background.png");
+            //img.MakeTransparent(Color.White);
+            //((OMImage)sender.Parent[screen, "imgReflectionTestSource"]).Image = new imageItem(img);
         }
 
         static void Slider_Rotation_OnSliderMoved(OMSlider sender, int screen)

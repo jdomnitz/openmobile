@@ -41,39 +41,65 @@ namespace OpenMobile
 
         private List<Command> _Commands = new List<Command>();
 
-        /// <summary>
-        /// Adds a new command provider
-        /// </summary>
-        /// <param name="command"></param>
-        public void AddCommand(bool screenSpecific, Command command)
+        public void Dispose()
         {
+
+        }
+
+        /// <summary>
+        /// Adds a new command provider and returns the different instances of the commands
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="command"></param>
+        public Command[] AddCommand(bool screenSpecific, Command command)
+        {
+            Command[] retVal = new Command[OM.Host.ScreenCount];
+
             if (!screenSpecific)
-                AddCommand(command);
+                retVal = AddCommand(command);
             else
             {
                 for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
                 {
                     Command specificCommand = (Command)((ICloneable)command).Clone();
                     specificCommand.Screen = i;
-                    AddCommand(specificCommand);
+                    retVal[i] = AddCommand_Internal(specificCommand, false)[0];
                 }
             }
+            return retVal;
         }
 
         /// <summary>
-        /// Adds a new command provider
+        /// Adds a new command provider and returns the different instances of the commands
         /// </summary>
         /// <param name="command"></param>
-        public void AddCommand(Command command)
+        public Command[] AddCommand(Command command)
         {
+            return AddCommand_Internal(command);
+        }
+
+        private Command[] AddCommand_Internal(Command command, bool addMultiScreen = true)
+        {
+            Command[] retVal = new Command[OM.Host.ScreenCount];
             // Check for valid command
             if (!command.Valid)
-                return;
+                return retVal;
+
+            if (command.ScreenSpecific && addMultiScreen)
+            {
+                return AddCommand(true, command);
+            }
 
             lock (_Commands)
             {
-                _Commands.Add(command);
+                if (!IsExactCommandPresent(command))
+                {
+                    _Commands.Add(command);
+                    for (int i = 0; i < retVal.Length; i++)
+                        retVal[i] = command;
+                }
             }
+            return retVal;
         }
 
         /// <summary>
@@ -116,12 +142,16 @@ namespace OpenMobile
                 // Get the name part only
                 name = name.Substring(provider.Length + 1);
 
-                // Get datasource
-                return _Commands.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Provider.ToLower() == provider.ToLower() && x.Valid));
+                // Get command
+                return _Commands.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Provider.ToLower() == provider.ToLower()));
             }
             
-            // Get normal datasource
-            Command command = _Commands.Find(x => (x.FullName.ToLower().Contains(name.ToLower()) && x.Valid));
+            // Get normal command
+            Command command = _Commands.Find(x => (x.FullName.ToLower().Contains(name.ToLower())));
+
+            // if command is not found directly, try to remove screen part to find command
+            if (command == null)
+                command = _Commands.Find(x => (x.FullName.ToLower().Contains(DataNameBase.GetNameWithoutScreen(name).ToLower())));
 
             // Log data
             if (command == null)
@@ -175,7 +205,16 @@ namespace OpenMobile
         /// <returns></returns>
         public object ExecuteCommand(int screen, string name, object[] param, out bool result)
         {
-            return ExecuteCommand(String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name), param, out result);
+            if (name.Contains(";"))
+            {
+                string provider = name.Substring(0, name.IndexOf(';'));
+                name = name.Remove(0, provider.Length+1);
+                return ExecuteCommand(String.Format("{0};{1}", provider, String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name)), param, out result);
+            }
+            else
+            {
+                return ExecuteCommand(String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name), param, out result);
+            }
         }
 
         /// <summary>
@@ -251,7 +290,17 @@ namespace OpenMobile
         public object ExecuteCommand(int screen, string name, params object[] param)
         {
             bool result = false;
-            return ExecuteCommand(String.Format("{0}.{1}",DataNameBase.GetScreenString(screen), name), param, out result);
+
+            if (name.Contains(";"))
+            {
+                string provider = name.Substring(0, name.IndexOf(';'));
+                name = name.Remove(0, provider.Length+1);
+                return ExecuteCommand(String.Format("{0};{1}", provider, String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name)), param, out result);
+            }
+            else
+            {
+                return ExecuteCommand(String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name), param, out result);
+            }
         }
 
         /// <summary>
@@ -312,5 +361,140 @@ namespace OpenMobile
             if (CommandExecMonitor != null)
                 CommandExecMonitor(command, param, name);
         }
+
+        #region CommandGroups
+
+        private List<CommandGroup> _CommandGroups = new List<CommandGroup>();
+
+        /// <summary>
+        /// Gets a CommandGroup
+        /// </summary>
+        /// <param name="CommandGroupName"></param>
+        /// <returns></returns>
+        private CommandGroup GetCommandGroup(string CommandGroupName)
+        {
+            return _CommandGroups.Find(x => x.FullNameWithoutScreen == CommandGroupName);
+        }
+
+        /// <summary>
+        /// True = CommandGroup is active
+        /// </summary>
+        /// <param name="commandGroup"></param>
+        /// <returns></returns>
+        public bool IsCommandGroupActive(CommandGroup commandGroup)
+        {
+            return _CommandGroups.Contains(commandGroup);
+        }
+
+        /// <summary>
+        /// True = command is present
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public bool IsCommandPresent(Command command)
+        {
+            return _Commands.Find(x => x.FullNameWithoutScreen == command.FullNameWithoutScreen) != null;
+        }
+
+        /// <summary>
+        /// True = command is present
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public bool IsExactCommandPresent(Command command)
+        {
+            return _Commands.Find(x => x.FullNameWithProvider == command.FullNameWithProvider) != null;
+        }
+
+        /// <summary>
+        /// Activates a screen specific command group on a specific screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="commandGroup"></param>
+        /// <returns></returns>
+        public bool ActivateCommandGroup(int screen, CommandGroupScreenSpecific commandGroup)
+        {
+            return ActivateCommandGroup(commandGroup.Instances[screen]);
+        }
+
+        /// <summary>
+        /// Activates a screen specific command group on all available screens
+        /// </summary>
+        /// <param name="commandGroup"></param>
+        /// <returns></returns>
+        public bool ActivateCommandGroup(CommandGroupScreenSpecific commandGroup)
+        {
+            for (int i = 0; i < OM.Host.ScreenCount; i++)
+            {
+                ActivateCommandGroup(commandGroup.Instances[i]);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Activates a command group and replaces nameLevels at the same time.
+        /// </summary>
+        /// <param name="commandGroup"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <returns></returns>
+        public bool ActivateCommandGroup(CommandGroup commandGroup, int screen = -1, string nameLevel1 = null, string nameLevel2 = null, string nameLevel3 = null)
+        {
+            commandGroup.SetScreen(screen);
+            commandGroup.SetNameLevels(nameLevel1, nameLevel2, nameLevel3);
+            return ActivateCommandGroup(commandGroup);
+        }
+        /// <summary>
+        /// Activates a commandGroup
+        /// </summary>
+        /// <param name="commandGroup"></param>
+        /// <returns></returns>
+        public bool ActivateCommandGroup(CommandGroup commandGroup)
+        {
+            lock (commandGroup)
+            {
+                CommandGroup currentGroup = GetCommandGroup(commandGroup.FullName);
+                int currentIndex = _CommandGroups.IndexOf(currentGroup);
+
+                if (currentGroup == commandGroup)
+                    return false;
+
+                if (currentGroup != null)
+                {   // Replace existing group
+                    CommandGroup.ReplaceGroup(currentGroup, commandGroup);
+                    _CommandGroups[currentIndex] = commandGroup;
+                }
+                else
+                {   // New group
+                    _CommandGroups.Add(commandGroup);
+
+                    // Activate new group
+                    CommandGroup.ActivateCommandsInGroup(this, commandGroup);
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Replaces one datasource with another one
+        /// </summary>
+        /// <param name="oldCommand"></param>
+        /// <param name="newCommand"></param>
+        /// <returns></returns>
+        public bool ReplaceCommand(Command oldCommand, Command newCommand)
+        {
+            // Remap subscriptions
+            Command.Remap(oldCommand, newCommand);
+
+            // Remap list data
+            int index = _Commands.IndexOf(oldCommand);
+            if (index >= 0)
+                _Commands[index] = newCommand;
+
+            return true;
+        }
+
+        #endregion
     }
 }

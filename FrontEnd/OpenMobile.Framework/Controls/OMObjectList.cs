@@ -608,7 +608,7 @@ namespace OpenMobile.Controls
             Item_Highlight(GetItemIndexFromPoint(e.Location));
         }
 
-        public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
+        public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance, ClickTypes clickType)
         {
             if (!ThrowActive)
             {
@@ -618,6 +618,10 @@ namespace OpenMobile.Controls
                 // Select item
                 Item_Select(GetItemIndexFromPoint(e.Location));
             }
+        }
+
+        public void MousePreviewClick(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point location, ClickTypes clickType)
+        {
         }
 
         #endregion

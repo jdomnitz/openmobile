@@ -213,6 +213,7 @@ namespace OpenMobile.Controls
             //gd.Opacity = 150;
             //gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonForegroundFocused;
             //btn.checkedImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            btn.checkedImage = btn.DownImage;
             if (opacity != null)
                 gd.Opacity = opacity;
             else

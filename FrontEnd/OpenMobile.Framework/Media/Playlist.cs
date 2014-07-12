@@ -28,6 +28,7 @@ using OpenMobile.Net;
 using OpenMobile.Plugin;
 using OpenMobile.Graphics;
 using System.ComponentModel;
+using System.Text;
 
 namespace OpenMobile.Media
 {
@@ -1046,16 +1047,38 @@ namespace OpenMobile.Media
 
     public class PlayList2 : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Display name (if provided)
+        /// </summary>
+        static public string GetDisplayName(string name)
+        {
+            if (name.Contains("|"))
+                return name.Substring(name.IndexOf("|") + 1);
+            return name;
+        }
+
+            
+        static public void SetDisplayName(ref string name, string displayName)
+        {
+            string currentDisplayName = GetDisplayName(name);
+
+            if (name.Contains("|"))
+                name.Replace(String.Format("|{0}", currentDisplayName), String.Format("|{0}", displayName));
+            else
+                name += String.Format("|{0}", displayName);
+        }
+
+
         #region Constructor
 
         public PlayList2()
         {
         }
         public PlayList2(string name)
+            : this()
         {
             this._Name = name;
         }
-
         #endregion
 
         /// <summary>
@@ -1258,6 +1281,7 @@ namespace OpenMobile.Media
         }
         private string _Name;
 
+
         private void ResetListData(bool resetCurrentIndex = true, bool resetHistory = true)
         {
             if (resetHistory)
@@ -1307,9 +1331,7 @@ namespace OpenMobile.Media
             return nextIndex;
         }
 
-
-
-        #region Add items
+        #region Item control
 
         /// <summary>
         /// Adds a new media item to the playlist
@@ -1347,6 +1369,38 @@ namespace OpenMobile.Media
                 this.OnPropertyChanged("Items");
                 Raise_OnList_Items_ItemInserted(_Items.Count - 1);
             }
+        }
+
+        /// <summary>
+        /// Removes an item from this playlist
+        /// </summary>
+        /// <param name="item"></param>
+        public void Remove(mediaInfo item)
+        {
+            int index = _Items.IndexOf(item);
+            Remove(index);
+        }
+        /// <summary>
+        /// Removes an item from this playlist
+        /// </summary>
+        /// <param name="index"></param>
+        public void Remove(int index)
+        {
+            _Items.RemoveAt(index);
+            this.OnPropertyChanged("Items");
+            GenerateQueue();
+            Raise_OnList_Items_ItemRemoved(index);
+        }
+
+        public bool SetNextMedia(int index)
+        {
+            lock (this)
+            {
+                _Queue.AddFirst(index);
+                Raise_OnList_Buffer_ItemInserted(_History.Count - 1 + 1 + 1);
+                Buffer_Refresh(true);
+            }
+            return true;
         }
 
         #endregion
@@ -1540,19 +1594,65 @@ namespace OpenMobile.Media
         /// <returns></returns>
         public bool Save()
         {
+            // Save current playlist order to the DB
+            StringBuilder sb = new StringBuilder();
+            foreach (var index in _Queue)
+            {
+                sb.Append(index);
+                sb.Append("|");
+            }
+            writePlayListSettingToDB(_Name, "Queue", sb.ToString());
+
+            // Save settings to database
+            writePlayListSettingToDB(_Name, "Random", _Random.ToString());
+            writePlayListSettingToDB(_Name, "Repeat", _Repeat.ToString());
+            writePlayListSettingToDB(_Name, "CurrentIndex", _CurrentIndex.ToString());
+
             return writePlaylistToDB(_Name, _Items);
         }
 
         /// <summary>
-        /// Loads this playlist from the FB
+        /// Loads this playlist from the DB
         /// </summary>
         /// <returns></returns>
         public bool Load()
         {
-            _Items = readPlaylistFromDB(_Name);
-            GenerateQueue();
-            Raise_OnList_Items_Changed();
-            return true;
+            try
+            {
+                _Items = readPlaylistFromDB(_Name);
+                //GenerateQueue();
+
+                // Load queue from DB
+                string gueueString = readPlayListSettingFromDB(_Name, "Queue");
+                if (gueueString != null)
+                {
+                    string[] gueueStringSplit = gueueString.Split('|');
+                    if (gueueStringSplit.Length > 0)
+                    {
+                        _Queue.Clear();
+                        for (int i = 0; i < gueueStringSplit.Length; i++)
+                        {
+                            int index = 0;
+                            if (int.TryParse(gueueStringSplit[i], out index))
+                                _Queue.AddLast(index);
+                        }
+                    }
+                }
+
+                // Load settings from database
+                int.TryParse(readPlayListSettingFromDB(_Name, "CurrentIndex"), out _CurrentIndex);
+                bool.TryParse(readPlayListSettingFromDB(_Name, "Random"), out _Random);
+                bool.TryParse(readPlayListSettingFromDB(_Name, "Repeat"), out _Repeat);
+
+                Buffer_Refresh(true);
+
+                Raise_OnList_Items_Changed();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         #endregion
@@ -1891,6 +1991,60 @@ namespace OpenMobile.Media
             }
 
             return playlist;
+        }
+
+        /// <summary>
+        /// Reads a playlist setting from the database
+        /// </summary>
+        /// <param name="playlistName"></param>
+        /// <param name="settingName"></param>
+        /// <returns></returns>
+        public static string readPlayListSettingFromDB(string playlistName, string settingName)
+        {
+            return readPlayListSettingFromDB(playlistName, settingName, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"));
+        }
+
+        /// <summary>
+        /// Reads a playlist setting from the database
+        /// </summary>
+        /// <param name="playlist"></param>
+        /// <param name="settingName"></param>
+        /// <param name="dbName"></param>
+        /// <returns></returns>
+        public static string readPlayListSettingFromDB(string playlistName, string settingName, string dbName)
+        {
+            IMediaDatabase db = BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName) as IMediaDatabase;
+            if (db == null)
+                return null;
+
+            return db.getMediaSetting(playlistName, settingName);
+        }
+
+        /// <summary>
+        /// Writes a playlist setting to the database
+        /// </summary>
+        /// <param name="playlistName"></param>
+        /// <param name="settingName"></param>
+        /// <param name="settingValue"></param>
+        public static void writePlayListSettingToDB(string playlistName, string settingName, string settingValue)
+        {
+            writePlayListSettingToDB(playlistName, settingName, settingValue, helperFunctions.StoredData.Get(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase"));
+        }
+
+        /// <summary>
+        /// Writes a playlist setting to the database
+        /// </summary>
+        /// <param name="playlist"></param>
+        /// <param name="settingName"></param>
+        /// <param name="settingValue"></param>
+        /// <param name="dbName"></param>
+        public static void writePlayListSettingToDB(string playlistName, string settingName, string settingValue, string dbName)
+        {
+            IMediaDatabase db = BuiltInComponents.Host.getData(eGetData.GetMediaDatabase, dbName) as IMediaDatabase;
+            if (db == null)
+                return;
+
+            db.setMediaSetting(playlistName, settingName, settingValue);
         }
 
         ///// <summary>

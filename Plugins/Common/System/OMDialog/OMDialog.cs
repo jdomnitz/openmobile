@@ -123,7 +123,7 @@ namespace OMDialog
                         DT.Left = (DT.Left == 0 ? 250 : DT.Left);
                         DT.Top = (DT.Top == 0 ? 175 : DT.Top);
                         DT.Width = (DT.Width == 0 ? 500 : DT.Width);
-                        DT.Height = (DT.Height == 0 ? 250 : DT.Height);
+                        DT.Height = (DT.Height == 0 ? 300 : DT.Height);
 
                         // Calculate amount of buttons to show
                         int ButtonCount = bit.Count((uint)DT.Button);
@@ -225,6 +225,7 @@ namespace OMDialog
                         Label_Text.Text = "";
                         Label_Text.Font = f;
                         Label_Text.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | Alignment.TopCenter;
+                        Label_Text.AutoFitTextMode = FitModes.Fit;
                         Panel.addControl(Label_Text);
 
                         #region Assign buttons

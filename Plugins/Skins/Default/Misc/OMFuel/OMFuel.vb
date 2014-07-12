@@ -57,8 +57,8 @@ Namespace OMFuel
         Private message As String = ""
         Private PopUpMenuStrip As ButtonStrip
         Private temp_count As Integer = 0
-        Private first_run As Boolean = True
         Private updated As Boolean = False
+        Private initialized As Boolean = False
 
         Dim myBanner As InfoBanner = New InfoBanner(bannerStyle, "Please wait...", 5000)
 
@@ -72,9 +72,19 @@ Namespace OMFuel
 
         Public Overrides Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus
 
-            'theHost.DebugMsg("OMFuel - initialize()", "Initializing...")
+            'host.DebugMsg("OMFuel - initialize()", "Initializing...")
 
             theHost = host
+
+            OpenMobile.Threading.SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
+
+            Return eLoadStatus.LoadSuccessful
+
+        End Function
+
+        Private Sub BackgroundLoad()
+
+            'theHost.DebugMsg("OMFuel - BackgroundLoad()", "Continuing in background...")
 
             If String.IsNullOrEmpty(StoredData.Get(Me, "favoriteCount")) Then
                 StoredData.Set(Me, "favoriteCount", 0)
@@ -92,7 +102,7 @@ Namespace OMFuel
             mainContainer.Opacity = 0
             omFuelpanel.addControl(mainContainer)
 
-            PanelManager.loadPanel(omFuelpanel, True)
+            'PanelManager.loadPanel(omFuelpanel, True)
 
             ' Build the panel to manually enter a favorite
             Dim fuelFavPanel As New OMPanel("EditFavs", "Fuel Prices")
@@ -142,25 +152,32 @@ Namespace OMFuel
             AddHandler cancelButton.OnClick, AddressOf cancelButton_OnClick
             fuelFavPanel.addControl(cancelButton)
 
+            PanelManager.loadPanel(omFuelpanel, True)
             PanelManager.loadPanel(fuelFavPanel, False)
 
             ' Subscribe to datasources
-            'System.Threading.Thread.Sleep(3000)
             theHost.DataHandler.SubscribeToDataSource("Fuel.Price.List", AddressOf Subscription_Updated)
             theHost.DataHandler.SubscribeToDataSource("Fuel.Messages.Text", AddressOf Subscription_Updated)
             theHost.DataHandler.SubscribeToDataSource("Location.Current", AddressOf Subscription_Updated)
 
-            'theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Last")
+            'theHost.DebugMsg("OMFuel - BackgroundLoad()", "Complete. Requesting data refresh...")
 
-            Return eLoadStatus.LoadSuccessful
+            initialized = True
 
-        End Function
+            theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Last")
+
+        End Sub
 
         Private Sub Subscription_Updated(ByVal sensor As OpenMobile.Data.DataSource)
 
-            'theHost.DebugMsg("OMFuel - Subscription_Updated()", "Datasource updated.")
+            'theHost.DebugMsg("OMFuel - Subscription_Updated()", sensor.FullName)
+
+            'If Not initialized Then
+            'theHost.DebugMsg("OMFuel - Subscription_Updated()", "We're not ready yet.")
+            'Exit Sub
+            'End If
+
             Dim mPanel As OMPanel
-            Dim loc As OpenMobile.Location
 
             Select Case sensor.FullName
 
@@ -194,11 +211,6 @@ Namespace OMFuel
                     Next
                     updated = False
 
-                Case "Location.Current"
-                    loc = sensor.Value
-                    currLat = loc.Latitude
-                    currLng = loc.Longitude
-
             End Select
 
         End Sub
@@ -214,7 +226,7 @@ Namespace OMFuel
         Public Sub panel_leave(ByVal sender As OMPanel, ByVal screen As Integer)
 
             theHost.UIHandler.InfoBanner_Hide(screen)
-            theHost.UIHandler.PopUpMenu.ClearButtonStrip(screen)
+            'theHost.UIHandler.PopUpMenu.ClearButtonStrip(screen)
             PopUpMenuStrip = Nothing
 
         End Sub
@@ -228,18 +240,14 @@ Namespace OMFuel
             'Dim message As String = ""
             'message = theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Messages.Text").FormatedValue
 
-            ' The following paragraph doesn't work because the banner
-            '  gets wiped out immediately upon building the panel.
-            'theHost.DebugMsg("OMFuel - panel_enter()", "Adding favorites to popup.")
-
             ' loads up the popup with the standard items
 
             PopUpMenuStrip = New ButtonStrip(Me.pluginName, "FuelPrices", "PopUpMenuStrip")
 
-            If ((currLat <> "0") And (currLng <> "0")) Then
-                ' We have a current location
-                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Current", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-search"), "Current", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
-            End If
+            'If ((currLat <> "0") And (currLng <> "0")) Then
+            ' We have a current location
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Current", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-search"), "Current", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            'End If
             PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Home", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Home"), "Home", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
             PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Favorites", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-new-label"), "Favorites/Search" & vbCrLf & "Hold to add shown", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
 
@@ -249,7 +257,7 @@ Namespace OMFuel
             For x = 1 To xCount
                 xCity = StoredData.Get(Me, String.Format("FAVS.favoriteCity{0}", x))
                 xState = StoredData.Get(Me, String.Format("FAVS.favoriteState{0}", x))
-                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem(xCity, theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-label"), String.Format("*{0},{1}", xCity, xState), False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem(xCity, theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-labels"), String.Format("*{0},{1}", xCity, xState), False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
             Next
 
             ' Set up the main container for prices
@@ -274,6 +282,8 @@ Namespace OMFuel
             Dim name As String = ""
             Dim address As String = ""
             Dim area As String = ""
+            Dim state As String = ""
+            Dim country As String = ""
             Dim timeStamp As String = ""
             Dim xdecimal As String = ""
             Dim ind As Integer = 0
@@ -310,10 +320,21 @@ Namespace OMFuel
                         price = GasPrices("Price")
                         address = GasPrices("Address")
                         area = GasPrices("Area")
+                        state = GasPrices("State")
+                        country = GasPrices("Country")
                         timeStamp = GasPrices("TimeStamp")
                         xdecimal = GasPrices("Decimal")
+                        Dim mapLoc As Array = {name, address, area, state, country}
 
                         Dim shpPriceBackground As New OMBasicShape("shpPriceBackground" & ind.ToString, x_coord, y_coord, 180, 470, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5))
+
+                        Dim invButton As OMButton = OMButton.PreConfigLayout_BasicStyle("invButton" & ind.ToString, x_coord, y_coord, 180, 470, OpenMobile.Graphics.GraphicCorners.All)
+                        invButton.BackgroundColor = Color.Transparent
+                        invButton.BorderColor = Color.Transparent
+                        invButton.Opacity = 0
+                        invButton.Tag = mapLoc
+                        invButton.FillColor = Color.Transparent
+                        AddHandler invButton.OnHoldClick, AddressOf invButton_onHoldClick
 
                         Dim entryImage = New OMImage("entryImage" & ind.ToString, shpPriceBackground.Left + 5, shpPriceBackground.Top + 5, shpPriceBackground.Width - 10, shpPriceBackground.Width - 10)
                         If data.image Is Nothing Then
@@ -333,6 +354,7 @@ Namespace OMFuel
                         entryPrice.AutoFitTextMode = FitModes.None
                         entryPrice.TextAlignment = (Alignment.WordWrap And Alignment.CenterCenter)
                         entryPrice.FontSize = 26
+                        'entryPrice.Text = FormatCurrency(Double.Parse(price, System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.CultureInfo.InvariantCulture), xdecimal)
                         entryPrice.Text = FormatCurrency(Double.Parse(price, System.Globalization.CultureInfo.InvariantCulture), xdecimal)
 
                         Dim entryGrade = New OMLabel("entryGrade" & ind.ToString, shpPriceBackground.Left + 5, entryPrice.Top + entryPrice.Height + 15, shpPriceBackground.Width - 10, 30)
@@ -367,6 +389,7 @@ Namespace OMFuel
                         theContainer.addControlRelative(entryAddress)
                         theContainer.addControlRelative(entryArea)
                         theContainer.addControlRelative(entryWhen)
+                        theContainer.addControlRelative(invButton)
 
                         x_coord = x_coord + 200
 
@@ -376,7 +399,9 @@ Namespace OMFuel
 
             End If
 
-            theHost.UIHandler.PopUpMenu.SetButtonStrip(PopUpMenuStrip)
+            'theHost.UIHandler.PopUpMenu.SetButtonStrip(PopUpMenuStrip)
+            sender.PopUpMenu = PopUpMenuStrip
+
             If Not String.IsNullOrEmpty(message) Then
                 If sender.IsVisible(screen) Then
                     'theHost.UIHandler.InfoBanner_Hide(screen)
@@ -388,6 +413,62 @@ Namespace OMFuel
             Else
                 theHost.UIHandler.InfoBanner_Hide(screen)
             End If
+
+        End Sub
+        Private Sub invButton_onHoldClick(ByVal sender As OMButton, ByVal screen As Integer)
+
+            Dim sname As String = sender.Name
+            Dim mapLoc As String() = sender.Tag
+            Dim x As String = ""
+            Dim y As Integer = 0
+
+            Dim myLoc As OpenMobile.Location = New OpenMobile.Location
+
+            y = mapLoc(1).IndexOf("&")
+            If y >= 0 Then
+                mapLoc(1) = mapLoc(1).Substring(0, y - 1)
+            Else
+                y = mapLoc(1).IndexOf("near")
+                If y >= 0 Then
+                    mapLoc(1) = mapLoc(1).Substring(0, y - 1)
+                End If
+            End If
+            myLoc.Address = mapLoc(1)
+            myLoc.City = mapLoc(2)
+            myLoc.State = mapLoc(3)
+            myLoc.Country = mapLoc(4)
+            'myLoc.Zip = "14305"
+
+            myLoc.Keyword = myLoc.Address + ", " + myLoc.City + ", " + myLoc.State + ", " + myLoc.Country
+            myLoc = theHost.CommandHandler.ExecuteCommand("Map.Lookup.Location", myLoc)
+
+            ' Clear all previous markers
+            theHost.CommandHandler.ExecuteCommand(screen, "Map.Markers.Clear")
+            ' Clears all our markers only
+            'theHost.CommandHandler.ExecuteCommand("Map.Marker.DeleteAll", Me.pluginName)
+
+            ' Place markers on map
+            ' My Current Location
+            theHost.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", {OM.Host.CurrentLocation, Me.pluginName, "Me", 1, "Me"})
+            theHost.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", {myLoc, Me.pluginName, "Target", 2, myLoc.Keyword})
+
+            'x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Goto.Location", myLoc)
+            'x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Goto.Location", OM.Host.CurrentLocation)
+            'OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", New Location(60.72638, 10.61718), Me.pluginName, "testmarker", OM.Host.getSkinImage("OMFuel|Logos|Shell").image.Copy().Resize(30), "Shell\r\n$1.222 (Regular)")
+
+            ' Show the map
+            'theHost.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Panel.Goto.Default.OMMaps", screen))
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Show.MapPlugin")
+            'OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Goto.Current")
+
+            ' Start the route
+            x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Route", Nothing, myLoc)
+
+            ' can map to button with this
+            ' btn_ShowMap.Command_Click = "Screen{:S:}.Map.Show.MapPlugin"
+            'x = theHost.CommandHandler.ExecuteCommand("Map.Zoom.Out")
+
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.ZoomAll")
 
         End Sub
 
@@ -416,9 +497,9 @@ Namespace OMFuel
                     ' Populate xZip and xCountry with info from favorite
                     Dim xZip As String = "", xCountry As String = "", xCity As String = "", xState As String = ""
                     xZip = StoredData.Get(Me, "FAVS.homeZip")
-                    xCity = StoredData.Get(Me, "FAVS.favoriteCity")
-                    xState = StoredData.Get(Me, "FAVS.favoriteState")
-                    xCountry = StoredData.Get(Me, "FAVS.favoriteCountry")
+                    xCity = StoredData.Get(Me, "FAVS.homeCity")
+                    xState = StoredData.Get(Me, "FAVS.homeState")
+                    xCountry = StoredData.Get(Me, "FAVS.homeCountry")
                     theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Favorite", {xZip, xCity, xState, xCountry})
                 Case "Favorites_Button"
                     ' Regular click on button does nothing
@@ -486,7 +567,7 @@ Namespace OMFuel
 
             Select Case sender.Name
                 Case "Home_Button"
-                    ' Save current location as HOME
+                    ' Save last searched location as HOME
                     StoredData.Set(Me, "FAVS.homeCity", theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Last.City").FormatedValue.ToUpper)
                     StoredData.Set(Me, "FAVS.homeState", theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Last.State").FormatedValue.ToUpper)
                     StoredData.Set(Me, "FAVS.homeZip", theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Last.Code").FormatedValue.ToUpper)
@@ -494,10 +575,7 @@ Namespace OMFuel
                     myBanner.Text = "Saved as HOME"
                     theHost.UIHandler.InfoBanner_Show(screen, myBanner)
                 Case "Favorites_Button"
-                    ' Add displayed location to favorites
-                    ' Hard coded example
-                    'Dim xZip As String = "M5H2N2"
-                    'Dim xCountry As String = "CA"
+                    ' Save last searched location to Favorites
                     If xCount > 0 Then
                         For x = 1 To xCount
                             xCity = StoredData.Get(Me, String.Format("FAVS.favoriteCity{0}", x))
@@ -570,13 +648,20 @@ Namespace OMFuel
             Dim fPanel As OMPanel = PanelManager(screen, "EditFavs")
             Dim zipBox As OMTextBox = fPanel("favZip")
             Dim cityBox As OMTextBox = fPanel("favCity")
-            'Dim stateBox As OMTextBox = fPanel("favState")
+
+            Dim myLoc As OpenMobile.Location = New OpenMobile.Location
+            If String.IsNullOrEmpty(zipBox.Text) Then
+                myLoc.Keyword = cityBox.Text
+            Else
+                myLoc.Keyword = zipBox.Text.Replace(" ", "")
+            End If
+            myLoc = theHost.CommandHandler.ExecuteCommand("Map.Lookup.Location", myLoc)
 
             Dim xZip As String, xCity As String, xState As String, xCountry As String
-            xZip = zipBox.Text.ToUpper
-            xCity = cityBox.Text.Substring(0, cityBox.Text.IndexOf(","))
-            xState = cityBox.Text.Substring(cityBox.Text.IndexOf(",") + 1)
-            xCountry = ""
+            xZip = myLoc.Zip.Replace(" ", "")
+            xCity = myLoc.City
+            xState = myLoc.State
+            xCountry = myLoc.Country
 
             zipBox.Text = ""
             cityBox.Text = ""

@@ -31,6 +31,7 @@ using OpenMobile.Plugin;
 using System.Diagnostics;
 using OpenMobile.Framework;
 using OpenMobile.helperFunctions.Graphics;
+using System.Linq;
 
 namespace OpenMobile
 {
@@ -45,7 +46,7 @@ namespace OpenMobile
         bool Identify;
         float IdentifyOpacity = 1f;
         public Graphics.Graphics g;
-        Point CursorPosition = new Point();
+        MouseData _MouseData = new MouseData();
         float CursorDistance = 0f;
         Point CursorDistanceXYTotal = new Point();
         Point CursorDistanceXYRelative = new Point();
@@ -207,6 +208,23 @@ namespace OpenMobile
             ReDrawPanel = new ReDrawTrigger(Invalidate);
         }
 
+        public override void Dispose()
+        {
+            if (tmrClickHold != null)
+                tmrClickHold.Dispose();
+            if (tmrMeasureFPS != null)
+                tmrMeasureFPS.Dispose();
+            base.Dispose();
+        }
+        protected override void Dispose(bool manual)
+        {
+            if (tmrClickHold != null)
+                tmrClickHold.Dispose();
+            if (tmrMeasureFPS != null)
+                tmrMeasureFPS.Dispose();
+            base.Dispose(manual);
+        }
+
         void tmrMeasureFPS_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {   // Measure max fps and log it to the debug log
             tmrMeasureFPS.Enabled = false;
@@ -300,7 +318,7 @@ namespace OpenMobile
 
         protected override void OnLoad(EventArgs e)
         {
-            g.Initialize();
+            g.Initialize(this, _MouseData);
             if (screen == 0)
             {
                 if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))
@@ -442,9 +460,9 @@ namespace OpenMobile
             {
                 lock (painting)
                 {
-                    g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 5, CursorPosition.Y);
-                    g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X, CursorPosition.Y + 5);
-                    g.DrawLine(new Pen(Color.Red, 3F), CursorPosition.X, CursorPosition.Y, CursorPosition.X + 12, CursorPosition.Y + 12);
+                    g.DrawLine(new Pen(Color.Red, 3F), _MouseData.CursorPosition.X, _MouseData.CursorPosition.Y, _MouseData.CursorPosition.X + 5, _MouseData.CursorPosition.Y);
+                    g.DrawLine(new Pen(Color.Red, 3F), _MouseData.CursorPosition.X, _MouseData.CursorPosition.Y, _MouseData.CursorPosition.X, _MouseData.CursorPosition.Y + 5);
+                    g.DrawLine(new Pen(Color.Red, 3F), _MouseData.CursorPosition.X, _MouseData.CursorPosition.Y, _MouseData.CursorPosition.X + 12, _MouseData.CursorPosition.Y + 12);
                 }
             }
         }
@@ -584,16 +602,16 @@ namespace OpenMobile
         {
             if (this.WindowState == WindowState.Maximized)
                 this.WindowState = WindowState.Fullscreen;
-            if ((this.WindowState == WindowState.Fullscreen) && (!defaultMouse))
+            if ((this.WindowState == WindowState.Fullscreen)) // && (!defaultMouse))
             {
-                if (screen == 0)
-                    DefaultMouse.TrapCursor();
+                //if (screen == 0)
+                //    DefaultMouse.TrapCursor();
                 DefaultMouse.HideCursor(this.WindowInfo);
             }
             else
             {
-                if ((screen == 0) && (!defaultMouse))
-                    DefaultMouse.UntrapCursor();
+                //if ((screen == 0) && (!defaultMouse))
+                //    DefaultMouse.UntrapCursor();
                 DefaultMouse.ShowCursor(this.WindowInfo);
             }
             base.OnWindowStateChanged(e);
@@ -655,7 +673,7 @@ namespace OpenMobile
             p.Scale(_ScaleFactors.X, _ScaleFactors.Y);
             return p;
         }
-
+        
         internal void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
         {
             if ((int)sender != screen)
@@ -666,12 +684,12 @@ namespace OpenMobile
             MouseMoveEventArgs.Scale(eScaled, _ScaleFactors);
 
             // Save current cursor position
-            CursorPosition = eScaled.Location;
+            _MouseData.CursorPosition = eScaled.Location;
 
             // Calculate mouse move distances
-            CursorDistance = (MouseMoveStartPoint.ToVector2() - CursorPosition.ToVector2()).Length;
-            CursorDistanceXYTotal = CursorPosition - MouseMoveStartPoint;
-            CursorDistanceXYRelative = CursorPosition - CursorDistanceXYRelative;
+            CursorDistance = (MouseMoveStartPoint.ToVector2() - _MouseData.CursorPosition.ToVector2()).Length;
+            CursorDistanceXYTotal = _MouseData.CursorPosition - MouseMoveStartPoint;
+            CursorDistanceXYRelative = _MouseData.CursorPosition - CursorDistanceXYRelative;
 
             // Calculate mouse move speed (pixels since last execution)
             swCursorSpeedTiming.Stop();
@@ -699,7 +717,7 @@ namespace OpenMobile
                     if (Gesture_Active || CursorDistance > 50)
                     {
                         // Add mouse position to gesture array
-                        currentGesture.Add(CursorPosition);
+                        currentGesture.Add(_MouseData.CursorPosition);
                     }
 
                 // Send iThrow interface data
@@ -749,7 +767,7 @@ namespace OpenMobile
                 OMControl ParentControl = null;
 
                 // Find control under mouse
-                control = FindControlAtLocation(CursorPosition, out ParentControl);
+                control = FindControlAtLocation(_MouseData.CursorPosition, out ParentControl);
 
                 // Highlight/unhighlight the control
                 UpdateControlFocus(control, ParentControl, true);
@@ -790,7 +808,7 @@ namespace OpenMobile
             }
 
             // Update relative distance data
-            CursorDistanceXYRelative = CursorPosition;
+            CursorDistanceXYRelative = _MouseData.CursorPosition;
             
             // Redraw screen
             Invalidate();
@@ -925,18 +943,33 @@ namespace OpenMobile
             // Redraw
             Invalidate();
 
+            // Check click type
+            ClickTypes clickType = ClickTypes.Normal;
+            if (swClickTiming.ElapsedMilliseconds > 1)
+            {
+                // Determine type of click (click or long click)
+                if (swClickTiming.ElapsedMilliseconds < 500)
+                {   // Normal click
+                    clickType = ClickTypes.Normal;
+                }
+                else
+                {   // Long click
+                    clickType = ClickTypes.Long;
+                }
+            }
+
             // Send Mouse preview interface data
             if (FocusedControlParent != null && ((FocusedControl != null && !typeof(IMousePreview).IsInstanceOfType(FocusedControl)) || (FocusedControl == null)))
             {   // Send event to focused control parent
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
-                        ((IMousePreview)FocusedControlParent).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                        ((IMousePreview)FocusedControlParent).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                        ((IMousePreview)FocusedControl).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
             }
 
             // Return if gesture is handled or no control has focus
@@ -944,7 +977,7 @@ namespace OpenMobile
             {
                 // Find control under mouse (if any)
                 OMControl ParentControl = null;
-                OMControl control = FindControlAtLocation(CursorPosition, out ParentControl);
+                OMControl control = FindControlAtLocation(_MouseData.CursorPosition, out ParentControl);
 
                 // Highlight/unhighlight the control
                 UpdateControlFocus(control, ParentControl, true);
@@ -1186,6 +1219,7 @@ namespace OpenMobile
                 // Go trough each panel to set correct modes after transition effects
                 lock (RenderingQueue)
                 {
+                    panels = panels.OrderByDescending(x => x.Mode).ToList();
                     foreach (OMPanel panel in panels)
                     {
                         // Stop rendering in each control in the panel (if applicable)
@@ -1870,7 +1904,6 @@ namespace OpenMobile
             return bestControl;
         }
 
-        private enum ClickTypes { None, Normal, Long, Hold }
         private void ActivateClick(OMControl control, ClickTypes ClickType, MouseButtonEventArgs e)
         {
             // Cancel if no control is provided
@@ -1883,7 +1916,7 @@ namespace OpenMobile
 
             // Scale mouse data
             MouseButtonEventArgs eScaled = new MouseButtonEventArgs(e);
-            MouseButtonEventArgs.Scale(eScaled, _ScaleFactors);
+            //MouseButtonEventArgs.Scale(eScaled, _ScaleFactors);
 
             // Lock the currently focused control
             lock (FocusedControl)

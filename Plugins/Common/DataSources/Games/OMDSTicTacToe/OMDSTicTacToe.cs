@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -35,22 +36,39 @@ using OpenMobile.Controls;
 
 namespace OMDSTicTacToe
 {
-    public class Class1 : IBasePlugin, IDataSource
+    public class OMDSTicTacToe : BasePluginCode, IDataSource
     {
         static IPluginHost theHost;
         int boardID;
         Random random;
-        Dictionary<int, TicTacToeBoard> gameBoards;
-        List<string> multiplayerList;
+        static Dictionary<int, TicTacToeBoard> gameBoards;
+        ObservableCollection<string> multiplayerList = new ObservableCollection<string>();
+        //List<string> multiplayerList;
         public static bool[] displayNotifications;
+        public static Notification[] gameNotifications;
 
-        public eLoadStatus initialize(IPluginHost host)
+        public OMDSTicTacToe()
+            : base("OMDSTicTacToe", OM.Host.getPluginImage<OMDSTicTacToe>("Icon-OMTicTacToe"), 0.1f, "Tic Tac Toe Datasource", "Peter Yeaney", "peter.yeaney@outlook.com")
+        {
+        }
+
+        public override imageItem pluginIcon
+        {
+            get
+            {
+                return OM.Host.getPluginImage(this, "Icon-OMTicTacToe");
+            }
+        }
+
+        public override eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
             random = new Random();
             gameBoards = new Dictionary<int, TicTacToeBoard>();
-            multiplayerList = new List<string>();
+            //multiplayerList = new List<string>();
+            multiplayerList = new ObservableCollection<string>();
             displayNotifications = new bool[theHost.ScreenCount];
+            gameNotifications = new Notification[OM.Host.ScreenCount];
             for (int i = 0; i < theHost.ScreenCount; i++)
             {
                 multiplayerList.Add("Screen: " + i.ToString());
@@ -66,21 +84,133 @@ namespace OMDSTicTacToe
             //create the commands for games
             theHost.CommandHandler.AddCommand(new Command(this.pluginName, "OMDSTicTacToe", "Notifications", "Enable", NotificationsEnable, 0, false, "Enable OMDSTicTacToe Notifications"));
             theHost.CommandHandler.AddCommand(new Command(this.pluginName, "OMDSTicTacToe", "Notifications", "Disable", NotificationsDisable, 0, false, "Disable OMDSTicTacToe Notifications"));
-            //theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "AddGame", AddGame, 2, false, ""));
-            //theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "StartGame", StartGame, 1, false, ""));
-            //theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "FlipTile", FlipTile, 1, false, ""));
-            //theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "EndGame", EndGame, 1, false, ""));
-            //theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "Rematch", Rematch, 1, false, ""));
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "AddGame", AddGame, 2, true, ""));
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "StartGame", StartGame, 1, false, ""));
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "FlipTile", FlipTile, 1, false, ""));
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "EndGame", EndGame, 1, false, ""));
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Game", "Rematch", Rematch, 1, false, ""));
 
-            //create the manual dataSource for starting games
-            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Game", "AddGame", 0, DataSource.DataTypes.raw, AddGame, ""));
-            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Game", "StartGame", 0, DataSource.DataTypes.raw, StartGame, ""));
-            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Game", "FlipTile", 0, DataSource.DataTypes.raw, FlipTile, ""));
-            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Game", "EndGame", 0, DataSource.DataTypes.raw, EndGame, ""));
-            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Game", "Rematch", 0, DataSource.DataTypes.raw, Rematch, ""));
-            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Game", "MultiplayerList", DataSource.DataTypes.raw, "List of multiplayer games"), multiplayerList);
+            //create the datasource for the multiplayerList and push the initial values
+            theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Multiplayer", "List", DataSource.DataTypes.raw, "Provides a subscribable DataSource for the multiplayerList: Value = ObservableCollection<string>"), multiplayerList);
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Multiplayer", "Challenge", ChallengeScreen, 2, false, "params = {screenFrom, screenChallenged}"));
+            theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Multiplayer", "Challenged", DataSource.DataTypes.raw, "Provides a subscribable DataSource for challenges: Value = List<int> {screenChallanger, screenChallanged}"));
+            theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Multiplayer", "Spectate", DataSource.DataTypes.raw, "Provides a subscribable DataSource for spectating = List<int> {SpectatingScreen, ScreenToSpectate}"));
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Multiplayer", "ChallengeDecline", ChallengeDeclined, 2, false, "params = {screenFrom, screenChallenger}"));
+            theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Multiplayer", "ChallengeDeclined", DataSource.DataTypes.raw, "Provides a subscribable DataSource for when a game challenge is declined"));
+            theHost.CommandHandler.AddCommand(new Command(this.pluginName, "TicTacToe", "Multiplayer", "ChallengeCancel", ChallengeCancelled, 2, false, "params = {screenFrom, screenChallenger}"));
+            theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Multiplayer", "ChallengeCancelled", DataSource.DataTypes.raw, "Provides a subscribable DataSource for when a game challenge is canceled"));
+            theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", "Notification", "Click", DataSource.DataTypes.raw, "Provides a subscribable DataSource for when a Tic Tac Toe notification is clicked"));
 
             return eLoadStatus.LoadSuccessful;
+        }
+
+        public static void ShowNotification(IBasePlugin ibp, int screen, string message)
+        {
+            if (OMDSTicTacToe.gameNotifications[screen] == null)
+            {
+                //gameNotifications[screen] = new Notification(ibp, "OMDSTicTacToe", imageItem.NONE, imageItem.NONE, line1, line2);
+                gameNotifications[screen] = new Notification(ibp, "OMDSTicTacToe", ibp.pluginIcon.image, ibp.pluginIcon.image, "Tic Tac Toe", message);
+                gameNotifications[screen].ClickAction += new Notification.NotificationAction(TicTacToeBoard_ClickAction);
+                gameNotifications[screen].ClearAction += new Notification.NotificationAction(TicTacToeBoard_ClearAction);
+                OM.Host.UIHandler.AddNotification(screen, gameNotifications[screen]);
+            }
+            else
+            {
+                OMDSTicTacToe.gameNotifications[screen].Text = message;
+            }
+        }
+
+        private static void TicTacToeBoard_ClickAction(Notification notification, int screen, ref bool cancel)
+        {
+
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Notification.Click", screen, true);
+
+            //for (int i = 0; i < gameBoards.Count; i++)
+            //{
+            //    if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == screen) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == screen))
+            //    {
+            //        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { screen, "BackToGame" } }, true);
+            //        break;
+            //    }
+            //}
+            
+            //send the message to go back to the game
+            //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { screen, "BackToGame" } }, true);
+        }
+
+        private static void TicTacToeBoard_ClearAction(Notification notification, int screen, ref bool cancel)
+        {
+            cancel = true;
+        }
+        
+
+        private object ChallengeCancelled(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            ModifyMultiplayerListBack(Convert.ToInt32(param[0]), Convert.ToInt32(param[1]));
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.ChallengeDeclined", new List<int> { Convert.ToInt32(param[0]), Convert.ToInt32(param[1]) }, true);
+            return null;
+        }
+
+        private object ChallengeDeclined(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            ModifyMultiplayerListBack(Convert.ToInt32(param[0]), Convert.ToInt32(param[1]));
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.ChallengeDeclined", new List<int> { Convert.ToInt32(param[0]), Convert.ToInt32(param[1]) }, true);
+            return null;
+        }
+
+        private void ModifyMultiplayerListBack(int screen1, int screen2)
+        {
+            multiplayerList[screen1] = String.Format("Screen: {0}", screen1.ToString());
+            multiplayerList[screen2] = String.Format("Screen: {0}", screen2.ToString());
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.List", multiplayerList, true);
+        }
+
+        private object ChallengeScreen(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            challengeScreen(Convert.ToInt32(param[0]), Convert.ToInt32(param[1]));
+            return null;
+        }
+
+        private void challengeScreen(int screen, int challengedScreen)
+        {
+            if (multiplayerList[challengedScreen].Contains("Challeng"))
+                return;
+            if (challengedScreen != -1)
+            {
+                if (multiplayerList[challengedScreen].Contains("***"))
+                {
+                    //already playing the game, sub_update for the spectator screen (param[0]) the board id of that game
+                    for (int i = 0; i < gameBoards.Count; i++)
+                    {
+                        if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == challengedScreen) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == challengedScreen))
+                        {
+                            multiplayerList[screen] = "*** Screen: " + screen.ToString() + " (Spectating Screen: " + challengedScreen.ToString() + ")";
+                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.Spectate", new List<int> {screen, gameBoards[gameBoards.Keys.ElementAt(i)].ID }, true);
+                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardVisibility", true, true);
+                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardUpdated", gameBoards[gameBoards.Keys.ElementAt(i)].Layout, true);
+                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { screen, "Spectating..." } }, true);
+                            break;
+                        }
+                    }
+                    return;
+                }
+            }
+            if (screen == challengedScreen)
+            {
+                OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner("Cannot challenge yourself!"));
+                return;
+            }
+            multiplayerList[screen] = String.Format("Screen: {0} (Challenging Screen: {1})", screen.ToString(), challengedScreen.ToString());
+            multiplayerList[challengedScreen] = String.Format("Screen: {0} (Challenged By Screen: {1})", challengedScreen.ToString(), screen.ToString());
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.List", multiplayerList, true);
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.Challenged", new List<int> {screen, challengedScreen}, true);
+            if (displayNotifications[challengedScreen])
+            {
+                ShowNotification(this, challengedScreen, String.Format("Screen {0} has challenged you to a game of Tic Tac Toe", screen.ToString()));
+            }
         }
 
         private object NotificationsEnable(OpenMobile.Command command, object[] param, out bool result)
@@ -94,11 +224,193 @@ namespace OMDSTicTacToe
         {
             result = true;
             displayNotifications[Convert.ToInt32(param[0])] = false;
+            gameNotifications[Convert.ToInt32(param[0])].ClearAction -= TicTacToeBoard_ClearAction;
+            gameNotifications[Convert.ToInt32(param[0])] = null;
+
+            ////does this do all the below?
+            ////gameNotifications[Convert.ToInt32(param[0])].Dispose();
+
+            ////remove the clear action, so we can clear the notification...
+            //for (int i = 0; i < gameBoards.Count; i++)
+            //{
+            //    if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == Convert.ToInt32(param[0])) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == Convert.ToInt32(param[0])))
+            //    {
+            //        gameNotifications[Convert.ToInt32(param[0])].ClearAction -= gameBoards[gameBoards.Keys.ElementAt(i)].TicTacToeBoard_ClearAction;
+            //    }
+            //}
+            ////null it out so next time we make a new notification
+            //gameNotifications[Convert.ToInt32(param[0])] = null;
+
             //clear any existing as well
             OM.Host.UIHandler.RemoveAllMyNotifications(this, Convert.ToInt32(param[0]));
             return null;
         }
 
+        private object AddGame(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            if (param == null)
+                return null;
+
+            ////can we create a game??? param[0] = screen1, param[1] = screen2
+            //if (Convert.ToInt32(param[1]) != -1)
+            //{
+            //    if (multiplayerList[Convert.ToInt32(param[1])].Contains("***"))
+            //    {
+            //        //already playing the game, sub_update for the spectator screen (param[0]) the board id of that game
+            //        for (int i = 0; i < gameBoards.Count; i++)
+            //        {
+            //            if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == Convert.ToInt32(param[1])) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == Convert.ToInt32(param[1])))
+            //            {
+            //                //the screen is playing on boardID = i, param[1] is the challenged screen
+            //                //return a board message for param[0] for being a spectator
+            //                multiplayerList[Convert.ToInt32(param[0])] = "*** Screen: " + param[0].ToString() + " (Spectating Screen: " + param[1].ToString() + ")";
+            //                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[i].ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { Convert.ToInt32(param[0]), String.Format("Spectate:{0}", gameBoards[i].ID) } }, true);
+            //                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.Spectate", gameBoards[i].ID, true);
+            //                break;
+            //            }
+            //        }
+            //        return null;
+            //    }
+            //}
+            //if (Convert.ToInt32(param[0]) == Convert.ToInt32(param[1]))
+            //{
+            //    OM.Host.UIHandler.InfoBanner_Show(Convert.ToInt32(param[0]), new InfoBanner("Cannot challenge yourself!"));
+            //    return null;
+            //}
+
+
+
+            int currentBoardID = boardID;
+            boardID += 1;
+            StoredData.Set(this, "OMDSTicTacToe.BoardID", boardID.ToString());
+            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", currentBoardID.ToString(), "BoardUpdated", DataSource.DataTypes.raw, "TicTacToe Game Board Updates"));
+            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", currentBoardID.ToString(), "BoardVisibility", DataSource.DataTypes.binary, "TicTacToe Game Board Visibility"));
+            BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", currentBoardID.ToString(), "BoardMessages", DataSource.DataTypes.raw, "TicTacToe Game Board Messages"));
+
+            if (Convert.ToInt32(param[1]) != -1)
+            {
+                
+                multiplayerList[Convert.ToInt32(param[0])] = "*** Screen: " + param[0].ToString() + " (VS. Screen: " + param[1].ToString() + ")";
+                if (!displayNotifications[Convert.ToInt32(param[0])])
+                    OM.Host.UIHandler.InfoBanner_Show(Convert.ToInt32(param[0]), new InfoBanner(String.Format("You VS Screen: {0}{1}GOOD LUCK!!!", param[1].ToString(), Environment.NewLine)));
+                multiplayerList[Convert.ToInt32(param[1])] = "*** Screen: " + param[1].ToString() + " (VS. Screen: " + param[0].ToString() + ")";
+                if (!displayNotifications[Convert.ToInt32(param[1])])
+                    OM.Host.UIHandler.InfoBanner_Show(Convert.ToInt32(param[1]), new InfoBanner(String.Format("You VS Screen: {0}{1}GOOD LUCK!!!", param[0].ToString(), Environment.NewLine)));
+                OM.Host.DebugMsg(String.Format("Game added ({0}): Screen {1} vs Screen {2}", currentBoardID.ToString(), param[0].ToString(), param[1].ToString()));
+            }
+            else
+            {
+                multiplayerList[Convert.ToInt32(param[0])] = "*** Screen: " + param[0].ToString() + " (VS. AI)";
+                OM.Host.UIHandler.InfoBanner_Show(Convert.ToInt32(param[0]), new InfoBanner(String.Format("You VS: AI{0}GOOD LUCK!!!", Environment.NewLine)));
+                OM.Host.DebugMsg(String.Format("Game added ({0}): Screen {1} vs AI", currentBoardID.ToString(), param[0].ToString() ));
+            }
+
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.List", multiplayerList, true);
+            //create all the dataSources we need
+            //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", currentBoardID.ToString(), "BoardUpdated", DataSource.DataTypes.raw, "TicTacToe Game Board Updates"));
+            //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", currentBoardID.ToString(), "BoardVisibility", DataSource.DataTypes.binary, "TicTacToe Game Board Visibility"));
+            //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource(this.pluginName, "TicTacToe", currentBoardID.ToString(), "BoardMessages", DataSource.DataTypes.raw, "TicTacToe Game Board Messages"));
+
+            //create new board
+            gameBoards.Add(currentBoardID, new TicTacToeBoard(currentBoardID));
+            gameBoards[currentBoardID].ibp = this;
+            gameBoards[currentBoardID].theHost = theHost;
+            gameBoards[currentBoardID].Player1 = Convert.ToInt32(param[0]);
+            gameBoards[currentBoardID].Player2 = Convert.ToInt32(param[1]);
+
+            gameBoards[currentBoardID].RandomizeTurns();
+            gameBoards[currentBoardID].RandomizePieces();
+
+            return currentBoardID;
+        }
+
+        private object StartGame(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            if (param == null)
+                return null;
+
+            //[0] = boardID
+            gameBoards[Convert.ToInt32(param[0])].StartGame();
+            return null;
+        }
+
+        private object FlipTile(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            if (param == null)
+                return null;
+
+            for (int i = 0; i < gameBoards.Count; i++)
+            {
+                if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == Convert.ToInt32(param[0])) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == Convert.ToInt32(param[0])))
+                {
+                    //the screen is playing on boardID = i
+                    if (gameBoards[gameBoards.Keys.ElementAt(i)].Turn != Convert.ToInt32(param[0]))
+                        return null;
+                    if (gameBoards[gameBoards.Keys.ElementAt(i)].Layout[Convert.ToInt32(param[1])][Convert.ToInt32(param[2])] != "B")
+                        return null;
+                    gameBoards[gameBoards.Keys.ElementAt(i)].FlipTile(Convert.ToInt32(param[1]), Convert.ToInt32(param[2]));
+                    return null;
+                }
+            }
+
+            //[0] = boardID, [1] = screen clicked from, [2] = row, [3] = col
+            if (gameBoards[Convert.ToInt32(param[0])].Turn != Convert.ToInt32(param[1]))
+                return null;
+            //return gameBoards[Convert.ToInt32(param[0])].FlipTile(Convert.ToInt32(param[2]), Convert.ToInt32(param[3]));
+            return null;
+        }
+
+        private object EndGame(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            if (param == null)
+                return null;
+            for (int i = 0; i < gameBoards.Count; i++)
+            {
+                if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == Convert.ToInt32(param[0])) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == Convert.ToInt32(param[0])))
+                {
+                    //OM.Host.DebugMsg(String.Format("Removing from gameBoards: {0}", gameBoards.Keys.ElementAt(i).ToString()));
+                    //the screen is playing on boardID = i
+                    multiplayerList[Convert.ToInt32(param[0])] = String.Format("Screen: {0}", param[0].ToString());
+                    if(gameBoards[gameBoards.Keys.ElementAt(i)].Player2 != -1)
+                        multiplayerList[gameBoards[gameBoards.Keys.ElementAt(i)].Player2] = String.Format("Screen: {0}", gameBoards[gameBoards.Keys.ElementAt(i)].Player2.ToString());
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.List", multiplayerList, true);
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardVisibility", false, true);
+                    gameBoards[gameBoards.Keys.ElementAt(i)].EndGame(Convert.ToInt32(param[0]));
+                    gameBoards.Remove(gameBoards.Keys.ElementAt(i));
+                    return null;
+                }
+            }
+            //else there is just a screen unsubscribing from spectating
+            multiplayerList[Convert.ToInt32(param[0])] = String.Format("Screen: {0}", param[0].ToString());
+
+            return null;
+        }
+
+        private object Rematch(OpenMobile.Command command, object[] param, out bool result)
+        {
+            result = true;
+            if (param == null)
+                return null;
+            for (int i = 0; i < gameBoards.Count; i++)
+            {
+                if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == Convert.ToInt32(param[0])) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == Convert.ToInt32(param[0])))
+                {
+                    //the screen is playing on boardID = i
+                    gameBoards[gameBoards.Keys.ElementAt(i)].RandomizeTurns();
+                    gameBoards[gameBoards.Keys.ElementAt(i)].RandomizePieces();
+                    gameBoards[gameBoards.Keys.ElementAt(i)].StartGame();
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        //not used anymore as of 01/28/2014
+        #region DataSourceDelegates
         private object AddGame(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
         {
             result = true;
@@ -235,58 +547,7 @@ namespace OMDSTicTacToe
             }
             return null;
         }
-
-        public Settings loadSettings()
-        {
-            return null;
-        }
-
-        public string authorName
-        {
-            get { return "Peter Yeaney"; }
-        }
-
-        public string authorEmail
-        {
-            get { return "peter.yeaney@outlook.com"; }
-        }
-
-        public string pluginName
-        {
-            get { return "OMDSTicTacToe"; }
-        }
-        public string displayName
-        {
-            get { return "TicTacToe Data"; }
-        }
-        public float pluginVersion
-        {
-            get { return 0.1F; }
-        }
-
-        public string pluginDescription
-        {
-            get { return "TicTacToe Data"; }
-        }
-
-        public bool incomingMessage(string message, string source)
-        {
-            return false;
-        }
-        public bool incomingMessage<T>(string message, string source, ref T data)
-        {
-            return false;
-        }
-
-        public imageItem pluginIcon
-        {
-            get { return OM.Host.getSkinImage("Icons|Icon-OMTicTacToe"); }
-        }
-
-        public void Dispose()
-        {
-            //
-        }
+#endregion
 
     }
 
@@ -299,6 +560,7 @@ namespace OMDSTicTacToe
         public int Player2;
         public int Turn;
         private int oldTurn;
+        private bool gameOver = false;
         public string[][] Layout = new string[3][] { new string[3], new string[3], new string[3] };
         public string[] Piece = new string[2];
         Random random;
@@ -339,76 +601,64 @@ namespace OMDSTicTacToe
         public void StartGame()
         {
             ResetBoard();
+            string messageP1 = "";
+            string messageP2 = "";
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".Spectator", "Watching Game...");
             if (Turn == Player1) //player 1 turn
             {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "It is your turn, please make a move!");
+                messageP1 = "It is your turn, please make a move!";
                 if (Player2 != -1) //not ai
-                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "Opponent's turn, please wait!");
-
+                    messageP2 = "Opponent's turn, please wait!";
             }
             else if ((Player2 != -1) && (Turn == Player2)) //player 2 turn
             {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "Opponent's turn, please wait!");
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "It is your turn, please make a move!");
+                messageP1 = "Opponent's turn, please wait!";
+                messageP2 = "It is your turn, please make a move!";
 
             }
             else if (Turn == -1) //ai turn
             {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "Computer's turn, please wait!");
-                AITurn();
+                messageP1 = "Computer's turn, please wait!";
+                OpenMobile.Threading.SafeThread.Asynchronous(AITurn);
             }
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { Player1, messageP1 }, { Player2, messageP2 } }, true);
         }
 
         public void ResetBoard(bool quit = false, int screenQuit = -1)
         {
             //flip all images "blank"
             for (int r = 1; r < 4; r++)
+            {
                 for (int c = 1; c < 4; c++)
                 {
                     Layout[r - 1][c - 1] = "B";
-                    if (quit)
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible", false);
-                    else
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible", true);
-                    //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + r.ToString() + "-" + c.ToString(), theHost.getPluginImage(ibp, "Images|TicTacToe_B"));
-                    //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + r.ToString() + "-" + c.ToString(), theHost.getPluginImage(ibp, "Images|TicTacToe_B_Transparent"));
-                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + r.ToString() + "-" + c.ToString(), theHost.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_None"));
-                }
+                 }
+            }
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardUpdated", Layout, true);
             if (quit)
-            {
+            {   
                 if (screenQuit != -1)
                 {
-                    if (Player1 == screenQuit)
+                    if (!gameOver)
                     {
-                        if (Player2 != -1)
-                            OM.Host.UIHandler.InfoBanner_Show(Player2, new InfoBanner("Your opponent has quit!"));
-                    }
-                    else if (Player2 == screenQuit)
-                    {
-                        OM.Host.UIHandler.InfoBanner_Show(Player1, new InfoBanner("Your opponent has quit!"));
+                        if (Player1 == screenQuit)
+                        {
+                            if (Player2 != -1)
+                                OM.Host.UIHandler.InfoBanner_Show(Player2, new InfoBanner("Your opponent has quit!"));
+                        }
+                        else if (Player2 == screenQuit)
+                        {
+                            OM.Host.UIHandler.InfoBanner_Show(Player1, new InfoBanner("Your opponent has quit!"));
+                        }
                     }
                 }
-                //mainmenu, quit, rematch, single player, multiplayer
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleStatusLabel", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "");
-                if (Player2 != -1) //not ai
-                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "");
-                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleMainMenuButton", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleRematchButton", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleQuitButton", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleSinglePlayerButton", true);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleMultiPlayerButton", true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardVisibility", false);
             }
             else
             {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleStatusLabel", true);
-                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleMainMenuButton", true);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleRematchButton", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleQuitButton", true);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleSinglePlayerButton", false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleMultiPlayerButton", false);
-            }
+                gameOver = false;
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardVisibility", true);
+             }
         }
 
         public void EndGame(int screenQuit = -1)
@@ -424,191 +674,149 @@ namespace OMDSTicTacToe
             {
 
                 Layout[row][col] = Piece[0];
-                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + (row + 1).ToString() + "-" + (col + 1).ToString(), theHost.getPluginImage(ibp, "Images|TicTacToe_" + Piece[0]));
-                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + (row + 1).ToString() + "-" + (col + 1).ToString(), theHost.getPluginImage(ibp, "Images|TicTacToe_" + Piece[0] + "_Transparent"));
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + (row + 1).ToString() + "-" + (col + 1).ToString(), theHost.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Piece[0]));
             }
             else if (oldTurn == Player2)
             {
                 Layout[row][col] = Piece[1];
-                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + (row + 1).ToString() + "-" + (col + 1).ToString(), theHost.getPluginImage(ibp, "Images|TicTacToe_" + Piece[1]));
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + (row + 1).ToString() + "-" + (col + 1).ToString(), theHost.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Piece[1]));
-                // Turn = Player1;
             }
+            
             SwitchTurns(oldTurn);
         }
 
         public void SwitchTurns(int oldTurn)
         {
             string gameEnd = GameEnd();
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardUpdated", Layout, true);
+            string messageP1 = "";
+            string messageP2 = "";
             if (gameEnd == "")
             {
                 if (oldTurn == Player1)
                 {
                     if (Player2 == -1)
                     {
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "Computer's turn, please wait!");
+                        messageP1 = "Computer's turn, please wait!";
                         Turn = Player2;
-                        AITurn();
+                        OpenMobile.Threading.SafeThread.Asynchronous(AITurn);
                     }
                     else
                     {
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "Opponent's turn, please wait!");
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "It is your turn, please make a move!");
+                        messageP1 = "Opponent's turn, please wait!";
+                        messageP2 = "It is your turn, please make a move!";
                         Turn = Player2;
-                        //
-                        if (Class1.displayNotifications[Player2])
+                        if (OMDSTicTacToe.displayNotifications[Player2])
                         {
-                            //show notification
-
+                            //CreateNotification(Player2, messageP2);
+                            ShowNotification(Player2, messageP2);
                         }
                     }
                 }
                 else if (oldTurn == Player2)
                 {
-                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "It is your turn, please make a move!");
+                    messageP1 = "It is your turn, please make a move!";
                     if (Player2 != -1) //not ai
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "Opponent's turn, please wait!");
+                        messageP2 = "Opponent's turn, please wait!";
                     Turn = Player1;
-                    if (Class1.displayNotifications[Player1])
+                    if (OMDSTicTacToe.displayNotifications[Player1])
                     {
-
+                        //CreateNotification(Player1, messageP1);
+                        ShowNotification(Player1, messageP1);
                     }
                 }
-                //return "";
             }
             else
             {
+                gameOver = true;
                 //someone won or it's a draw....
                 if (gameEnd == "Win")
                 {
                     if (oldTurn == Player1)
                     {
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "Congratulations, you've won!");
+                        messageP1 = "Congraulations, you've won!";
                         if (Player2 != -1)
                         {
-                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "Unfortunate, you've lost!");
-                            if (Class1.displayNotifications[Player2])
+                            messageP2 = "Unfortunate, you've lost!";
+                            if (OMDSTicTacToe.displayNotifications[Player2])
                             {
-
+                                //CreateNotification(Player2, messageP2);
+                                ShowNotification(Player2, messageP2);
                             }
                         }
                     }
                     else if (oldTurn == Player2)
                     {
                         if (Player2 != -1)
-                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "Congratulations, you've won!");
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "Unfortunate, you've lost!");
-                        if (Class1.displayNotifications[Player1])
+                            messageP2 = "Congratulations, you've won!";
+                        messageP1 = "Unfortunate, you've lost!";
+                        if (OMDSTicTacToe.displayNotifications[Player1])
                         {
-
+                            //CreateNotification(Player1, messageP1);
+                            ShowNotification(Player1, messageP1);
                         }
                     }
-                    //return Player2.ToString();
                 }
                 else
                 {
-                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player1.ToString(), "Draw!");
-                    if (Class1.displayNotifications[Player1])
+                    messageP1 = "Draw!";
+                    if (OMDSTicTacToe.displayNotifications[Player1])
                     {
-
+                        //CreateNotification(Player1, messageP1);
+                        ShowNotification(Player1, messageP1);
                     }
                     if (Player2 != -1)
                     {
-                        BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + "." + Player2.ToString(), "Draw!");
-                        if (Class1.displayNotifications[Player2])
+                        messageP2 = "Draw!";
+                        if (OMDSTicTacToe.displayNotifications[Player2])
                         {
-
+                            //CreateNotification(Player2, messageP2);
+                            ShowNotification(Player2, messageP2);
                         }
                     }
-                    //return Player2.ToString();
                 }
-                //if here, we need to change visible = true for "return to main menu","rematch" buttons, visible = false for "quit" button
-                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleMainMenuButton", true);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleRematchButton", true);
-                //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".VisibleQuitButton", true);
             }
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { Player1, messageP1 }, { Player2, messageP2 } }, true);
         }
 
         private string GameEnd()
         {
             if ((Layout[0][0] != "B") && (Layout[0][0] == Layout[0][1]) && (Layout[0][1] == Layout[0][2]))
             {
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[0][0]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-1", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-2", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-3", imgWon);
+                Layout[0][0] = Layout[0][1] = Layout[0][2] = String.Format("W{0}", Layout[0][0]);
                 return "Win";
             }
             else if ((Layout[1][0] != "B") && (Layout[1][0] == Layout[1][1]) && (Layout[1][1] == Layout[1][2]))
             {
-                //imageItem imgWon = OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_" + layout[1][0]);
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[1][0]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-1", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-2", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-3", imgWon);
+                Layout[1][0] = Layout[1][1] = Layout[1][2] = String.Format("W{0}", Layout[1][0]);
                 return "Win";
             }
             else if ((Layout[2][0] != "B") && (Layout[2][0] == Layout[2][1]) && (Layout[2][1] == Layout[2][2]))
             {
-                //imageItem imgWon = OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_" + layout[2][0]);
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[2][0]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-1", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-2", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-3", imgWon);
+                Layout[2][0] = Layout[2][1] = Layout[2][2] = String.Format("W{0}", Layout[2][0]);
                 return "Win";
             }
             else if ((Layout[0][0] != "B") && (Layout[0][0] == Layout[1][0]) && (Layout[1][0] == Layout[2][0]))
             {
-                //imageItem imgWon = OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_" + layout[0][0]);
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[0][0]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-1", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-1", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-1", imgWon);
+                Layout[0][0] = Layout[1][0] = Layout[2][0] = String.Format("W{0}", Layout[0][0]);
                 return "Win";
             }
             else if ((Layout[0][1] != "B") && (Layout[0][1] == Layout[1][1]) && (Layout[0][1] == Layout[2][1]))
             {
-                //imageItem imgWon = OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_" + layout[0][1]);
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[0][1]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-2", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-2", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-2", imgWon);
+                Layout[0][1] = Layout[1][1] = Layout[2][1] = String.Format("W{0}", Layout[0][1]);
                 return "Win";
             }
             else if ((Layout[0][2] != "B") && (Layout[0][2] == Layout[1][2]) && (Layout[1][2] == Layout[2][2]))
             {
-                //imageItem imgWon = OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_" + layout[0][2]);
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[0][2]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-3", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-3", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-3", imgWon);
+                Layout[0][2] = Layout[1][2] = Layout[2][2] = String.Format("W{0}", Layout[0][2]);
                 return "Win";
             }
             else if ((Layout[0][0] != "B") && (Layout[0][0] == Layout[1][1]) && (Layout[1][1] == Layout[2][2]))
             {
-                //imageItem imgWon = OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_" + layout[0][0]);
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[2][2]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-1", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-2", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-3", imgWon);
+                Layout[0][0] = Layout[1][1] = Layout[2][2] = String.Format("W{0}", Layout[0][0]);
                 return "Win";
             }
             else if ((Layout[0][2] != "B") && (Layout[0][2] == Layout[1][1]) && (Layout[1][1] == Layout[2][0]))
             {
-                //imageItem imgWon = OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_" + layout[0][2]);
-                imageItem imgWon = new imageItem((OImage)OM.Host.getPluginImage(ibp, "Images|Icon-Glass-OMTicTacToe_" + Layout[0][2]).image.Clone());
-                imgWon.image.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".1-3", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".2-2", imgWon);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".3-1", imgWon);
+                Layout[0][2] = Layout[1][1] = Layout[2][0] = String.Format("W{0}", Layout[0][2]);
                 return "Win";
             }
             for (int i = 0; i < 3; i++)
@@ -616,6 +824,26 @@ namespace OMDSTicTacToe
                     if (Layout[i][j] == "B") return ""; //if ANY piece is still blank, return blank and keep playing
             //if here it's a draw
             return "Draw";
+        }
+
+        private void CreateNotification(int screen, string message)
+        {
+            Notification notification = new Notification(ibp, String.Format("notification.{0}", screen.ToString()), ibp.pluginIcon.image, "Tic Tac Toe", message, TicTacToeNotification_Action, TicTacToeNotification_Clear);
+            OM.Host.UIHandler.AddNotification(screen, notification);
+        }
+
+        void TicTacToeNotification_Action(Notification notification, int screen, ref bool cancel)
+        {
+            //send the message to go back to the game
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { screen, "BackToGame" } }, true);
+        }
+
+        void TicTacToeNotification_Clear(Notification notification, int screen, ref bool cancel)
+        {
+            // Cancel the clear request on this notification
+            //we aren't changing anything so the notification stays
+            //it will become cleared when it is clicked
+            cancel = true;
         }
 
         /// <summary>
@@ -725,7 +953,7 @@ namespace OMDSTicTacToe
         {
             lock (Layout)
             {
-                Thread.Sleep(500);
+                Thread.Sleep(750);
 
                 // Try winning moves
                 Point nextMove = GetNextAIMove(Piece[1]);
@@ -744,27 +972,33 @@ namespace OMDSTicTacToe
         }
 
 
-        private void ShowNotification(int screen, string line1, string line2)
+        private void ShowNotification(int screen, string message)
         {
-            if (gameNotifications[screen] == null)
-            {
-                //gameNotifications[screen] = new Notification(ibp, "OMDSTicTacToe", imageItem.NONE, imageItem.NONE, line1, line2);
-                gameNotifications[screen] = new Notification(ibp, "OMDSTicTacToe", imageItem.NONE.image, line1, line2);
-                gameNotifications[screen].ClearAction += new Notification.NotificationAction(TicTacToeBoard_ClearAction);
-                OM.Host.UIHandler.AddNotification(screen, gameNotifications[screen]);
-            }
-            else
-            {
-                gameNotifications[screen].Header = line1;
-                gameNotifications[screen].Text = line2;
+            OMDSTicTacToe.ShowNotification(ibp, screen, message);
+            //if (OMDSTicTacToe.gameNotifications[screen] == null)
+            //{
+            //    //gameNotifications[screen] = new Notification(ibp, "OMDSTicTacToe", imageItem.NONE, imageItem.NONE, line1, line2);
+            //    gameNotifications[screen] = new Notification(ibp, "OMDSTicTacToe", ibp.pluginIcon.image, "Tic Tac Toe", message);
+            //    gameNotifications[screen].ClickAction += new Notification.NotificationAction(TicTacToeBoard_ClickAction);
+            //    gameNotifications[screen].ClearAction += new Notification.NotificationAction(TicTacToeBoard_ClearAction);
+            //    OM.Host.UIHandler.AddNotification(screen, gameNotifications[screen]);
+            //}
+            //else
+            //{
+            //    OMDSTicTacToe.gameNotifications[screen].Text = message;
 
-            }
+            //}
         }
 
-        private void TicTacToeBoard_ClearAction(Notification notification, int screen, ref bool cancel)
+        private void TicTacToeBoard_ClickAction(Notification notification, int screen, ref bool cancel)
         {
-            gameNotifications[screen] = null;
-            cancel = false;
+            //send the message to go back to the game
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { screen, "BackToGame" } }, true);
+        }
+
+        public void TicTacToeBoard_ClearAction(Notification notification, int screen, ref bool cancel)
+        {
+            cancel = true;
         }
 
     }

@@ -34,6 +34,25 @@ namespace OpenMobile.Graphics
         private bool[] _GenerateTexture = new bool[10];
         private uint[] _Texture = new uint[10];
 
+        /// <summary>
+        /// The shader effect to use when rendering this image
+        /// </summary>
+        public OMShaders ShaderEffect
+        {
+            get
+            {
+                return this._ShaderEffect;
+            }
+            set
+            {
+                if (this._ShaderEffect != value)
+                {
+                    this._ShaderEffect = value;
+                }
+            }
+        }
+        private OMShaders _ShaderEffect = OMShaders.None;        
+
         public uint GetTexture(int Screen)
         {
             //return _Texture;
@@ -395,6 +414,37 @@ namespace OpenMobile.Graphics
                     _GenerateTexture[i] = true;
             }
             return this;
+        }
+
+        public OImage Invert()
+        {
+            if (img == null)
+                return this;
+
+            System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(
+            new float[][]
+            {
+                new float[] {-1, 0, 0, 0, 0},
+                new float[] {0, -1, 0, 0, 0},
+                new float[] {0, 0, -1, 0, 0},
+                new float[] {0, 0, 0, 1, 0},
+                new float[] {1, 1, 1, 0, 1}
+            });
+
+            UpdateAndSetImageWithMatrix(cm);
+
+            return this;
+        }
+
+        private unsafe void Invert(Bitmap bmp)
+        {
+            int w = bmp.Width, h = bmp.Height;
+            BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+
+            int* bytes = (int*)data.Scan0;
+            for (int i = w * h - 1; i >= 0; i--)
+                bytes[i] = ~bytes[i];
+            bmp.UnlockBits(data);
         }
 
         public OImage MakeTransparentFromPixel(int pixelX, int pixelY)
@@ -877,6 +927,7 @@ namespace OpenMobile.Graphics
             lock (img)
             {
                 OImage newImg = new OImage((Bitmap)img.Clone());
+                newImg.ShaderEffect = this.ShaderEffect;
                 return newImg;
             }
         }
@@ -893,6 +944,15 @@ namespace OpenMobile.Graphics
         public override string ToString()
         {
             return string.Format("{0}({1})",base.ToString(), this.GetHashCode());
+        }
+
+        /// <summary>
+        /// Converts this image to a imageItem object
+        /// </summary>
+        /// <returns></returns>
+        public imageItem ToImageItem()
+        {
+            return new imageItem(this);
         }
     }
 }

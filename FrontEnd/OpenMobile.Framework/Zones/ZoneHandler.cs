@@ -51,6 +51,11 @@ namespace OpenMobile.Zones
             MediaHandler_OnProviderInfoChangedDelegate = new MediaProviderInfo_EventHandler(MediaHandler_OnProviderInfoChanged);
         }
 
+        public void Dispose()
+        {
+
+        }
+
         /// <summary>
         /// List of available zones (Read only)
         /// </summary>
@@ -259,11 +264,14 @@ namespace OpenMobile.Zones
             {
                 if (_ActiveZones[i] == zone.ID)
                 {
-                    BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Name", i), zone.Name);
-                    BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.AudioDevice", i), zone.AudioDevice.Name);
+                    //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Name", i), zone.Name);
+                    //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.AudioDevice", i), zone.AudioDevice.Name);
+
+                    OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.Name", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.Name);
+                    OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.AudioDevice", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.AudioDevice.Name);
 
                     // Also push audio data to ensure all data is refreshed
-                    PushDataSources_AudioDevice(i, zone.AudioDevice);
+                    PushDataSources_AudioDevice(zone);
 
                     PushDataSources_MediaInfo(i, zone.MediaHandler);
 
@@ -331,6 +339,16 @@ namespace OpenMobile.Zones
                 if (_ActiveZones[i] == zone.ID)
                     return i;
             return -1;
+        }
+
+        /// <summary>
+        /// Gets the index of the specified zone
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public int GetIndexForZone(Zone zone)
+        {
+            return _Zones.IndexOf(zone);
         }
 
         /// <summary>
@@ -563,8 +581,53 @@ namespace OpenMobile.Zones
             Commands_Register();
         }
 
+        private Dictionary<Zone, CommandGroup> _Zone_CommandGroup_Device = new Dictionary<Zone, CommandGroup>();
+
         private void Commands_Register()
         {
+            // Create one set of commands per zone
+            for (int i = 0; i < _Zones.Count; i++)
+            {
+                CommandGroup commandGroup = new CommandGroup(String.Format("{0}.Zone{1}", BuiltInComponents.OMInternalPlugin.pluginName, i), BuiltInComponents.OMInternalPlugin.pluginName, "Zone", "Device");
+                _Zone_CommandGroup_Device.Add(_Zones[i], commandGroup);
+
+                // Don't create any commands if a zone has sub zones 
+                if (OM.Host.ZoneHandler.Zones[i].HasSubZones)
+                    continue;
+
+                commandGroup.AddCommand(
+                    OM.Host.CommandHandler.AddCommand(
+                        new Command(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume.Increment", CommandExecutor, 0, false, "")));
+
+                commandGroup.AddCommand(
+                    OM.Host.CommandHandler.AddCommand(
+                        new Command(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume.Decrement", CommandExecutor, 0, false, "")));
+
+                commandGroup.AddCommand(
+                    OM.Host.CommandHandler.AddCommand(
+                        new Command(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume.Mute", CommandExecutor, 0, false, "")));
+
+                commandGroup.AddCommand(
+                    OM.Host.CommandHandler.AddCommand(
+                        new Command(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume.Unmute", CommandExecutor, 0, false, "")));
+
+                commandGroup.AddCommand(
+                    OM.Host.CommandHandler.AddCommand(
+                        new Command(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume.Mute.Toggle", CommandExecutor, 0, false, "")));
+
+                commandGroup.AddCommand(
+                    OM.Host.CommandHandler.AddCommand(
+                        new Command(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume.Set", CommandExecutor, 1, false, "")));
+            }
+
+            OM.Host.ForEachScreen((screen) =>
+            {
+                Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+                OM.Host.CommandHandler.ActivateCommandGroup(_Zone_CommandGroup_Device[zone], screen);
+            });
+
+
+            /*
             // Create commands for zones at all available screens
             for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
             {
@@ -628,8 +691,158 @@ namespace OpenMobile.Zones
                 // Toggle repeat
                 BuiltInComponents.Host.CommandHandler.AddCommand(new Command("OM", String.Format("Screen{0}", i), "Zone", "MediaProvider.Repeat.Toggle", CommandExecutor, 0, false, "Toggles the repeat state of the current playlist"));
             }
+            */
         }
 
+        private object CommandExecutor(Command command, object[] param, out bool result)
+        {
+            result = false;
+
+            string commandName = command.FullNameWithoutScreen.Replace(BuiltInComponents.OMInternalPlugin.pluginName, "");
+
+            Zone zone = null;
+            if (command.NameLevel2.Contains("Zone"))
+            {
+                int zoneIndex = int.Parse(command.NameLevel2.Replace("Zone", ""));
+                zone = OM.Host.ZoneHandler.Zones[zoneIndex];
+
+                // Strip away unwanted information from the command name
+                commandName = commandName.Replace(String.Format(".{0}.", command.NameLevel2), "");
+            }
+
+            try
+            {
+                switch (commandName)
+                {
+                    #region Volume.Increment
+
+                    case "Volume.Increment":
+                        {
+                            result = true;
+
+                            // Toggle mute if mute is active instead of adjusting volume
+                            if (zone.AudioDevice.Mute)
+                            {
+                                zone.AudioDevice.Mute = false;
+                                return "";
+                            }
+
+                            if (Params.IsParamsValid(param, 1))
+                            {
+                                if (param[0] is int)
+                                {   // increment step is given
+                                    zone.AudioDevice.Volume += (int)param[0];
+                                    return "";
+                                }
+                            }
+
+                            // Fallback if no parameter is given
+                            zone.AudioDevice.Volume += 5;
+                            return "";
+                        }
+
+                    #endregion
+
+                    #region Volume.Decrement
+
+                    case "Volume.Decrement":
+                        {
+                            result = true;
+
+                            // Toggle mute if mute is active instead of adjusting volume
+                            if (zone.AudioDevice.Mute)
+                            {
+                                zone.AudioDevice.Mute = false;
+                                return "";
+                            }
+
+                            if (Params.IsParamsValid(param, 1))
+                            {
+                                if (param[0] is int)
+                                {   // increment step is given
+                                    zone.AudioDevice.Volume -= (int)param[0];
+                                    return "";
+                                }
+                            }
+
+                            // Fallback if no parameter is given
+                            zone.AudioDevice.Volume -= 5;
+                            return "";
+                        }
+
+                    #endregion
+
+                    #region Volume.Mute
+
+                    case "Volume.Mute":
+                        {
+                            result = true;
+                            zone.AudioDevice.Mute = true;
+                            return "";
+                        }
+
+                    #endregion
+
+                    #region Volume.Unmute
+
+                    case "Volume.Unmute":
+                        {
+                            result = true;
+                            zone.AudioDevice.Mute = false;
+                            return "";
+                        }
+
+                    #endregion
+
+                    #region Volume.Mute.Toggle
+
+                    case "Volume.Mute.Toggle":
+                        {
+                            result = true;
+                            zone.AudioDevice.Mute = !zone.AudioDevice.Mute;
+                            return "";
+                        }
+
+                    #endregion
+
+                    #region Volume.Set
+
+                    case "Volume.Set":
+                        {
+                            result = true;
+                            if (Params.IsParamsValid(param, 1))
+                            {
+                                if (param[0] is int)
+                                {   // Set volume
+                                    zone.AudioDevice.Volume = (int)param[0];
+                                    return "";
+                                }
+                                else
+                                {
+                                    return "Invalid datatype for Volume.Set";
+                                }
+                            }
+                            else
+                            {
+                                return "Minimum one parameter is required";
+                            }
+                        }
+
+                    #endregion
+
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
+            return null;
+        }
+
+        /*
         private object CommandExecutor(Command command, object[] param, out bool result)
         {
             result = true;
@@ -736,9 +949,45 @@ namespace OpenMobile.Zones
             }
             return result;
         }
+        */
+
+        private Dictionary<Zone, DataSourceGroup> _Zone_DataSourceGroup_Device = new Dictionary<Zone, DataSourceGroup>();
 
         private void DataSources_Register()
         {
+            // Create one set of datasources per zone
+            for (int i = 0; i < _Zones.Count; i++)
+            {
+                Zone zone = OM.Host.ZoneHandler.Zones[i];
+
+                DataSourceGroup dataSourceGroup = new DataSourceGroup(String.Format("{0}.Zone{1}", BuiltInComponents.OMInternalPlugin.pluginName, i), BuiltInComponents.OMInternalPlugin.pluginName, "Zone", "Device");
+                _Zone_DataSourceGroup_Device.Add(OM.Host.ZoneHandler.Zones[i], dataSourceGroup);
+
+                dataSourceGroup.AddDataSource(
+                    OM.Host.DataHandler.AddDataSource(
+                        new DataSource(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume", 0, DataSource.DataTypes.percent, DataSourceGetter, "Current volume for this zone as integer")));
+
+                dataSourceGroup.AddDataSource(
+                    OM.Host.DataHandler.AddDataSource(
+                        new DataSource(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Volume.Mute", 0, DataSource.DataTypes.binary, DataSourceGetter, "Current mute state for this zone as bool")));
+
+                dataSourceGroup.AddDataSource(
+                    OM.Host.DataHandler.AddDataSource(
+                        new DataSource(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "Name", 0, DataSource.DataTypes.text, DataSourceGetter, "Name for this zone as string")));
+
+                dataSourceGroup.AddDataSource(
+                    OM.Host.DataHandler.AddDataSource(
+                        new DataSource(BuiltInComponents.OMInternalPlugin, BuiltInComponents.OMInternalPlugin.pluginName, String.Format("Zone{0}", i), "AudioDevice", 0, DataSource.DataTypes.text, DataSourceGetter, "Name of Audiodevice for this zone as string")));
+
+            }
+            OM.Host.ForEachScreen((screen) =>
+            {
+                Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+                OM.Host.DataHandler.ActivateDataSourceGroup(_Zone_DataSourceGroup_Device[zone], screen);
+            });
+
+
+            /*
             // Create data sources for zones at all available screens
             for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
             {
@@ -827,8 +1076,79 @@ namespace OpenMobile.Zones
                 BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "Shuffle", DataSource.DataTypes.binary, "MediaProvider: Suffle state", false));
                 BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource("OM", "Zone", "MediaProvider", "Repeat", DataSource.DataTypes.binary, "MediaProvider: Repeat state", false));
             }
+            */
         }
 
+        private object DataSourceGetter(DataSource datasource, out bool result, object[] param)
+        {
+            result = true;
+
+            string datasourceName = datasource.FullNameWithoutScreen.Replace(BuiltInComponents.OMInternalPlugin.pluginName, "");
+
+            Zone zone = null;
+            if (datasource.NameLevel2.Contains("Zone"))
+            {
+                int zoneIndex = int.Parse(datasource.NameLevel2.Replace("Zone", ""));
+                zone = _Zones[zoneIndex];
+
+                // Strip away unwanted information from the name
+                datasourceName = datasourceName.Replace(String.Format(".{0}.", datasource.NameLevel2), "");
+            }
+
+            try
+            {
+                switch (datasourceName)
+                {
+                    #region Volume
+
+                    case "Volume":
+                        {
+                            return zone.AudioDevice.Volume;
+                        }
+
+                    #endregion
+
+                    #region Volume.Mute
+
+                    case "Volume.Mute":
+                        {
+                            return zone.AudioDevice.Mute;
+                        }
+
+                    #endregion
+
+                    #region Name
+
+                    case "Name":
+                        {
+                            return zone.Name;
+                        }
+
+                    #endregion
+
+                    #region AudioDevice
+
+                    case "AudioDevice":
+                        {
+                            return zone.AudioDevice.Name;
+                        }
+
+                    #endregion
+
+                    default:
+                        break;
+                }
+            }
+            catch
+            {
+                result = false;
+            }
+
+            return null;
+        }
+
+
+/*
         private object ZoneDataProvider(OpenMobile.Data.DataSource dataSource, out bool result, object[] param)
         {
             result = true;
@@ -866,16 +1186,17 @@ namespace OpenMobile.Zones
             result = false;
             return null;
         }
-
+*/
         private Zone.VolumeChangedDelegate zone_OnVolumeChangedDelegate;
         private void zone_OnVolumeChanged(Zone zone, AudioDevice audioDevice)
         {
+            PushDataSources_AudioDevice(zone);
+
             // Loop trough all active zones in case the same zone is active on more than one screen
             for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
             {
                 if (_ActiveZones[i] == zone.ID)
                 {
-                    PushDataSources_AudioDevice(i, audioDevice);
                     Raise_OnZoneUpdated(zone, i, false);
                 }
             }
@@ -964,10 +1285,13 @@ namespace OpenMobile.Zones
                 return String.Format("{0:00}:{1:00}:{2:00}", ts.TotalHours, ts.Minutes, ts.Seconds);
         }
 
-        private void PushDataSources_AudioDevice(int screen, AudioDevice audioDevice)
+        private void PushDataSources_AudioDevice(Zone zone)
         {
-            BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume", screen), audioDevice.Volume);
-            BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume.Mute", screen), audioDevice.Mute);
+            //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume", screen), audioDevice.Volume);
+            //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume.Mute", screen), audioDevice.Mute);
+            OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.Volume", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.AudioDevice.Volume);
+            OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.Volume.Mute", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.AudioDevice.Mute);
+
         }
 
         /// <summary>

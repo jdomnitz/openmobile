@@ -27,6 +27,7 @@ using System.ComponentModel;
 
 namespace OpenMobile.Threading
 {
+
     /// <summary>
     /// Provides a thread which is sandboxed to prevent crashing the rest of the framework when an error occurs
     /// </summary>
@@ -64,6 +65,24 @@ namespace OpenMobile.Threading
         }
         private static Queue<Function> functions = new Queue<Function>();
         private static Dictionary<int, ThreadState> locks = new Dictionary<int, ThreadState>();
+
+        /// <summary>
+        /// Disposes off ALL active threads
+        /// </summary>
+        public static void Dispose()
+        {
+            lock (locks)
+            {
+                foreach (var key in locks.Keys)
+                {
+                    if (locks.ContainsKey(key))
+                    {
+                        locks[key].state = ThreadState.States.Kill;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Creates a new asynchronous safe thread
         /// </summary>
@@ -195,7 +214,8 @@ namespace OpenMobile.Threading
                 }
 
                 // No more functions, go to idle state
-                s.state = ThreadState.States.Sleeping;
+                if (s.state != ThreadState.States.Kill)
+                    s.state = ThreadState.States.Sleeping;
 
                 // Report thread as available
                 availableThreads++;
@@ -204,7 +224,16 @@ namespace OpenMobile.Threading
                 while (s.state == ThreadState.States.Sleeping)
                 {
                     // Stop and wait for trigger (max 30 seconds, after timeout thread will die)
-                    s.waitHandle.WaitOne(30000);
+                    for (int i = 0; i < 30; i++)
+                    {
+                        if (s.state == ThreadState.States.Kill)
+                            break;
+
+                        if (s.waitHandle.WaitOne(1000))
+                        {
+                            break;
+                        }
+                    }
 
                     // Should we terminate this thread?
                     if ((functions.Count == 0) && (availableThreads > 1))

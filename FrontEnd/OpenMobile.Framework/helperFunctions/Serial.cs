@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using OpenMobile.Plugin;
 
 namespace OpenMobile.helperFunctions
 {
@@ -32,29 +33,78 @@ namespace OpenMobile.helperFunctions
     {
         static private EventWaitHandle _SerialReleased = new EventWaitHandle(true, EventResetMode.AutoReset);
 
+        static private IBasePlugin _CurrentLockOwner;
+        static private DateTime _LockTime;
+
         /// <summary>
         /// Requests serial ports access. Returns true if request was successfull, returns false if request timed out (15 seconds)
         /// <para>Remember to release the request with ReleaseAccess<seealso cref="ReleaseAccess"/></para>
         /// </summary>
         /// <returns></returns>
-        static public bool GetAccess()
+        static public bool GetAccess(IBasePlugin requestingPlugin)
         {
-            // Wait for access
-            if (!_SerialReleased.WaitOne(15000))
+
+            // Check if lock has been held to long
+            if (!_LockTime.Equals(new DateTime()))
             {
-                // Operation timed out, reset waitHandle
-                _SerialReleased.Set();
-                return false;
+                if ((DateTime.Now - _LockTime) > new TimeSpan(0, 0, 15))
+                {
+                    // Lock is held to long
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Current lock held by {0} to long, forcing a release", _CurrentLockOwner));
+                    _SerialReleased.Set();
+                    _CurrentLockOwner = null;
+                }
             }
+
+            // If someone else holds the lock we just return false
+            if (_CurrentLockOwner != null)
+            {
+
+                // Wait for access
+                if (!_SerialReleased.WaitOne(15000))
+                {
+                    // Operation timed out, reset waitHandle
+                    _SerialReleased.Set();
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Access denied to {0}, timed out waiting for {1}", requestingPlugin.pluginName, _CurrentLockOwner.pluginName));
+                    return false;
+                }
+
+                //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Access denied to {0}, Access currently held by {1}", requestingPlugin.pluginName, _CurrentLockOwner.pluginName));
+                //return false;
+
+            }
+
+            // Set the current owner
+            _CurrentLockOwner = requestingPlugin;
+            _LockTime = DateTime.Now;
+            _SerialReleased.Reset();
+
+            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Access granted to {0}", requestingPlugin.pluginName));
             return true;
+
         }
 
         /// <summary>
         /// Releases the serial port access request.
         /// </summary>
-        static public void ReleaseAccess()
+        static public void ReleaseAccess(IBasePlugin requestingPlugin)
         {
-            _SerialReleased.Set();
+            // Do we have anything to release?
+            if (_CurrentLockOwner != null)
+            {   // Yes
+                if (_CurrentLockOwner.Equals(requestingPlugin))
+                {
+                    _CurrentLockOwner = null;
+                    _SerialReleased.Set();
+                    _LockTime = new DateTime();
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Access released by {0}", requestingPlugin));
+                }
+                else
+                {
+                    //if (_CurrentLockOwner != null)
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Release by {0} denied, Access currently held by {1}", requestingPlugin.pluginName, _CurrentLockOwner.pluginName));
+                }
+            }
         }
     }
 }

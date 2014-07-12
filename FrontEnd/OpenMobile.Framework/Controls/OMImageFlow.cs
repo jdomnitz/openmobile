@@ -129,6 +129,14 @@ namespace OpenMobile.Controls
             _textAlignment = Alignment.BottomCenter;
         }
 
+        ~OMImageFlow()
+        {
+            if (tmrUpdate != null)
+                tmrUpdate.Dispose();
+            if (_tmrThrowHandler != null)
+                _tmrThrowHandler.Dispose();
+        }
+
         #endregion
 
         #region private classes
@@ -1479,10 +1487,10 @@ namespace OpenMobile.Controls
         bool _ThrowActive = false;
         void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
         {
-            _ThrowActive = true;
             _accDistance += RelativeDistance;
             if (System.Math.Abs(_accDistance.X) > 50)
             {
+                _ThrowActive = true;
                 if (RelativeDistance.X > 0)
                     SelectedIndex--;
                 else if (RelativeDistance.X < 0)
@@ -1493,7 +1501,7 @@ namespace OpenMobile.Controls
 
         void IThrow.MouseThrowStart(int screen, Point StartLocation, PointF CursorSpeed, PointF scaleFactors, ref bool Cancel)
         {
-            _ThrowActive = true;
+            //_ThrowActive = true;
             if (_tmrThrowHandler != null)
                 _tmrThrowHandler.Enabled = false;
         }
@@ -1564,7 +1572,7 @@ namespace OpenMobile.Controls
             if (_ThrowActive)
                 return;
 
-            switch (GetClickHorizontalSection(e.Location))
+            switch (GetClickHorizontalSection(base.GetLocalControlPoint(e.Location)))
             {
                 case 1: // Left side
                     MoveLeft();
@@ -1588,7 +1596,7 @@ namespace OpenMobile.Controls
             if (_ThrowActive)
                 return;
 
-            switch (GetClickHorizontalSection(e.Location))
+            switch (GetClickHorizontalSection(base.GetLocalControlPoint(e.Location)))
             {
                 case 1: // Left side
                     //MoveLeft();
@@ -1613,7 +1621,7 @@ namespace OpenMobile.Controls
             if (_ThrowActive)
                 return;
 
-            switch (GetClickHorizontalSection(e.Location))
+            switch (GetClickHorizontalSection(base.GetLocalControlPoint(e.Location)))
             {
                 case 1: // Left side
                     //MoveLeft();
@@ -1666,13 +1674,13 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         private int GetClickHorizontalSection(Point p)
         {
-            int area = this.width / 3;
-            if (p.X >= this.Region.Left && p.X <= this.Region.Left + area)
+            int area = this.Region.Width / 3;
+            if (p.X <= this.Region.Left + area)
                 return 1;
-            else if (p.X >= this.Region.Left + area && p.X <= this.Region.Left + area + area)
-                return 2;
-            else
+            else if (p.X >= this.Region.Left + area + area)
                 return 3;
+            else
+                return 2;
         }
 
         #endregion

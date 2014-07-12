@@ -121,7 +121,7 @@ namespace OpenMobile.helperFunctions
             using (PluginSettings setting = new PluginSettings())
             {
                 int i = 0;
-                if (!int.TryParse(setting.getSetting(plugin, name), out i))
+                if (!int.TryParse(setting.getSetting(plugin, name), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out i))
                     return defaultValue;
                 return i;
             }
@@ -147,7 +147,7 @@ namespace OpenMobile.helperFunctions
             using (PluginSettings setting = new PluginSettings())
             {
                 float i = 0;
-                if (!float.TryParse(setting.getSetting(plugin, name), out i))
+                if (!float.TryParse(setting.getSetting(plugin, name), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out i))
                     return defaultValue;
                 return i;
             }

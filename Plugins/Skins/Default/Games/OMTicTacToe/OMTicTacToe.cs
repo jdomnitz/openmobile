@@ -29,96 +29,115 @@ using OpenMobile.Plugin;
 using OpenMobile.helperFunctions;
 using OpenMobile.Graphics;
 using OpenMobile.Data;
+using System.Collections.ObjectModel;
 
 namespace OMTicTacToe
 {
-    public class Class1 : IHighLevel
+    public class OMTicTacToe : HighLevelCode
     {
-
-        ScreenManager manager;
-        IPluginHost theHost;
+        //ScreenManager manager;
+        //IPluginHost theHost;
         int[] boardIDs;
         Dictionary<int, int> screensToBoards;
+        imageItem imgB;
+        imageItem imgX;
+        imageItem imgO;
+        imageItem imgWonX;
+        imageItem imgWonO;
 
-        public eLoadStatus initialize(IPluginHost host)
+        public OMTicTacToe()
+            : base("OMTicTacToe", OM.Host.getPluginImage<OMTicTacToe>("Icon-OMTicTacToe"), 0.1f, "Tic Tac Toe", "Tic Tac Toe", "Peter Yeaney", "peter.yeaney@outlook.com")
+        {
+        }
+
+        public override imageItem pluginIcon
+        {
+            get
+            {
+                return OM.Host.getPluginImage(this, "Icon-OMTicTacToe");
+            }
+        }
+
+        public override eLoadStatus initialize(IPluginHost host)
         {
 
-            theHost = host;
-            manager = new ScreenManager(this);
+            //theHost = host;
+            //base.PanelManager = new ScreenManager(this);
 
-            boardIDs = new int[theHost.ScreenCount];
+            boardIDs = new int[OM.Host.ScreenCount];
             screensToBoards = new Dictionary<int, int>();
+            imgB = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_B").image.Clone());
+            imgX = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_X").image.Clone());
+            imgO = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_O").image.Clone());
+            imgWonX = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_X").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinFocusColor));
+            imgWonO = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_O").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinFocusColor));
 
-            //Dim text1btn = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Text1Btn", x + 420, y + 350, 150, 80, "", "OK")
-            //OMButton location_button = OMButton.PreConfigLayout_BasicStyle("locationbutton", 351, 41, 298, 48, GraphicCorners.All);
-            OMPanel TicTacToe = new OMPanel("OMTicTacToe", "TicTacToe", this.pluginIcon);
-            //OMButton SinglePlayer = new OMButton("SinglePlayer", (theHost.ClientArea[0].Width / 2) - 100, (theHost.ClientArea[0].Height / 2) - 75, 200, 80);
-            OMButton SinglePlayer = OMButton.PreConfigLayout_BasicStyle("SinglePlayer", (theHost.ClientArea[0].Width / 2) - 100, (theHost.ClientArea[0].Height / 2) - 75, 200, 80, GraphicCorners.All);
+             OMPanel TicTacToe = new OMPanel("OMTicTacToe", this.displayName, this.pluginIcon);
+            OMButton SinglePlayer = OMButton.PreConfigLayout_BasicStyle("SinglePlayer", (OM.Host.ClientArea[0].Width / 2) - 100, (OM.Host.ClientArea[0].Height / 2) - 75, 200, 80, GraphicCorners.All);
             SinglePlayer.Text = "Single Player";
-            //SinglePlayer.BorderColor = Color.White;
-            //SinglePlayer.BorderSize = 1;
             SinglePlayer.OnClick += new userInteraction(SinglePlayer_OnClick);
-            //OMButton MultiPlayer = new OMButton("MultiPlayer", (theHost.ClientArea[0].Width / 2) - 100, (theHost.ClientArea[0].Height / 2) + 5, 200, 80);
-            OMButton MultiPlayer = OMButton.PreConfigLayout_BasicStyle("MultiPlayer", (theHost.ClientArea[0].Width / 2) - 100, (theHost.ClientArea[0].Height / 2) + 5, 200, 80, GraphicCorners.All);
-            MultiPlayer.Text = "Multiplayer";
-            //MultiPlayer.BorderColor = Color.White;
-            //MultiPlayer.BorderSize = 1;
-            MultiPlayer.OnClick += new userInteraction(MultiPlayer_OnClick);
-            //OMButton MainMenu = new OMButton("MainMenu", ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100);
-            OMButton MainMenu = OMButton.PreConfigLayout_BasicStyle("MainMenu", ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100, GraphicCorners.All);
-            MainMenu.Text = "Return To Main Menu";
-            MainMenu.Visible = false;
-            //MainMenu.Visible_DataSource = "TicTacToe.Game.VisibleButtons";
-            MainMenu.OnClick += new userInteraction(MainMenu_OnClick);
-            //OMButton Rematch = new OMButton("Rematch", (theHost.ClientArea[0].Width / 2) - 100, 400, 200, 100);
-            //OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", (theHost.ClientArea[0].Width / 2) - 100, 400, 200, 100, GraphicCorners.All);
-            OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", 800, 200, 200, 100, GraphicCorners.All);
-            Rematch.Text = "Rematch";
-            Rematch.Visible = false;
-            //Rematch.Visible_DataSource = "TicTacToe.Game.VisibleButtons";
-            Rematch.OnClick += new userInteraction(Rematch_OnClick);
-            //OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100, GraphicCorners.All);
-            OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", 800, 300, 200, 100, GraphicCorners.All);
-            Quit.Visible = false;
-            Quit.Text = "Quit";
-            //Quit.Visible_DataSource = "TicTacToe.Game.VisibleButtons";
-            Quit.OnClick += new userInteraction(Quit_OnClick);
-
             TicTacToe.addControl(SinglePlayer);
+            OMButton MultiPlayer = OMButton.PreConfigLayout_BasicStyle("MultiPlayer", (OM.Host.ClientArea[0].Width / 2) - 100, (OM.Host.ClientArea[0].Height / 2) + 5, 200, 80, GraphicCorners.All);
+            MultiPlayer.Text = "Multiplayer";
+            MultiPlayer.OnClick += new userInteraction(MultiPlayer_OnClick);
             TicTacToe.addControl(MultiPlayer);
-            TicTacToe.addControl(MainMenu);
-            TicTacToe.addControl(Rematch);
-            TicTacToe.addControl(Quit);
-            //TicTacToe.Entering += new PanelEvent(TicTacToe_Entering);
+            
+            //OMPanel MultiplayerPanel = new OMPanel("MultiplayerPanel", "TicTacToe -> Multiplayer", this.pluginIcon);
 
-            OMPanel MultiplayerPanel = new OMPanel("MultiplayerPanel", "TicTacToe -> Multiplayer", this.pluginIcon);
-            OMList MultiplayerList = new OMList("MultiplayerList", 100, 80, 390, 440);
+            OMList MultiplayerList = new OMList("multiplayerList", 100, 80, 390, 400);
             MultiplayerList.OnClick += new userInteraction(MultiplayerList_OnClick);
-            OMList MultiplayerListPlaying = new OMList("MultiplayerListPlaying", 610, 80, 380, 440);
-            MultiplayerPanel.addControl(MultiplayerList);
-            MultiplayerPanel.addControl(MultiplayerListPlaying);
-
+            MultiplayerList.Visible = false;
+            TicTacToe.addControl(MultiplayerList);
+            OMButton multiplayerCancel = OMButton.PreConfigLayout_BasicStyle("multiplayerCancel", 100, 480, 390, 80, GraphicCorners.All);
+            multiplayerCancel.Text = "Cancel";
+            multiplayerCancel.Visible = false;
+            multiplayerCancel.OnClick += new userInteraction(multiplayerCancel_OnClick);
+            TicTacToe.addControl(multiplayerCancel);
+            //OMList MultiplayerListPlaying = new OMList("MultiplayerListPlaying", 610, 80, 380, 440);
+            //MultiplayerPanel.addControl(MultiplayerList);
+            //MultiplayerPanel.addControl(MultiplayerListPlaying);
+            
             //OMObjectList MultiPlayerList = new OMObjectList("MultiPlayerList", 100, 80, 390, 440);
-            
-
-            OMPanel GamePanel = new OMPanel("GamePanel", "TicTacToe", this.pluginIcon);
-            
-            //OMButton Quit = new OMButton("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100);
-            //OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100, GraphicCorners.All);
-            //Quit.Visible = false;
-            //Quit.Text = "Quit";
-            //Quit.Visible_DataSource = "TicTacToe.Game.VisibleButtons";
-            //Quit.OnClick += new userInteraction(Quit_OnClick);
-            //GamePanel.addControl(statusLabel);
-            //GamePanel.addControl(Quit);
-            
-            //TicTacToe.addControl(Quit);
+            OMBasicShape challengeBackgroundMain = new OMBasicShape("challengeBackgroundMain", OM.Host.ClientArea[0].Left, OM.Host.ClientArea[0].Top + (OM.Host.ClientArea[0].Height / 2) - 100, OM.Host.ClientArea[0].Width, 200, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+            challengeBackgroundMain.Visible = false;
+            TicTacToe.addControl(challengeBackgroundMain);
+            OMLabel challengeLabelMain = new OMLabel("challengeLabelMain", challengeBackgroundMain.Left + 5, challengeBackgroundMain.Top + 5, challengeBackgroundMain.Width - 10, challengeBackgroundMain.Height - 90);
+            challengeLabelMain.Visible = false;
+            TicTacToe.addControl(challengeLabelMain);
+            OMButton challengeCancel = OMButton.PreConfigLayout_BasicStyle("challengeCancel", (challengeBackgroundMain.Width / 2) - 50, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, GraphicCorners.All);
+            challengeCancel.Text = "Cancel";
+            challengeCancel.Visible = false;
+            challengeCancel.OnClick += new userInteraction(challengeCancel_OnClick);
+            TicTacToe.addControl(challengeCancel);
+            OMButton challengeAccept = OMButton.PreConfigLayout_BasicStyle("challengeAccept", (challengeBackgroundMain.Width / 2) - 110, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, GraphicCorners.All);
+            challengeAccept.Text = "Accept";
+            challengeAccept.Visible = false;
+            challengeAccept.OnClick += new userInteraction(challengeAccept_OnClick);
+            TicTacToe.addControl(challengeAccept);
+            OMButton challengeDecline = OMButton.PreConfigLayout_BasicStyle("challengeDecline", challengeAccept.Left + challengeAccept.Width + 20, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, GraphicCorners.All);
+            challengeDecline.Text = "Decline";
+            challengeDecline.Visible = false;
+            challengeDecline.OnClick += new userInteraction(challengeDecline_OnClick);
+            TicTacToe.addControl(challengeDecline);
 
             Size tileSize = new Size(140, 140);
             OMBasicShape shapeBackgroundMain = new OMBasicShape("shapeBackgroundMain", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top + 5, tileSize.Width * 3 + 20, tileSize.Height * 3 + 20 + 40, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
             shapeBackgroundMain.Left = OM.Host.ClientArea_Init.Center.X - shapeBackgroundMain.Region.Center.X;
             shapeBackgroundMain.Visible = false;
             TicTacToe.addControl(shapeBackgroundMain);
+            
+            OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", 0, OM.Host.ClientArea[0].Bottom - 110, 200, 100, GraphicCorners.All);
+            Rematch.Left = (shapeBackgroundMain.Left / 2) - (Rematch.Width / 2);
+            Rematch.Text = "Rematch";
+            Rematch.Visible = false;
+            Rematch.OnClick += new userInteraction(Rematch_OnClick);
+            TicTacToe.addControl(Rematch);
+
+            OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", OM.Host.ClientArea_Init.Right - 230, OM.Host.ClientArea_Init.Bottom - 110, 200, 100, GraphicCorners.All);
+            Quit.Visible = false;
+            Quit.Text = "Quit";
+            Quit.OnClick += new userInteraction(Quit_OnClick);
+            TicTacToe.addControl(Quit);
 
             OMLabel statusLabel = new OMLabel("statusLabel", shapeBackgroundMain.Region.Left + 10, shapeBackgroundMain.Region.Top + 5, shapeBackgroundMain.Region.Width - 20, 40);
             statusLabel.Visible = false;
@@ -126,42 +145,16 @@ namespace OMTicTacToe
             statusLabel.ShapeData = new ShapeData(shapes.RoundedRectangle, Color.FromArgb(25, Color.White), Color.Transparent, 0, 5);
             TicTacToe.addControl(statusLabel);
 
-            /*
-            OMBasicShape shpBackground = new OMBasicShape("shpBackground", 190, 90, 470, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(175, Color.Black), Color.Transparent, 0, 5));
-            shpBackground.Visible = false;
-            TicTacToe.addControl(shpBackground);
-            OMBasicShape shpBackground1 = new OMBasicShape("shpBackground1", 190, 198, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-            shpBackground1.Visible = false;
-            TicTacToe.addControl(shpBackground1);
-            OMBasicShape shpBackground2 = new OMBasicShape("shpBackground2", 190, 298, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-            shpBackground2.Visible = false;
-            TicTacToe.addControl(shpBackground2);
-            OMBasicShape shpBackground3 = new OMBasicShape("shpBackground3", 348, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-            shpBackground3.Visible = false;
-            TicTacToe.addControl(shpBackground3);
-            OMBasicShape shpBackground4 = new OMBasicShape("shpBackground4", 498, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-            shpBackground4.Visible = false;
-            TicTacToe.addControl(shpBackground4);
-            */
-
-
-
-            for (int i = 0; i < theHost.ScreenCount; i++)
+            for (int i = 0; i < OM.Host.ScreenCount; i++)
             {
                 for (int r = 1; r < 4; r++) //rows
                 {
                     for (int c = 1; c < 4; c++) //columns
                     {
-                        //OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), 50 + (150 * c), 100 * r, 150, 100);
                         OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), shapeBackgroundMain.Region.Left + 10 + (tileSize.Width * (c - 1)), shapeBackgroundMain.Region.Top + 50 + (tileSize.Height * (r - 1)), tileSize.Width, tileSize.Height);
                         boardTile.Visible = false;
-                        //boardTile.Image = theHost.getSkinImage("TicTacToe_B");
-                        //boardTile.Image = theHost.getPluginImage(this, "Images|TicTacToe_B");
                         boardTile.OnClick += new userInteraction(boardTile_OnClick);
-                        //GamePanel.addControl(boardTile);
                         TicTacToe.addControl(boardTile);
-                        
-
                     }
                 }
                 MultiplayerList.Add("Screen: " + i.ToString());
@@ -170,21 +163,294 @@ namespace OMTicTacToe
             TicTacToe.Entering += new PanelEvent(TicTacToe_Entering);
             TicTacToe.Leaving += new PanelEvent(TicTacToe_Leaving);
 
-            manager.loadPanel(TicTacToe, true);
-            manager.loadPanel(MultiplayerPanel);
-            //manager.loadPanel(GamePanel);
+            base.PanelManager.loadPanel(TicTacToe, true);
+            //for(int i=0;i<OM.Host.ScreenCount;i++)
+            //    base.PanelManager.loadSinglePanel(TicTacToe, i, true);
+            //base.PanelManager.loadPanel(MultiplayerPanel);
 
-            theHost.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Game.MultiplayerList", Subscription_Updated);
+            OM.Host.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Multiplayer.List", Subscription_Updated);
+            OM.Host.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Multiplayer.Challenged", Subscription_Updated);
+            OM.Host.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Multiplayer.Spectate", Subscription_Updated);
+            OM.Host.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Multiplayer.ChallengeAccepted", Subscription_Updated);
+            OM.Host.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Multiplayer.ChallengeDeclined", Subscription_Updated);
+            OM.Host.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Multiplayer.ChallengeCancelled", Subscription_Updated);
+            OM.Host.DataHandler.SubscribeToDataSource("OMDSTicTacToe;TicTacToe.Notification.Click", Subscription_Updated);
 
             return eLoadStatus.LoadSuccessful;
         }
 
+        void challengeCancel_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Multiplayer.ChallengeCancel", new object[] { sender.Tag, ((OMLabel)base.PanelManager[Convert.ToInt32(sender.Tag), "OMTicTacToe"]["challengeLabelMain"]).Tag });
+        }
+
+        void challengeAccept_OnClick(OMControl sender, int screen)
+        {
+            object gameBoardID = OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Game.AddGame", new object[] { screen.ToString(), ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Tag.ToString() });
+            if (gameBoardID != null)
+            {
+                boardIDs[screen] = Convert.ToInt32(gameBoardID);
+                boardIDs[Convert.ToInt32(((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Tag)] = Convert.ToInt32(gameBoardID);
+                OM.Host.DataHandler.SubscribeToDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardUpdated", gameBoardID.ToString()), Subscription_Updated);
+                OM.Host.DataHandler.SubscribeToDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardVisibility", gameBoardID.ToString()), Subscription_Updated);
+                OM.Host.DataHandler.SubscribeToDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardMessages", gameBoardID.ToString()), Subscription_Updated);
+                OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Game.StartGame", new object[] { gameBoardID.ToString() });
+            }
+        }
+
+        void challengeDecline_OnClick(OMControl sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Multiplayer.ChallengeDecline", new object[] { sender.Tag, ((OMLabel)base.PanelManager[Convert.ToInt32(sender.Tag), "OMTicTacToe"]["challengeLabelMain"]).Tag });
+        }
+
         private void Subscription_Updated(DataSource sensor)
         {
-            for (int screen = 0; screen < theHost.ScreenCount; screen++)
+            if (sensor.Value == null)
+                return;
+            for (int screen = 0; screen < OM.Host.ScreenCount; screen++)
             {
-                //((OMList)manager[screen, "OMTicTacToe"]["multiplayerList"]).Items.Clear();
-                //((OMList)manager[screen, "OMTicTacToe"]["multiplayerList"]).Items.AddRange();
+                if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "List"))
+                {
+                    //update the multiplayer list
+                    UpdateMultiplayerList(screen, (ObservableCollection<string>)sensor.Value);
+                    //UpdateMultiplayerList(screen, (List<string>)sensor.Value);
+                }
+                else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "Challenged") && (((List<int>)sensor.Value)[1] == screen))
+                {
+                    int screenChallenger = ((List<int>)sensor.Value)[0];
+                    //show the challenged panel on SCREEN --> background, label, 2 buttons (accept / decline), ((List<int>)sensor.Value)[0] = screen challenged FROM
+                    //AllMenuVisibility(false, screenChallenger);
+                    //AllMenuVisibility(false, screen);
+                    ((OMLabel)base.PanelManager[screenChallenger, "OMTicTacToe"]["challengeLabelMain"]).Text = String.Format("You have challenged Screen: {0}. Awaiting their response...", screen.ToString());
+                    ((OMLabel)base.PanelManager[screenChallenger, "OMTicTacToe"]["challengeLabelMain"]).Tag = screen.ToString();
+                    ShowChallengeMain(true, screenChallenger, true);
+                    ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Text = String.Format("You have been challenged by Screen: {0}. Please choose an action...", screenChallenger.ToString());
+                    ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Tag = screenChallenger.ToString();
+                    ShowChallengeMain(true, screen, false);
+                    //challengeCancel, challengeAccept, challengeDecline
+                    
+                    
+
+                }
+                else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "ChallengeAccepted"))
+                {
+                    //start game --- this happens in the accept button click event for now
+
+                }
+                else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "ChallengeDeclined"))
+                {
+                    //get rid of the challenge controls
+                    ToggleChallengeControlsOff(((List<int>)sensor.Value)[0]);
+                    ToggleChallengeControlsOff(((List<int>)sensor.Value)[1]);
+                }
+                else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "ChallengeCancelled"))
+                {
+                    //
+                    ToggleChallengeControlsOff(((List<int>)sensor.Value)[0]);
+                    ToggleChallengeControlsOff(((List<int>)sensor.Value)[1]);
+                }
+                else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "Spectate")  && (((List<int>)sensor.Value)[0] == screen))
+                {
+                    boardIDs[screen] = ((List<int>)sensor.Value)[1];
+                }
+                else if (sensor.NameLevel2 == "Notification" && sensor.NameLevel3 == "Click")
+                {
+                    if(screen == Convert.ToInt32(sensor.Value))
+                        base.GotoPanel(screen, "OMTicTacToe");
+                }
+                else //if (boardIDs[screen] == Convert.ToInt32(sensor.NameLevel2))
+                {
+                    int gameBoardID;
+                    if ((int.TryParse(sensor.NameLevel2, out gameBoardID)) && (gameBoardID > 0) && (boardIDs[screen] == gameBoardID))
+                    {
+                        //this screen is subscribed to this board
+                        if (sensor.NameLevel3 == "BoardUpdated")
+                        {
+                            UpdateBoard(boardIDs[screen], screen, (string[][])sensor.Value);
+                            //OpenMobile.Threading.SafeThread.Asynchronous(delegate() { UpdateBoard(boardIDs[screen], screen, (string[][])sensor.Value); });
+                        }
+                        else if (sensor.NameLevel3 == "BoardVisibility")
+                        {
+                            if ((bool)sensor.Value)
+                            {
+                                ChangeBoardVisibility(true, screen);
+                            }
+                            else
+                            {
+                                ChangeBoardVisibility(false, screen);
+                            }
+                        }
+                        else if (sensor.NameLevel3 == "BoardMessages")
+                        {
+                            //ChangeBoardMessage(((Dictionary<int, string>)sensor.Value)[((Dictionary<int, string>)sensor.Value).Keys.ElementAt(0)], screen);
+                            try
+                            {
+                                ChangeBoardMessage(((Dictionary<int, string>)sensor.Value)[screen], screen);
+                            }
+                            catch (Exception ex)
+                            {
+                                //ChangeBoardMessage("Spectating...", screen);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UpdateMultiplayerList(int screen, ObservableCollection<string> multiplayerList)
+        //private void UpdateMultiplayerList(int screen, List<string> multiplayerList)
+        {
+            for (int i = 0; i < multiplayerList.Count; i++)
+            {
+                ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"])[i].text = multiplayerList[i];
+            }
+        }
+
+        private void ChangeBoardMessage(string message, int screen)
+        {
+            if (message == "BackToGame")
+            {
+                base.GotoPanel(screen, "OMTicTacToe");
+                //base.ShowPanel(screen, "OMTicTacToe");
+            }
+            else
+            {
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Text = message;
+                //OM.Host.DebugMsg(String.Format("Message - Screen: {0}, Visible: {1}, Text: {2}", screen.ToString(), ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Visible, ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Text));
+                if ((message.ToLower().Contains("won")) || (message.ToLower().Contains("lost")) || (message.ToLower().Contains("draw")))
+                    ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["Rematch"]).Visible = true;
+            }
+        }
+
+        private void ToggleChallengeControlsOff(int screen)
+        {
+            ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["SinglePlayer"]).Disabled = false;
+            ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["MultiPlayer"]).Disabled = false;
+            ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeCancel"]).Visible = false;
+            ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeAccept"]).Visible = false;
+            ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeDecline"]).Visible = false;
+            ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["challengeBackgroundMain"]).Visible = false;
+            ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Visible = false;
+        }
+
+        private void ShowChallengeMain(bool Visible, int screen, bool Challenger)
+        {
+            if (Visible)
+            {
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["challengeBackgroundMain"]).Visible = true;
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Visible = true;
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["SinglePlayer"]).Disabled = true;
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["MultiPlayer"]).Disabled = true;
+            }
+            else
+            {
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["challengeBackgroundMain"]).Visible = false;
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Visible = false;
+            }
+            if (Challenger)
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeCancel"]).Visible = true;
+            else
+            {
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeAccept"]).Visible = true;
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeDecline"]).Visible = true;
+            }
+        }
+
+        private void AllMenuVisibility(bool Visible, int screen)
+        {
+            MainMenuButtonsVisibility(Visible, screen);
+            if (Visible)
+            {
+                ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"]).Visible = true;
+            }
+            else
+            {
+                ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"]).Visible = false;
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["multiplayerCancel"]).Visible = false;
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeCancel"]).Visible = false;
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeAccept"]).Visible = false;
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeDecline"]).Visible = false;
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["challengeBackgroundMain"]).Visible = false;
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Visible = false;
+            }
+        }
+
+        private void MainMenuButtonsVisibility(bool Visible, int screen)
+        {
+            if (Visible)
+            {
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["SinglePlayer"]).Visible = true;
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["MultiPlayer"]).Visible = true;
+            }
+            else
+            {
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["SinglePlayer"]).Visible = false;
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["MultiPlayer"]).Visible = false;
+            }
+        }
+
+        private void ChangeBoardVisibility(bool Visible, int screen)
+        {
+            if (Visible)
+            {
+                AllMenuVisibility(false, screen);
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible = true;
+                //OM.Host.DebugMsg(String.Format("Setting - Screen: {0}, shapeBackgroundMain.Visible: {1}", screen.ToString(), ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible.ToString()));
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Visible = true;
+                //OM.Host.DebugMsg(String.Format("Setting - Screen: {0}, statusLabel.Visible: {1}", screen.ToString(), ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Visible.ToString()));
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["Quit"]).Visible = true;
+                //OM.Host.DebugMsg(String.Format("Setting - Screen: {0}, Quit.Visible: {1}", screen.ToString(), ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["Quit"]).Visible.ToString()));
+            }
+            else
+            {
+                MainMenuButtonsVisibility(true, screen);
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible = false;
+                //OM.Host.DebugMsg(String.Format("Setting - Screen: {0}, shapeBackgroundMain.Visible: {1}", screen.ToString(), ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible.ToString()));
+                ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Visible = false;
+                //OM.Host.DebugMsg(String.Format("Setting - Screen: {0}, statusLabel.Visible: {1}", screen.ToString(), ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Visible.ToString()));
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["Quit"]).Visible = false;
+                //OM.Host.DebugMsg(String.Format("Setting - Screen: {0}, Quit.Visible: {1}", screen.ToString(), ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["Quit"]).Visible.ToString()));
+            }
+            ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["Rematch"]).Visible = false;
+            for (int r = 1; r < 4; r++)
+            {
+                for (int c = 1; c < 4; c++)
+                {
+                    if (Visible)
+                    {
+                        //base.PanelManager[screen, "OMTicTacToe"].MoveControlToFront((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]);
+                        ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible = true;
+                        //OM.Host.DebugMsg(String.Format("boardTile_{0}_{1}.Visible: true", r.ToString(), c.ToString()));
+                    }
+                    else
+                    {   
+                        ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible = false;
+                        //OM.Host.DebugMsg(String.Format("boardTile_{0}_{1}.Visible: false", r.ToString(), c.ToString()));
+                    }
+                }
+            }
+        }
+
+        private void UpdateBoard(int gameBoardID, int screen, string[][] Layout)
+        {
+            ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["Rematch"]).Visible = false;
+            for (int r = 1; r < 4; r++)
+            {
+                for (int c = 1; c < 4; c++)
+                {
+                    //OM.Host.DebugMsg(String.Format("Updating - Screen: {0}, gameBoardID: {1}, Layout[{2}][{3}]: {4}", screen.ToString(), gameBoardID.ToString(), (r - 1).ToString(), (c - 1).ToString(), Layout[r - 1][c - 1]));
+                    ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Image = imageItem.NONE;
+                    if (Layout[r - 1][c - 1] == "B")
+                        ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Image = imgB;
+                    else if (Layout[r - 1][c - 1] == "X")
+                        ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Image = imgX;
+                    else if (Layout[r - 1][c - 1] == "O")
+                        ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Image = imgO;
+                    else if (Layout[r - 1][c - 1] == "WX")
+                        ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Image = imgWonX;
+                    else if (Layout[r - 1][c - 1] == "WO")
+                        ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Image = imgWonO;
+                }
             }
         }
 
@@ -198,184 +464,72 @@ namespace OMTicTacToe
             OM.Host.CommandHandler.ExecuteCommand("OMDSTicTacToe.Notifications.Enable", new object[] { screen });
         }
 
-        private void MainMenu_OnClick(OMControl sender, int screen)
-        {
-
-        }
-
         private void Rematch_OnClick(OMControl sender, int screen)
         {
-            object value;
-            theHost.DataHandler.GetDataSourceValue("TicTacToe.Game.Rematch", new object[] { screen.ToString() }, out value);
+            OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Game.Rematch", new object[] { screen.ToString() });
         }
 
         private void Quit_OnClick(OMControl sender, int screen)
         {
-            object value;
-            theHost.DataHandler.GetDataSourceValue("TicTacToe.Game.EndGame", new object[] { screen.ToString() }, out value);
+            //just remove the subscriptions once
+            OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Game.EndGame", new object[] { screen.ToString() });
+            OM.Host.DataHandler.UnsubscribeFromDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardUpdated", boardIDs[screen].ToString()), Subscription_Updated);
+            OM.Host.DataHandler.UnsubscribeFromDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardVisibility", boardIDs[screen].ToString()), Subscription_Updated);
+            OM.Host.DataHandler.UnsubscribeFromDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardMessages", boardIDs[screen].ToString()), Subscription_Updated);
         }
 
         private void SinglePlayer_OnClick(OMControl sender, int screen)
         {
-            object value;
-            theHost.DataHandler.GetDataSourceValue("TicTacToe.Game.AddGame", new object[] { screen.ToString(), "-1" }, out value);
-            if (value != null)
+            object gameBoardID = OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Game.AddGame", new object[] { screen.ToString(), "-1" });
+            if (gameBoardID != null)
             {
-                /*
-                //OMBasicShape shpBackground = new OMBasicShape("shpBackground", 190, 90, 470, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(175, Color.Black), Color.Transparent, 0, 5));
-                //shpBackground.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground"]).Visible = true;
-                //OMBasicShape shpBackground1 = new OMBasicShape("shpBackground1", 190, 198, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                //shpBackground1.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground1"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground1"]).Visible = true;
-                //OMBasicShape shpBackground2 = new OMBasicShape("shpBackground2", 190, 298, 470, 4, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                //shpBackground2.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground2"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground2"]).Visible = true;
-                //OMBasicShape shpBackground3 = new OMBasicShape("shpBackground3", 348, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                //shpBackground3.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground3"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground3"]).Visible = true;
-                //OMBasicShape shpBackground4 = new OMBasicShape("shpBackground4", 498, 90, 4, 320, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(125, Color.Black), Color.Transparent, 0, 5));
-                //shpBackground4.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground4"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shpBackground4"]).Visible = true;
-                */
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMBasicShape)manager[screen, "OMTicTacToe"]["shapeBackgroundMain"]).Visible = true;
+                boardIDs[screen] = Convert.ToInt32(gameBoardID);
+                OM.Host.DataHandler.SubscribeToDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardUpdated", gameBoardID.ToString()), Subscription_Updated);
+                OM.Host.DataHandler.SubscribeToDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardVisibility", gameBoardID.ToString()), Subscription_Updated);
+                OM.Host.DataHandler.SubscribeToDataSource(String.Format("OMDSTicTacToe;TicTacToe.{0}.BoardMessages", gameBoardID.ToString()), Subscription_Updated);
+                OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Game.StartGame", new object[] { gameBoardID.ToString() });
+            }
+        }
 
-                OMPanel p = manager[screen, "OMTicTacToe"];
-                //p.addControl(shpBackground);
-                //p.addControl(shpBackground1);
-                //p.addControl(shpBackground2);
-                //p.addControl(shpBackground3);
-                //p.addControl(shpBackground4);
-                //p.MoveControlToBack(shpBackground1);
-                //p.MoveControlToBack(shpBackground2);
-                //p.MoveControlToBack(shpBackground3);
-                //p.MoveControlToBack(shpBackground4);
-                //p.MoveControlToBack(shpBackground);
-
-                //set the button datasources
-                for (int r = 1; r < 4; r++)
-                {
-                    for (int c = 1; c < 4; c++)
-                    {
-                        //OMButton boardTile = (OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]);
-                        //OMButton boardTile = new OMButton("boardTile_" + r.ToString() + "_" + c.ToString(), 50 + (150 * c), 100 * r, 150, 100);
-                        //boardTile.OnClick += new userInteraction(boardTile_OnClick);
-                        //boardTile.Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible";
-                        //boardTile.DataSource_Image = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString();
-                        //p.addControl(boardTile);
-                        ((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString() + "-Visible";
-                        ((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).DataSource_Image = "TicTacToe." + Convert.ToInt32(value).ToString() + "." + r.ToString() + "-" + c.ToString();
-                        ((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible = true;
-                        p.MoveControlToFront((OMButton)manager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]);
-                    }
-                }
-                //OMLabel statusLabel = new OMLabel("statusLabel", 0, 35, 1000, 65);
-                //p.addControl(statusLabel);
-                ((OMLabel)manager[screen, "OMTicTacToe"]["statusLabel"]).DataSource = String.Format("TicTacToe." + Convert.ToInt32(value).ToString() + ".{0}", screen.ToString());
-                ((OMLabel)manager[screen, "OMTicTacToe"]["statusLabel"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleStatusLabel";
-                ((OMLabel)manager[screen, "OMTicTacToe"]["statusLabel"]).Visible = true;
-                //OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", (theHost.ClientArea[0].Width / 2) - 100, 400, 200, 100, GraphicCorners.All);
-                //Rematch.Text = "Rematch";
-                //p.addControl(Rematch);
-                //Rematch.OnClick += new userInteraction(Rematch_OnClick);
-                //p.addControl(Rematch);
-                /*
-                OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", (theHost.ClientArea[0].Width / 2) + ((theHost.ClientArea[0].Width / 2) / 2) - 100, 400, 200, 100, GraphicCorners.All);
-                Quit.Text = "Quit";
-                Quit.OnClick += new userInteraction(Quit_OnClick);
-                p.addControl(Quit);
-                */
-                //((OMButton)manager[screen, "OMTicTacToe"]["MainMenu"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleMainMenuButton";
-                ((OMButton)manager[screen, "OMTicTacToe"]["Rematch"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleRematchButton";
-                ((OMButton)manager[screen, "OMTicTacToe"]["Rematch"]).Visible = true;
-                ((OMButton)manager[screen, "OMTicTacToe"]["Quit"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleQuitButton";
-                ((OMButton)manager[screen, "OMTicTacToe"]["Quit"]).Visible = true;
-
-                ((OMButton)manager[screen, "OMTicTacToe"]["SinglePlayer"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleSinglePlayerButton";
-                ((OMButton)manager[screen, "OMTicTacToe"]["MultiPlayer"]).Visible_DataSource = "TicTacToe." + Convert.ToInt32(value).ToString() + ".VisibleMultiPlayerButton";
-                theHost.DataHandler.GetDataSourceValue("TicTacToe.Game.StartGame", new object[] { Convert.ToInt32(value).ToString() }, out value);
+        private void MultiPlayerControlsShown(bool Visible, int screen)
+        {
+            if (Visible)
+            {
+                ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"]).Visible = true;
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["multiplayerCancel"]).Visible = true;
+            }
+            else
+            {
+                ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"]).Visible = false;
+                ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["multiplayerCancel"]).Visible = false;
             }
         }
 
         private void MultiPlayer_OnClick(OMControl sender, int screen)
         {
-            //theHost.execute(eFunction.TransitionFromAny, screen.ToString());
-            //theHost.execute(eFunction.TransitionToPanel, screen.ToString(), "OMTicTacToe", "MultiplayerPanel");
-            //theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            MainMenuButtonsVisibility(false, screen);
+            MultiPlayerControlsShown(true, screen);
+        }
+
+        private void multiplayerCancel_OnClick(OMControl sender, int screen)
+        {
+            MultiPlayerControlsShown(false, screen);
+            MainMenuButtonsVisibility(true, screen);
         }
 
         private void MultiplayerList_OnClick(OMControl sender, int screen)
         {
-
+            OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Multiplayer.Challenge", new object[] { screen, ((OMList)sender).SelectedIndex });
         }
 
         private void boardTile_OnClick(OMControl sender, int screen)
         {
-            if (((OMLabel)manager[screen, "OMTicTacToe"]["statusLabel"]).Text == "Watching game...") //not playing in this game...
+            if (((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["statusLabel"]).Text == "Watching game...") //not playing in this game...
                 return;
             string row = (Convert.ToInt32(((OMButton)sender).Name.Remove(0, 10).Substring(0, 1)) - 1).ToString();
             string col = (Convert.ToInt32(((OMButton)sender).Name.Remove(0, 12)) - 1).ToString();
-            object value;
-            theHost.DataHandler.GetDataSourceValue("TicTacToe.Game.FlipTile", new object[] { screen.ToString(), row, col }, out value);
+            OM.Host.CommandHandler.ExecuteCommand("TicTacToe.Game.FlipTile", new object[] { screen.ToString(), row, col });
         }
 
-        public OMPanel loadPanel(string name, int screen)
-        {
-            return manager[screen, name];
-        }
-        public Settings loadSettings()
-        {
-            return null;
-        }
-        public string authorName
-        {
-            get { return "Peter Yeaney"; }
-        }
-        public string authorEmail
-        {
-            get { return "peter.yeaney@outlook.com"; }
-        }
-        public string pluginName
-        {
-            get { return "OMTicTacToe"; }
-        }
-        public string displayName
-        {
-            get { return "TicTacToe"; }
-        }
-        public float pluginVersion
-        {
-            get { return 0.1F; }
-        }
-        public string pluginDescription
-        {
-            get { return "Tic Tac Toe Game"; }
-        }
-        public bool incomingMessage(string message, string source)
-        {
-            return false;
-        }
-        public bool incomingMessage<T>(string message, string source, ref T data)
-        {
-            return false;
-        }
-        public imageItem pluginIcon
-        {
-            get 
-            { 
-                //return OM.Host.getSkinImage("Icons|Icon-TicTacToe"); 
-                return OM.Host.getPluginImage(this, "Icon-OMTicTacToe"); 
-            }
-        }
-        public void Dispose()
-        {
-            //
-        }
     }
 }

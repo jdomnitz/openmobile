@@ -1,1 +1,2 @@
-﻿
+﻿Bugs:
+	- OMMapProvider "Object is currently in use elsewhere." -> Caused by simultaneous access to the GDI object

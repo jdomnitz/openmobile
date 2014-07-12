@@ -63,6 +63,6 @@ namespace OpenMobile.Controls
         /// <summary>
         /// MouseUp event for this control
         /// </summary>
-        void MousePreviewUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance);
+        void MousePreviewUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance, ClickTypes clickType);
     }
 }

@@ -259,6 +259,11 @@ namespace OpenMobile.Controls
         /// </summary>
         public event IndexChangedDelegate OnSelectedIndexChanged;
         /// <summary>
+        /// Occurs when the selected list index is held 
+        /// </summary>
+        public event IndexChangedDelegate OnSelectedIndexChangedHold;
+        
+        /// <summary>
         /// Occurs when the highlighted item changes
         /// </summary>
         public event IndexChangedDelegate OnHighlightedIndexChanged;
@@ -282,6 +287,7 @@ namespace OpenMobile.Controls
         private Rectangle _ItemBase_Region;
         private int _Items_SelectedIndex = -1;
         private int _Items_HighlightedIndex = -1;
+        private Timer tmrClickHold = new Timer(500);
 
         private List<ListControlItem> _Items = new List<ListControlItem>();
 
@@ -302,7 +308,7 @@ namespace OpenMobile.Controls
         public OMObjectList2(string name, int x, int y, int w, int h)
             : base(name, x, y, w, h)
         {
-            //AddListItems(50);
+            tmrClickHold.Elapsed += new System.Timers.ElapsedEventHandler(tmrClickHold_Elapsed);
         }
 
         #endregion
@@ -499,7 +505,7 @@ namespace OpenMobile.Controls
             return -1;
         }
 
-        private void Item_Select(int index)
+        private void Item_Select(int index, bool useHoldEvent = false)
         {
             // Deselect selected item
             if (_Items_SelectedIndex >= 0)
@@ -511,8 +517,16 @@ namespace OpenMobile.Controls
                 _Items[_Items_SelectedIndex].ExecuteAction_Select(this, this.parent.ActiveScreen, _Items_SelectedIndex);
 
             // Trigger event
-            if (OnSelectedIndexChanged != null)
-                OnSelectedIndexChanged(this, this.parent.ActiveScreen);
+            if (!useHoldEvent)
+            {
+                if (OnSelectedIndexChanged != null)
+                    OnSelectedIndexChanged(this, this.parent.ActiveScreen);
+            }
+            else
+            {
+                if (OnSelectedIndexChangedHold != null)
+                    OnSelectedIndexChangedHold(this, this.parent.ActiveScreen);
+            }
         }
         private void Item_Highlight(int index)
         {
@@ -615,10 +629,16 @@ namespace OpenMobile.Controls
 
             // Highlight item under mouse
             Item_Highlight(GetItemIndexFromPoint(e.Location));
+
+            // Enable hold detection
+            tmrClickHold.Enabled = true;
+            tmrClickHold.Tag = e.Location;
         }
 
-        public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
+        public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance, ClickTypes clickType)
         {
+            tmrClickHold.Enabled = false;
+
             if (!ThrowActive)
             {
                 // unhighlight currently highlighted item
@@ -627,6 +647,13 @@ namespace OpenMobile.Controls
                 // Select item
                 Item_Select(GetItemIndexFromPoint(e.Location));
             }
+        }
+
+        void tmrClickHold_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            // Disable timer to prevent multiple hits
+            tmrClickHold.Enabled = false;
+            Item_Select(GetItemIndexFromPoint((Point)tmrClickHold.Tag), true);
         }
 
         #endregion
@@ -767,5 +794,6 @@ namespace OpenMobile.Controls
                 }
             }
         }
+
     }
 }

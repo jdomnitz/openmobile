@@ -1,7 +1,15 @@
 ﻿---- < Distributed >-----
+20140422
+	+ Several changes, including DataSourceGroups and CommandGroups
+	+ New Media Player using datasources and commands (old interface not yet removed)
+		Please note that the current implementation has no playlist editing/browsing so all songs are automatically loaded into the default 
+		playlist the first time the Music Player skin is opened (this might take some time on certain setups) operation has completed when 
+		coveres are visible in the coverflow.
+
+---- < Distributed, Comitted >-----
 20140127 
 	+ Added support for subscribing to multiscreen datasources (datasources that begins with "Screen") by using this string as a 
-	  direct datasource link for a comtrol, notice that even the full name of the datasource is Screen0.Map.Busy we drop the screen part: 
+	  direct datasource link for a control, notice that even the full name of the datasource is Screen0.Map.Busy we drop the screen part: 
 		img_MapGroup_Updating.DataSource = "{:S:}Map.Busy";
 	+ Added support for executing a multiscreen command (commands that begins with "Screen") by using this command as a 
 	  direct command for a button (and other controls), notice that even the full name of the command is Screen0.Map.Zoom.In we drop the screen part: 

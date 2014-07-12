@@ -34,6 +34,7 @@ using OpenMobile.Plugin;
 using OpenMobile.Zones;
 using OpenMobile;
 using OpenMobile.helperFunctions;
+using OpenMobile.Net;
 
 namespace OpenMobile
 {
@@ -325,6 +326,21 @@ namespace OpenMobile
             OpenMobile.Controls.PanelTransitionEffectHandler.Init();
         }
 
+        public void Dispose()
+        {
+            if (tmrCurrentClock != null)
+                tmrCurrentClock.Dispose();
+            _DataHandler.Dispose();
+            _CommandHandler.Dispose();
+            _UIHandler.Dispose();
+            _ZoneHandler.Dispose();
+        }
+
+        ~PluginHost()
+        {
+            Dispose();
+        }
+
         void tmrCurrentClock_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             tmrCurrentClock_time(null);
@@ -352,8 +368,9 @@ namespace OpenMobile
             NetWorkAvailable = GetNetWorkAvailable();
 
             // Connect network events
-            NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
+            //NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(NetworkChange_NetworkAddressChanged);
+            NetworkStatus.AvailabilityChanged += new NetworkStatusChangedHandler(NetworkStatus_AvailabilityChanged);
         }
 
         /// <summary>
@@ -975,7 +992,7 @@ namespace OpenMobile
         /// <param name="altitude"></param>
         public void UpdateLocation(string name = null,
             string address = null,
-            string street = null, 
+            string street = null,
             string city = null,
             string state = null,
             string country = null,
@@ -988,53 +1005,83 @@ namespace OpenMobile
             Location currentLocation = CurrentLocation;
             if (name != null)
             {
-                currentLocation.Name = name;
-                dataUpdated = true;
+                if (!currentLocation.Name.Equals(name))
+                {
+                    currentLocation.Name = name;
+                    dataUpdated = true;
+                }
             }
             if (address != null)
             {
-                currentLocation.Address = address;
-                dataUpdated = true;
+                if (!currentLocation.Address.Equals(address))
+                {
+                    currentLocation.Address = address;
+                    dataUpdated = true;
+                }
             }
             if (street != null)
             {
-                currentLocation.Street = street;
-                dataUpdated = true;
+                if (!currentLocation.Street.Equals(street))
+                {
+                    currentLocation.Street = street;
+                    dataUpdated = true;
+                }
             }
             if (city != null)
             {
-                currentLocation.City = city;
-                dataUpdated = true;
+                if (!currentLocation.City.Equals(city))
+                {
+                    currentLocation.City = city;
+                    dataUpdated = true;
+                }
             }
             if (state != null)
             {
-                currentLocation.State = state;
-                dataUpdated = true;
+                if (!currentLocation.State.Equals(state))
+                {
+                    currentLocation.State = state;
+                    dataUpdated = true;
+                }
             }
             if (country != null)
             {
-                currentLocation.Country = country;
-                dataUpdated = true;
+                if (!currentLocation.Country.Equals(country))
+                {
+                    currentLocation.Country = country;
+                    dataUpdated = true;
+                }
             }
             if (zip != null)
             {
-                currentLocation.Zip = zip;
-                dataUpdated = true;
+                if (!currentLocation.Zip.Equals(zip))
+                {
+                    currentLocation.Zip = zip;
+                    dataUpdated = true;
+                }
             }
             if (latitude.HasValue)
             {
-                currentLocation.Latitude = latitude.Value;
-                dataUpdated = true;
+                if (!currentLocation.Latitude.Equals(latitude.Value))
+                {
+                    currentLocation.Latitude = latitude.Value;
+                    dataUpdated = true;
+                }
             }
             if (longitude.HasValue)
             {
-                currentLocation.Longitude = longitude.Value;
-                dataUpdated = true;
+                if (!currentLocation.Longitude.Equals(longitude.Value))
+                {
+                    currentLocation.Longitude = longitude.Value;
+                    dataUpdated = true;
+                }
             }
             if (altitude.HasValue)
             {
-                currentLocation.Altitude = altitude.Value;
-                dataUpdated = true;
+                if (!currentLocation.Altitude.Equals(altitude.Value))
+                {
+                    currentLocation.Altitude = altitude.Value;
+                    dataUpdated = true;
+                }
             }
 
             UpdateLocation(currentLocation, dataUpdated);
@@ -1293,6 +1340,69 @@ namespace OpenMobile
             return System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable();
         }
 
+        void NetworkStatus_AvailabilityChanged(object sender, NetworkStatusChangedArgs e)
+        {
+            if (NetWorkAvailable && !e.IsAvailable)
+            {   // We disconnected from the network
+                NetWorkAvailable = e.IsAvailable;
+                InternetAccess = false;
+                raiseSystemEvent(eFunction.disconnectedFromInternet, String.Empty, String.Empty, String.Empty);
+            }
+            else
+            {   // We connected to the network
+                NetWorkAvailable = e.IsAvailable;
+
+                // Was this just a network connection comming alive or was it a internet connection?
+                if (OpenMobile.Net.Network.checkForInternet() == OpenMobile.Net.Network.connectionStatus.InternetAccess)
+                {   // Yes, network with internet available
+                    InternetAccess = true;
+                    raiseSystemEvent(eFunction.connectedToInternet, String.Empty, String.Empty, String.Empty);
+                }
+                else
+                {   // Network only, no internet. Let's keep polling for 10mins to see if it comes alive (in case of a phone connecting etc...)
+                    InternetAccess = false;
+                    Network_PollForInternetAvailability();
+                }
+            }
+
+            // Set internal state
+            _NetWorkAvailable_PreviousState = e.IsAvailable;
+        }
+
+        /// <summary>
+        /// Starts a thread that polls for internet availability up to a max time
+        /// </summary>
+        /// <param name="maxSeconds"></param>
+        public void Network_PollForInternetAvailability(int maxSeconds = 600)
+        {
+            // Start a new thread that monitors the connection
+            SandboxedThread.Asynchronous(() =>
+            {
+                int pollDelay = 10;
+                int max = maxSeconds / pollDelay;
+                // We're maximum gonna loop this 60 times (60 x 10 sec = 10min)
+                for (int i = 0; i < max; i++)
+                {
+                    // Cancel if no network is available
+                    if (!NetworkStatus.IsAvailable)
+                        break;
+
+                    // Check for available internet
+                    if (OpenMobile.Net.Network.checkForInternet() == OpenMobile.Net.Network.connectionStatus.InternetAccess)
+                    {   // Yes, network with internet available
+                        InternetAccess = true;
+                        raiseSystemEvent(eFunction.connectedToInternet, String.Empty, String.Empty, String.Empty);
+
+                        // Break loop and cancel thread
+                        break;
+                    }
+
+                    // Let's wait for 10 seconds before trying again
+                    Thread.Sleep(pollDelay * 1000);
+                }
+            });
+        }
+
         /// <summary>
         /// Raises system event when network address is changed
         /// </summary>
@@ -1523,8 +1633,21 @@ namespace OpenMobile
 
         #region Execute function
 
-        //TODO : REWRITE MEDIA CONTROLS TO USE SCREEN AND IN ADDITION SCREEN AND ZONE
 
+        private void CloseProgram(string halCommand)
+        {
+            if (!closing)
+            {
+                closing = true;
+                SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.CloseProgramPreview, String.Empty, String.Empty, String.Empty); });
+                savePlaylists();
+                //SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
+                raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
+                Hal_Send(halCommand);
+                Stop();
+                RenderingWindow.CloseRenderer();
+            }
+        }
 
 
         /// <summary>
@@ -1540,17 +1663,18 @@ namespace OpenMobile
                 case eFunction.closeProgram:
                     //Don't lock this to prevent deadlock
                     {
-                        if (!closing)
-                        {
-                            closing = true;
-                            SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.CloseProgramPreview, String.Empty, String.Empty, String.Empty); });                            
-                            savePlaylists();
-                            //SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
-                            raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
-                            Hal_Send("44");
-                            Stop();
-                            RenderingWindow.CloseRenderer();
-                        }
+                        CloseProgram("44");
+                        //if (!closing)
+                        //{
+                        //    closing = true;
+                        //    SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.CloseProgramPreview, String.Empty, String.Empty, String.Empty); });                            
+                        //    savePlaylists();
+                        //    //SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
+                        //    raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
+                        //    Hal_Send("44");
+                        //    Stop();
+                        //    RenderingWindow.CloseRenderer();
+                        //}
                     }
                     return true;
 
@@ -1598,25 +1722,29 @@ namespace OpenMobile
 
                 // Shutdown computer
                 case eFunction.shutdown:
-                    Hal_Send("46");
-                    Stop();
+                    //Hal_Send("46");
+                    //Stop();
+                    CloseProgram("46");
                     return true;
 
                 // Restart computer
                 case eFunction.restart:
-                    Hal_Send("47");
-                    Stop();
+                    //Hal_Send("47");
+                    //Stop();
+                    CloseProgram("47");
                     return true;
 
                 // Hibernate computer
                 case eFunction.hibernate:
                     Hal_Send("45");
+                    //CloseProgram("45");
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                     return true;
 
                 // Set computer in standby
                 case eFunction.standby:
                     Hal_Send("48");
+                    //CloseProgram("48");
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                     return true;
 
@@ -2101,6 +2229,18 @@ namespace OpenMobile
                     if (int.TryParse(arg, out ret))
                     {
                         Core.RenderingWindows[ret].WindowState = WindowState.Minimized;
+                        return true;
+                    }
+                    return false;
+
+                // Toggle fullscreen / Windowed application
+                case eFunction.ToggleFullscreen:
+                     if (int.TryParse(arg, out ret))
+                    {
+                        if (Core.RenderingWindows[ret].WindowState != WindowState.Fullscreen)
+                            Core.RenderingWindows[ret].WindowState = WindowState.Fullscreen;
+                        else
+                            Core.RenderingWindows[ret].WindowState = WindowState.Normal;
                         return true;
                     }
                     return false;
@@ -2775,7 +2915,7 @@ namespace OpenMobile
                                 return false;
                             raiseSystemEvent(eFunction.TransitionToPanel, arg1, (panel.OwnerPlugin != null ? panel.OwnerPlugin.pluginName : ""), panel.Name);
                             if (!panel.UIPanel)
-                                history.Enqueue(ret, arg2, arg3, panel.Forgotten);
+                                history.Enqueue(ret, arg2, panel.Name, panel.Forgotten);
                         }
                         return true;
                     }
@@ -3788,7 +3928,7 @@ namespace OpenMobile
             IBasePlugin plugin = getPluginByName(pluginName);
             if (plugin == null)
                 return imageItem.NONE;
-            return getPluginImage(plugin, imageName);
+            return getPluginImage(plugin, imageName, String.Empty);
         }
 
         /// <summary>
@@ -3818,7 +3958,28 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Loads an image from a file located in the plugin folder
+        /// Loads a sprite from a sprite image from a file located in the plugin folder (This method can be used in the constructor)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="imageName"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        public imageItem getPluginImage<T>(string imageName, string spriteName)
+        {
+            return getPluginImage(typeof(T), imageName, spriteName);
+        }
+        /// <summary>
+        /// Loads an image from a file located in the plugin folder (This method can be used in the constructor)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
+        public imageItem getPluginImage<T>(string imageName)
+        {
+            return getPluginImage(typeof(T), imageName, String.Empty);
+        }
+        /// <summary>
+        /// Loads a sprite from a sprite image from a file located in the plugin folder
         /// </summary>
         /// <param name="plugin"></param>
         /// <param name="imageName"></param>
@@ -3826,8 +3987,19 @@ namespace OpenMobile
         /// <returns></returns>
         public imageItem getPluginImage(IBasePlugin plugin, string imageName, string spriteName)
         {
+            return getPluginImage(plugin.GetType(), imageName, spriteName);
+        }
+        /// <summary>
+        /// Loads a sprite from a sprite image from a file located in the plugin folder
+        /// </summary>
+        /// <param name="pluginType"></param>
+        /// <param name="imageName"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        public imageItem getPluginImage(Type pluginType, string imageName, string spriteName)
+        {
             // Get paths
-            string PluginPath = System.Reflection.Assembly.GetAssembly(plugin.GetType()).Location;
+            string PluginPath = System.Reflection.Assembly.GetAssembly(pluginType).Location;
             PluginPath = System.IO.Path.GetDirectoryName(PluginPath);
             string fullImageName = Path.Combine(PluginPath, imageName).Replace('|', System.IO.Path.DirectorySeparatorChar);
 

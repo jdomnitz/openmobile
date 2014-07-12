@@ -157,7 +157,8 @@ namespace OMMenu
                         List_Menu.Name = "Menu_List";
                         List_Menu.Scrollbars = true;
                         List_Menu.ListStyle = eListStyle.MultiList;
-                        List_Menu.Background = Color.Silver;
+                        List_Menu.SeparatorColor = Color.Silver; 
+                        //List_Menu.Background = Color.Silver;
                         List_Menu.ItemColor1 = Color.Black;
                         List_Menu.Font = new Font(Font.GenericSansSerif, DT.FontSize);
                         //List_Menu.Color = Color.White;

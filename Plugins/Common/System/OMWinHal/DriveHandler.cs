@@ -24,13 +24,22 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using System.Collections;
+using System.Management;
+using System.Management.Instrumentation;
+using System.Runtime.InteropServices; 
+
 namespace OMHal
 {
     static class DriveHandler
     {
-        private const int DBT_DEVICEARRIVAL = 0x8000; // system detected a new device
-        private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
+        public const int DBT_DEVICEARRIVAL = 0x8000; // system detected a new device
+        public const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
         private const int DBT_DEVTYP_VOLUME = 0x00000002; // drive type is logical volume
+        private const int DBT_DEVTYP_PORT = 0x00000003;      // serial, parallel 
+        private const int DBT_DEVTYP_DEVICEINTERFACE = 0x00000005;
+        private const int DBT_DEVTYP_HANDLE = 0x00000006;
+        private const int DBT_DEVTYP_OEM = 0x00000000;      
 
         [StructLayout(LayoutKind.Sequential)]
         public struct DEV_BROADCAST_VOLUME
@@ -40,6 +49,9 @@ namespace OMHal
             public int dbcv_reserved;
             public int dbcv_unitmask;
         }
+
+        //delegate enables asynchronous call for getting the list of friendly names  
+        private static getFriendlyNameListDelegate mDeleg;
 
         public static void WndProc(ref Message m)
         {
@@ -51,28 +63,118 @@ namespace OMHal
                 {
                     StringBuilder path=new StringBuilder();
                     SHGetPathFromIDListW(nfy.dwItem1, path);
-                    DeviceArrived(path.ToString());
+                    DriveArrived(path.ToString());
                 }
                 else if ((int)m.LParam == (int)SHCNE.SHCNE_MEDIAREMOVED)
                 {
                     StringBuilder path = new StringBuilder();
                     SHGetPathFromIDListW(nfy.dwItem1, path);
-                    DeviceRemoved(path.ToString());
+                    DriveRemoved(path.ToString());
                 }else if((int)m.LParam == (int)SHCNE.SHCNE_DRIVEADD)
                 {
                     StringBuilder path=new StringBuilder();
                     SHGetPathFromIDListW(nfy.dwItem1, path);
-                    DeviceArrived(path.ToString());
+                    DriveArrived(path.ToString());
                 }
                 else if ((int)m.LParam == (int)SHCNE.SHCNE_DRIVEREMOVED)
                 {
                     StringBuilder path = new StringBuilder();
                     SHGetPathFromIDListW(nfy.dwItem1, path);
-                    DeviceRemoved(path.ToString());
+                    DriveRemoved(path.ToString());
                 }
             }
         }
-        
+
+        public static void WndProc_Devices(ref Message m)
+        {
+            unsafe
+            {
+                int devType;
+                switch (m.WParam.ToInt32())
+                {
+                    case DBT_DEVICEARRIVAL:
+                        {
+                            devType = Marshal.ReadInt32(m.LParam, 4);
+                            if (devType == DBT_DEVTYP_PORT)
+                                Form1.raiseSystemEvent(eFunction.USBDeviceAdded, "PORT", "", "");
+                            else if (devType == DBT_DEVTYP_VOLUME)
+                                Form1.raiseSystemEvent(eFunction.USBDeviceAdded, "VOLUME", "", "");
+                            else 
+                                Form1.raiseSystemEvent(eFunction.USBDeviceAdded, "UNKNOWN", "", "");
+
+                                //// usb device inserted, call the query      
+                                //mDeleg = new getFriendlyNameListDelegate(getFriendlyNameList);
+                                //AsyncCallback callback = new AsyncCallback(getFriendlyNameListCallback);
+
+                                //// invoke the thread that will handle getting the friendly names  
+                                //mDeleg.BeginInvoke(callback, new object());
+
+                        }
+                        break;
+                    case DBT_DEVICEREMOVECOMPLETE:
+                        {
+                            devType = Marshal.ReadInt32(m.LParam, 4);
+                            if (devType == DBT_DEVTYP_PORT)
+                                Form1.raiseSystemEvent(eFunction.USBDeviceRemoved, "PORT", "", "");
+                            else if (devType == DBT_DEVTYP_VOLUME)
+                                Form1.raiseSystemEvent(eFunction.USBDeviceRemoved, "VOLUME", "", "");
+                            else 
+                                Form1.raiseSystemEvent(eFunction.USBDeviceRemoved, "UNKNOWN", "", "");                                
+                            
+                            // usb device removed, call the query  
+
+                            //mDeleg = new getFriendlyNameListDelegate(getFriendlyNameList);
+                            //AsyncCallback callback = new AsyncCallback(getFriendlyNameListCallback);
+
+
+                            //// invoke the thread that will handle getting the friendly names   
+                            //mDeleg.BeginInvoke(callback, new object());
+                        }
+                        break;
+                }
+            }
+        }
+
+        // function queries the system using WMI and gets an arraylist of all com port devices     
+        static private ArrayList getFriendlyNameList()
+        {
+            ArrayList deviceList = new ArrayList();
+
+            // getting a list of all available com port devices and their friendly names     
+            // must add System.Management DLL resource to solution before using this     
+            // Project -> Add Reference -> .Net tab, choose System.Management     
+
+            // source:     
+            // http://www.codeproject.com/KB/system/hardware_properties_c_.aspx     
+
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("Select Name from Win32_PnpEntity");
+
+            foreach (ManagementObject devices in searcher.Get())
+            {
+                string name = devices.GetPropertyValue("Name").ToString();
+
+                // only add item if the friendly names contains "COM"     
+                // we only want to add COM Ports     
+                if (name.Contains("(COM"))
+                {
+                    deviceList.Add(name);
+                }
+            }
+
+            searcher.Dispose();
+            return deviceList;
+        }
+
+        // delegate wrapper function for the getFriendlyNameList function  
+        private delegate ArrayList getFriendlyNameListDelegate();
+
+        // callback method when the thread returns  
+        static private void getFriendlyNameListCallback(IAsyncResult ar)
+        {
+            // got the returned arrayList, now we can do whatever with it  
+            ArrayList result = mDeleg.EndInvoke(ar);
+        } 
+
         public const int WM_MEDIA_CHANGE = 0x0801;
         public static uint id;
         public static void hook(IntPtr form)
@@ -138,7 +240,7 @@ namespace OMHal
             SHCNE_GLOBALEVENTS    = 0x0C0581E0,
             SHCNE_ALLEVENTS       = 0x7FFFFFFF,
         }
-        private static void DeviceArrived(string drive)
+        private static void DriveArrived(string drive)
         {
             DriveInfo info = new DriveInfo(drive);
             if (info.IsReady == true)
@@ -146,7 +248,7 @@ namespace OMHal
                 Form1.raiseStorageEvent(eMediaType.NotSet,true, drive);
             }
         }
-        private static void DeviceRemoved(string drive)
+        private static void DriveRemoved(string drive)
         {
             DriveInfo info = new DriveInfo(drive);
             Form1.raiseStorageEvent(eMediaType.DeviceRemoved,true, drive);

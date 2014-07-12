@@ -105,10 +105,13 @@ namespace OMHal
         }
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg==DriveHandler.WM_MEDIA_CHANGE)
+            if (m.Msg == DriveHandler.WM_MEDIA_CHANGE)
                 DriveHandler.WndProc(ref m);
             else
+            {
+                DriveHandler.WndProc_Devices(ref m);
                 base.WndProc(ref m);
+            }
         }
 
         public static void raiseSystemEvent(eFunction eFunction, string arg, string arg2, string arg3)

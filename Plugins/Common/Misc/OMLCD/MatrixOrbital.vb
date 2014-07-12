@@ -506,7 +506,7 @@ Namespace OMLCD
             ' Try to connect to portname
 
             ' Wait our turn access serial ports
-            helperFunctions.SerialAccess.GetAccess()
+            helperFunctions.SerialAccess.GetAccess(Me)
 
             Dim startTime As DateTime
             Dim elapsedTime As TimeSpan
@@ -600,7 +600,7 @@ Namespace OMLCD
             End Try
 
             ' Reqlinquish our hold on serial ports
-            helperFunctions.SerialAccess.ReleaseAccess()
+            helperFunctions.SerialAccess.ReleaseAccess(Me)
 
             m_lastRequest.Clear()
 

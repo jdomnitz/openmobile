@@ -268,6 +268,25 @@ namespace OpenMobile
         }
 
         /// <summary>
+        /// A general purpose tag
+        /// </summary>
+        public object Tag
+        {
+            get
+            {
+                return this._Tag;
+            }
+            set
+            {
+                if (this._Tag != value)
+                {
+                    this._Tag = value;
+                }
+            }
+        }
+        private object _Tag;        
+
+        /// <summary>
         /// Owner of this notification (IBasePlugin)
         /// </summary>
         public IBasePlugin OwnerPlugin

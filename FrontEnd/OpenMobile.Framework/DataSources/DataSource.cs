@@ -91,6 +91,10 @@ namespace OpenMobile.Data
 
         private void Raise_OnDataSourceChanged(bool spawn)
         {
+            // Cancel pushing updates if not enabled
+            if (!_Enabled)
+                return;
+
             DataSourceChangedDelegate handler = _OnDataSourceChanged;
             if (handler != null)
             {
@@ -99,7 +103,7 @@ namespace OpenMobile.Data
                     // Spawn new thread for event update
                     OpenMobile.Threading.SafeThread.Asynchronous(delegate()
                     {
-                        Delegate[] ds = _OnDataSourceChanged.GetInvocationList();
+                        Delegate[] ds = handler.GetInvocationList();
                         for (int i = 0; i < ds.Length; i++)
                         {
                             try
@@ -119,7 +123,7 @@ namespace OpenMobile.Data
                 }
                 else
                 {
-                    Delegate[] ds = _OnDataSourceChanged.GetInvocationList();
+                    Delegate[] ds = handler.GetInvocationList();
                     for (int i = 0; i < ds.Length; i++)
                     {
                         try
@@ -138,6 +142,45 @@ namespace OpenMobile.Data
                 }
             }
         }
+
+        #region Static methods
+
+        /// <summary>
+        /// Remaps the subscribers of one datasource to a new one
+        /// </summary>
+        /// <param name="fromDataSource"></param>
+        /// <param name="toDataSource"></param>
+        static public void Remap(DataSource fromDataSource, DataSource toDataSource)
+        {
+            // Copy subscriptions to the new dataSource
+            toDataSource._OnDataSourceChanged = fromDataSource._OnDataSourceChanged;
+
+            // Clear subscriptions from old dataSource
+            fromDataSource._OnDataSourceChanged = null;
+        }
+
+        /// <summary>
+        /// Pushes an update to all subscribers
+        /// </summary>
+        static public void PushUpdate(DataSource dataSource)
+        {
+            // Get a fresh value from the sensor (Not needed if value is already valid and present)
+            if (dataSource.Value != null)
+                dataSource.RefreshValue(dataSource.Value, false, true, true);
+            else
+                dataSource.RefreshValue(null, true, true, true);
+        }
+
+        /// <summary>
+        /// Clears all subscribers from a datasource
+        /// </summary>
+        /// <param name="dataSource"></param>
+        static public void ClearSubscribers(DataSource dataSource)
+        {
+            dataSource._OnDataSourceChanged = null;
+        }
+
+        #endregion
 
         #region Properties
 
@@ -176,6 +219,25 @@ namespace OpenMobile.Data
             }
         }
         private bool _Valid;
+
+        /// <summary>
+        /// Is this source enabled
+        /// </summary>
+        public bool Enabled
+        {
+            get
+            {
+                return this._Enabled;
+            }
+            set
+            {
+                if (this._Enabled != value)
+                {
+                    this._Enabled = value;
+                }
+            }
+        }
+        private bool _Enabled = true;        
 
         /// <summary>
         /// Is someone subscribing to this data
@@ -501,6 +563,69 @@ namespace OpenMobile.Data
             }
         }
 
+        /// <summary>
+        /// The group this DataSource belongs to
+        /// </summary>
+        public DataSourceGroup Group
+        {
+            get
+            {
+                return this._Group;
+            }
+            set
+            {
+                if (this._Group != value)
+                {
+                    //// Should we unregister before adding this to the new group
+                    //if (this._Group != null)
+                    //    this._Group.RemoveDataSource(this);
+
+                    this._Group = value;
+                    //if (!_Group.ContainsDataSource(this))
+                    //    this._Group.AddDataSource(this);
+                }
+            }
+        }
+        private DataSourceGroup _Group;
+
+        /// <summary>
+        /// The linked DataSource target
+        /// </summary>
+        public DataSource LinkedTarget
+        {
+            get
+            {
+                return this._LinkedTarget;
+            }
+            set
+            {
+                if (this._LinkedTarget != value)
+                {
+                    this._LinkedTarget = value;
+                }
+            }
+        }
+        private DataSource _LinkedTarget;
+
+        /// <summary>
+        /// The linked DataSource source
+        /// </summary>
+        public DataSource LinkedSource
+        {
+            get
+            {
+                return this._LinkedSource;
+            }
+            set
+            {
+                if (this._LinkedSource != value)
+                {
+                    this._LinkedSource = value;
+                }
+            }
+        }
+        private DataSource _LinkedSource;        
+
         #endregion
 
         #region Constructors
@@ -526,6 +651,23 @@ namespace OpenMobile.Data
         {
             Init();
         }
+
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="dataType"></param>
+        /// <param name="description"></param>
+        public DataSource(bool screenSpecific, string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, dataType, description)
+        {
+            ScreenSpecific = screenSpecific;
+        }
+
         /// <summary>
         /// Creates a new DataSource object
         /// </summary>
@@ -539,6 +681,23 @@ namespace OpenMobile.Data
             : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, dataType, description)
         {
         }
+
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="dataType"></param>
+        /// <param name="description"></param>
+        public DataSource(bool screenSpecific, IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, dataType, description)
+        {
+            ScreenSpecific = screenSpecific;
+        }
+        
         /// <summary>
         /// Creates a new DataSource object with an initial value 
         /// </summary>
@@ -556,6 +715,24 @@ namespace OpenMobile.Data
             _Valid = true;
             Init();
         }
+
+        /// <summary>
+        /// Creates a new DataSource object with an initial value 
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="dataType"></param>
+        /// <param name="description"></param>
+        /// <param name="initialValue"></param>
+        public DataSource(bool screenSpecific, string provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description, object initialValue)
+            : this(provider, nameLevel1,  nameLevel2, nameLevel3, dataType, description, initialValue)
+        {
+            ScreenSpecific = screenSpecific;
+        }
+
         /// <summary>
         /// Creates a new DataSource object with an initial value 
         /// </summary>
@@ -569,6 +746,23 @@ namespace OpenMobile.Data
         public DataSource(IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description, object initialValue)
             : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, dataType, description, initialValue)
         {
+        }
+
+        /// <summary>
+        /// Creates a new DataSource object with an initial value 
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="dataType"></param>
+        /// <param name="description"></param>
+        /// <param name="initialValue"></param>
+        public DataSource(bool screenSpecific, IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, DataTypes dataType, string description, object initialValue)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, dataType, description, initialValue)
+        {
+            ScreenSpecific = screenSpecific;
         }
 
         /// <summary>
@@ -599,6 +793,24 @@ namespace OpenMobile.Data
         /// <summary>
         /// Creates a new DataSource object
         /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="pollRate"></param>
+        /// <param name="dataType"></param>
+        /// <param name="getter"></param>
+        /// <param name="description"></param>
+        public DataSource(bool screenSpecific, string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, description)
+        {
+            ScreenSpecific = screenSpecific;
+        }
+
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
         /// <param name="provider"></param>
         /// <param name="nameLevel1"></param>
         /// <param name="nameLevel2"></param>
@@ -610,6 +822,25 @@ namespace OpenMobile.Data
             : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, description)
         {
         }
+
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="pollRate"></param>
+        /// <param name="dataType"></param>
+        /// <param name="getter"></param>
+        /// <param name="description"></param>
+        public DataSource(bool screenSpecific, IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, description)
+        {
+            ScreenSpecific = screenSpecific;
+        }
+
         /// <summary>
         /// Creates a new DataSource object
         /// </summary>
@@ -634,6 +865,26 @@ namespace OpenMobile.Data
             this._Description = description;
             Init();
         }
+
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="pollRate"></param>
+        /// <param name="dataType"></param>
+        /// <param name="getter"></param>
+        /// <param name="setter"></param>
+        /// <param name="description"></param>
+        public DataSource(bool screenSpecific, string provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, DataSourceSetDelegate setter, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, setter, description)
+        {
+            ScreenSpecific = screenSpecific;
+        }
+
         /// <summary>
         /// Creates a new DataSource object
         /// </summary>
@@ -650,6 +901,26 @@ namespace OpenMobile.Data
             : this(provider.pluginName, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, setter, description)
         {
         }
+
+        /// <summary>
+        /// Creates a new DataSource object
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="pollRate"></param>
+        /// <param name="dataType"></param>
+        /// <param name="getter"></param>
+        /// <param name="setter"></param>
+        /// <param name="description"></param>
+        public DataSource(bool screenSpecific, IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, int pollRate, DataTypes dataType, DataSourceGetDelegate getter, DataSourceSetDelegate setter, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, pollRate, dataType, getter, setter, description)
+        {
+            ScreenSpecific = screenSpecific;
+        }
+
         private void Init()
         {
             //if (this._NameLevel1.ToUpper().Contains("SCREEN"))
@@ -689,8 +960,17 @@ namespace OpenMobile.Data
             if (PollRate == 0)
                 return false;
 
-            if (_OnDataSourceChanged == null)
-                return false;
+            if (_LinkedTarget == null)
+            {
+                if (_OnDataSourceChanged == null)
+                    return false;
+            }
+            else
+            {
+                if (_OnDataSourceChanged == null && _LinkedTarget._OnDataSourceChanged == null)
+                    return false;
+            }
+
             return IsValueOld();
         }
 
@@ -704,6 +984,8 @@ namespace OpenMobile.Data
         /// <returns></returns>
         internal bool RefreshValue(object value, bool useGetter, bool spawn, bool force = false)
         {
+            bool result = false;
+
             try
             {
                 _Valid = false;
@@ -754,15 +1036,24 @@ namespace OpenMobile.Data
                 
                 // Trigg event if result is valid
                 if (_Valid && Changed)
+                {
                     Raise_OnDataSourceChanged(spawn);
 
-                return _Valid;
+                    // Inform any linked datasources
+                    if (this._LinkedTarget != null)
+                        this._LinkedTarget.RefreshValue(_Value, false, spawn, true);
+                }
+
+                result = _Valid;
             }
             catch
             {
                 _Valid = false;
-                return _Valid;
+                result = _Valid;
             }
+
+           
+            return result;
         }
 
         /// <summary>
@@ -776,6 +1067,13 @@ namespace OpenMobile.Data
         {
             bool result = false;
             value = null;
+
+            if (Getter == null)
+            {
+                value = this.Value;
+                return true;
+            }
+
             object getterValue = Getter(this, out result, param);
             if (result)
                 value = getterValue;
@@ -806,7 +1104,8 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0} [{1}({2})]", this.FullName, (this.Value == null ? String.Empty : this.Value), this.FormatedValue);
+            //return string.Format("{0} [{1}({2})]", this.FullName, (this.Value == null ? String.Empty : this.Value), this.FormatedValue);
+            return string.Format("{0}", this.FullName);
         }
 
         #region Formatted value
@@ -943,6 +1242,8 @@ namespace OpenMobile.Data
         }
 
         #endregion
+
+
 
         /// <summary>
         /// Clones this datasource

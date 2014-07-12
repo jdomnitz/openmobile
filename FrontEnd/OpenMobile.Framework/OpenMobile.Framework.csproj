@@ -92,6 +92,7 @@
     <Compile Include="Animator.cs" />
     <Compile Include="BuiltInComponents.cs" />
     <Compile Include="CommandHandler\Command.cs" />
+    <Compile Include="CommandHandler\CommandGroup.cs" />
     <Compile Include="CommandHandler\CommandHandler.cs" />
     <Compile Include="CommandHandler\DataNameBase.cs" />
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Controls\OMScrollingContainer.cs" />
     <Compile Include="Controls\OMSlider.cs" />
     <Compile Include="Controls\OMTextBox.cs" />
+    <Compile Include="DataSources\DataSourceGroup.cs" />
     <Compile Include="Data\Calendar.cs" />
     <Compile Include="Data\Collections.cs" />
     <Compile Include="Data\Contacts.cs" />
@@ -186,6 +188,7 @@
     <Compile Include="IPluginHost.cs" />
     <Compile Include="Media\ManagedTagReader.cs" />
     <Compile Include="Media\Playlist_Obsolete.cs" />
+    <Compile Include="Net\NetworkStatus.cs" />
     <Compile Include="Net\RSS.cs" />
     <Compile Include="Plugin\BasePluginCode.cs" />
     <Compile Include="Plugin\IAudioDeviceProvider.cs" />
@@ -300,7 +303,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

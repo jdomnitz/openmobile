@@ -339,10 +339,13 @@ namespace OpenMobile
             sw.Stop();
             BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Plugin Manager", String.Format("Initialization of {0} completed (used {1}ms)", pluginCollection[index].pluginName, sw.ElapsedMilliseconds));
             // Inform user about slow plugins
-            if (sw.ElapsedMilliseconds > _Plugin_MaxInitTimeMS)
+            if (System.Diagnostics.Debugger.IsAttached)
             {
-                theHost.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, pluginCollection[index], null, null, String.Format("Plugin {0} is slow to initialize", pluginCollection[index].pluginName), String.Format("Used a total of {0}ms of maximum {1}ms", sw.ElapsedMilliseconds, _Plugin_MaxInitTimeMS)));
-                BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "Plugin Manager", String.Format("Plugin {0} has slow initializing (used {1}ms)", pluginCollection[index].pluginName, sw.ElapsedMilliseconds));
+                if (sw.ElapsedMilliseconds > _Plugin_MaxInitTimeMS)
+                {
+                    theHost.UIHandler.AddNotification(new Notification(Notification.Styles.Warning, pluginCollection[index], null, null, String.Format("Plugin {0} is slow to initialize", pluginCollection[index].pluginName), String.Format("Used a total of {0}ms of maximum {1}ms", sw.ElapsedMilliseconds, _Plugin_MaxInitTimeMS)));
+                    BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "Plugin Manager", String.Format("Plugin {0} has slow initializing (used {1}ms)", pluginCollection[index].pluginName, sw.ElapsedMilliseconds));
+                }
             }
         }
 
@@ -531,8 +534,7 @@ namespace OpenMobile
             }
 
             // Raise network events (if available)
-            if (OpenMobile.Net.Network.IsAvailable)
-                theHost.raiseSystemEvent(eFunction.connectedToInternet, String.Empty, String.Empty, String.Empty);
+            theHost.Network_PollForInternetAvailability();
 
             // Clean plugincollection list
             pluginCollection.TrimExcess();
@@ -709,6 +711,10 @@ namespace OpenMobile
                 if (pluginCollection[i] != null)
                     pluginCollection[i].Dispose();
             InputRouter.Dispose();
+            theHost.Dispose();
+            OpenMobile.Threading.SafeThread.Dispose();
+            Application.Dispose();
+            Thread.Sleep(2500);
             Environment.Exit(0); //Force
         }
 

@@ -37,6 +37,10 @@ namespace OpenMobile.Graphics
         float _HeightScale;
         int _Width;
         int _Height;
+
+        GameWindow _TargetWindow;
+        MouseData _MouseData;
+
         #endregion
 
         internal static void DeleteTexture(int screen, uint texture)
@@ -47,8 +51,10 @@ namespace OpenMobile.Graphics
             GL.DeleteTexture(texture);
         }
 
-        public V2Graphics(int screen)
+        public V2Graphics(int screen, GameWindow targetWindow, MouseData mouseData)
         {
+            this._TargetWindow = targetWindow;
+            this._MouseData = mouseData;
             this._Screen = screen;
             lock (_Textures)
             {
@@ -306,6 +312,12 @@ namespace OpenMobile.Graphics
             double width2 = Width / 2.0;
             double height2 = Height / 2.0;
 
+            // Should we use a shader effect?
+            if (image.ShaderEffect != OMShaders.None)
+            {   // Yes
+                V2Shaders.ActivateShader(_TargetWindow, _MouseData, image.ShaderEffect, _Width, _Height);
+            }
+
             if (useReflection)
             {
                 double reflectionImageHeight = height2 * reflectionData.ReflectionLength;
@@ -454,7 +466,12 @@ namespace OpenMobile.Graphics
             //    GL.PopMatrix();
             //}
             //else
-           
+
+            // Remove any shader effect
+            if (image.ShaderEffect != OMShaders.None)
+            {   // Yes
+                V2Shaders.DeactivateShader(image.ShaderEffect);
+            }
 
             GL.Disable(EnableCap.Texture2D);
         }

@@ -131,6 +131,10 @@ namespace OpenMobile.Graphics
                     if (setVisible)
                         controls[i].Visible = true;
                     //controls[i].Opacity = 0;
+
+                    // Lock controls
+                    for (int i2 = 0; i2 < controls[i].Controls.Count; i2++)
+                        Monitor.Enter(controls[i].Controls[i2].Lock);
                 }
 
                 // Animate
@@ -165,6 +169,10 @@ namespace OpenMobile.Graphics
                 {
                     controls[i].Opacity = targetOpacity;
                     controls[i].Refresh();
+
+                    // Unlock controls
+                    for (int i2 = 0; i2 < controls[i].Controls.Count; i2++)
+                        Monitor.Exit(controls[i].Controls[i2].Lock);
                 }
             }
         }
@@ -231,6 +239,13 @@ namespace OpenMobile.Graphics
             if (!runAnimation)
                 return;
 
+            for (int i = 0; i < controls.Length; i++)
+            {
+                // Lock controls
+                for (int i2 = 0; i2 < controls[i].Controls.Count; i2++)
+                    Monitor.Enter(controls[i].Controls[i2].Lock);
+            }
+
             // Animate
             SmoothAnimator Animation = new SmoothAnimator(speed * BuiltInComponents.SystemSettings.TransitionSpeed);
             Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
@@ -258,12 +273,17 @@ namespace OpenMobile.Graphics
                 // Continue animation
                 return true;
             });
+
             for (int i = 0; i < controls.Length; i++)
             {
                 if (setInvisible)
                     controls[i].Visible = false;
                 controls[i].Opacity = targetOpacity;
                 controls[i].Refresh();
+
+                // Unlock controls
+                for (int i2 = 0; i2 < controls[i].Controls.Count; i2++)
+                    Monitor.Exit(controls[i].Controls[i2].Lock);
             }
         }
 
