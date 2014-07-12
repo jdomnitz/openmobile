@@ -78,11 +78,13 @@ namespace OpenMobile
         /// </summary>
         gesturing = 10,
         /// <summary>
+        /// About to be unloaded after transitioning out
+        /// </summary>
+        Unloaded = 11,
+        /// <summary>
         /// Loaded and ready for transitioning in
         /// </summary>
-        Loaded,
-        Unloaded,
-
+        Loaded = 12
     };
     /// <summary>
     /// The style list to render
@@ -992,6 +994,8 @@ namespace OpenMobile
         tunerDataUpdated = 58,
         /// <summary>
         /// Minimize the rendering window
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
         /// </summary>
         minimize = 59,
         //Tuned Content
@@ -1322,6 +1326,25 @@ namespace OpenMobile
         /// Used as event only! Changed to night mode for current location
         /// </summary>
         CurrentLocationNight,
+
+        /// <summary>
+        /// Used as event only! A USB Device has been added to the system
+        /// <para>Arg: Type of device (Unknown, PORT, VOLUME)</para>
+        /// </summary>
+        USBDeviceAdded,
+
+        /// <summary>
+        /// Used as event only! A USB Device has been removed from the system
+        /// <para>Arg: Type of device (Unknown, PORT, VOLUME)</para>
+        /// </summary>
+        USBDeviceRemoved,
+
+        /// <summary>
+        /// Toggles between fullscreen and windowed mode
+        /// <para>---------------------------------------</para>
+        /// <para>Arg1: Screen Number</para>
+        /// </summary>
+        ToggleFullscreen
     }
     /// <summary>
     /// The status of a plugins initialization
@@ -1491,6 +1514,32 @@ namespace OpenMobile
     }
 
     /// <summary>
+    /// Mouse click types
+    /// </summary>
+    public enum ClickTypes 
+    { 
+        /// <summary>
+        /// No click
+        /// </summary>
+        None, 
+
+        /// <summary>
+        /// Normal click
+        /// </summary>
+        Normal, 
+
+        /// <summary>
+        /// Long click
+        /// </summary>
+        Long, 
+
+        /// <summary>
+        /// Hold click
+        /// </summary>
+        Hold 
+    }
+
+    /// <summary>
     /// Type of media
     /// </summary>
     public enum eMediaType : short
@@ -1583,6 +1632,12 @@ namespace OpenMobile
         /// Smartphone
         /// </summary>
         Smartphone = 20,
+        
+        /// <summary>
+        /// A url stream
+        /// </summary>
+        URLStream,
+
         /// <summary>
         /// Other
         /// </summary>
@@ -2751,7 +2806,7 @@ namespace OpenMobile
         /// <summary>
         /// Source Type
         /// </summary>
-        public eMediaType Type;
+        public eMediaType Type = eMediaType.NotSet;
         /// <summary>
         /// Create a new mediaInfo object
         /// </summary>
@@ -2778,6 +2833,72 @@ namespace OpenMobile
         {
             return String.Format("{0} - {1} - {2} [{3}]", Artist, Album, Name, Location);
         }
+
+        /// <summary>
+        /// Replaces info in this mediaInfo if newer data is available
+        /// </summary>
+        /// <param name="album"></param>
+        /// <param name="artist"></param>
+        /// <param name="name"></param>
+        /// <param name="genre"></param>
+        /// <param name="length"></param>
+        /// <param name="tracknumber"></param>
+        /// <returns></returns>
+        public bool UpdateMissingInfo(string album = null, string artist = null, string name = null, string genre = null, int? length = null, int? tracknumber = null, OImage coverArt = null, eMediaType? type = null)
+        {
+            bool updated = false;
+            if (type.HasValue != null)
+                if (this.Type != type.Value)
+                {
+                    this.Type = type.Value;
+                    updated = true;
+                }
+            if (album != null)
+                if (String.IsNullOrEmpty(this.Album))
+                {
+                    this.Album = album;
+                    updated = true;
+                }
+            if (artist != null)
+                if (String.IsNullOrEmpty(this.Artist))
+                {
+                    this.Artist = artist;
+                    updated = true;
+                }
+            if (genre != null)
+                if (String.IsNullOrEmpty(this.Genre))
+                {
+                    this.Genre = genre;
+                    updated = true;
+                }
+            if (length.HasValue)
+                if (this.Length != length.Value)
+                {
+                    this.Length = length.Value;
+                    updated = true;
+                }
+            if (tracknumber.HasValue)
+                if (this.TrackNumber != tracknumber.Value)
+                {
+                    this.TrackNumber = tracknumber.Value;
+                    updated = true;
+                }
+            if (name != null)
+                if (String.IsNullOrEmpty(this.Name))
+                {
+                    this.Name = name;
+                    updated = true;
+                }
+            if (coverArt != null)
+                if (this.coverArt == null)
+                {
+                    this.coverArt = coverArt;
+                    updated = true;
+                }
+
+            return updated;
+        }
+
     }
 
     /// <summary>

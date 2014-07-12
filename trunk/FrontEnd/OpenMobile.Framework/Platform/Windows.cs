@@ -316,12 +316,12 @@ namespace OpenMobile.Framework
                     case 6:
                         if (ex.dwMinorVersion == 0)
                             osVersion = "Windows Vista";
-                        else
-                            osVersion = "Windows 7";
-                        break;
-                    case 7:
-                        if (ex.dwMinorVersion == 0)
-                            osVersion = "Windows 8";
+                        else if (ex.dwMinorVersion == 1)
+                            osVersion = "Windows 7"; 
+                        else if (ex.dwMinorVersion == 2) 
+                            osVersion = "Windows 8"; 
+                        else if (ex.dwMinorVersion == 3) 
+                            osVersion = "Windows 8.1"; 
                         break;
                 }
                 if (Configuration.TabletPC)
@@ -342,14 +342,14 @@ namespace OpenMobile.Framework
                             osVersion = "Windows Server 2003";
                         break;
                     case 6:
-                        if (ex.dwMinorVersion == 0)
-                            osVersion = "Windows Server 2008";
-                        else
-                            osVersion = "Windows Server 2008 R2";
-                        break;
-                    case 7:
-                        if (ex.dwMinorVersion == 0)
-                            osVersion = "Windows Server 2012";
+                         if (ex.dwMinorVersion == 0) 
+                            osVersion = "Windows Server 2008"; 
+                        else if (ex.dwMinorVersion == 1) 
+                            osVersion = "Windows Server 2008 R2"; 
+                        else if (ex.dwMinorVersion == 2) 
+                            osVersion = "Windows Server 2012"; 
+                        else if (ex.dwMinorVersion == 3) 
+                            osVersion = "Windows Server 2012 R2"; 
                         break;
                 }
             }

@@ -130,6 +130,11 @@ namespace OpenMobile.Controls
         public event refreshNeeded UpdateThisControl;
 
         /// <summary>
+        /// A multithread usable lock object
+        /// </summary>
+        public object Lock = new object();
+
+        /// <summary>
         /// Is the control renderable? Returns true if is, false otherwise
         /// </summary>
         /// <param name="DisregardRenderingType"></param>
@@ -384,7 +389,7 @@ namespace OpenMobile.Controls
                     height = value;
                     _Region.Height = value;
                     onSizeChanged_Internal();
-                    Refresh();
+                    RefreshGraphic();
                 }
             }
         }
@@ -400,7 +405,7 @@ namespace OpenMobile.Controls
                     width = value;
                     _Region.Width = value;
                     onSizeChanged_Internal();
-                    Refresh();
+                    RefreshGraphic();
                 }
             }
         }
@@ -672,7 +677,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Create a new control
         /// </summary>
-        [Obsolete("Always provide a control name. Method will be removed in next release")]
+        //[Obsolete("Always provide a control name. Method will be removed in a later release")]
         public OMControl()
         {
         }
@@ -887,7 +892,7 @@ namespace OpenMobile.Controls
         private string _Visible_DataSource;
 
         /// <summary>
-        /// Sets the sensor to subscribe to
+        /// Sets the datasource to subscribe to
         /// </summary>
         public string DataSource
         {
@@ -910,7 +915,8 @@ namespace OpenMobile.Controls
                 // Check for special dataref of screen present 
                 if (!string.IsNullOrEmpty(value))
                 {
-                    this._DataSource = DataNameBase.GetDataNameWithScreen(this.parent.ActiveScreen, value);
+                    if (value.Contains(OpenMobile.Data.DataSource.DataTag_Screen))
+                        this._DataSource = DataNameBase.GetDataNameWithScreen(this.parent.ActiveScreen, value);
                 }
                
                 // Subscribe to updates

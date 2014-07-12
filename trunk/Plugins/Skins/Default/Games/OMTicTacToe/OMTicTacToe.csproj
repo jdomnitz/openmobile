@@ -52,6 +52,7 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="OMTicTacToe.cs" />
@@ -88,6 +89,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon-OMTicTacToe.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Icon-Glass-OMTicTacToe_B.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Icon-Glass-OMTicTacToe_O.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Icon-Glass-OMTicTacToe_X.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\TicTacToe_B.png">

@@ -36,6 +36,14 @@ namespace OpenMobile.Graphics
                 return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             }
         }
+
+        public static void Dispose()
+        {
+            _Run = false;
+        }
+
+        private static bool _Run = true;
+
         public static void Run()
         {
             #if WINDOWS
@@ -43,7 +51,7 @@ namespace OpenMobile.Graphics
             if (Configuration.RunningOnWindows)
             {
                 OpenMobile.Platform.Windows.MSG msg = new OpenMobile.Platform.Windows.MSG();
-                while (msg.Message != Platform.Windows.WindowMessage.CLOSE)
+                while (msg.Message != Platform.Windows.WindowMessage.CLOSE && _Run)
                 {
                     Thread.Sleep(0);
                     ret = OpenMobile.Platform.Windows.Functions.GetMessage(ref msg, IntPtr.Zero, 0, 0);

@@ -57,10 +57,18 @@ namespace OMMediaDB2
             /// <summary>
             /// Playlist item
             /// </summary>
-            PlaylistItem = 1
+            PlaylistItem = 1,
+
+            /// <summary>
+            /// A playlist setting
+            /// </summary>
+            PlaylistSetting = 2
         }
 
-        private const decimal _DBVersion = 1.0m;
+        /// <summary>
+        /// Required dataBase version, a higher number here than what's currently in the DB will cause the DB to be rebuilt (possible loosing data)
+        /// </summary>
+        private const double _DBVersion = 2.1d;
 
         /// <summary>
         /// The full filepath to the database file
@@ -286,7 +294,7 @@ namespace OMMediaDB2
             {
                 if (showNotifications)
                 {
-                    string IndexStatusString = String.Format("Progress: {0}", (((amountToBeIndexed - locationsToIndex.Count) / (double)amountToBeIndexed) * 100).ToString("0.00"));
+                    string IndexStatusString = String.Format("Progress: {0:0}", ((amountToBeIndexed - locationsToIndex.Count) / (double)amountToBeIndexed));
                     _NotificationIndexingStatus.Text = IndexStatusString;
                 }
 
@@ -299,11 +307,18 @@ namespace OMMediaDB2
             {
                 // Update notification text to user
                 if (amountNew > 0)
+                {
                     _NotificationIndexingStatus.Text = String.Format("Found {0} items", amountNew);
+                    _NotificationIndexingStatus.Header = "Media search completed";
+                    _NotificationIndexingStatus.State = Notification.States.Passive;
+                }
                 else
+                {
                     _NotificationIndexingStatus.Text = String.Format("No new items found");
-                _NotificationIndexingStatus.Header = "Media search completed";
-                _NotificationIndexingStatus.State = Notification.States.Passive;
+                    _NotificationIndexingStatus.Header = "Media search completed";
+                    _NotificationIndexingStatus.State = Notification.States.Passive;
+                    OM.Host.UIHandler.RemoveNotification(_NotificationIndexingStatus, true);
+                }
             }
 
             return true;
@@ -341,12 +356,12 @@ namespace OMMediaDB2
             if (info == null)
                 return false;
 
-            //Try to get image from folder
-            if (info.coverArt == null && _FolderCovers_Enabled)
-                info.coverArt = TagReader.getFolderImage(info.Location);
             // Try to get cover image from lastFM
             if (info.coverArt == null && _LastFM_Enabled)
                 info.coverArt = TagReader.getLastFMImage(info.Artist, info.Album, _LastFM_CoverSize);
+            //Try to get image from folder
+            if (info.coverArt == null && _FolderCovers_Enabled)
+                info.coverArt = TagReader.getFolderImage(info.Location);
             // Set default image if image is missing
             if (info.coverArt == null && !string.IsNullOrEmpty(_Cover_MissingImagePath))
                 info.coverArt = BuiltInComponents.Host.getSkinImage(_Cover_MissingImagePath).image;
@@ -354,6 +369,36 @@ namespace OMMediaDB2
             if (!DB_InsertMediaInfo(DBObjectTypes.IndexedItem, info))
                 return false;
             return true;
+        }
+
+        /// <summary>
+        /// Returns true if a coverArt with the given ID is already loaded in the database
+        /// </summary>
+        /// <param name="coverArtID"></param>
+        /// <returns></returns>
+        private bool DB_ContainsMediaInfo(DBObjectTypes objectType, mediaInfo media, string objectTag = null)
+        {
+            if (!DB_ConnectAndOpen())
+                return false;
+
+            try
+            {
+                using (SqliteCommand command = _DBConnection.CreateCommand())
+                {
+                    command.CommandText = "SELECT Location FROM tblMediaInfo WHERE ObjectType=@ObjectType AND Location=@Location AND ObjectTag=@ObjectTag";
+                    command.Parameters.AddWithValue("@ObjectType", (int)objectType);
+                    command.Parameters.AddWithValue("@Location", media.Location);
+                    command.Parameters.AddWithValue("@ObjectTag", objectTag);
+                    string Location = command.ExecuteScalar() as string;
+                    if (media.Location == Location)
+                        return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return false;
         }
 
         /// <summary>
@@ -365,6 +410,9 @@ namespace OMMediaDB2
         private bool DB_InsertMediaInfo(DBObjectTypes objectType, mediaInfo media, string objectTag = null)
         {
             if (!DB_ConnectAndOpen())
+                return false;
+
+            if (DB_ContainsMediaInfo(objectType, media, objectTag))
                 return false;
 
             // Add cover to database (if not already present)
@@ -505,7 +553,7 @@ namespace OMMediaDB2
             return String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArt FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType='{0}' ", (int)objectType);
         }
 
-        private List<OImage> DB_GetCoversForArtist(string artist)
+        private List<OImage> DB_GetCoversForArtist(string artist, int limit)
         {
             List<OImage> covers = new List<OImage>();
 
@@ -517,6 +565,8 @@ namespace OMMediaDB2
                 using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
                 {
                     cmd.CommandText = "SELECT Artist, CoverArt, CoverArtID FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType =@ObjectType AND Artist =@Artist GROUP BY CoverArtID";
+                    if (limit > 0)
+                        cmd.CommandText += " LIMIT " + limit.ToString();
                     cmd.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.IndexedItem);
                     cmd.Parameters.AddWithValue("@Artist", artist);
                     SqliteDataReader reader = cmd.ExecuteReader();
@@ -613,7 +663,7 @@ namespace OMMediaDB2
                     {
                         // Replace coverArt with mosaic of artist
                         int albumCount = DB_GetAlbumByArtistCount(media.Artist);
-                        List<OImage> covers = DB_GetCoversForArtist(media.Artist);
+                        List<OImage> covers = DB_GetCoversForArtist(media.Artist, 10);
                         media.coverArt = OpenMobile.helperFunctions.Graphics.Images.CreateMosaic(covers, 200, 200);
                         if (albumCount == 0)
                             media.Name = String.Format("{0} (No albums)", media.Artist);
@@ -622,6 +672,25 @@ namespace OMMediaDB2
                         else
                             media.Name = String.Format("{0} ({1} albums)", media.Artist, albumCount);
                         media.Album = String.Empty;
+                    }
+                    break;
+                case MediaDataBaseCommands.GetGenres:
+                    {
+                        // Replace coverArt with mosaic of artist
+                        int albumCount = DB_GetAlbumByArtistCount(media.Artist);
+                        List<OImage> covers = DB_GetCoversForArtist(media.Artist, 10);
+                        media.coverArt = OpenMobile.helperFunctions.Graphics.Images.CreateMosaic(covers, 200, 200);
+                        if (albumCount == 0)
+                            media.Album = "(No albums)";
+                        else if (albumCount == 1)
+                            media.Album = String.Format("{0} album", albumCount);
+                        else
+                            media.Album = String.Format("{0} albums", albumCount);
+                        media.Name = media.Genre;
+                        media.Artist = String.Empty;
+
+                        if (String.IsNullOrEmpty(media.Genre))
+                            media.Name = "No genre";
                     }
                     break;
                 case MediaDataBaseCommands.GetAlbum:
@@ -703,6 +772,75 @@ namespace OMMediaDB2
                 return 0;
             }
         }
+
+        /// <summary>
+        /// Reads a setting value from the database
+        /// </summary>
+        /// <param name="objectTag"></param>
+        /// <param name="settingName"></param>
+        /// <returns></returns>
+        private string DB_GetMediaSetting(string objectTag, string settingName)
+        {
+            if (!DB_ConnectAndOpen())
+                return null;
+
+            try
+            {
+                using (SqliteCommand command = _DBConnection.CreateCommand())
+                {
+                    command.CommandText = "SELECT Value FROM tblMediaSettings WHERE ObjectType =@ObjectType AND ObjectTag =@ObjectTag AND Name =@Name ORDER BY ROWID ASC LIMIT 1";
+                    command.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.PlaylistSetting);
+                    command.Parameters.AddWithValue("@ObjectTag", objectTag);
+                    command.Parameters.AddWithValue("@Name", settingName);
+                    return command.ExecuteScalar() as string;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Sets a setting value in the database
+        /// </summary>
+        /// <param name="objectTag"></param>
+        /// <param name="settingName"></param>
+        /// <param name="settingValue"></param>
+        private void DB_SetMediaSetting(string objectTag, string settingName, string settingValue)
+        {
+            if (!DB_ConnectAndOpen())
+                return;
+
+            try
+            {
+                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                {
+                    // Try to update
+                    cmd.CommandText = "UPDATE tblMediaSettings SET Value=@Value WHERE Name=@Name AND ObjectTag=@ObjectTag AND ObjectType=@ObjectType";
+                    cmd.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.PlaylistSetting);
+                    cmd.Parameters.AddWithValue("@ObjectTag", objectTag);
+                    cmd.Parameters.AddWithValue("@Name", settingName);
+                    cmd.Parameters.AddWithValue("@Value", settingValue);
+                    int updateCount = cmd.ExecuteNonQuery();
+
+                    if (updateCount == 0)
+                    {   // Update failed, insert instead
+                        cmd.CommandText = "INSERT INTO tblMediaSettings (ObjectType, ObjectTag, Name, Value) VALUES (@ObjectType, @ObjectTag, @Name, @Value)";
+                        cmd.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.PlaylistSetting);
+                        cmd.Parameters.AddWithValue("@ObjectTag", objectTag);
+                        cmd.Parameters.AddWithValue("@Name", settingName);
+                        cmd.Parameters.AddWithValue("@Value", settingValue);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch
+            {
+                return;
+            }
+        }
+
 
         /// <summary>
         /// Deletes all indexed data from the DB
@@ -832,7 +970,7 @@ namespace OMMediaDB2
         /// <summary>
         /// Creates the database file and it's tables
         /// </summary>
-        private void DB_Create(decimal dbVersion)
+        private void DB_Create(double dbVersion)
         {
             if (!DB_ConnectAndOpen())
                 return;
@@ -842,10 +980,11 @@ namespace OMMediaDB2
 
             SqliteCommand cmd = new SqliteCommand(
                 "BEGIN TRANSACTION;" +
-                "CREATE TABLE tblDBInfo (Owner TEXT, Description TEXT, Version NUMERIC);" +
-                String.Format("INSERT INTO tblDBInfo VALUES('{0}', '{1}', '{2}');", base.pluginName, base.pluginDescription, dbVersion) +
+                "CREATE TABLE tblDBInfo (Owner TEXT, Description TEXT, Version TEXT);" +
+                String.Format("INSERT INTO tblDBInfo VALUES('{0}', '{1}', '{2}');", base.pluginName, base.pluginDescription, dbVersion.ToString().Replace(',','.')) +
                 "CREATE TABLE tblMediaInfoCoverArt (ID INTEGER UNIQUE, IDText TEXT, CoverArt BLOB);" +
-                "CREATE TABLE tblMediaInfo (ObjectType INTEGER, ObjectTag TEXT NULL, Name TEXT, Artist TEXT, Album TEXT, Location TEXT, TrackNumber INTEGER, Genre TEXT, Lyrics TEXT, Length NUMERIC, Rating NUMERIC, Type NUMERIC, CoverArtID INTEGER);" + 
+                "CREATE TABLE tblMediaInfo (ObjectType INTEGER, ObjectTag TEXT NULL, Name TEXT, Artist TEXT, Album TEXT, Location TEXT, TrackNumber INTEGER, Genre TEXT, Lyrics TEXT, Length NUMERIC, Rating NUMERIC, Type NUMERIC, CoverArtID INTEGER);" +
+                "CREATE TABLE tblMediaSettings (ObjectType INTEGER, ObjectTag TEXT NULL, Name TEXT, Value TEXT NULL);" +
                 "COMMIT;"
                 , _DBConnection);
 
@@ -889,15 +1028,18 @@ namespace OMMediaDB2
         /// Checks if the required version of the database is correct
         /// </summary>
         /// <param name="minVersion"></param>
-        private bool DB_CheckVersion(decimal minVersion)
+        private bool DB_CheckVersion(double minVersion)
         {
             if (!DB_ConnectAndOpen())
                 return false;
 
             using (SqliteCommand command = _DBConnection.CreateCommand())
             {
-                command.CommandText = "SELECT Version FROM tblDBInfo";
-                decimal dec = (decimal)command.ExecuteScalar();
+                command.CommandText = "SELECT Version FROM tblDBInfo"; 
+                object returnValue = command.ExecuteScalar();
+                double dec = 0;
+                Double.TryParse((string)returnValue, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out dec);
+                //double dec = Convert.ToDouble(returnValue, System.Globalization.CultureInfo.InvariantCulture);
                 if (dec >= minVersion)
                     return true;
             }
@@ -982,7 +1124,7 @@ namespace OMMediaDB2
             return _DBReader != null;
         }
 
-        public bool beginGetAlbums(string artistFilter = "", string albumFilter = "", bool covers = true)
+        public bool beginGetAlbums(string artistFilter = "", string albumFilter = "", string genreFilter = "", bool covers = true)
         {
             if (!DB_ConnectAndOpen())
                 return false;
@@ -992,12 +1134,15 @@ namespace OMMediaDB2
                 SQL += " AND Artist LIKE @Artist";
             if (!String.IsNullOrEmpty(albumFilter))
                 SQL += " AND Album LIKE @Album";
-            SQL += " GROUP BY Upper(Album), Upper(Artist)";
+            if (!String.IsNullOrEmpty(genreFilter))
+                SQL += " AND Genre LIKE @Genre";
+            SQL += " GROUP BY Upper(Album), Upper(Artist), Upper(Genre)";
 
             using (SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection))
             {
                 cmd.Parameters.AddWithValue("@Artist", artistFilter.Replace('*', '%'));
                 cmd.Parameters.AddWithValue("@Album", albumFilter.Replace('*', '%'));
+                cmd.Parameters.AddWithValue("@Genre", genreFilter.Replace('*', '%'));
                 _DBReader = cmd.ExecuteReader();
             }
 
@@ -1239,6 +1384,16 @@ namespace OMMediaDB2
             {
             }
             return playlists;
+        }
+
+        public string getMediaSetting(string mediaTag, string settingName)
+        {
+            return DB_GetMediaSetting(mediaTag, settingName);
+        }
+
+        public void setMediaSetting(string mediaTag, string settingName, string value)
+        {
+            DB_SetMediaSetting(mediaTag, settingName, value);
         }
 
         #endregion

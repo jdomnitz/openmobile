@@ -729,6 +729,7 @@ namespace OpenMobile
                 // Home location
                 BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "Location", "Favorite", "Home", 0, DataSource.DataTypes.raw, DataProvider, "Home location as set by the user"));
 
+
             }
 
 

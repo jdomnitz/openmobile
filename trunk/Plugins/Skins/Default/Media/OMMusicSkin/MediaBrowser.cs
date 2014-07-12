@@ -39,7 +39,10 @@ namespace OMMusicSkin
         {
             Song,
             Artist,
-            Album
+            Album,
+            Genre,
+            Playlist,
+            PlaylistItems
         }
 
         private StoredData.ScreenInstanceData ScreenSpecificData = new StoredData.ScreenInstanceData();
@@ -64,6 +67,10 @@ namespace OMMusicSkin
             // Media list
             OMObjectList2 lstMedia = new OMObjectList2("lstMedia", shapeBackground.Region.Left + 10, shapeBackground.Region.Top + 10, shapeBackground.Region.Width - 80, shapeBackground.Region.Height - 20);
             lstMedia.OnSelectedIndexChanged += new OMObjectList2.IndexChangedDelegate(lstMedia_OnSelectedIndexChanged);
+            lstMedia.OnSelectedIndexChangedHold += new OMObjectList2.IndexChangedDelegate(lstMedia_OnSelectedIndexChangedHold);
+            lstMedia.OnScrollStart += new userInteraction(lstMedia_OnScrollStart);
+            lstMedia.OnScrolling += new userInteraction(lstMedia_OnScrolled);
+            lstMedia.OnScrollEnd += new userInteraction(lstMedia_OnScrollEnd);
             panel.addControl(lstMedia);
             // Media list item
             #region Configure list item
@@ -123,31 +130,84 @@ namespace OMMusicSkin
                 if (values == null || values.Length == 0)
                     return;
 
-                if (!(values[0] is mediaInfo))
-                    return;
+                if ((values[0] is mediaInfo))
+                {
+                    mediaInfo media = values[0] as mediaInfo;
+                    item.Tag = media;
 
-                mediaInfo media = values[0] as mediaInfo;
-                item.Tag = media;
+                    // Cover image
+                    OMImage imgItemCover = item["imgListCover"] as OMImage;
+                    imgItemCover.Image = new imageItem(media.coverArt);
 
-                // Cover image
-                OMImage imgItemCover = item["imgListCover"] as OMImage;
-                imgItemCover.Image = new imageItem(media.coverArt);
+                    // Header text
+                    OMLabel lblItemHeader = item["lblListItemHeader"] as OMLabel;
+                    lblItemHeader.Text = media.Name;
 
-                // Header text
-                OMLabel lblItemHeader = item["lblListItemHeader"] as OMLabel;
-                lblItemHeader.Text = media.Name;
+                    // Description text
+                    OMLabel lblItemDescription = item["lblListItemDescription"] as OMLabel;
+                    lblItemDescription.Text = media.Artist;
 
-                // Description text
-                OMLabel lblItemDescription = item["lblListItemDescription"] as OMLabel;
-                lblItemDescription.Text = media.Artist;
+                    // Description2 text
+                    OMLabel lblItemDescription2 = item["lblListItemDescription2"] as OMLabel;
+                    lblItemDescription2.Text = media.Album;
 
-                // Description2 text
-                OMLabel lblItemDescription2 = item["lblListItemDescription2"] as OMLabel;
-                lblItemDescription2.Text = media.Album;
+                    // Rating image
+                    if (media.Rating >= 0)
+                    {
+                        OMImage imglItemRating = item["imgListItem_Rating"] as OMImage;
+                        imgListItem_Rating.Image = OM.Host.getSkinImage(String.Format("Icons|Icon-Ratings-{0}", media.Rating));
+                    }
+                }
+                else
+                {   // Direct access to fields
 
-                // Rating image
-                OMImage imglItemRating = item["imgListItem_Rating"] as OMImage;
-                imgListItem_Rating.Image = OM.Host.getSkinImage(String.Format("Icons|Icon-Ratings-{0}", media.Rating));
+                    // Tag
+                    item.Tag = values[0];
+                    
+                    if (values.Length >= 2 && values[1] is OImage)
+                    {
+                        // Cover image
+                        OMImage imgItemCover = item["imgListCover"] as OMImage;
+                        imgItemCover.Image = new imageItem((OImage)values[1]);
+                    }
+                    else if (values.Length >= 2 && values[1] is imageItem)
+                    {
+                        // Cover image
+                        OMImage imgItemCover = item["imgListCover"] as OMImage;
+                        imgItemCover.Image = (imageItem)values[1];
+                    }
+
+                    if (values.Length >= 3 && values[2] is string)
+                    {
+                        // Header text
+                        OMLabel lblItemHeader = item["lblListItemHeader"] as OMLabel;
+                        lblItemHeader.Text = (string)values[2];
+                    }
+
+                    if (values.Length >= 4 && values[3] is string)
+                    {
+                        // Description text
+                        OMLabel lblItemDescription = item["lblListItemDescription"] as OMLabel;
+                        lblItemDescription.Text = (string)values[3];
+                    }
+
+                    if (values.Length >= 5 && values[4] is string)
+                    {
+                        // Description2 text
+                        OMLabel lblItemDescription2 = item["lblListItemDescription2"] as OMLabel;
+                        lblItemDescription2.Text = (string)values[4];
+                    }
+
+                    if (values.Length >= 6 && values[5] is int)
+                    {
+                        if ((int)values[5] >= 0)
+                        {
+                            // Rating image
+                            OMImage imglItemRating = item["imgListItem_Rating"] as OMImage;
+                            imgListItem_Rating.Image = OM.Host.getSkinImage(String.Format("Icons|Icon-Ratings-{0}", (int)values[5]));
+                        }
+                    }
+                }
 
                 // Update item count text
                 OMLabel lblItemCount = sender.Parent[screen, "lblMediaListItemCount"] as OMLabel;
@@ -224,9 +284,10 @@ namespace OMMusicSkin
                 else
                     shpItemBackground.ShapeData = itemShapeData_Normal;
             };
-            lstMedia.ItemBase = ItemBase;
 
             #endregion
+
+            lstMedia.ItemBase = ItemBase;
 
             #endregion
 
@@ -253,13 +314,22 @@ namespace OMMusicSkin
             btnList_ScrollDown.OnHoldClick += new userInteraction(btnList_ScrollDown_OnHoldClick);
             panel.addControl(btnList_ScrollDown);
 
+            OMLabel lblList_Info = new OMLabel("lblList_Info", lstMedia.Region.Left, lstMedia.Region.Top, lstMedia.Region.Width, lstMedia.Region.Height);
+            lblList_Info.NoUserInteraction = true;
+            lblList_Info.Text = "A";
+            lblList_Info.TextAlignment = Alignment.CenterCenter;
+            lblList_Info.FontSize = 300;
+            lblList_Info.Opacity = 75;
+            lblList_Info.Visible = false;
+            panel.addControl(lblList_Info);
+
             #endregion
 
             OMBasicShape shapeMediaFilterBackground = new OMBasicShape("shapeMediaFilterBackground", shapeBackground.Region.Left, shapeBackground.Region.Bottom + 5, shapeBackground.Width, 50,
                new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
             panel.addControl(shapeMediaFilterBackground);
 
-            OMLabel lblMediaFilterInfo = new OMLabel("lblMediaFilterInfo", shapeMediaFilterBackground.Region.Left, shapeMediaFilterBackground.Region.Top, shapeMediaFilterBackground.Width - 230, 50);
+            OMLabel lblMediaFilterInfo = new OMLabel("lblMediaFilterInfo", shapeMediaFilterBackground.Region.Left, shapeMediaFilterBackground.Region.Top, shapeMediaFilterBackground.Width - 378, 50);
             lblMediaFilterInfo.Color = Color.FromArgb(78, Color.White);
             lblMediaFilterInfo.Text = "Enter filter text here";
             panel.addControl(lblMediaFilterInfo);
@@ -276,17 +346,23 @@ namespace OMMusicSkin
             txtMediaFilter.OnTextChange += txtMediaFilter_OnTextChange;
             panel.addControl(txtMediaFilter);
 
-            OMButton btnMediaFilterSong = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterSong", shapeMediaFilterBackground.Region.Right - 238, shapeMediaFilterBackground.Region.Top, 80, shapeMediaFilterBackground.Region.Height, GraphicCorners.None, "", "Song", 22);
-            btnMediaFilterSong.OnClick += new userInteraction(btnMediaFilterSong_OnClick);
-            panel.addControl(btnMediaFilterSong);
-            OMButton btnMediaFilterArtist = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterArtist", 0, 0, btnMediaFilterSong.Region.Width, btnMediaFilterSong.Region.Height, GraphicCorners.None, "", "Artist", 22);
+            OMButton btnMediaFilterArtist = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterArtist", shapeMediaFilterBackground.Region.Right - 398, shapeMediaFilterBackground.Region.Top, 80, shapeMediaFilterBackground.Region.Height, GraphicCorners.None, "", "Artist", 22);
             btnMediaFilterArtist.OnClick += new userInteraction(btnMediaFilterArtist_OnClick);
-            panel.addControl(btnMediaFilterArtist, ControlDirections.Right, -1, 0);
-            OMButton btnMediaFilterAlbums = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterAlbums", 0, 0, btnMediaFilterSong.Region.Width, btnMediaFilterSong.Region.Height, 255, 10, GraphicCorners.Right, "", null, "Album", null, null,null,null, 22);
+            panel.addControl(btnMediaFilterArtist);
+            OMButton btnMediaFilterAlbums = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterAlbums", 0, 0, btnMediaFilterArtist.Region.Width, btnMediaFilterArtist.Region.Height, 255, 10, GraphicCorners.None, "", null, "Album", null, null, null, null, 22);
             btnMediaFilterAlbums.OnClick += new userInteraction(btnMediaFilterAlbums_OnClick);
             panel.addControl(btnMediaFilterAlbums, ControlDirections.Right, -1, 0);
+            OMButton btnMediaFilterSong = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterSong", 0, 0, btnMediaFilterArtist.Region.Width, btnMediaFilterArtist.Region.Height, GraphicCorners.None, "", "Song", 22);
+            btnMediaFilterSong.OnClick += new userInteraction(btnMediaFilterSong_OnClick);
+            panel.addControl(btnMediaFilterSong, ControlDirections.Right, -1, 0);
+            OMButton btnMediaFilterGenre = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterGenre", 0, 0, btnMediaFilterSong.Region.Width, btnMediaFilterSong.Region.Height, GraphicCorners.None, "", "Genre", 22);
+            btnMediaFilterGenre.OnClick += new userInteraction(btnMediaFilterGenre_OnClick);
+            panel.addControl(btnMediaFilterGenre, ControlDirections.Right, -1, 0);
+            OMButton btnMediaFilterPlaylist = OMButton.PreConfigLayout_BasicStyle("btnMediaFilterPlaylist", 0, 0, btnMediaFilterGenre.Region.Width, btnMediaFilterGenre.Region.Height, GraphicCorners.Right, "", "Playlist", 22);
+            btnMediaFilterPlaylist.OnClick += new userInteraction(btnMediaFilterPlaylist_OnClick);
+            panel.addControl(btnMediaFilterPlaylist, ControlDirections.Right, -1, 0);
 
-            OMButton btnMediaFilterClear = new OMButton("btnMediaFilterClear", btnMediaFilterSong.Region.Left - 50, btnMediaFilterSong.Region.Top, 50, btnMediaFilterSong.Region.Height);
+            OMButton btnMediaFilterClear = new OMButton("btnMediaFilterClear", btnMediaFilterArtist.Region.Left - 50, btnMediaFilterArtist.Region.Top, 50, btnMediaFilterArtist.Region.Height);
             btnMediaFilterClear.FocusImage = OM.Host.getSkinImage("AIcons|5-content-remove");
             btnMediaFilterClear.Image = new imageItem(((OImage)btnMediaFilterClear.FocusImage.image.Clone()).SetAlpha(0.3f));
             btnMediaFilterClear.OnClick += new userInteraction(btnMediaFilterClear_OnClick);
@@ -297,25 +373,108 @@ namespace OMMusicSkin
             return panel;
         }
 
-        void lstMedia_OnSelectedIndexChanged(OMObjectList2 sender, int screen)
+        void lstMedia_OnSelectedIndexChangedHold(OMObjectList2 sender, int screen)
         {
-            mediaInfo media = sender.SelectedItem.Tag as mediaInfo;
-            if (media == null)
-                return;
-
             switch (MediaList_ListMode_Get(screen))
             {
                 case ListModes.Song:
                     break;
                 case ListModes.Artist:
-                    MediaList_ListMode_Set(ListModes.Album, screen);
-                    MediaList_SongFilter_Set("", media.Artist, "", screen);
-                    MediaList_Search(sender.Parent, screen);
                     break;
                 case ListModes.Album:
-                    MediaList_ListMode_Set(ListModes.Song, screen);
-                    MediaList_SongFilter_Set("", media.Artist, media.Album, screen);
-                    MediaList_Search(sender.Parent, screen);
+                    break;
+                case ListModes.Genre:
+                    break;
+                case ListModes.Playlist:
+                    break;
+                case ListModes.PlaylistItems:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void lstMedia_OnScrollEnd(OMControl sender, int screen)
+        {
+            OMLabel lblList_Info = sender.Parent[screen, "lblList_Info"] as OMLabel;
+            if (lblList_Info != null)
+                lblList_Info.Visible = false;
+        }
+
+        void lstMedia_OnScrollStart(OMControl sender, int screen)
+        {
+            OMLabel lblList_Info = sender.Parent[screen, "lblList_Info"] as OMLabel;
+            if (lblList_Info != null)
+                lblList_Info.Visible = true;
+        }
+
+        void lstMedia_OnScrolled(OMControl sender, int screen)
+        {
+            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
+            OMLabel lblList_Info = sender.Parent[screen, "lblList_Info"] as OMLabel;
+
+            try
+            {
+                // Update index letter to show list progress
+                if (lst.RenderOrder.Count > 0)
+                {
+                    OMLabel lblItem = lst.Items[lst.RenderOrder[0]]["lblListItemHeader"] as OMLabel;
+                    if (lblItem != null)
+                    {
+                        lblList_Info.Text = lblItem.Text.Substring(0, 1);
+                    }
+                }
+            }
+            catch
+            {   // Mask errors
+            }
+        }
+
+        void lstMedia_OnSelectedIndexChanged(OMObjectList2 sender, int screen)
+        {
+            switch (MediaList_ListMode_Get(screen))
+            {
+                case ListModes.Song:
+                    break;
+                case ListModes.Artist:
+                    {
+                        mediaInfo media = sender.SelectedItem.Tag as mediaInfo;
+                        if (media == null)
+                            return;
+                        MediaList_ListMode_Set(ListModes.Album, screen, sender.Parent);
+                        MediaList_SongFilter_Set("", media.Artist, "", "", "", screen);
+                        MediaList_Search(sender.Parent, screen);
+                    }
+                    break;
+                case ListModes.Album:
+                    {
+                        mediaInfo media = sender.SelectedItem.Tag as mediaInfo;
+                        if (media == null)
+                            return;
+                        MediaList_ListMode_Set(ListModes.Song, screen, sender.Parent);
+                        MediaList_SongFilter_Set("", media.Artist, media.Album, "", "", screen);
+                        MediaList_Search(sender.Parent, screen);
+                    }
+                    break;
+                case ListModes.Genre:
+                    {
+                        mediaInfo media = sender.SelectedItem.Tag as mediaInfo;
+                        if (media == null)
+                            return;
+                        MediaList_ListMode_Set(ListModes.Album, screen, sender.Parent);
+                        MediaList_SongFilter_Set("", "", "", media.Genre, "", screen);
+                        MediaList_Search(sender.Parent, screen);
+                    }
+                    break;
+                case ListModes.Playlist:
+                    {
+                        string playlistName = sender.SelectedItem.Tag as string;
+                        if (String.IsNullOrEmpty(playlistName))
+                            return;
+                        MediaList_ListMode_Set(ListModes.PlaylistItems, screen, sender.Parent);
+                        //MediaList_SongFilter_Set("", "", "", "", playlistName, screen);
+                        MediaList_FillFromPlaylist(sender.Parent, screen, playlistName);
+                    }
                     break;
                 default:
                     break;
@@ -332,7 +491,7 @@ namespace OMMusicSkin
             {
                 if (lst.Items.Count == 0)
                 {
-                    MediaList_ListMode_Set(ListModes.Artist, screen);
+                    MediaList_ListMode_Set(ListModes.Artist, screen, sender);
                     MediaList_Search(sender, screen);
                 }
             }
@@ -343,14 +502,14 @@ namespace OMMusicSkin
         void btnMediaFilterAlbums_OnClick(OMControl sender, int screen)
         {
             MediaList_SongFilter_Clear(screen);
-            MediaList_ListMode_Set(ListModes.Album, screen); 
+            MediaList_ListMode_Set(ListModes.Album, screen, sender.Parent); 
             MediaList_Search(sender.Parent, screen);
         }
 
         void btnMediaFilterArtist_OnClick(OMControl sender, int screen)
         {
             MediaList_SongFilter_Clear(screen);
-            MediaList_ListMode_Set(ListModes.Artist, screen);
+            MediaList_ListMode_Set(ListModes.Artist, screen, sender.Parent);
             MediaList_Search(sender.Parent, screen);
         }
 
@@ -363,7 +522,21 @@ namespace OMMusicSkin
         void btnMediaFilterSong_OnClick(OMControl sender, int screen)
         {
             MediaList_SongFilter_Clear(screen);
-            MediaList_ListMode_Set(ListModes.Song, screen);
+            MediaList_ListMode_Set(ListModes.Song, screen, sender.Parent);
+            MediaList_Search(sender.Parent, screen);
+        }
+
+        void btnMediaFilterGenre_OnClick(OMControl sender, int screen)
+        {
+            MediaList_SongFilter_Clear(screen);
+            MediaList_ListMode_Set(ListModes.Genre, screen, sender.Parent);
+            MediaList_Search(sender.Parent, screen);
+        }
+
+        void btnMediaFilterPlaylist_OnClick(OMControl sender, int screen)
+        {
+            MediaList_SongFilter_Clear(screen);
+            MediaList_ListMode_Set(ListModes.Playlist, screen, sender.Parent);
             MediaList_Search(sender.Parent, screen);
         }
 
@@ -387,7 +560,7 @@ namespace OMMusicSkin
             if (lst != null)
             {
                 lst.Clear();
-                db.beginGetSongs(songFilter: String.Format("*{0}*", txt.Text), artistFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "ArtistFilter")), albumFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "AlbumFilter")));
+                db.beginGetSongs(songFilter: String.Format("*{0}*", txt.Text), artistFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "ArtistFilter")), albumFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "AlbumFilter")), sortBy: eMediaField.Title);
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
@@ -443,7 +616,91 @@ namespace OMMusicSkin
             if (lst != null)
             {
                 lst.Clear();
-                db.beginGetAlbums(artistFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "ArtistFilter")), albumFilter: String.Format("*{0}*", txt.Text));
+                db.beginGetAlbums(artistFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "ArtistFilter")),
+                    genreFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "GenreFilter")), 
+                    albumFilter: String.Format("*{0}*", txt.Text));
+                mediaInfo info = db.getNextMedia();
+                while (info != null)
+                {
+                    if ((int)txt.Tag != id)
+                        return;
+                    lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    info = db.getNextMedia();
+                }
+            }
+        }
+
+        void MediaList_SearchGenre(OMPanel panel, int screen)
+        {
+            if (db == null) return;
+
+            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
+            OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            if (txt.Tag == null || !(txt.Tag is int))
+                txt.Tag = 0;
+            int id = (int)txt.Tag;
+            id++;
+            txt.Tag = id;
+            lbl.Visible = String.IsNullOrEmpty(txt.Text);
+            if (lst != null)
+            {
+                lst.Clear();
+                db.beginGetGenres();
+                mediaInfo info = db.getNextMedia();
+                while (info != null)
+                {
+                    if ((int)txt.Tag != id)
+                        return;
+                    lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    info = db.getNextMedia();
+                }
+            }
+        }
+
+        void MediaList_SearchPlaylists(OMPanel panel, int screen)
+        {
+            if (db == null) return;
+
+            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
+            OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            if (txt.Tag == null || !(txt.Tag is int))
+                txt.Tag = 0;
+            int id = (int)txt.Tag;
+            id++;
+            txt.Tag = id;
+            lbl.Visible = String.IsNullOrEmpty(txt.Text);
+            if (lst != null)
+            {
+                lst.Clear();
+                
+                var playlistNames = db.listPlaylists();
+                foreach (var playlistName in playlistNames)
+                {
+                    string playlistDisplayName = PlayList2.GetDisplayName(playlistName);
+                    lst.AddItemFromItemBase(ControlDirections.Down, new object[] { playlistName, null, playlistDisplayName, "", "" });
+                }
+            }
+        }
+
+        void MediaList_FillFromPlaylist(OMPanel panel, int screen, string playlistName)
+        {
+            if (db == null) return;
+
+            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
+            OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            if (txt.Tag == null || !(txt.Tag is int))
+                txt.Tag = 0;
+            int id = (int)txt.Tag;
+            id++;
+            txt.Tag = id;
+            lbl.Visible = String.IsNullOrEmpty(txt.Text);
+            if (lst != null)
+            {
+                lst.Clear();
+                db.beginGetPlaylist(playlistName);
                 mediaInfo info = db.getNextMedia();
                 while (info != null)
                 {
@@ -468,28 +725,90 @@ namespace OMMusicSkin
                 case ListModes.Album:
                     MediaList_SearchAlbums(panel, screen);
                     break;
+                case ListModes.Genre:
+                    MediaList_SearchGenre(panel, screen);
+                    break;
+                case ListModes.Playlist:
+                    MediaList_SearchPlaylists(panel, screen);
+                    break;
                 default:
                     break;
             }
         }
 
-        void MediaList_SongFilter_Set(string songFilter, string artistFilter, string albumFilter, int screen)
+        void MediaList_SongFilter_Set(string songFilter, string artistFilter, string albumFilter, string genreFilter, string playlistFilter, int screen)
         {
             ScreenSpecificData.SetProperty(screen, "SongFilter", songFilter);
             ScreenSpecificData.SetProperty(screen, "AlbumFilter", albumFilter);
             ScreenSpecificData.SetProperty(screen, "ArtistFilter", artistFilter);
+            ScreenSpecificData.SetProperty(screen, "GenreFilter", genreFilter);
+            ScreenSpecificData.SetProperty(screen, "PlaylistFilter", playlistFilter);
         }
         void MediaList_SongFilter_Clear(int screen)
         {
             ScreenSpecificData.SetProperty(screen, "SongFilter", "");
             ScreenSpecificData.SetProperty(screen, "AlbumFilter", "");
             ScreenSpecificData.SetProperty(screen, "ArtistFilter", "");
+            ScreenSpecificData.SetProperty(screen, "GenreFilter", "");
         }
 
-        void MediaList_ListMode_Set(ListModes mode, int screen)
+        void MediaList_ListMode_Set(ListModes mode, int screen, OMPanel panel)
         {
             ScreenSpecificData.SetProperty(screen, "ListMode", mode);
+
+            // Update listmode buttons to reflect the active mode
+            OMButton btnMediaFilterArtist = panel[screen, "btnMediaFilterArtist"] as OMButton;
+            OMButton btnMediaFilterAlbums = panel[screen, "btnMediaFilterAlbums"] as OMButton;
+            OMButton btnMediaFilterSong = panel[screen, "btnMediaFilterSong"] as OMButton;
+            OMButton btnMediaFilterGenre = panel[screen, "btnMediaFilterGenre"] as OMButton;
+            OMButton btnMediaFilterPlaylist = panel[screen, "btnMediaFilterPlaylist"] as OMButton;
+
+            if (btnMediaFilterArtist != null && btnMediaFilterAlbums != null && btnMediaFilterSong != null)
+            {
+                switch (mode)
+                {
+                    case ListModes.Song:
+                        btnMediaFilterArtist.Checked = false;
+                        btnMediaFilterAlbums.Checked = false;
+                        btnMediaFilterSong.Checked = true;
+                        btnMediaFilterGenre.Checked = false;
+                        btnMediaFilterPlaylist.Checked = false;
+                        break;
+                    case ListModes.Artist:
+                        btnMediaFilterArtist.Checked = true;
+                        btnMediaFilterAlbums.Checked = false;
+                        btnMediaFilterSong.Checked = false;
+                        btnMediaFilterGenre.Checked = false;
+                        btnMediaFilterPlaylist.Checked = false;
+                        break;
+                    case ListModes.Album:
+                        btnMediaFilterArtist.Checked = false;
+                        btnMediaFilterAlbums.Checked = true;
+                        btnMediaFilterSong.Checked = false;
+                        btnMediaFilterGenre.Checked = false;
+                        btnMediaFilterPlaylist.Checked = false;
+                        break;
+                    case ListModes.Genre:
+                        btnMediaFilterArtist.Checked = false;
+                        btnMediaFilterAlbums.Checked = false;
+                        btnMediaFilterSong.Checked = false;
+                        btnMediaFilterGenre.Checked = true;
+                        btnMediaFilterPlaylist.Checked = false;
+                        break;
+                    case ListModes.Playlist:
+                    case ListModes.PlaylistItems:
+                        btnMediaFilterArtist.Checked = false;
+                        btnMediaFilterAlbums.Checked = false;
+                        btnMediaFilterSong.Checked = false;
+                        btnMediaFilterGenre.Checked = false;
+                        btnMediaFilterPlaylist.Checked = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
+
         ListModes MediaList_ListMode_Get(int screen)
         {
             return ScreenSpecificData.GetProperty<ListModes>(screen, "ListMode");
@@ -501,8 +820,11 @@ namespace OMMusicSkin
 
         int txtMediaFilterOSKOffset = 220;
         void txtMediaFilter_OnOSKHide(OMControl sender, int screen)
-        {            
+        {
+            OMBasicShape shapeMediaFilterBackground = sender.Parent[screen, "shapeMediaFilterBackground"] as OMBasicShape;
+
             OMTextBox txtBox = sender.Parent[screen, "txtMediaFilter"] as OMTextBox;
+            txtBox.Width = shapeMediaFilterBackground.Width - 378;
             txtBox.Top += txtMediaFilterOSKOffset;
 
             OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
@@ -514,7 +836,10 @@ namespace OMMusicSkin
 
         void txtMediaFilter_OnOSKShow(OMControl sender, int screen)
         {
+            OMBasicShape shapeMediaFilterBackground = sender.Parent[screen, "shapeMediaFilterBackground"] as OMBasicShape;
+
             OMTextBox txtBox = sender.Parent[screen, "txtMediaFilter"] as OMTextBox;
+            txtBox.Width = shapeMediaFilterBackground.Width;
             txtBox.Top -= txtMediaFilterOSKOffset;
 
             OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;

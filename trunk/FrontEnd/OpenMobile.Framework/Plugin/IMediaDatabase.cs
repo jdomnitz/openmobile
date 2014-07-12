@@ -66,9 +66,10 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="artistFilter"></param>
         /// <param name="albumFilter"></param>
+        /// <param name="genreFilter"></param>
         /// <param name="covers"></param>
         /// <returns></returns>
-        bool beginGetAlbums(string artistFilter = "", string albumFilter = "", bool covers = true);
+        bool beginGetAlbums(string artistFilter = "", string albumFilter = "", string genreFilter = "", bool covers = true);
         /// <summary>
         /// List all songs
         /// </summary>
@@ -144,7 +145,8 @@ namespace OpenMobile.Plugin
         bool clearIndex();
         #endregion
 
-        #region PlaylistSearch
+        #region Playlist
+
         /// <summary>
         /// If the plugin can read/write playlists
         /// </summary>
@@ -182,6 +184,24 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         List<string> listPlaylists();
+
+        /// <summary>
+        /// Sets a media setting
+        /// </summary>
+        /// <param name="mediaTag"></param>
+        /// <param name="settingName"></param>
+        /// <returns></returns>
+        string getMediaSetting(string mediaTag, string settingName);
+
+        /// <summary>
+        /// Gets a media setting
+        /// </summary>
+        /// <param name="mediaTag"></param>
+        /// <param name="settingName"></param>
+        /// <param name="value"></param>
+        void setMediaSetting(string mediaTag, string settingName, string value);
+
+
 
         #endregion
 

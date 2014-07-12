@@ -107,11 +107,11 @@ namespace OpenMobile.Controls
                 }
             }
         }
-        private ControlDirections _DefaultControlDirection = ControlDirections.None;        
+        private ControlDirections _DefaultControlDirection = ControlDirections.None;
 
         private int ControlCountOld = 0;
 
-        protected List<int> _RenderOrder = null;        
+        protected List<int> _RenderOrder = null;
         protected List<int> _RenderOrder_ObjectsInView = null;
         protected List<int> _RenderOrder_ObjectsOutsideView = null;
         /// <summary>
@@ -155,6 +155,59 @@ namespace OpenMobile.Controls
 
         #region Events
 
+        #region OnScrollStart
+
+        /// <summary>
+        /// Event that's raised when starting to scroll
+        /// </summary>
+        public event userInteraction OnScrollStart;
+        private void Raise_OnScrollStart()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null)
+                return;
+
+            if (OnScrollStart != null)
+                OnScrollStart(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
+
+        #region OnScrolling
+
+        /// <summary>
+        /// Event that's raised while scrolling the list
+        /// </summary>
+        public event userInteraction OnScrolling;
+        private void Raise_OnScrolling()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null)
+                return;
+
+            if (OnScrolling != null)
+                OnScrolling(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
+
+        #region OnScrollEnd
+
+        /// <summary>
+        /// Event that's raised when scroll has ended
+        /// </summary>
+        public event userInteraction OnScrollEnd;
+        private void Raise_OnScrollEnd()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null)
+                return;
+
+            if (OnScrollEnd != null)
+                OnScrollEnd(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
 
         #region OnControlAdded 
 
@@ -1062,6 +1115,8 @@ namespace OpenMobile.Controls
             // Cancel any ongoing scrolling
             _ThrowRun = false;
 
+            Raise_OnScrollStart();
+
             if (animationSpeed == 0)
                 animationSpeed = 1.0f;
 
@@ -1154,6 +1209,8 @@ namespace OpenMobile.Controls
                                 }
                             }
 
+                            Raise_OnScrolling();
+
                             Refresh();
 
                             //System.Threading.Thread.Sleep(500);
@@ -1171,10 +1228,13 @@ namespace OpenMobile.Controls
                     Point Distance = (this.Region.Center - controlFound.Region.Center);
                     ScrollRegion.X = Distance.X;
                     ScrollRegion.Y = Distance.Y;
+
+                    Raise_OnScrolling();
+
                     Refresh();
                 }
             }
-
+            Raise_OnScrollEnd();
         }
 
         #endregion
@@ -2322,6 +2382,9 @@ namespace OpenMobile.Controls
         {
             // Continue motion when user end's the throw 
             _ThrowRun = true;
+
+            Raise_OnScrollStart();
+
             int LoopSpeedMS = 12;
             PointF DecelerationFactor = new PointF(0.003f, 0.003f);
             PointF ThrowSpeed = new PointF(System.Math.Abs(CursorSpeed.X), System.Math.Abs(CursorSpeed.Y));
@@ -2330,7 +2393,7 @@ namespace OpenMobile.Controls
 
             while (_ThrowRun)
             {
-                if (!_ThrowRun)
+                if (!_ThrowRun || _Controls.Count == 0)
                     break;
 
                 if (ThrowSpeed.X > 0)
@@ -2372,10 +2435,13 @@ namespace OpenMobile.Controls
                 if (ThrowSpeed.X <= 0 & ThrowSpeed.Y <= 0)
                     _ThrowRun = false;
 
-                if (!_ThrowRun)
+                if (!_ThrowRun || _Controls.Count == 0)
                     break;
 
                 Scroll(ScrollDistance);
+
+                Raise_OnScrolling();
+
                 Refresh();
 
                 System.Threading.Thread.Sleep(LoopSpeedMS);
@@ -2383,6 +2449,8 @@ namespace OpenMobile.Controls
             
             _ScrollBar_Vertical_ScrollInProgress = false;
             _ScrollBar_Horizontal_ScrollInProgress = false;
+
+            Raise_OnScrollEnd();
         }
 
         #endregion
@@ -2426,7 +2494,11 @@ namespace OpenMobile.Controls
             _ThrowRun = false;
         }
 
-        public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
+        public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance, ClickTypes clickType)
+        {
+        }
+
+        public void MousePreviewClick(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point location, ClickTypes clickType)
         {
         }
     }

@@ -146,6 +146,14 @@ namespace OpenMobile.Graphics
         private int _ReflectionOffset;        
     }
 
+    public class MouseData
+    {
+        /// <summary>
+        /// The mouse position
+        /// </summary>
+        public Point CursorPosition = new Point();
+    }
+
     public sealed class Graphics
     {
         static bool v2;
@@ -1029,7 +1037,7 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Initializes the graphics engine (Selectes the proper rendering methods to use)
         /// </summary>
-        public void Initialize()
+        public void Initialize(GameWindow targetWindow, MouseData mouseData)
         {
             #if LINUX
             if (Platform.Factory.IsEmbedded)
@@ -1053,7 +1061,7 @@ namespace OpenMobile.Graphics
                     v2 = (Array.Exists(extensions, t => t == "GL_ARB_texture_non_power_of_two"));
                 }
                 if (v2)
-                    implementation = new V2Graphics(screen);
+                    implementation = new V2Graphics(screen, targetWindow, mouseData);
                 else
                     implementation = new V1Graphics(screen);
                 renderer = GL.GetString(StringName.Renderer);

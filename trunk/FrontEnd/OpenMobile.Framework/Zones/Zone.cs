@@ -109,6 +109,17 @@ namespace OpenMobile
         }
 
         /// <summary>
+        /// Gets the zoneHandler index for this zone
+        /// </summary>
+        public int Index
+        {
+            get
+            {
+                return OM.Host.ZoneHandler.GetIndexForZone(this);
+            }
+        }
+ 
+        /// <summary>
         /// Does this zone have subzones
         /// </summary>
         public bool HasSubZones

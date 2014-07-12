@@ -41,6 +41,16 @@ namespace OpenMobile
         private static Timer[] tmrIdleDetection;
 
         /// <summary>
+        /// Enabled/disabled state for idle detection per screen
+        /// </summary>
+        private static bool[] _IdleDetectionEnabled;
+
+        /// <summary>
+        /// The idle state per screen
+        /// </summary>
+        private static bool[] _Idle;
+
+        /// <summary>
         /// Current device mappings
         /// </summary>
         static string[] KeyboardMapping;
@@ -462,6 +472,12 @@ namespace OpenMobile
 
         public static void Dispose()
         {
+            for (int i = 0; i < tmrIdleDetection.Length; i++)
+			{
+                if (tmrIdleDetection[i] != null)
+                    tmrIdleDetection[i].Dispose();
+			}            
+
             // Unhide default OS mouse
             Core.RenderingWindows[0].DefaultMouse.ShowCursor(Core.RenderingWindows[0].WindowInfo);
             if (driver != null)
@@ -469,6 +485,7 @@ namespace OpenMobile
                 driver.Dispose();
             }
         }
+
         public static void Initialize()
         {
 #if WINDOWS
@@ -581,8 +598,44 @@ namespace OpenMobile
                     tmrIdleDetection[i].Elapsed += new System.Timers.ElapsedEventHandler(tmrIdleDetection_Elapsed);
                 }
             }
+            _Idle = new bool[BuiltInComponents.Host.ScreenCount];
+            _IdleDetectionEnabled = new bool[BuiltInComponents.Host.ScreenCount];
+            for (int i = 0; i < _IdleDetectionEnabled.Length; i++)
+                _IdleDetectionEnabled[i] = true;   
 
-            //DataSources_Register();
+            DataSources_Register();
+            Commands_Register();
+        }
+
+        private static void DataSources_Register()
+        {
+            // OM is idle
+            BuiltInComponents.Host.DataHandler.AddDataSource(true, new DataSource(BuiltInComponents.OMInternalPlugin, "System", "Idle", "", 0, DataSource.DataTypes.binary, null, "System is idle"), false);
+
+        }
+
+        private static void Commands_Register()
+        {
+            // Enable / Disable idle setting
+            OM.Host.CommandHandler.AddCommand(true, new Command(BuiltInComponents.OMInternalPlugin, "System", "Idle", "Enable", CommandExecutor, 0, false, "Enables idle detection"));
+            OM.Host.CommandHandler.AddCommand(true, new Command(BuiltInComponents.OMInternalPlugin, "System", "Idle", "Disable", CommandExecutor, 0, false, "Disables idle detection"));
+        }
+
+        private static object CommandExecutor(Command command, object[] param, out bool result)
+        {
+            result = false;
+
+            switch (command.FullNameWithoutScreen)
+            {
+                case "System.Idle.Enable":
+                    _IdleDetectionEnabled[command.Screen] = true;
+                    break;
+                case "System.Idle.Disable":
+                    _IdleDetectionEnabled[command.Screen] = false;
+                    break;
+            }
+
+            return null;
         }
 
         static void Host_OnSystemEvent(eFunction function, object[] args)
@@ -1337,12 +1390,37 @@ namespace OpenMobile
         {
             SandboxedThread.Asynchronous(delegate()
             {
+                if (!_IdleDetectionEnabled[screen])
+                {
+                    if (_Idle[screen])
+                    {
+                        _Idle[screen] = false;
+                        // Push update to datasource
+                        BuiltInComponents.Host.DataHandler.PushDataSourceValue(screen, "OM", "System.Idle", false, true);
+                        Core.theHost.raiseSystemEvent(eFunction.IdleLeaving, screen.ToString(), String.Empty, String.Empty);
+                    }
+
+                    return;
+                }
+                
                 if (leaving)
+                {
+                    _Idle[screen] = false;
+
+                    // Push update to datasource
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue(screen, "OM", "System.Idle", false, true);
+
                     Core.theHost.raiseSystemEvent(eFunction.IdleLeaving, screen.ToString(), String.Empty, String.Empty);
+                }
                 else
                 {
+                    _Idle[screen] = true;
+
+                    // Push update to datasource
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue(screen, "OM", "System.Idle", true, true);
+
                     Core.theHost.raiseSystemEvent(eFunction.IdleEntering, screen.ToString(), String.Empty, String.Empty);
-                    
+
                     // Execute configured action
                     string action = BuiltInComponents.SystemSettings.IdleDetectionAction(screen);
                     if (!string.IsNullOrEmpty(action))
@@ -1393,57 +1471,5 @@ namespace OpenMobile
         }
 
         #endregion
-
-        //#region DataSources
-
-        //private static void DataSources_Register()
-        //{
-        //    // Create data sources for zones at all available screens
-        //    for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
-        //    {
-        //        // Volume
-        //        BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", String.Format("Screen{0}", i), "Input", "IdleDetectionInterval", 0, DataSource.DataTypes.raw, DataSourceGetter, DataSourceSetter, "Time in seconds before the idle event is fired"));
-        //    }
-        //}
-
-        //private static object DataSourceGetter(DataSource dataSource, out bool result, object[] param)
-        //{
-        //    result = true;
-
-        //    // Update volume data
-        //    if (dataSource.NameLevel2 == "Input" && dataSource.NameLevel3 == "IdleDetectionInterval")
-        //        return (tmrIdleDetection[helperFunctions.General.GetScreenFromString(dataSource.NameLevel1)].Interval / 1000);
-
-        //    result = false;
-        //    return null;
-        //}
-
-        //private static void DataSourceSetter(DataSource dataSource, ref object value, object[] param, out bool result)
-        //{
-        //    result = true;
-
-        //    // Update volume data
-        //    if (dataSource.NameLevel2 == "Input" && dataSource.NameLevel3 == "IdleDetectionInterval")
-        //    {
-        //        int screen = helperFunctions.General.GetScreenFromString(dataSource.NameLevel1);
-        //        int delay = helperFunctions.General.GetDataFromObject<int>(value, 60);
-        //        tmrIdleDetection[screen].Interval = delay * 1000;
-
-        //        // Write data to database
-        //        SaveIdleDetectionInterval(screen, delay);
-        //    }
-        //    result = false;
-        //    return;
-        //}
-
-        //private static void SaveIdleDetectionInterval(int screen, int value)
-        //{
-        //    string SettingName = String.Format("Screen{0}.Input.IdleDetectionInterval", screen);
-        //    StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, SettingName, 60);
-        //    StoredData.Set(BuiltInComponents.OMInternalPlugin, SettingName, value);
-        //}
-
-        //#endregion
-
     }
 }

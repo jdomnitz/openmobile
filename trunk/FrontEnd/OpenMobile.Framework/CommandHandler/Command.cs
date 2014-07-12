@@ -70,6 +70,29 @@ namespace OpenMobile
             return String.Format("Screen{0}", screen);
         }
 
+        /// <summary>
+        /// Remaps the command executors from one command to another
+        /// </summary>
+        /// <param name="fromCommand"></param>
+        /// <param name="toCommand"></param>
+        static public void Remap(Command fromCommand, Command toCommand)
+        {
+            // Copy executor to the new command
+            toCommand._ExecDelegate = fromCommand._ExecDelegate;
+
+            // Clear executor from old command
+            fromCommand._ExecDelegate = null;
+        }
+
+        /// <summary>
+        /// Clears all execute delegates from a command
+        /// </summary>
+        /// <param name="dataSource"></param>
+        static public void ClearExecutor(Command command)
+        {
+            command._ExecDelegate = null;
+        }
+
         #endregion
 
         /// <summary>
@@ -109,9 +132,88 @@ namespace OpenMobile
         {
             get
             {
+                if (_LinkedSource != null)
+                    return _LinkedSource._ExecDelegate != null;
+
                 return _ExecDelegate != null;
             }
         }
+
+        /// <summary>
+        /// Is this command enabled
+        /// </summary>
+        public bool Enabled
+        {
+            get
+            {
+                return this._Enabled;
+            }
+            set
+            {
+                if (this._Enabled != value)
+                {
+                    this._Enabled = value;
+                }
+            }
+        }
+        private bool _Enabled = true;
+
+        /// <summary>
+        /// The group this command belongs to
+        /// </summary>
+        public CommandGroup Group
+        {
+            get
+            {
+                return this._Group;
+            }
+            set
+            {
+                if (this._Group != value)
+                {
+                    this._Group = value;
+                }
+            }
+        }
+        private CommandGroup _Group;
+
+        /// <summary>
+        /// The linked command target
+        /// </summary>
+        public Command LinkedTarget
+        {
+            get
+            {
+                return this._LinkedTarget;
+            }
+            set
+            {
+                if (this._LinkedTarget != value)
+                {
+                    this._LinkedTarget = value;
+                }
+            }
+        }
+        private Command _LinkedTarget;
+
+        /// <summary>
+        /// The linked Command source
+        /// </summary>
+        public Command LinkedSource
+        {
+            get
+            {
+                return this._LinkedSource;
+            }
+            set
+            {
+                if (this._LinkedSource != value)
+                {
+                    this._LinkedSource = value;
+                }
+            }
+        }
+        private Command _LinkedSource;      
 
         /// <summary>
         /// The amount of required parameters
@@ -145,6 +247,17 @@ namespace OpenMobile
         /// <returns></returns>
         public object Execute(object[] param, out bool result)
         {
+            // Is this command enabled?
+            if (!_Enabled)
+            {   // Command disabled unable to process command
+                result = false;
+                return null;
+            }
+
+            // Use linked command?
+            if (_LinkedSource != null)
+                return _LinkedSource.Execute(param, out result);
+
             // Check if parameters is required
             if (RequiresParameters && (param == null || param.Length < _RequiredParamCount))
             {   // Missing parameters unable to process command
@@ -179,6 +292,7 @@ namespace OpenMobile
             return Execute(null, out result);
         }
 
+
         /// <summary>
         /// Creates a new command
         /// </summary>
@@ -202,6 +316,23 @@ namespace OpenMobile
             this._Description = description;
         }
 
+        /// <summary>
+        /// Creates a new command
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="execDelegate"></param>
+        /// <param name="requiredParamCount"></param>
+        /// <param name="returnsValue"></param>
+        /// <param name="description"></param>
+        public Command(bool screenSpecific, IBasePlugin provider, string nameLevel1, string nameLevel2, string nameLevel3, CommandExecDelegate execDelegate, int requiredParamCount, bool returnsValue, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, execDelegate, requiredParamCount, returnsValue, description)
+        {
+            ScreenSpecific = screenSpecific;
+        }
 
         /// <summary>
         /// Creates a new command
@@ -224,6 +355,24 @@ namespace OpenMobile
             this._RequiredParamCount = requiredParamCount;
             this._ReturnsValue = returnsValue;
             this._Description = description;
+        }
+
+        /// <summary>
+        /// Creates a new command
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="provider"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <param name="execDelegate"></param>
+        /// <param name="requiredParamCount"></param>
+        /// <param name="returnsValue"></param>
+        /// <param name="description"></param>
+        public Command(bool screenSpecific, string provider, string nameLevel1, string nameLevel2, string nameLevel3, CommandExecDelegate execDelegate, int requiredParamCount, bool returnsValue, string description)
+            : this(provider, nameLevel1, nameLevel2, nameLevel3, execDelegate, requiredParamCount, returnsValue, description)
+        {
+            ScreenSpecific = screenSpecific;
         }
 
         public override string ToString()

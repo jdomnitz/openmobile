@@ -48,7 +48,7 @@ namespace OMMaps2
         #region Skin Init and Dispose
 
         public OMMaps()
-            : base("OMMaps", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "A map frontend for OpenMobile", "OMMaps", "OM Dev team", "")
+            : base("OMMaps", OM.Host.getSkinImage("Icons|Icon-Navigation"), 1f, "A map frontend for OpenMobile", "OMMaps", "OM Dev team", "")
         {
         }
 
@@ -101,7 +101,7 @@ namespace OMMaps2
 
         private OMPanel InitializeMapPanel()
         {
-            OMPanel panel = new OMPanel("OMMaps", "Map", OM.Host.getSkinImage("Icons|Icon-GPS"));
+            OMPanel panel = new OMPanel("OMMaps", "Map", this.pluginIcon);
 
             OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height,
                 new ShapeData(shapes.Rectangle, Color.FromArgb(255, Color.Black)));
@@ -150,20 +150,25 @@ namespace OMMaps2
             mouse_MapGroup_MapHandler.OnClick += new OMMouseHandler.MouseEventArgsHandler(mouseMapHandler_OnClick);
             panel.addControl(mouse_MapGroup_MapHandler);
 
-            OMButton btn_MapGroup_ZoomIn = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomIn", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Top + 10, 60, 60, null, null, GraphicCorners.All, "", null, "+", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
-            btn_MapGroup_ZoomIn.Opacity = 100;
+            OMButton btn_MapGroup_ZoomIn = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomIn", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Top + 10, 90, 90, null, null, GraphicCorners.All, "", null, "+", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
+            btn_MapGroup_ZoomIn.Opacity = 140;
             btn_MapGroup_ZoomIn.Command_Click = "{:S:}Map.Zoom.In";
             panel.addControl(btn_MapGroup_ZoomIn);
 
-            OMButton btn_MapGroup_ZoomOut = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomOut", img_MapGroup_Map.Region.Right - 70, img_MapGroup_Map.Region.Top + 10, 60, 60, null, null, GraphicCorners.All, "", null, "-", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
-            btn_MapGroup_ZoomOut.Opacity = 100;
+            OMButton btn_MapGroup_ZoomOut = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomOut", img_MapGroup_Map.Region.Right - 100, img_MapGroup_Map.Region.Top + 10, 90, 90, null, null, GraphicCorners.All, "", null, "-", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
+            btn_MapGroup_ZoomOut.Opacity = 140;
             btn_MapGroup_ZoomOut.Command_Click = "{:S:}Map.Zoom.Out";
             panel.addControl(btn_MapGroup_ZoomOut);
 
-            OMButton btn_MapGroup_CurrentLoc = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_CurrentLoc", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Bottom - 70, 60, 60, null, null, GraphicCorners.All, "", OM.Host.getSkinImage("AIcons|10-device-access-location-found").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinTextColor), "", null, null, null);
-            btn_MapGroup_CurrentLoc.Opacity = 100;
+            OMButton btn_MapGroup_CurrentLoc = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_CurrentLoc", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Bottom - 100, 90, 90, null, null, GraphicCorners.All, "", OM.Host.getSkinImage("AIcons|10-device-access-location-found").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinTextColor), "", null, null, null);
+            btn_MapGroup_CurrentLoc.Opacity = 140;
             btn_MapGroup_CurrentLoc.Command_Click = "{:S:}Map.Goto.Current";
-            
+
+            OMLabel lbl_MapGroup_ZoomLevel = new OMLabel("lbl_MapGroup_ZoomLevel", btn_MapGroup_ZoomIn.Region.Left, btn_MapGroup_ZoomIn.Region.Bottom, btn_MapGroup_ZoomIn.Region.Width, 35);
+            lbl_MapGroup_ZoomLevel.FontSize = 30;
+            lbl_MapGroup_ZoomLevel.DataSource = "{:S:}Map.Zoom.Level";
+            panel.addControl(lbl_MapGroup_ZoomLevel);
+     
             panel.addControl(btn_MapGroup_CurrentLoc);
 
             OMImage img_MapGroup_Updating = new OMImage("img_MapGroup_Updating", OM.Host.ClientArea_Init.Left + (OM.Host.ClientArea_Init.Width / 2), OM.Host.ClientArea_Init.Top + (OM.Host.ClientArea_Init.Height / 2), OM.Host.getSkinImage("BusyAnimationTransparent.gif"));
@@ -186,6 +191,7 @@ namespace OMMaps2
             panel.PopUpMenu = PopUpMenuStrip;
 
             panel.Entering += new PanelEvent(panel_Entering);
+            panel.Leaving += new PanelEvent(panel_Leaving);
 
             return panel;
         }
@@ -210,6 +216,12 @@ namespace OMMaps2
         void panel_Entering(OMPanel sender, int screen)
         {
             OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Refresh");
+            OM.Host.CommandHandler.ExecuteCommand(screen, "OM;System.Idle.Disable");
+        }
+
+        void panel_Leaving(OMPanel sender, int screen)
+        {
+            OM.Host.CommandHandler.ExecuteCommand(screen, "OM;System.Idle.Enable");
         }
 
         void btn_InfoGroup_Hide_OnClick(OMControl sender, int screen)

@@ -57,8 +57,8 @@ namespace OpenMobile.mPlayer
         {
             // Register commands
             _Commands.Add(new mPlayerCommand(Commands.Quit, false, "pausing_toggle quit", "ID_EXIT="));
-            _Commands.Add(new mPlayerCommand(Commands.LoadFile, false, "pausing_toggle loadfile \"{0}\"", "Playing ", 0));
-            _Commands.Add(new mPlayerCommand(Commands.LoadList, false, "pausing_toggle loadlist \"{0}\"", "Playing ", 0));
+            _Commands.Add(new mPlayerCommand(Commands.LoadFile, false, "pausing_toggle loadfile \"{0}\"", "Starting playback...", 0));
+            _Commands.Add(new mPlayerCommand(Commands.LoadList, false, "pausing_toggle loadlist \"{0}\"", "Starting playback...", 0));
             _Commands.Add(new mPlayerCommand(Commands.Pause, false, "pause"));
             _Commands.Add(new mPlayerCommand(Commands.Stop, false, "pausing_keep_force Stop", "EOF code: 4"));
             _Commands.Add(new mPlayerCommand(Commands.Get_PlaybackPos, false, "get_property time_pos", "ANS_time_pos="));

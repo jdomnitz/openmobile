@@ -370,6 +370,23 @@ namespace OpenMobile.Plugin
         imageItem getPluginImage(IBasePlugin plugin, string ninePatchImageName, Size ninePatchImageSize);
 
         /// <summary>
+        /// Loads a sprite from a sprite image from a file located in the plugin folder (This method can be used in the constructor)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="imageName"></param>
+        /// <param name="spriteName"></param>
+        /// <returns></returns>
+        imageItem getPluginImage<T>(string imageName, string spriteName);
+
+        /// <summary>
+        /// Loads an image from a file located in the plugin folder (This method can be used in the constructor)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
+        imageItem getPluginImage<T>(string imageName);
+
+        /// <summary>
         /// Gets information on the currently playing media
         /// </summary>
         /// <returns></returns>

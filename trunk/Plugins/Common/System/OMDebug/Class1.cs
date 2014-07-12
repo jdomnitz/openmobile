@@ -608,9 +608,9 @@ namespace OMDebug
 
         public void Dispose()
         {
-            if (writer!=null)
-                writer.Dispose();
-            GC.SuppressFinalize(this);
+            //if (writer!=null)
+            //    writer.Dispose();
+            //GC.SuppressFinalize(this);
         }
 
         #endregion

@@ -65,6 +65,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="VistaAudio, Version=1.1.0.24056, Culture=neutral, PublicKeyToken=734135321ceb880a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

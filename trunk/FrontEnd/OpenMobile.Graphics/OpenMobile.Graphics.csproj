@@ -121,6 +121,7 @@
     <Compile Include="Platform\Windows\WinRawMouse.cs" />
     <Compile Include="Platform\X11\X11RawInput.cs" />
     <Compile Include="SafeThread.cs" />
+    <Compile Include="V2Shaders.cs" />
     <Compile Include="V1Graphics.cs" />
     <Compile Include="Graphics\Color4.cs" />
     <Compile Include="Graphics\ColorFormat.cs" />

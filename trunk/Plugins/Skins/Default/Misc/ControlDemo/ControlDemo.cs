@@ -362,7 +362,6 @@ namespace ControlDemo
             // Load DataSources panel
             manager.QueuePanel("DataSources", panelDataSources.Initialize);
 
-
             return eLoadStatus.LoadSuccessful;
         }
 
@@ -604,10 +603,40 @@ namespace ControlDemo
             f.Size = 24;
             tempIcon.RenderText(0, 0, tempIcon.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, Globalization.convertToLocalTemp(10.0, true), f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
 
-            Notification notification = new Notification(Notification.Styles.IconOnly, this, "ControlDemo_Notification", DateTime.Now, null, tempIcon, "Notification test", "");
-            notification.State = Notification.States.Active;
-            notification.IconSize_Width = tempIcon.Width;
-            OM.Host.UIHandler.AddNotification(screen, notification);
+            //Notification notification = new Notification(Notification.Styles.IconOnly, this, "ControlDemo_Notification", DateTime.Now, null, tempIcon, "Notification test", "");
+            //notification.State = Notification.States.Active;
+            //notification.IconSize_Width = tempIcon.Width;
+            //OM.Host.UIHandler.AddNotification(screen, notification);
+
+            //OImage icon1 = OM.Host.getSkinImage("Icons|Icon-Weather_Conditions1").image;
+            //Notification notification1 = new Notification(this, "ControlDemo_Notification1", icon1, icon1, "Notification 1", "");
+            //notification1.State = Notification.States.Active;
+            //OM.Host.UIHandler.AddNotification(screen, notification1);
+
+            //OImage icon2 = icon1.Copy().Overlay(Color.Yellow);
+            //Notification notification2 = new Notification(this, "ControlDemo_Notification2", icon2, icon2, "Notification 2", "");
+            //notification2.State = Notification.States.Active;
+            //OM.Host.UIHandler.AddNotification(screen, notification2);
+
+            //OImage icon3 = icon1.Copy().Overlay(Color.Red);
+            //Notification notification3 = new Notification(this, "ControlDemo_Notification3", icon3, icon3, "Notification 3", "");
+            //notification3.State = Notification.States.Active;
+            //OM.Host.UIHandler.AddNotification(screen, notification3);
+
+            //OImage icon4 = OM.Host.getSkinImage("Icons|Icon-Weather_Conditions2").image;
+            //Notification notification4 = new Notification(this, "ControlDemo_Notification4", icon4, icon4, "Notification 4", "");
+            //notification4.State = Notification.States.Active;
+            //OM.Host.UIHandler.AddNotification(screen, notification4);
+
+            //OImage icon5 = icon4.Copy().Overlay(Color.Yellow);
+            //Notification notification5 = new Notification(this, "ControlDemo_Notification5", icon5, icon5, "Notification 5", "");
+            //notification5.State = Notification.States.Active;
+            //OM.Host.UIHandler.AddNotification(screen, notification5);
+
+            //OImage icon6 = icon4.Copy().Overlay(Color.Red);
+            //Notification notification6 = new Notification(this, "ControlDemo_Notification6", icon6, icon6, "Notification 6", "");
+            //notification6.State = Notification.States.Active;
+            //OM.Host.UIHandler.AddNotification(screen, notification6);
 
         }
 

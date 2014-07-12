@@ -342,7 +342,7 @@ namespace OpenMobile.UI
 
         public void ControlButtons_AutoHideTimer_Reset(int screen)
         {
-            if (_tmrControlButtonsAutoHide.Length <= screen && screen < 0)
+            if ((_tmrControlButtonsAutoHide.Length <= screen && screen < 0) || _tmrControlButtonsAutoHide[screen] == null)
                 return;
 
             if (_tmrControlButtonsAutoHide[screen].Enabled)
@@ -539,12 +539,32 @@ namespace OpenMobile.UI
             _ControlButtons_ButtonStripContainer.OnButtonStripSet += _ControlButtons_ButtonStripContainer_OnButtonStripSet_Handler;
 
             _tmrControlButtonsAutoHide = new Timer[BuiltInComponents.Host.ScreenCount];
+            _tmrMediaBannerAutoHide = new Timer[BuiltInComponents.Host.ScreenCount];
 
             _MediaBanner_Enable = new bool[BuiltInComponents.Host.ScreenCount];
             for (int i = 0; i < _MediaBanner_Enable.Length; i++)
                 _MediaBanner_Enable[i] = true;
 
             BuiltInComponents.Host.OnSystemEvent += new SystemEvent(Host_OnSystemEvent);
+        }
+
+        public void Dispose()
+        {
+            for (int i = 0; i < _tmrMediaBannerAutoHide.Length; i++)
+            {
+                if (_tmrMediaBannerAutoHide[i] != null)
+                    _tmrMediaBannerAutoHide[i].Dispose();
+            }
+            for (int i = 0; i < _tmrControlButtonsAutoHide.Length; i++)
+            {
+                if (_tmrControlButtonsAutoHide[i] != null)
+                    _tmrControlButtonsAutoHide[i].Dispose();
+            }
+        }
+
+        ~UIHandler()
+        {
+            Dispose();
         }
 
         #endregion
@@ -1473,6 +1493,7 @@ namespace OpenMobile.UI
 
         #region MediaBanner
 
+        private Timer[] _tmrMediaBannerAutoHide;
         public delegate void ShowMediaBannerDelegate(int screen, bool fast);
         public delegate void HideMediaBannerDelegate(int screen, bool fast);
         public delegate void EnableMediaBannerDelegate(int screen, bool fast);
@@ -1507,16 +1528,49 @@ namespace OpenMobile.UI
                 OnEnableMediaBanner(screen, fast);
         }
 
+        public void MediaBanner_AutoHideTimer_Reset(int screen)
+        {
+            if (_tmrMediaBannerAutoHide.Length <= screen && screen < 0)
+                return;
+
+            if (_tmrMediaBannerAutoHide[screen].Enabled)
+            {
+                _tmrMediaBannerAutoHide[screen].Enabled = false;
+                _tmrMediaBannerAutoHide[screen].Enabled = true;
+            }
+        }
+
         /// <summary>
         /// Show the Mediabanner
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="bannerData"></param>
-        public void MediaBanner_Show(int screen, bool fast = false)
+        public void MediaBanner_Show(int screen, bool fast = false, int secondsToShow = 0)
         {
             // Call event
             if (_MediaBanner_Enable[screen])
                 Raise_OnShowMediaBanner(screen, fast);
+
+            if (secondsToShow > 0)
+            {
+                if (_tmrMediaBannerAutoHide[screen] == null)
+                {
+                    _tmrMediaBannerAutoHide[screen] = new Timer(secondsToShow * 1000);
+                    _tmrMediaBannerAutoHide[screen].Elapsed += _tmrMediaBannerAutoHide_Elapsed;
+                    _tmrMediaBannerAutoHide[screen].AutoReset = false;
+                }
+                _tmrMediaBannerAutoHide[screen].Interval = secondsToShow * 1000;
+                _tmrMediaBannerAutoHide[screen].Screen = screen;
+                _tmrMediaBannerAutoHide[screen].Tag = fast;
+                _tmrMediaBannerAutoHide[screen].Enabled = true;
+            }
+        }
+
+        void _tmrMediaBannerAutoHide_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Timer tmr = sender as Timer;
+            tmr.Enabled = false;
+            Raise_OnHideMediaBanner(tmr.Screen, (bool)tmr.Tag);
         }
 
         /// <summary>

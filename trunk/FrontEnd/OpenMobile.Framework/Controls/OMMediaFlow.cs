@@ -30,7 +30,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// An "coverflow" style control for images
     /// </summary>
-    public class OMMediaFlow: OMImageFlow
+    public class OMMediaFlow : OMImageFlow
     {
         #region Constructor
 
@@ -103,7 +103,7 @@ namespace OpenMobile.Controls
                 }
             }
         }
-        private ListSources _ListSource = ListSources.Items;        
+        private ListSources _ListSource = ListSources.Items;
 
         /// <summary>
         /// Gets or sets the databounded playlist 
@@ -137,7 +137,7 @@ namespace OpenMobile.Controls
 
                     // Connect to new event
                     this._PlayListSource.PropertyChanged += new PropertyChangedEventHandler(_PlayListSource_PropertyChanged);
-                    this._PlayListSource.OnList_Items_Changed +=new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListChanged);
+                    this._PlayListSource.OnList_Items_Changed += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListChanged);
                     this._PlayListSource.OnList_Items_Cleared += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListCleared);
                     this._PlayListSource.OnList_Items_ItemInserted += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItemInserted);
                     this._PlayListSource.OnList_Items_ItemRemoved += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItemRemoved);
@@ -161,9 +161,15 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Buffer)
                 return;
 
-            this.RemoveAt(index);
-            SelectedIndex = _PlayListSource.BufferIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                this.RemoveAt(index);
+                SelectedIndex = _PlayListSource.BufferIndex;
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_OnListItem_Buffer_Inserted(List<mediaInfo> list, int index)
@@ -171,9 +177,15 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Buffer)
                 return;
 
-            this.Insert(GetCoverImage(list[index].coverArt), index);
-            SelectedIndex = _PlayListSource.BufferIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                this.Insert(GetCoverImage(list[index].coverArt), index);
+                SelectedIndex = _PlayListSource.BufferIndex;
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_OnList_Buffer_Cleared(List<mediaInfo> list, int index)
@@ -181,9 +193,15 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Buffer)
                 return;
 
-            this.Clear();
-            SelectedIndex = _PlayListSource.BufferIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                this.Clear();
+                SelectedIndex = _PlayListSource.BufferIndex;
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_OnList_Buffer_Changed(List<mediaInfo> list, int index)
@@ -191,19 +209,34 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Buffer)
                 return;
 
-            LoadImagesFromPlayList();
-            SelectedIndex = _PlayListSource.BufferIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                LoadImagesFromPlayList();
+                SelectedIndex = _PlayListSource.BufferIndex;
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_OnListItemRemoved(List<mediaInfo> list, int index)
         {
             if (_ListSource != ListSources.Items)
                 return;
-
-            this.RemoveAt(index);
-            SelectedIndex = _PlayListSource.CurrentIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                this.RemoveAt(index);
+                if (index >= list.Count)
+                    SelectedIndex = index - 1;
+                else
+                    SelectedIndex = index;
+                //SelectedIndex = _PlayListSource.CurrentIndex; //<-- Commented this out so the coverflow wouldn't "flow" back and remain at the spot we just removed the playlist item from
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_OnListItemInserted(List<mediaInfo> list, int index)
@@ -211,9 +244,15 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Items)
                 return;
 
-            this.Insert(GetCoverImage(list[index].coverArt), index);
-            SelectedIndex = _PlayListSource.CurrentIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                this.Insert(GetCoverImage(list[index].coverArt), index);
+                SelectedIndex = _PlayListSource.CurrentIndex;
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_OnListCleared(List<mediaInfo> list, int index)
@@ -221,9 +260,15 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Items)
                 return;
 
-            this.Clear();
-            SelectedIndex = _PlayListSource.CurrentIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                this.Clear();
+                SelectedIndex = _PlayListSource.CurrentIndex;
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_OnListChanged(List<mediaInfo> list, int index)
@@ -231,9 +276,15 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Items)
                 return;
 
-            LoadImagesFromPlayList();
-            SelectedIndex = _PlayListSource.CurrentIndex;
-            this.Text = ExtractLabelText();
+            try
+            {
+                LoadImagesFromPlayList();
+                SelectedIndex = _PlayListSource.CurrentIndex;
+                this.Text = ExtractLabelText();
+            }
+            catch
+            {
+            }
         }
 
         void _PlayListSource_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -241,18 +292,24 @@ namespace OpenMobile.Controls
             if (_ListSource != ListSources.Items)
                 return;
 
-            switch (e.PropertyName)
+            try
             {
-                case "Items":
-                case "CurrentItem":
-                case "Random":
-                    {
-                        LoadImagesFromPlayList();
-                        SelectedIndex = _PlayListSource.CurrentIndex;
-                    }
-                    break;
-                default:
-                    break;
+                switch (e.PropertyName)
+                {
+                    case "Items":
+                    case "CurrentItem":
+                    case "Random":
+                        {
+                            LoadImagesFromPlayList();
+                            SelectedIndex = _PlayListSource.CurrentIndex;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch
+            {
             }
         }
 
@@ -297,7 +354,7 @@ namespace OpenMobile.Controls
                     }
                     break;
                 case ListSources.Buffer:
-                     {   // Show the buffer list
+                    {   // Show the buffer list
                         lock (_Images)
                         {
                             mediaInfo[] playListItems = _PlayListSource.Buffer.ToArray();
@@ -331,7 +388,7 @@ namespace OpenMobile.Controls
                             SelectedIndex = _PlayListSource.BufferIndex;
                         }
                     }
-                   break;
+                    break;
                 default:
                     break;
             }

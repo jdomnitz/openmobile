@@ -179,6 +179,44 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
+        /// The color of the separator
+        /// </summary>
+        public Color SeparatorColor
+        {
+            get
+            {
+                return this._SeparatorColor;
+            }
+            set
+            {
+                if (this._SeparatorColor != value)
+                {
+                    this._SeparatorColor = value;
+                }
+            }
+        }
+        private Color _SeparatorColor;
+
+        /// <summary>
+        /// The size of the separator in pixels
+        /// </summary>
+        public int SeparatorSize
+        {
+            get
+            {
+                return this._SeparatorSize;
+            }
+            set
+            {
+                if (this._SeparatorSize != value)
+                {
+                    this._SeparatorSize = value;
+                }
+            }
+        }
+        private int _SeparatorSize = 1;        
+
+        /// <summary>
         /// Changes the selected index and scrolls the list so the selected item is visible
         /// <para>Use -1 to clear current selection</para>
         /// </summary>
@@ -528,6 +566,12 @@ namespace OpenMobile.Controls
             UseSoftEdges = false;
             SoftEdgeData = new FadingEdge.GraphicData();
             declare();
+        }
+
+        ~OMList()
+        {
+            if (throwtmr != null)
+                throwtmr.Dispose();
         }
 
         private void declare()
@@ -891,6 +935,11 @@ namespace OpenMobile.Controls
                             if ((items.Count > i) && (items[i].RefreshGraphic)) //rare thread collision
                                 g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - imgSze, _RenderingValue_Alpha);
                         }
+
+                        //draw separator?
+                        if (_SeparatorColor != Color.Transparent && !_SeparatorColor.IsEmpty && (i < items.Count - 1))
+                            g.DrawLine(new Pen(Color.FromArgb((int)base.GetAlphaValue255(_SeparatorColor.A), _SeparatorColor), _SeparatorSize), new Point(rect.Left, rect.Bottom - 2), new Point(rect.Right, rect.Bottom - 2));
+
                     }
                     g.Clip = r; //Reset the clip size for the rest of the controls
 
@@ -919,6 +968,7 @@ namespace OpenMobile.Controls
                         float ntop = top + height * ((float)-moved) / (listItemHeight * items.Count);
                         g.FillRoundRectangle(new Brush(_color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
                     }
+
                 }
                 catch 
                 {

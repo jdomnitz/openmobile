@@ -119,6 +119,8 @@ namespace OMWinPlayer
 
         public override eLoadStatus initialize(IPluginHost host)
         {
+            return eLoadStatus.LoadFailedGracefulUnloadRequested;
+
             if (Configuration.RunningOnMacOS)
                 return eLoadStatus.LoadFailedGracefulUnloadRequested;
 

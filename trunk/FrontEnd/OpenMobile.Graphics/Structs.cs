@@ -2164,7 +2164,6 @@ namespace OpenMobile.Graphics
             this.size = 12;
             this.style = FontStyle.Regular;
         }
-        [Obsolete("Use Enum")]
         public Font(string Font, float size)
         {
             this.name = Font;

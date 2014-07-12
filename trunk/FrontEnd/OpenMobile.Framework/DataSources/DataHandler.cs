@@ -52,6 +52,7 @@ namespace OpenMobile.Data
         private bool PollEngine_Run = false;
         private bool PollEngine_Enable = false;
         private EventWaitHandle PollEngine_WaitHandle;
+        private List<DataSourceGroup> _DataSourceGroups = new List<DataSourceGroup>();
 
         /// <summary>
         /// Creates a new datahandler
@@ -68,10 +69,7 @@ namespace OpenMobile.Data
             PollThread.Start();
         }
 
-        /// <summary>
-        /// Disposer
-        /// </summary>
-        ~DataHandler()
+        public void Dispose()
         {
             if (PollThread != null)
             {
@@ -83,7 +81,15 @@ namespace OpenMobile.Data
         }
 
         /// <summary>
-        /// Get's or set's the value of a datasource.
+        /// Disposer
+        /// </summary>
+        ~DataHandler()
+        {
+            Dispose();
+        }
+
+        /// <summary>
+        /// Get's or set's the value of a datasource (NB! The value returned is "null" if the datasource is not available).
         /// NB! When setting a datasource value the full name with provider must be used
         /// </summary>
         /// <param name="name"></param>
@@ -151,49 +157,181 @@ namespace OpenMobile.Data
         }
 
         /// <summary>
-        /// Adds a new command provider
+        /// Gets a DataSourceGroup
         /// </summary>
-        /// <param name="command"></param>
-        public void AddDataSource(bool screenSpecific, DataSource dataSource)
+        /// <param name="dataSourceGroupName"></param>
+        /// <returns></returns>
+        private DataSourceGroup GetDataSourceGroup(string dataSourceGroupName)
         {
-            if (!screenSpecific)
-                AddDataSource(dataSource);
-            else
+            return _DataSourceGroups.Find(x => x.FullNameWithoutScreen == dataSourceGroupName);
+        }
+
+        /// <summary>
+        /// Activates a command group and replaces nameLevels at the same time.
+        /// </summary>
+        /// <param name="commandGroup"></param>
+        /// <param name="nameLevel1"></param>
+        /// <param name="nameLevel2"></param>
+        /// <param name="nameLevel3"></param>
+        /// <returns></returns>
+        public bool ActivateDataSourceGroup(DataSourceGroup dataSourceGroup, int screen = -1, string nameLevel1 = null, string nameLevel2 = null, string nameLevel3 = null)
+        {
+            dataSourceGroup.SetScreen(screen);
+            dataSourceGroup.SetNameLevels(nameLevel1, nameLevel2, nameLevel3);
+            return ActivateDataSourceGroup(dataSourceGroup);
+        }
+
+        /// <summary>
+        /// Activates a screen specific datasource group on a specific screen
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="commandGroup"></param>
+        /// <returns></returns>
+        public bool ActivateDataSourceGroup(int screen, DataSourceGroupScreenSpecific dataSourceGroup)
+        {
+            return ActivateDataSourceGroup(dataSourceGroup.Instances[screen]);
+        }
+
+        /// <summary>
+        /// Activates a screen specific datasource group on all available screens
+        /// </summary>
+        /// <param name="commandGroup"></param>
+        /// <returns></returns>
+        public bool ActivateDataSourceGroup(DataSourceGroupScreenSpecific dataSourceGroup)
+        {
+            for (int i = 0; i < OM.Host.ScreenCount; i++)
             {
-                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
-                {
-                    DataSource specificSource = (DataSource)((ICloneable)dataSource).Clone();
-                    specificSource.Screen = i;
-                    AddDataSource(specificSource);
+                ActivateDataSourceGroup(dataSourceGroup.Instances[i]);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Activates a DataSourceGroup
+        /// </summary>
+        /// <param name="dataSourceGroup"></param>
+        /// <returns></returns>
+        public bool ActivateDataSourceGroup(DataSourceGroup dataSourceGroup)
+        {
+            lock (dataSourceGroup)
+            {
+                DataSourceGroup currentGroup = GetDataSourceGroup(dataSourceGroup.FullName);
+                int currentIndex = _DataSourceGroups.IndexOf(currentGroup);
+
+                if (currentGroup == dataSourceGroup)
+                    return false;
+
+                if (currentGroup != null)
+                {   // Replace existing group
+                    DataSourceGroup.ReplaceGroup(currentGroup, dataSourceGroup);
+                    _DataSourceGroups[currentIndex] = dataSourceGroup;
                 }
+                else
+                {   // New datasource group
+                    _DataSourceGroups.Add(dataSourceGroup);
+
+                    // Activate dataSources in group
+                    DataSourceGroup.ActivateDataSourcesInGroup(this, dataSourceGroup);
+                }
+                return true;
             }
         }
 
         /// <summary>
-        /// Adds a new command provider
+        /// True = DataSourceGroup is active
         /// </summary>
-        /// <param name="command"></param>
-        public void AddDataSource(bool screenSpecific, DataSource dataSource, object initialValue)
+        /// <param name="dataSourceGroup"></param>
+        /// <returns></returns>
+        public bool IsDataSourceGroupActive(DataSourceGroup dataSourceGroup)
         {
+            return _DataSourceGroups.Contains(dataSourceGroup);
+        }
+
+        /// <summary>
+        /// True = datasource is present
+        /// </summary>
+        /// <param name="dataSource"></param>
+        /// <returns></returns>
+        public bool IsDataSourcePresent(DataSource dataSource)
+        {
+            return _DataSources.Find(x => x.FullNameWithoutScreen == dataSource.FullNameWithoutScreen) != null;
+        }
+
+        /// <summary>
+        /// True = datasource is present
+        /// </summary>
+        /// <param name="dataSource"></param>
+        /// <returns></returns>
+        public bool IsExactDataSourcePresent(DataSource dataSource)
+        {
+            return _DataSources.Find(x => x.FullNameWithProvider == dataSource.FullNameWithProvider) != null;
+        }
+
+        /// <summary>
+        /// Adds a new datasource
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="dataSource"></param>
+        public DataSource[] AddDataSource(bool screenSpecific, DataSource dataSource)
+        {
+            DataSource[] retVal = new DataSource[OM.Host.ScreenCount];
+
             if (!screenSpecific)
-                AddDataSource(dataSource, initialValue);
+                retVal = AddDataSource(dataSource);
             else
             {
                 for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
                 {
                     DataSource specificSource = (DataSource)((ICloneable)dataSource).Clone();
                     specificSource.Screen = i;
-                    AddDataSource(specificSource, initialValue);
+                    retVal[i] = AddDataSource_Internal(specificSource, false)[0];
                 }
             }
+            return retVal;
+        }
+
+        /// <summary>
+        /// Adds a new datasource
+        /// </summary>
+        /// <param name="screenSpecific"></param>
+        /// <param name="dataSource"></param>
+        /// <param name="initialValue"></param>
+        public DataSource[] AddDataSource(bool screenSpecific, DataSource dataSource, object initialValue)
+        {
+            DataSource[] retVal = new DataSource[OM.Host.ScreenCount];
+
+            if (!screenSpecific)
+                retVal = AddDataSource(dataSource, initialValue);
+            else
+            {
+                for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                {
+                    DataSource specificSource = (DataSource)((ICloneable)dataSource).Clone();
+                    specificSource.Screen = i;
+                    retVal[i] = AddDataSource_Internal(specificSource, initialValue, false)[0];
+                }
+            }
+            return retVal;
         }
 
         /// <summary>
         /// Adds a new dataprovider
         /// </summary>
         /// <param name="dataSource"></param>
-        public void AddDataSource(DataSource dataSource)
+        public DataSource[] AddDataSource(DataSource dataSource)
         {
+            return AddDataSource_Internal(dataSource);
+        }
+        private DataSource[] AddDataSource_Internal(DataSource dataSource, bool addMultiScreen = true)
+        {
+            DataSource[] retVal = new DataSource[OM.Host.ScreenCount];
+
+            if (dataSource.ScreenSpecific & addMultiScreen)
+            {
+                retVal = AddDataSource(true, dataSource);
+                return retVal;
+            }
+
             lock (_DataSources)
             {
                 _DataSources.Add(dataSource);        // Add to internal sensor list
@@ -208,25 +346,99 @@ namespace OpenMobile.Data
                 SubscriptionCache_Prosess(dataSource);
             }
             PollEngine_WaitHandle.Set();
+
+            for (int i = 0; i < retVal.Length; i++)
+                retVal[i] = dataSource;
+
+            return retVal;
         }
 
         /// <summary>
         /// Adds a new dataprovider with initial value
         /// </summary>
         /// <param name="dataSource"></param>
-        public void AddDataSource(DataSource dataSource, object initialValue)
+        /// <param name="initialValue"></param>
+        public DataSource[] AddDataSource(DataSource dataSource, object initialValue)
         {
+            return AddDataSource_Internal(dataSource, initialValue);
+        }
+        public DataSource[] AddDataSource_Internal(DataSource dataSource, object initialValue, bool addMultiScreen = true)
+        {
+            DataSource[] retVal = new DataSource[OM.Host.ScreenCount];
+            
+            if (dataSource.ScreenSpecific & addMultiScreen)
+            {
+                retVal = AddDataSource(true, dataSource, initialValue);
+                return retVal;
+            }
+
             lock (_DataSources)
             {
-                _DataSources.Add(dataSource);        // Add to internal sensor list
-                
-                // Get a fresh value from the sensor
-                dataSource.RefreshValue(initialValue, false, true);
+                if (!IsExactDataSourcePresent(dataSource))
+                {
+                    _DataSources.Add(dataSource);        // Add to internal sensor list
 
-                // Prosess queue
-                SubscriptionCache_Prosess(dataSource);
+                    // Get a fresh value from the sensor
+                    dataSource.RefreshValue(initialValue, false, true);
+
+                    // Prosess queue
+                    SubscriptionCache_Prosess(dataSource);
+                }
             }
             PollEngine_WaitHandle.Set();
+
+            for (int i = 0; i < retVal.Length; i++)
+                retVal[i] = dataSource;
+
+            return retVal;
+        }
+
+        ///// <summary>
+        ///// Adds a new dataprovider with initial value
+        ///// </summary>
+        ///// <param name="dataSourceGroup"></param>
+        ///// <param name="dataSource"></param>
+        ///// <param name="initialValue"></param>
+        //public DataSource[] AddDataSource(DataSourceGroup dataSourceGroup, DataSource dataSource, object initialValue)
+        //{
+        //    lock (dataSourceGroup)
+        //    {
+        //        // Replace name levels with information from DataSourceGroup
+        //        dataSource = DataSourceGroup.ReplaceNameLevels(dataSourceGroup, dataSource);
+
+        //        dataSourceGroup.DataSources.Add(dataSource);        // Add to internal sensor list
+
+        //        // Get a fresh value from the sensor
+        //        dataSource.RefreshValue(initialValue, false, true);
+
+        //        // Prosess queue
+        //        SubscriptionCache_Prosess(dataSource);
+        //    }
+        //    PollEngine_WaitHandle.Set();
+
+        //    for (int i = 0; i < retVal.Length; i++)
+        //        retVal[i] = dataSource;
+
+        //    return retVal;
+        //}
+
+        /// <summary>
+        /// Replaces one datasource with another one
+        /// </summary>
+        /// <param name="oldDataSource"></param>
+        /// <param name="newDataSource"></param>
+        /// <returns></returns>
+        public bool ReplaceDataSource(DataSource oldDataSource, DataSource newDataSource)
+        {
+            // Remap subscriptions
+            DataSource.Remap(oldDataSource, newDataSource);
+
+            // Remap list data
+            int index = _DataSources.IndexOf(oldDataSource);
+            if (index >= 0)
+                _DataSources[index] = newDataSource;
+
+            return true;
         }
 
         /// <summary> 
@@ -305,7 +517,83 @@ namespace OpenMobile.Data
         }
 
         /// <summary>
-        /// Gets a datasource and supports sending parameters along in the request
+        /// Gets a datasource's value and supports sending parameters along in the request
+        /// <para>Name can be part of a datasources name or a full datasource name WITHOUT a provider (example: Zone.Volume)</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public T GetDataSourceValue<T>(string name, object[] param = null)
+        {
+            return GetDataSourceValue<T>(name, param, default(T));
+        }
+
+        /// <summary>
+        /// Gets a datasource's value and supports sending parameters along in the request
+        /// <para>Name can be part of a datasources name or a full datasource name WITHOUT a provider (example: Zone.Volume)</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public T GetDataSourceValue<T>(string name, object[] param, T defaultValue)
+        {
+            try
+            {
+                object returnValue;
+                if (!GetDataSourceValue(name, param, out returnValue))
+                    return defaultValue;
+                return (T)returnValue;
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// Gets a datasource's value and supports sending parameters along in the request
+        /// <para>Name can be part of a datasources name or a full datasource name WITHOUT a provider (example: Zone.Volume)</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public T GetDataSourceValue<T>(int screen, string name, object[] param = null)
+        {
+            return GetDataSourceValue<T>(screen, name, param, default(T));
+        }
+
+        /// <summary>
+        /// Gets a datasource's value and supports sending parameters along in the request
+        /// <para>Name can be part of a datasources name or a full datasource name WITHOUT a provider (example: Zone.Volume)</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="screen"></param>
+        /// <param name="name"></param>
+        /// <param name="param"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public T GetDataSourceValue<T>(int screen, string name, object[] param, T defaultValue)
+        {
+            try
+            {
+                object returnValue;
+                if (!GetDataSourceValue(screen, name, param, out returnValue))
+                    return defaultValue;
+                return (T)returnValue;
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// Gets a datasource's value and supports sending parameters along in the request
         /// <para>Name can be part of a datasources name or a full datasource name WITHOUT a provider (example: Zone.Volume)</para>
         /// </summary>
         /// <param name="screen"></param>
@@ -318,7 +606,7 @@ namespace OpenMobile.Data
             return GetDataSourceValue(String.Format("{0}.{1}", DataNameBase.GetScreenString(screen), name), param, out value);
         }
         /// <summary>
-        /// Gets a datasource and supports sending parameters along in the request
+        /// Gets a datasource's value and supports sending parameters along in the request
         /// <para>Name can be part of a datasources name or it can be a full reference including a provider reference (example: OM;Screen0.Zone.Volume)</para>
         /// </summary>
         /// <param name="name"></param>

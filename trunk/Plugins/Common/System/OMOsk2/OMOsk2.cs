@@ -980,6 +980,11 @@ namespace OMOsk2
 
         public void Dispose()
         {
+            for (int i = 0; i < MaskInputTimer.Length; i++)
+			{
+                if (MaskInputTimer[i] != null)
+			        MaskInputTimer[i].Dispose();
+			}
             GC.SuppressFinalize(this);
         }
 

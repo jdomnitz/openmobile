@@ -345,20 +345,23 @@ namespace OpenMobile.mPlayer
         private string _SessionLogNameFullPath;
 
         /// <summary>
-        /// Dump the text to the sessionlog
+        /// Dump the text to the session log
         /// </summary>
         /// <param name="text"></param>
-        private void WriteToSessionLog(string text, bool header)
+        private void WriteToSessionLog(string text, bool header, string filePath = null)
         {
-            // Dump output to tempfile
+            if (String.IsNullOrEmpty(filePath))
+                filePath = _SessionLogNameFullPath;
+
+            // Dump output to temp file
             if (_SessionLog)
             {
                 try
                 {
                     if (header)
-                        File.AppendAllText(_SessionLogNameFullPath, String.Format("mPlayerCom: {0}\r\n", text));
+                        File.AppendAllText(filePath, String.Format("mPlayerCom: {0}\r\n", text));
                     else
-                        File.AppendAllText(_SessionLogNameFullPath, String.Format("{0}\r\n", text));
+                        File.AppendAllText(filePath, String.Format("{0}\r\n", text));
                 }
                 catch
                 {
@@ -413,6 +416,7 @@ namespace OpenMobile.mPlayer
         }
         private string _mPlayerFileName = @"mplayer.exe";
         private string _mPlayerFileNameFullPath;
+        private string _mPlayerFolderName = @"mPlayer";
 
         /// <summary>
         /// The basic arguments used for starting mPlayer
@@ -431,7 +435,8 @@ namespace OpenMobile.mPlayer
                 }
             }
         }
-        private string _BaseArgs = @"-input nodefault-bindings -noconfig all -slave -quiet -idle -nomouseinput -v -osdlevel 0"; // -cache 8192";
+        //private string _BaseArgs = @"-input nodefault-bindings -noconfig all -slave -quiet -idle -nomouseinput -v -osdlevel 0 -cache 8192 −cache−min 0 ";
+        private string _BaseArgs = @"-input nodefault-bindings -noconfig all -slave -quiet -idle -nomouseinput -osdlevel 0 -cache 8192";
 
         /// <summary>
         /// Gets or sets the active window handle (used for Video output)
@@ -728,8 +733,15 @@ namespace OpenMobile.mPlayer
             // Clear existing audio devices
             _AudioDevices.Clear();
 
+            string localPath = GetLocalPath();
+
             // Start get the required info from mPlayer
-            StringReader ProcessOutput = SpawnAndGetMPlayerOutput(@"-v -vo null -ao dsound -frames 0 0 ""point1sec.mp3""");
+            // @"-input nodefault-bindings -noconfig all -slave -quiet -idle -nomouseinput -osdlevel 0 -cache 8192";
+            string args = @"-v -vo null -ao dsound -frames 0 0 ";
+            args += String.Format(" \"{0}{1}{2}{1}{3}\"", localPath, System.IO.Path.DirectorySeparatorChar, _mPlayerFolderName, "mPlayerCom.res");
+            StringReader ProcessOutput = SpawnAndGetMPlayerOutput(args); //@"-v -vo null -ao dsound -frames 0 0 ""point1sec.mp3""");
+
+            string sessionLogPath = localPath + System.IO.Path.DirectorySeparatorChar + _mPlayerFolderName + System.IO.Path.DirectorySeparatorChar + "AudioDetection.txt";
 
             // Process output from mPlayer
             if (ProcessOutput != null)
@@ -738,6 +750,8 @@ namespace OpenMobile.mPlayer
                 int ProcessOutputMode = 0;
                 while ((ProcessOutputLine = ProcessOutput.ReadLine()) != null)
                 {
+                    //WriteToSessionLog(String.Format("AudioDetection output: {0}", ProcessOutputLine), false, sessionLogPath);
+
                     // Skip empty lines
                     if (ProcessOutputLine.Trim() == "")
                         continue;
@@ -847,14 +861,20 @@ namespace OpenMobile.mPlayer
             _tmrMediaPoll.Elapsed += new System.Timers.ElapsedEventHandler(_tmrMediaPoll_Elapsed);
             ClearMediaData(MediaTypes.None);
 
-            // Spawn player with audiodetection
-            if (spawnPlayer)
-                SpawnPlayer(true, true);
+            // Spawn player with audio detection
+            //if (spawnPlayer)
+            //    SpawnPlayer(true, true);
+            GetAudioDevices();
         }
         
         ~mPlayer()
         {
             killPlayer();
+            if (_tmrMediaPoll != null)
+            {
+                _tmrMediaPoll.Dispose();
+                _tmrMediaPoll = null;
+            }
         }
 
         #endregion
@@ -928,8 +948,8 @@ namespace OpenMobile.mPlayer
         {
             // Create full path names
             string localPath = GetLocalPath();
-            _mPlayerFileNameFullPath = localPath + System.IO.Path.DirectorySeparatorChar + mPlayerFileName;
-            _SessionLogNameFullPath = localPath + System.IO.Path.DirectorySeparatorChar + _SessionLogName;
+            _mPlayerFileNameFullPath = localPath + System.IO.Path.DirectorySeparatorChar + _mPlayerFolderName + System.IO.Path.DirectorySeparatorChar + mPlayerFileName;
+            _SessionLogNameFullPath = localPath + System.IO.Path.DirectorySeparatorChar + _mPlayerFolderName + System.IO.Path.DirectorySeparatorChar + _SessionLogName;
 
             // Clear output from tempfile
             if (_SessionLog)
@@ -1010,7 +1030,7 @@ namespace OpenMobile.mPlayer
 
             // Set audio mode
             if (_AudioMode.Mode != MPlayerAudioModeName.Null)
-            {   // Audio outout is active
+            {   // Audio output is active
                 args += String.Format(" -ao {0}", _AudioMode.ModeCommand);
 
                 if (!audioDetection)
@@ -1071,7 +1091,7 @@ namespace OpenMobile.mPlayer
 
             // Add args so we start to play the dummy MP3 file
             if (audioDetection)
-                args += String.Format(" \"{0}{1}{2}\"",localPath,System.IO.Path.DirectorySeparatorChar, "mPlayerCom.res");
+                args += String.Format(" \"{0}{1}{2}{1}{3}\"",localPath,System.IO.Path.DirectorySeparatorChar, _mPlayerFolderName, "mPlayerCom.res");
 
             // Start new process
             _PlayerProcess = new Process();
@@ -1162,7 +1182,7 @@ namespace OpenMobile.mPlayer
             _PlayerState = PlayerStates.None;
 
             // Respawn player
-            SpawnPlayer(false, true);
+            SpawnPlayer(false, false);
 
             if (storedState == PlayerStates.Playing)
             {   // Restart previously playing media
@@ -1180,8 +1200,11 @@ namespace OpenMobile.mPlayer
         /// <returns></returns>
         private StringReader SpawnAndGetMPlayerOutput(string args)
         {
+            string localPath = GetLocalPath();
+            string mPlayerFileNameFullPath = localPath + System.IO.Path.DirectorySeparatorChar + _mPlayerFolderName + System.IO.Path.DirectorySeparatorChar + mPlayerFileName;
+            
             Process mPlayerProcess = new Process();
-            mPlayerProcess.StartInfo.FileName = mPlayerFileName;
+            mPlayerProcess.StartInfo.FileName = mPlayerFileNameFullPath;
             mPlayerProcess.StartInfo.CreateNoWindow = true;
             mPlayerProcess.StartInfo.RedirectStandardOutput = true;
             mPlayerProcess.StartInfo.RedirectStandardError = true;
@@ -1191,6 +1214,7 @@ namespace OpenMobile.mPlayer
             {
                 mPlayerProcess.StartInfo.Arguments = args;
                 mPlayerProcess.Start();
+                //Thread.Sleep(2000);
                 return new StringReader(mPlayerProcess.StandardOutput.ReadToEnd());
             }
             catch
@@ -1512,6 +1536,8 @@ namespace OpenMobile.mPlayer
         int _ProcessOutputMode = 0;
         void _PlayerProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
+            bool raiseMediaEvent = false;
+
             // Dump output to tempfile
             WriteToSessionLog(e.Data, false);
 
@@ -1538,7 +1564,7 @@ namespace OpenMobile.mPlayer
             }
 
             // Detect playback completed
-            if (_PlayerState == PlayerStates.Playing && line.Contains("EOF code: 1"))
+            if (_PlayerState == PlayerStates.Playing && (line.Contains("EOF code: 1") | line.Contains("ANS_percent_pos=100")))
             {
                 SetPlayerState(PlayerStates.Idle);
             }
@@ -1548,6 +1574,7 @@ namespace OpenMobile.mPlayer
             {
                 _MediaInfo.Url = line.Substring(8);
                 //SetPlayerState(PlayerStates.Playing);
+                raiseMediaEvent = true;
             }
 
             // Detect audio present
@@ -1567,17 +1594,32 @@ namespace OpenMobile.mPlayer
             // Get streaming data (if any)
                 // Genre
             if (line.Contains("- icy-name:"))
+            {
                 _MediaInfo.Title = FindAndGetSubString(line, "- icy-name:");
+                raiseMediaEvent = true;
+            }
             if (line.Contains("- icy-genre:"))
+            {
                 _MediaInfo.Genre = FindAndGetSubString(line, "- icy-genre:");
+                raiseMediaEvent = true;
+            }
             if (line.Contains("- icy-description:"))
+            {
                 _MediaInfo.Comment = FindAndGetSubString(line, "- icy-description:");
+                raiseMediaEvent = true;
+            }
             if (line.Contains("- icy-url:"))
+            {
                 _MediaInfo.Comment += String.Format(" ({0})", FindAndGetSubString(line, "- icy-url:"));
+                raiseMediaEvent = true;
+            }
 
             // Set media type (if streaming)
-                if (line.StartsWith("STREAM_HTTP("))
-                    _MediaInfo.MediaType = MediaTypes.Stream_HTTP;
+            if (line.StartsWith("STREAM_HTTP("))
+            {
+                _MediaInfo.MediaType = MediaTypes.Stream_HTTP;
+                raiseMediaEvent = true;
+            }
 
             switch (_PlaybackMode)
             {
@@ -1650,6 +1692,9 @@ namespace OpenMobile.mPlayer
                     }
                     break;
             }
+
+            if (raiseMediaEvent)
+                Raise_OnMediaInfoUpdated();
         }
 
         #endregion
@@ -1845,7 +1890,7 @@ namespace OpenMobile.mPlayer
             // Start with fresh media properties
             ClearMediaData(mediaType);
 
-            SendCommand(command, param);
+            string reply = SendCommand(command, 5000, param);
             SetPlayerState(PlayerStates.Playing);
             _MediaInfo.Url = param;
 

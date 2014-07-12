@@ -1,0 +1,43 @@
+﻿
+
+*** these could be cause by angles 90/270 ***
+[NOTES] Ball moves "up in pixels" sometimes when the ball YDirection is Down resulting in a NON triggering life lost event
+[NOTES] Ball moves upwards beyond the top of the client area sometimes
+*********************************************
+
+[CHANGE] Attempting fix of setting angles for 2 issues above
+[ADDED] Quit Game popup button
+
+[CHANGE] Paddle shooting to shoot 4 lasers instead of 2
+[CHANGE] Paddle shooting to shoot at 1.5 seconds apart instead of 1
+[CHANGE] Paddle shooting to shoot 4 shots instead of 3
+[CHANGE] Paddle shots now only hit one brick and de-extend instead of traveling through bricks
+[CHANGE] Laser power up collisions (not checking the center of laser anymore, but rather the outsides of laser)
+[CHANGE] Laser power up collisions now only hit a brick once instead of multiple times per brick
+[CHANGE] Endless game mode now has a 5% chance to randomly activate a powerup when creating a new brick
+[CHANGE] Endless game mode now spawns 0 - 2 bricks when there are more than 10 bricks already in play (1 - 2 if less than 10 bricks currently in play)
+[CHANGE] Endless game mode now places bricks without overlapping currently displayed bricks and balls
+[CHANGE] Ball max speed set to 7.0F instead of 24.0F
+[ADDED] Method to clear paddle shots/paddle shooting on reset (game over/won, life lost)
+[ADDED] Forcing MouseUp method in Paddle.cs on reset (game over/won, life lost)
+
+[ADDED] New game mode - Endless
+[ADDED] Paddle shooting power up
+
+[ADDED] Base power up class
+[ADDED] Laser power up
+[ADDED] Multiple ball power up
+[ADDED] Extra life power up
+
+[CHANGE] Collisions changed, now based on angle and circles
+[CHANGE] Changed ball to move directions based on an Angle property instead of hard coding X/Y pixel movements
+
+[ADDED] Resume game on paddle mouse down
+
+[ADDED] Fading destroyed bricks
+[ADDED] Saving high Scores
+[ADDED] Pause game on panel leave
+[ADDED] Scores
+[ADDED] Lives
+[ADDED] Ball moving with paddle before launched
+[CHANGE] Break the classes into their own .cs files

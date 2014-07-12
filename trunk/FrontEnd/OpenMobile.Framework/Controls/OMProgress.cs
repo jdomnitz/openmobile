@@ -54,8 +54,8 @@ namespace OpenMobile.Controls
             progress.Value = 0;
             progress.Style = OMProgress.Styles.shape;
             progress.ShowProgressBarValue = true;
-            progress.FontSize = 10;
-            progress.TextOffset = new Point(0, 5);
+            progress.FontSize = 18;
+            progress.TextOffset = new Point(0, 14);
 
             // Create shapedata for progressbar background
             ShapeData ShapeData = new ShapeData(shapes.Polygon,

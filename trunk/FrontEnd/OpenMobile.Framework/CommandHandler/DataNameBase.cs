@@ -32,6 +32,22 @@ namespace OpenMobile
     /// </summary>
     public abstract class DataNameBase
     {
+        #region Static methods
+
+        /// <summary>
+        /// Gets the name without a screen reference
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        static public string GetNameWithoutScreen(string name)
+        {
+            if (name.ToLower().StartsWith("screen"))
+                return name.Substring(name.IndexOf('.') + 1);
+            return name;
+        }
+
+        #endregion
+
         /// <summary>
         /// The separator character used for a provider
         /// </summary>
@@ -89,6 +105,51 @@ namespace OpenMobile
             }
         }
         private int _Screen = -1;
+
+        /// <summary>
+        /// True = A screen is specified for this object
+        /// </summary>
+        [System.ComponentModel.Browsable(false)]
+        public bool IsScreenSpecified
+        {
+            get
+            {
+                return _Screen >= 0;
+            }
+        }
+
+        /// <summary>
+        /// Sets or gets wheater this object is specific to a screen or not
+        /// </summary>
+        [System.ComponentModel.Browsable(false)]
+        public bool ScreenSpecific
+        {
+            get
+            {
+                return this._ScreenSpecific;
+            }
+            set
+            {
+                if (this._ScreenSpecific != value)
+                {
+                    this._ScreenSpecific = value;
+                }
+            }
+        }
+        private bool _ScreenSpecific = false;
+
+        /// <summary>
+        /// The hashcode for this objet
+        /// </summary>
+        [System.ComponentModel.Browsable(false)]
+        public int HashCode
+        {
+            get
+            {
+                return this.GetHashCode();
+            }
+        }
+        
 
         /// <summary>
         /// The full name of this command with screen reference (if present) (Screen.Level1.Level2.Level3)

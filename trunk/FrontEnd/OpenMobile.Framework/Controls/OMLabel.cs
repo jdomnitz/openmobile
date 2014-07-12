@@ -445,9 +445,9 @@ namespace OpenMobile.Controls
 
         internal override void DataSource_Missing(string propertyName)
         {
-            _text = "ERR";
-            _RefreshGraphic = true;
-            Refresh();
+            //_text = "ERR";
+            //_RefreshGraphic = true;
+            //Refresh();
         }
 
         internal override void DataSource_InLine_Changed(string s)
