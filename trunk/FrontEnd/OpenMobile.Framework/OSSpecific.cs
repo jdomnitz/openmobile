@@ -25,6 +25,7 @@ using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using OpenTK;
 
 namespace OpenMobile.Framework
 {
@@ -137,7 +138,7 @@ namespace OpenMobile.Framework
                 theHost.OnSystemEvent += new SystemEvent(theHost_OnSystemEvent);
             }
 #if WINDOWS
-            if (Configuration.RunningOnWindows)
+            if (OpenTK.Configuration.RunningOnWindows)
             {
                 try
                 {
@@ -170,46 +171,48 @@ namespace OpenMobile.Framework
 #if WINDOWS
             else
 #endif
-                if (Configuration.RunningOnX11)
+                if (OpenTK.Configuration.RunningOnX11)
                 {
-                    if (lastHandle == null)
-                        lastHandle = new embedInfo[theHost.ScreenCount];
-                    OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
-                    IntPtr tmp1; IntPtr tmp2;
-                    int count;
-                    IntPtr w;
-                    OpenMobile.Platform.X11.Functions.XQueryTree(info.Display, info.RootWindow, out tmp1, out tmp2, out w, out count);
-                    name = name.ToLower();
-                    IntPtr[] windows = new IntPtr[count];
-                    Marshal.Copy(w, windows, 0, count);
-                    foreach (IntPtr window in windows)
-                    {
-                        IntPtr windowName = new IntPtr();
-                        OpenMobile.Platform.X11.Functions.XFetchName(info.Display, window, ref windowName);
-                        if (windowName == IntPtr.Zero)
-                            continue;
-                        string localName = Marshal.PtrToStringAuto(windowName);
-                        if (localName.ToLower().Contains(name))
-                        {
-                            object o;
-                            theHost.getData(eGetData.GetScaleFactors, String.Empty, screen.ToString(), out o);
-                            if (o == null)
-                                return false;
-                            PointF scale = (PointF)o;
-                            IntPtr _atom_net_wm_state = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE", false);
-                            IntPtr _atom_net_wm_state_maximized_horizontal = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_HORZ", false);
-                            IntPtr _atom_net_wm_state_maximized_vertical = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_VERT", false);
-                            OpenMobile.Platform.X11.X11WindowInfo winInf = new OpenMobile.Platform.X11.X11WindowInfo(window, info);
-                            OpenMobile.Platform.X11.Functions.SendNetWMMessage(winInf, _atom_net_wm_state, new IntPtr(0), _atom_net_wm_state_maximized_horizontal, _atom_net_wm_state_maximized_vertical);
-                            OpenMobile.Platform.X11.Functions.XRaiseWindow(info.Display, window);
-                            OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, window, (int)(position.Width * scale.X), (int)(position.Height * scale.Y));
-                            OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, window, info.WindowHandle, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
-                            OpenMobile.Platform.X11.Functions.XMoveWindow(info.Display, window, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
-                            lastHandle[screen].handle = window;
-                            lastHandle[screen].position = position;
-                            return true;
-                        }
-                    }
+                    // Code is broken in current version of OpenTK
+
+                    //if (lastHandle == null)
+                    //    lastHandle = new embedInfo[theHost.ScreenCount];
+                    //OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
+                    //IntPtr tmp1; IntPtr tmp2;
+                    //int count;
+                    //IntPtr w;
+                    //OpenMobile.Platform.X11.Functions.XQueryTree(info.Display, info.RootWindow, out tmp1, out tmp2, out w, out count);
+                    //name = name.ToLower();
+                    //IntPtr[] windows = new IntPtr[count];
+                    //Marshal.Copy(w, windows, 0, count);
+                    //foreach (IntPtr window in windows)
+                    //{
+                    //    IntPtr windowName = new IntPtr();
+                    //    OpenMobile.Platform.X11.Functions.XFetchName(info.Display, window, ref windowName);
+                    //    if (windowName == IntPtr.Zero)
+                    //        continue;
+                    //    string localName = Marshal.PtrToStringAuto(windowName);
+                    //    if (localName.ToLower().Contains(name))
+                    //    {
+                    //        object o;
+                    //        theHost.getData(eGetData.GetScaleFactors, String.Empty, screen.ToString(), out o);
+                    //        if (o == null)
+                    //            return false;
+                    //        PointF scale = (PointF)o;
+                    //        IntPtr _atom_net_wm_state = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE", false);
+                    //        IntPtr _atom_net_wm_state_maximized_horizontal = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_HORZ", false);
+                    //        IntPtr _atom_net_wm_state_maximized_vertical = OpenMobile.Platform.X11.Functions.XInternAtom(info.Display, "_NET_WM_STATE_MAXIMIZED_VERT", false);
+                    //        OpenMobile.Platform.X11.X11WindowInfo winInf = new OpenMobile.Platform.X11.X11WindowInfo(window, info);
+                    //        OpenMobile.Platform.X11.Functions.SendNetWMMessage(winInf, _atom_net_wm_state, new IntPtr(0), _atom_net_wm_state_maximized_horizontal, _atom_net_wm_state_maximized_vertical);
+                    //        OpenMobile.Platform.X11.Functions.XRaiseWindow(info.Display, window);
+                    //        OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, window, (int)(position.Width * scale.X), (int)(position.Height * scale.Y));
+                    //        OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, window, info.WindowHandle, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
+                    //        OpenMobile.Platform.X11.Functions.XMoveWindow(info.Display, window, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0));
+                    //        lastHandle[screen].handle = window;
+                    //        lastHandle[screen].position = position;
+                    //        return true;
+                    //    }
+                    //}
                 }
 #endif
             return false;
@@ -220,7 +223,7 @@ namespace OpenMobile.Framework
             if (function == eFunction.RenderingWindowResized)
             {
 #if WINDOWS
-                if (Configuration.RunningOnWindows)
+                if (OpenTK.Configuration.RunningOnWindows)
                 {
                     if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
                     {
@@ -239,19 +242,20 @@ namespace OpenMobile.Framework
 #if WINDOWS
                 else
 #endif
-                    if (Configuration.RunningOnX11)
+                    if (OpenTK.Configuration.RunningOnX11)
                     {
-                        if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
-                        {
-                            int screen = int.Parse(OpenMobile.helperFunctions.Params.GetParam<string>(args, 0));
-                            object o;
-                            theHost.getData(eGetData.GetScaleFactors, String.Empty, OpenMobile.helperFunctions.Params.GetParam<string>(args, 0), out o);
-                            if (o == null)
-                                return;
-                            OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
-                            PointF scale = (PointF)o;
-                            OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, lastHandle[screen].handle, (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y));
-                        }
+                        // TODO: Fix linux support
+                        //if (OpenMobile.helperFunctions.Params.IsParamsValid(args, 1))
+                        //{
+                        //    int screen = int.Parse(OpenMobile.helperFunctions.Params.GetParam<string>(args, 0));
+                        //    object o;
+                        //    theHost.getData(eGetData.GetScaleFactors, String.Empty, OpenMobile.helperFunctions.Params.GetParam<string>(args, 0), out o);
+                        //    if (o == null)
+                        //        return;
+                        //    OpenTK.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
+                        //    PointF scale = (PointF)o;
+                        //    OpenMobile.Platform.X11.Functions.XResizeWindow(info.Display, lastHandle[screen].handle, (int)(lastHandle[screen].position.Width * scale.X), (int)(lastHandle[screen].position.Height * scale.Y));
+                        //}
                     }
 #endif
             }
@@ -269,7 +273,7 @@ namespace OpenMobile.Framework
                 if (lastHandle[screen].handle == IntPtr.Zero)
                     return false;
 #if WINDOWS
-                if (Configuration.RunningOnWindows)
+                if (OpenTK.Configuration.RunningOnWindows)
                 {
                     try
                     {
@@ -288,12 +292,12 @@ namespace OpenMobile.Framework
 #if WINDOWS
                 else
 #endif
-                    if (Configuration.RunningOnX11)
+                    if (OpenTK.Configuration.RunningOnX11)
                     {
-                        OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
-                        OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
-                        lastHandle[screen].handle = IntPtr.Zero;
-                        return true;
+                        //OpenMobile.Platform.X11.X11WindowInfo info = (OpenMobile.Platform.X11.X11WindowInfo)theHost.GetWindowHandle(screen);
+                        //OpenMobile.Platform.X11.Functions.XReparentWindow(info.Display, lastHandle[screen].handle, info.RootWindow, 0, 10);
+                        //lastHandle[screen].handle = IntPtr.Zero;
+                        //return true;
                     }
 #endif
             }
@@ -305,13 +309,13 @@ namespace OpenMobile.Framework
         /// <returns></returns>
         public static string getOS()
         {
-            if (Configuration.RunningOnWindows)
+            if (OpenTK.Configuration.RunningOnWindows)
                 return "Windows";
-            else if (Configuration.RunningOnMacOS)
+            else if (OpenTK.Configuration.RunningOnMacOS)
                 return "Mac OSX";
-            else if (Configuration.RunningOnLinux)
+            else if (OpenTK.Configuration.RunningOnLinux)
                 return "Linux";
-            else if (Configuration.RunningOnUnix)
+            else if (OpenTK.Configuration.RunningOnUnix)
                 return "Unix";
             else
                 return "Unknown";

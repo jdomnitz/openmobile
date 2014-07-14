@@ -88,8 +88,8 @@ namespace OMOpenGLtest
 
             // Create a target window
             OMTargetWindow VideoWindow = new OMTargetWindow("VideoWindow", 150, OM.Host.ClientArea[0].Top, OM.Host.ClientArea[0].Right - 180, OM.Host.ClientArea[0].Height-20);
-            VideoWindow.OnWindowCreated += new OMTargetWindow.WindowArgs(VideoWindow_OnWindowCreated);
-            VideoWindow.OnWindowDisposed += new OMTargetWindow.WindowArgs(VideoWindow_OnWindowDisposed);
+            //VideoWindow.OnWindowCreated += new OMTargetWindow.WindowArgs(VideoWindow_OnWindowCreated);
+            //VideoWindow.OnWindowDisposed += new OMTargetWindow.WindowArgs(VideoWindow_OnWindowDisposed);
             VideoWindow.OnWindowCovered += new ControlEventHandler(VideoWindow_OnWindowCovered);
             VideoWindow.OnWindowUncovered += new ControlEventHandler(VideoWindow_OnWindowUncovered);
             VideoWindow.OnClick += new userInteraction(VideoWindow_OnClick);
@@ -146,10 +146,10 @@ namespace OMOpenGLtest
 
         #region VideoWindow events
 
-        void VideoWindow_OnWindowDisposed(OMTargetWindow sender, int screen, GameWindow window, IntPtr handle)
-        {
-            Players[screen].Dispose();
-        }
+        //void VideoWindow_OnWindowDisposed(OMTargetWindow sender, int screen, GameWindow window, IntPtr handle)
+        //{
+        //    Players[screen].Dispose();
+        //}
 
         void VideoWindow_OnClick(OMControl sender, int screen)
         {
@@ -163,49 +163,49 @@ namespace OMOpenGLtest
             }
         }
 
-        void VideoWindow_OnWindowCreated(OMTargetWindow sender, int screen, GameWindow window, IntPtr handle)
-        {
+        //void VideoWindow_OnWindowCreated(OMTargetWindow sender, int screen, GameWindow window, IntPtr handle)
+        //{
 
-            mPlayer _mPlayer = new mPlayer();
-            _mPlayer.AudioMode = MPlayerAudioModeName.DirectSound;
-            _mPlayer.VideoMode = MPlayerVideoModeName.GL;
-            _mPlayer.WindowHandle = handle;
+        //    mPlayer _mPlayer = new mPlayer();
+        //    _mPlayer.AudioMode = MPlayerAudioModeName.DirectSound;
+        //    _mPlayer.VideoMode = MPlayerVideoModeName.GL;
+        //    _mPlayer.WindowHandle = handle;
             
-            // Save a reference to screen number
-            _mPlayer.Tag = sender; 
+        //    // Save a reference to screen number
+        //    _mPlayer.Tag = sender; 
 
-            // Set disc player to use with mPlayer
-            _mPlayer.DiscDevice = "g:";
+        //    // Set disc player to use with mPlayer
+        //    _mPlayer.DiscDevice = "g:";
 
-            if (screen == 0)
-                _mPlayer.SetSyncMaster(OM.Host.ScreenCount);
-            else
-            {
-                _mPlayer.SetSyncSlave(screen);
-                _mPlayer.AudioDevice = null;
-            }
+        //    if (screen == 0)
+        //        _mPlayer.SetSyncMaster(OM.Host.ScreenCount);
+        //    else
+        //    {
+        //        _mPlayer.SetSyncSlave(screen);
+        //        _mPlayer.AudioDevice = null;
+        //    }
 
-            // Players audiodevice follows zone
-            AudioDevice audioDevice = BuiltInComponents.Host.ZoneHandler.GetActiveZone(screen).AudioDevice;
-            if (!audioDevice.IsDefault)
-                _mPlayer.AudioDevice = audioDevice.Name;
+        //    // Players audiodevice follows zone
+        //    AudioDevice audioDevice = BuiltInComponents.Host.ZoneHandler.GetActiveZone(screen).AudioDevice;
+        //    if (!audioDevice.IsDefault)
+        //        _mPlayer.AudioDevice = audioDevice.Name;
 
-            // Connect events
-            _mPlayer.OnPlaybackStarted += new mPlayer.PlayerEventHandler(_mPlayer_OnPlaybackStarted);
-            _mPlayer.OnPlaybackStopped += new mPlayer.PlayerEventHandler(_mPlayer_OnPlaybackStopped);
-            _mPlayer.OnPlaybackPaused += new mPlayer.PlayerEventHandler(_mPlayer_OnPlaybackPaused);
-            _mPlayer.OnAudioPresent += new mPlayer.PlayerEventHandler(_mPlayer_OnAudioPresent);
-            _mPlayer.OnVideoPresent += new mPlayer.PlayerEventHandler(_mPlayer_OnVideoPresent);
-            _mPlayer.OnMediaInfoUpdated += new mPlayer.PlayerEventHandler(_mPlayer_OnMediaInfoUpdated);
-            _mPlayer.OnStartupCompleted += new mPlayer.PlayerEventHandler(_mPlayer_OnStartupCompleted);
+        //    // Connect events
+        //    _mPlayer.OnPlaybackStarted += new mPlayer.PlayerEventHandler(_mPlayer_OnPlaybackStarted);
+        //    _mPlayer.OnPlaybackStopped += new mPlayer.PlayerEventHandler(_mPlayer_OnPlaybackStopped);
+        //    _mPlayer.OnPlaybackPaused += new mPlayer.PlayerEventHandler(_mPlayer_OnPlaybackPaused);
+        //    _mPlayer.OnAudioPresent += new mPlayer.PlayerEventHandler(_mPlayer_OnAudioPresent);
+        //    _mPlayer.OnVideoPresent += new mPlayer.PlayerEventHandler(_mPlayer_OnVideoPresent);
+        //    _mPlayer.OnMediaInfoUpdated += new mPlayer.PlayerEventHandler(_mPlayer_OnMediaInfoUpdated);
+        //    _mPlayer.OnStartupCompleted += new mPlayer.PlayerEventHandler(_mPlayer_OnStartupCompleted);
 
-            _mPlayer.Start();
+        //    _mPlayer.Start();
 
-            lock (Players)
-            {
-                Players.Add(screen, _mPlayer);
-            }
-        }
+        //    lock (Players)
+        //    {
+        //        Players.Add(screen, _mPlayer);
+        //    }
+        //}
 
         #endregion
 

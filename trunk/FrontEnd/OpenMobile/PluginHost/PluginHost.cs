@@ -89,7 +89,7 @@ namespace OpenMobile
         /// <summary>
         /// Amount of active screens
         /// </summary>
-        private static int _ScreenCount = DisplayDevice.AvailableDisplays.Count;
+        private static int _ScreenCount = OpenTK.DisplayDevice.AvailableDisplays.Count;
 
         /// <summary>
         /// The amount of available audio devices (instances)
@@ -390,10 +390,10 @@ namespace OpenMobile
         /// </summary>
         public void LateInit()
         {            
-            // Raise screen orientation event in case it differs from what we expected
-            for (int i = 0; i < ScreenCount; i++)
-                if (!DisplayDevice.AvailableDisplays[i].Landscape)
-                    raiseSystemEvent(eFunction.screenOrientationChanged, i.ToString(), "Portrait", string.Empty);
+            //// Raise screen orientation event in case it differs from what we expected
+            //for (int i = 0; i < ScreenCount; i++)
+            //    if (!OpenTK.DisplayDevice.AvailableDisplays[i].Landscape)
+            //        raiseSystemEvent(eFunction.screenOrientationChanged, i.ToString(), "Portrait", string.Empty);
 
             // Initialize device arrays
             currentPlaylist = new List<mediaInfo>[AudioDeviceCount];
@@ -879,7 +879,7 @@ namespace OpenMobile
         {
             if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
                 return (IntPtr)(-1); //Out of bounds
-            return Core.RenderingWindows[screen].WindowHandle;
+            return Core.RenderingWindows[screen].WindowInfo.Handle;
         }
 
         /// <summary>
@@ -1466,9 +1466,9 @@ namespace OpenMobile
         /// <param name="e"></param>
         private void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
         {
-            if (_ScreenCount != DisplayDevice.AvailableDisplays.Count)
+            if (_ScreenCount != OpenTK.DisplayDevice.AvailableDisplays.Count)
             {
-                if (_ScreenCount < DisplayDevice.AvailableDisplays.Count)
+                if (_ScreenCount < OpenTK.DisplayDevice.AvailableDisplays.Count)
                 {
                     // TODO : Better handling of screen added / removed
                     raiseSystemEvent(eFunction.screenAdded, String.Empty, String.Empty, String.Empty);
@@ -1506,7 +1506,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="Screen"></param>
         /// <param name="windowState"></param>
-        public void SetWindowState(int Screen, WindowState windowState)
+        public void SetWindowState(int Screen, OpenTK.WindowState windowState)
         {
             Core.RenderingWindows[Screen].WindowState = windowState;
         }
@@ -1515,7 +1515,7 @@ namespace OpenMobile
         /// Sets the windowstate (maximized/minimized) for all screens
         /// </summary>
         /// <param name="windowState"></param>
-        public void SetAllWindowState(WindowState windowState)
+        public void SetAllWindowState(OpenTK.WindowState windowState)
         {
             for (int i = 0; i < _ScreenCount; i++)
                 Core.RenderingWindows[i].WindowState = windowState;
@@ -1691,7 +1691,7 @@ namespace OpenMobile
                     {
                         ProcessStartInfo info = Process.GetCurrentProcess().StartInfo;
                         info.FileName = Process.GetCurrentProcess().Modules[0].FileName;
-                        if (Core.RenderingWindows[0].WindowState == WindowState.Fullscreen)
+                        if (Core.RenderingWindows[0].WindowState == OpenTK.WindowState.Fullscreen)
                             info.Arguments = "-fullscreen";
                         Core.RenderingWindows[0].Exit();
                         Process.Start(info);
@@ -2228,7 +2228,7 @@ namespace OpenMobile
                 case eFunction.minimize:
                     if (int.TryParse(arg, out ret))
                     {
-                        Core.RenderingWindows[ret].WindowState = WindowState.Minimized;
+                        Core.RenderingWindows[ret].WindowState = OpenTK.WindowState.Minimized;
                         return true;
                     }
                     return false;
@@ -2237,10 +2237,10 @@ namespace OpenMobile
                 case eFunction.ToggleFullscreen:
                      if (int.TryParse(arg, out ret))
                     {
-                        if (Core.RenderingWindows[ret].WindowState != WindowState.Fullscreen)
-                            Core.RenderingWindows[ret].WindowState = WindowState.Fullscreen;
+                        if (Core.RenderingWindows[ret].WindowState != OpenTK.WindowState.Fullscreen)
+                            Core.RenderingWindows[ret].WindowState = OpenTK.WindowState.Fullscreen;
                         else
-                            Core.RenderingWindows[ret].WindowState = WindowState.Normal;
+                            Core.RenderingWindows[ret].WindowState = OpenTK.WindowState.Normal;
                         return true;
                     }
                     return false;
@@ -3202,8 +3202,6 @@ namespace OpenMobile
                         Core.RenderingWindows[i].PaintIdentity();
                 else if (message == "MakeCurrent")
                     Core.RenderingWindows[0].MakeCurrent();
-                else if (message == "KillCurrent")
-                    Core.RenderingWindows[0].MakeCurrent(null);
                 return true;
             }
 
@@ -4253,46 +4251,6 @@ namespace OpenMobile
                             ret[i] = ret[i].Replace(Path.Combine(Application.StartupPath, "Skins", String.Empty), String.Empty);
                         data = ret;
                         return;
-
-                    // Get a list of available keyboards
-                    case eGetData.GetAvailableKeyboards:
-                        data = InputRouter.Keyboards;
-                        return;
-
-                    // Get a list of available mice
-                    case eGetData.GetAvailableMice:
-                        data = InputRouter.Mice;
-                        return;
-
-                    // Get a list of mapped keyboards
-                    case eGetData.GetMappedKeyboards:
-                        data = InputRouter.KeyboardsMapped;
-                        return;
-
-                    // Get a list of unmapped keyboards
-                    case eGetData.GetUnMappedKeyboards:
-                        data = InputRouter.KeyboardsUnMapped;
-                        return;
-
-                    // Get a list of mapped mice
-                    case eGetData.GetMappedMice:
-                        data = InputRouter.MiceMapped;
-                        return;
-
-                    // Get a list of unmapped mice
-                    case eGetData.GetUnMappedMice:
-                        data = InputRouter.MiceUnMapped;
-                        return;
-
-                    // Detect a mouse device
-                    case eGetData.GetMouseDetectedUnit:
-                        data = InputRouter.DetectMouseDevice();
-                        return;
-
-                    // Detect a keyboard device
-                    case eGetData.GetKeyboardDetectedUnit:
-                        data = InputRouter.DetectKeyboardDevice();
-                        return;
                 }
             }
             catch (Exception e)
@@ -4546,38 +4504,6 @@ namespace OpenMobile
                                 if (currentTunedContent[zone.AudioDevice.Instance] != null)
                                     data = currentTunedContent[zone.AudioDevice.Instance].getSupportedBands(zone);
                             }
-                        }
-                        return;
-
-                    // Gets a list of available mice units for a specific screen
-                    case eGetData.GetMiceUnitsForScreen:
-                        {
-                            if (int.TryParse(param, out ret) == true)
-                                data = InputRouter.GetMiceDeviceListForScreen(ret);
-                        }
-                        return;
-
-                    // Gets a list of available keyboard units for a specific screen
-                    case eGetData.GetKeyboardUnitsForScreen:
-                        {
-                            if (int.TryParse(param, out ret) == true)
-                                data = InputRouter.GetKeyboardsDeviceListForScreen(ret);
-                        }
-                        return;
-
-                    // Gets the currently mapped keyboard for a specific screen
-                    case eGetData.GetKeyboardCurrentUnitForScreen:
-                        {
-                            if (int.TryParse(param, out ret) == true)
-                                data = InputRouter.GetKeyboardsCurrentDeviceForScreen(ret);
-                        }
-                        return;
-
-                    // Gets the currently mapped mice for a specific screen
-                    case eGetData.GetMiceCurrentUnitForScreen:
-                        {
-                            if (int.TryParse(param, out ret) == true)
-                                data = InputRouter.GetMiceDeviceCurrentForScreen(ret);
                         }
                         return;
                 }
@@ -4857,7 +4783,7 @@ namespace OpenMobile
         /// <returns></returns>
         public RenderingWindowData GetRenderingWindowData(int screen)
         {
-            return new RenderingWindowData(Core.RenderingWindows[screen].ClientLocation, Core.RenderingWindows[screen].Size, Core.RenderingWindows[screen].ScaleFactors);
+            return new RenderingWindowData(Core.RenderingWindows[screen].Location.ToOpenMobilePoint(), Core.RenderingWindows[screen].Size.ToOpenMobileSize(), Core.RenderingWindows[screen].ScaleFactors);
         }
 
         public iRenderingWindow RenderingWindowInterface(int screen)

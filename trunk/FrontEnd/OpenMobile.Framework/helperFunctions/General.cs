@@ -27,6 +27,7 @@ using OpenMobile.Graphics;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
+using OpenTK;
 
 namespace OpenMobile.helperFunctions
 {
@@ -810,14 +811,14 @@ namespace OpenMobile.helperFunctions
                 else
                     return true;
                 bool result = true;
-                if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
-                    if (!Configuration.RunningOnEmbedded) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
+                //    if (!Configuration.RunningOnEmbedded) result = false;
                 if ((OSConfFlags & OSConfigurationFlags.Linux) == OSConfigurationFlags.Linux)
                     if (!Configuration.RunningOnLinux) result = false;
                 if ((OSConfFlags & OSConfigurationFlags.MacOS) == OSConfigurationFlags.MacOS)
                     if (!Configuration.RunningOnMacOS) result = false;
-                if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
-                    if (!Configuration.TabletPC) result = false;
+                //if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
+                //    if (!Configuration.TabletPC) result = false;
                 if ((OSConfFlags & OSConfigurationFlags.Unix) == OSConfigurationFlags.Unix)
                     if (!Configuration.RunningOnUnix) result = false;
                 if ((OSConfFlags & OSConfigurationFlags.Windows) == OSConfigurationFlags.Windows)
@@ -844,14 +845,14 @@ namespace OpenMobile.helperFunctions
                     return true;
 
                 bool result = true;
-                if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
-                    if (Configuration.RunningOnEmbedded) result = true;
+                //if ((OSConfFlags & OSConfigurationFlags.Embedded) == OSConfigurationFlags.Embedded)
+                //    if (Configuration.RunningOnEmbedded) result = true;
                 if ((OSConfFlags & OSConfigurationFlags.Linux) == OSConfigurationFlags.Linux)
                     if (Configuration.RunningOnLinux) result = true;
                 if ((OSConfFlags & OSConfigurationFlags.MacOS) == OSConfigurationFlags.MacOS)
                     if (Configuration.RunningOnMacOS) result = true;
-                if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
-                    if (Configuration.TabletPC) result = true;
+                //if ((OSConfFlags & OSConfigurationFlags.TabletPC) == OSConfigurationFlags.TabletPC)
+                //    if (Configuration.TabletPC) result = true;
                 if ((OSConfFlags & OSConfigurationFlags.Unix) == OSConfigurationFlags.Unix)
                     if (Configuration.RunningOnUnix) result = true;
                 if ((OSConfFlags & OSConfigurationFlags.Windows) == OSConfigurationFlags.Windows)
@@ -870,13 +871,13 @@ namespace OpenMobile.helperFunctions
                 // Get OS Configuration attribute flags
                 OSConfigurationFlags OSConfFlags = OSConfigurationFlags.Any; // Default
 
-                if (Configuration.RunningOnEmbedded) OSConfFlags |= OSConfigurationFlags.Embedded;
+                //if (Configuration.RunningOnEmbedded) OSConfFlags |= OSConfigurationFlags.Embedded;
                 if (Configuration.RunningOnLinux) OSConfFlags |= OSConfigurationFlags.Linux;
                 if (Configuration.RunningOnMacOS) OSConfFlags |= OSConfigurationFlags.MacOS;
                 if (Configuration.RunningOnUnix) OSConfFlags |= OSConfigurationFlags.Unix;
                 if (Configuration.RunningOnWindows) OSConfFlags |= OSConfigurationFlags.Windows;
                 if (Configuration.RunningOnX11) OSConfFlags |= OSConfigurationFlags.X11;
-                if (Configuration.TabletPC) OSConfFlags |= OSConfigurationFlags.TabletPC;
+                //if (Configuration.TabletPC) OSConfFlags |= OSConfigurationFlags.TabletPC;
 
                 return OSConfFlags;
             }

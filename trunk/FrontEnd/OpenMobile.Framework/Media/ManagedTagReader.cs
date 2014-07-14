@@ -130,7 +130,7 @@ namespace OpenMobile.Media
         public static OImage getFileThumbnail(string path, int size)
         {
 #if WINDOWS
-            if (Configuration.RunningOnWindows)
+            if (OpenTK.Configuration.RunningOnWindows)
             {
                 return IconExtractor.GetFileIcon(path, size);
             }
@@ -139,7 +139,7 @@ namespace OpenMobile.Media
 #if WINDOWS
             else
 #endif
-                if (Configuration.RunningOnLinux)
+                if (OpenTK.Configuration.RunningOnLinux)
                 {
                     return GnomeIcon.GetFileIcon(path);
                 }

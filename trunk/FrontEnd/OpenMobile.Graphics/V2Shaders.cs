@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenMobile.Graphics.OpenGL;
-using OpenMobile.Math;
+using OpenTK.Graphics.OpenGL;
+using OpenTK;
 
 namespace OpenMobile.Graphics
 {

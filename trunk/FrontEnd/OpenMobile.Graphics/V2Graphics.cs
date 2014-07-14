@@ -21,9 +21,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using OpenMobile.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 using System.Drawing.Imaging;
-using OpenMobile.Math;
+using OpenTK;
 
 namespace OpenMobile.Graphics
 {
@@ -104,7 +104,7 @@ namespace OpenMobile.Graphics
                         }
                         catch (InvalidOperationException) { return false; }
                         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-                                        OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                                        OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
 
@@ -116,7 +116,7 @@ namespace OpenMobile.Graphics
                         }
                         catch (InvalidOperationException) { return false; }
                         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
-                                        OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                                        OpenTK.Graphics.OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
 
@@ -136,7 +136,7 @@ namespace OpenMobile.Graphics
                         }
                         catch (InvalidOperationException) { return false; }
                         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
-                                        OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                                        OpenTK.Graphics.OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         tmp.UnlockBits(data);
                         tmp.Dispose();
                         break;
@@ -169,7 +169,7 @@ namespace OpenMobile.Graphics
         public void Clear(Color color)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.ClearColor(color);
+            GL.ClearColor(color.ToSystemColor());
         }
         private Rectangle _clip = NoClip;
         public Rectangle Clip
@@ -210,8 +210,8 @@ namespace OpenMobile.Graphics
 
             // Move base point to 0,0,0
             _3D_Translate(0, 0, 0);
-            
-            GL.Color4(pen.Color);
+
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
 
             float yrad = height / 2F;
@@ -279,13 +279,13 @@ namespace OpenMobile.Graphics
         }
         public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle)
         {
-            DrawImage(image, X, Y, Width, Height, transparency, angle, Math.Vector3.Zero);
+            DrawImage(image, X, Y, Width, Height, transparency, angle, Vector3.Zero);
         }
-        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation)
+        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Vector3 rotation)
         {
             DrawImage(image, X, Y, 0, Width, Height, transparency, angle, rotation, null);
         }
-        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData)
+        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Vector3 rotation, ReflectionsData reflectionData)
         {
             if (image == null)
                 return;
@@ -616,7 +616,7 @@ namespace OpenMobile.Graphics
             _3D_Translate(0, 0, 0);
 
             GL.LineWidth(pen.Width);
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.VertexPointer<Point>(2, VertexPointerType.Int, 0, points);
             GL.DrawArrays(BeginMode.LineStrip, 0, points.Length);
@@ -636,7 +636,7 @@ namespace OpenMobile.Graphics
 
             GL.LineWidth(pen.Width);
             int[] arr = new int[] { x1, y1, x2, y2 };
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.VertexPointer(2, VertexPointerType.Int, 0, arr);
             GL.DrawArrays(BeginMode.Lines, 0, 2);
@@ -659,7 +659,7 @@ namespace OpenMobile.Graphics
 
             GL.LineWidth(pen.Width);
             float[] arr = new float[] { x1, y1, x2, y2 };
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.VertexPointer(2, VertexPointerType.Float, 0, arr);
             GL.DrawArrays(BeginMode.Lines, 0, 2);
@@ -681,7 +681,7 @@ namespace OpenMobile.Graphics
             // Move base point to 0,0,0
             _3D_Translate(0, 0, 0);
 
-            GL.Color4(brush.Color);
+            GL.Color4(brush.Color.ToSystemColor());
             GL.Begin(BeginMode.Polygon);
             for (int i = 0; i < points.Length; i++)
                 GL.Vertex2(points[i].X, points[i].Y);
@@ -728,7 +728,7 @@ namespace OpenMobile.Graphics
 
             #endregion
 
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             //GL.LineWidth(pen.Width);
 
              GL.Begin(BeginMode.QuadStrip);
@@ -820,7 +820,7 @@ namespace OpenMobile.Graphics
             p[10, 1] = new PointF(x + pen.Width, y + height - radius - pen.Width);
             p[11, 1] = new PointF(x + pen.Width, y + radius + pen.Width);
 
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             //GL.LineWidth(pen.Width);
 
             int steps = 12;
@@ -958,7 +958,7 @@ namespace OpenMobile.Graphics
             GL.PushMatrix();
 
             // Set color
-            GL.Color4(brush.Color);
+            GL.Color4(brush.Color.ToSystemColor());
 
             // Move base point to 0,0,0
             _3D_Translate(0, 0, 0);
@@ -1005,7 +1005,7 @@ namespace OpenMobile.Graphics
             // Move base point to 0,0,0
             _3D_Translate(0, 0, 0);
 
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
 
             float yrad = height / 2F;
@@ -1040,7 +1040,7 @@ namespace OpenMobile.Graphics
 
             float radius = System.Math.Min(width, height) / 2f;
 
-            GL.Color4(color);
+            GL.Color4(color.ToSystemColor());
             GL.PointSize(radius * 2);
 
             GL.Begin(BeginMode.Points);
@@ -1072,10 +1072,10 @@ namespace OpenMobile.Graphics
             for (int i = 0; i < gradient.Count; i++)
             {
                 GL.Begin(BeginMode.Quads);
-                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV1.Color.A/255.0f) * opacity), gradient[i].ColorPointV1.Color)); GL.Vertex3(gradient[i].ColorPointV1.Point);
-                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV2.Color.A / 255.0f) * opacity), gradient[i].ColorPointV2.Color)); GL.Vertex3(gradient[i].ColorPointV2.Point);
-                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV3.Color.A/255.0f) * opacity), gradient[i].ColorPointV3.Color)); GL.Vertex3(gradient[i].ColorPointV3.Point);
-                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV4.Color.A / 255.0f) * opacity), gradient[i].ColorPointV4.Color)); GL.Vertex3(gradient[i].ColorPointV4.Point);
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV1.Color.A / 255.0f) * opacity), gradient[i].ColorPointV1.Color).ToSystemColor()); GL.Vertex3(gradient[i].ColorPointV1.Point.ToOpenTKVector3());
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV2.Color.A / 255.0f) * opacity), gradient[i].ColorPointV2.Color).ToSystemColor()); GL.Vertex3(gradient[i].ColorPointV2.Point.ToOpenTKVector3());
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV3.Color.A / 255.0f) * opacity), gradient[i].ColorPointV3.Color).ToSystemColor()); GL.Vertex3(gradient[i].ColorPointV3.Point.ToOpenTKVector3());
+                GL.Color4(Color.FromArgb((int)(255 * (gradient[i].ColorPointV4.Color.A / 255.0f) * opacity), gradient[i].ColorPointV4.Color).ToSystemColor()); GL.Vertex3(gradient[i].ColorPointV4.Point.ToOpenTKVector3());
                 GL.End();                
             }
 
@@ -1100,13 +1100,13 @@ namespace OpenMobile.Graphics
             GL.Scale(width2, height2, 1);
 
             GL.Begin(BeginMode.Quads);
-            GL.Color4(brush.ColorData_C1);
+            GL.Color4(brush.ColorData_C1.ToSystemColor());
             GL.Vertex3(-1, -1, 0); //TOP-LEFT
-            GL.Color4(brush.ColorData_C2);
+            GL.Color4(brush.ColorData_C2.ToSystemColor());
             GL.Vertex3(1, -1, 0); //TOP-RIGHT
-            GL.Color4(brush.ColorData_C3);
+            GL.Color4(brush.ColorData_C3.ToSystemColor());
             GL.Vertex3(1, 1, 0); //BOTTOM-RIGHT
-            GL.Color4(brush.ColorData_C4);
+            GL.Color4(brush.ColorData_C4.ToSystemColor());
             GL.Vertex3(-1, 1, 0); //BOTTOM-LEFT
             GL.End();
 
@@ -1159,7 +1159,7 @@ namespace OpenMobile.Graphics
             p[11] = new PointF(x, y + radius);
 
             // Set color
-            GL.Color4(color);
+            GL.Color4(color.ToSystemColor());
 
             #region Draw rectangles
 

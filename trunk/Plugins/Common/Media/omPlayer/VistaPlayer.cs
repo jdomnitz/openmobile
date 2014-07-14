@@ -435,32 +435,32 @@ namespace OMPlayer
         }
         public bool SetVideoVisible(Zone zone, bool visible)
         {
-            // Errorcheck
-            if (zone == null) return false;
-            if (zone.AudioDevice.Instance < 0) return false;
+            //// Errorcheck
+            //if (zone == null) return false;
+            //if (zone.AudioDevice.Instance < 0) return false;
 
-            checkInstance(zone);
-            if (player[zone.AudioDevice.Instance].m_pVideoDisplay == null)
-                return false;
-            bool currentlyVisible = OpenMobile.Platform.Windows.Functions.IsWindowVisible(player[zone.AudioDevice.Instance].drain);
-            if (visible == currentlyVisible)
-                return false;
-            if (visible)
-            {
-                if (visible && !player[zone.AudioDevice.Instance].fullscreen)
-                {
-                    player[zone.AudioDevice.Instance].fullscreen = true;
-                    player[zone.AudioDevice.Instance].Resize();
-                    return true;
-                }
-                OnMediaEvent(eFunction.showVideoWindow, zone, "");
-                return OpenMobile.Platform.Windows.Functions.ShowWindow(player[zone.AudioDevice.Instance].drain, OpenMobile.Platform.Windows.ShowWindowCommand.SHOW);
-            }
-            else if (OpenMobile.Platform.Windows.Functions.ShowWindow(player[zone.AudioDevice.Instance].drain, OpenMobile.Platform.Windows.ShowWindowCommand.HIDE))
-            {
-                OnMediaEvent(eFunction.hideVideoWindow, zone, "");
-                return true;
-            }
+            //checkInstance(zone);
+            //if (player[zone.AudioDevice.Instance].m_pVideoDisplay == null)
+            //    return false;
+            //bool currentlyVisible = OpenMobile.Platform.Windows.Functions.IsWindowVisible(player[zone.AudioDevice.Instance].drain);
+            //if (visible == currentlyVisible)
+            //    return false;
+            //if (visible)
+            //{
+            //    if (visible && !player[zone.AudioDevice.Instance].fullscreen)
+            //    {
+            //        player[zone.AudioDevice.Instance].fullscreen = true;
+            //        player[zone.AudioDevice.Instance].Resize();
+            //        return true;
+            //    }
+            //    OnMediaEvent(eFunction.showVideoWindow, zone, "");
+            //    return OpenMobile.Platform.Windows.Functions.ShowWindow(player[zone.AudioDevice.Instance].drain, OpenMobile.Platform.Windows.ShowWindowCommand.SHOW);
+            //}
+            //else if (OpenMobile.Platform.Windows.Functions.ShowWindow(player[zone.AudioDevice.Instance].drain, OpenMobile.Platform.Windows.ShowWindowCommand.HIDE))
+            //{
+            //    OnMediaEvent(eFunction.hideVideoWindow, zone, "");
+            //    return true;
+            //}
             return false;
         }
         public bool play(Zone zone)
@@ -882,45 +882,47 @@ namespace OMPlayer
             */
             public int Resize()
             {
-                if (fullscreen == true)
-                {
-                    OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
-                    OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)VistaPlayer.theHost.GetWindowHandle(zone.Screen), ref info);
-                    if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
-                        return ResizeVideo(0, 0, info.Window.Width - (info.Window.Width - info.Client.Width), info.Window.Height - (info.Window.Height - info.Client.Height));
-                    else
-                        return ResizeVideo(0, 0, info.Window.Width + 1, info.Window.Height);
-                }
-                else
-                {
-                    object o;
-                    theHost.getData(eGetData.GetScaleFactors, "", zone.Screen.ToString(), out o);
-                    if (o == null)
-                        return -1;
-                    PointF sf = (PointF)o;
-                    Rectangle pos = theHost.GetVideoPosition(zone.Screen);
-                    return ResizeVideo((int)(pos.Left * sf.X), (int)(pos.Top * sf.Y), (int)(pos.Width * sf.X), (int)(pos.Height * sf.Y));
-                }
+                return 0;
+
+                //if (fullscreen == true)
+                //{
+                //    OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
+                //    OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)VistaPlayer.theHost.GetWindowHandle(zone.Screen), ref info);
+                //    if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
+                //        return ResizeVideo(0, 0, info.Window.Width - (info.Window.Width - info.Client.Width), info.Window.Height - (info.Window.Height - info.Client.Height));
+                //    else
+                //        return ResizeVideo(0, 0, info.Window.Width + 1, info.Window.Height);
+                //}
+                //else
+                //{
+                //    object o;
+                //    theHost.getData(eGetData.GetScaleFactors, "", zone.Screen.ToString(), out o);
+                //    if (o == null)
+                //        return -1;
+                //    PointF sf = (PointF)o;
+                //    Rectangle pos = theHost.GetVideoPosition(zone.Screen);
+                //    return ResizeVideo((int)(pos.Left * sf.X), (int)(pos.Top * sf.Y), (int)(pos.Width * sf.X), (int)(pos.Height * sf.Y));
+                //}
             }
             private int ResizeVideo(int x,int y,int width, int height)
             {
-                MFRect rcDest = new MFRect();
-                rcDest.left = 0;
-                rcDest.top = 0;
-                rcDest.right = width;
-                rcDest.bottom = height;
-                if (!OpenMobile.Platform.Windows.Functions.SetWindowPos(drain, IntPtr.Zero, x, y, width, height, OpenMobile.Platform.Windows.SetWindowPosFlags.NOACTIVATE))
-                    return S_False;
-                if (m_pVideoDisplay != null)
-                {
-                    MFVideoNormalizedRect nRect = new MFVideoNormalizedRect();
+                //MFRect rcDest = new MFRect();
+                //rcDest.left = 0;
+                //rcDest.top = 0;
+                //rcDest.right = width;
+                //rcDest.bottom = height;
+                //if (!OpenMobile.Platform.Windows.Functions.SetWindowPos(drain, IntPtr.Zero, x, y, width, height, OpenMobile.Platform.Windows.SetWindowPosFlags.NOACTIVATE))
+                //    return S_False;
+                //if (m_pVideoDisplay != null)
+                //{
+                //    MFVideoNormalizedRect nRect = new MFVideoNormalizedRect();
 
-                    nRect.left = 0;
-                    nRect.right = 1;
-                    nRect.top = 0;
-                    nRect.bottom = 1;
-                    return m_pVideoDisplay.SetVideoPosition(nRect, rcDest);
-                }
+                //    nRect.left = 0;
+                //    nRect.right = 1;
+                //    nRect.top = 0;
+                //    nRect.bottom = 1;
+                //    return m_pVideoDisplay.SetVideoPosition(nRect, rcDest);
+                //}
                 return S_False;
             }
             public bool PlayMovieInWindow(Zone zone, string filename)
@@ -1085,7 +1087,7 @@ namespace OMPlayer
                         OnMediaEvent(eFunction.showVideoWindow, zone, String.Empty);
                         // Create the video renderer.
                         IntPtr rw = (IntPtr)VistaPlayer.theHost.GetWindowHandle(zone.Screen);
-                        OpenMobile.Platform.Windows.Functions.SetParent(drain, rw);
+                        //OpenMobile.Platform.Windows.Functions.SetParent(drain, rw);
                         Resize();
                         sink.Show();
                         hr = MFExtern.MFCreateVideoRendererActivate(drain, out pRendererActivate);
@@ -1297,8 +1299,8 @@ namespace OMPlayer
                     SafeThread.Asynchronous(delegate() { OnMediaEvent(eFunction.nextMedia, zone, String.Empty); }, VistaPlayer.theHost);
                 else
                     stop(false);
-                if (!isAudioOnly)
-                    OpenMobile.Platform.Windows.Functions.ShowWindow(drain, OpenMobile.Platform.Windows.ShowWindowCommand.HIDE);
+                //if (!isAudioOnly)
+                //    OpenMobile.Platform.Windows.Functions.ShowWindow(drain, OpenMobile.Platform.Windows.ShowWindowCommand.HIDE);
             }
 
             private void OnSessionStarted(IMFMediaEvent pEvent)
@@ -1533,7 +1535,7 @@ namespace OMPlayer
             {
                 this.FormBorderStyle = FormBorderStyle.None;
                 this.BackColor = System.Drawing.Color.Black;
-                OpenMobile.Platform.Windows.Functions.ShowCursor(false);
+                //OpenMobile.Platform.Windows.Functions.ShowCursor(false);
 
                 // Ensure handle is created
                 this.Handle.ToInt32();

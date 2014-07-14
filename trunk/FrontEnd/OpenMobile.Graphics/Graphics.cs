@@ -1,4 +1,4 @@
-﻿using OpenMobile.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 using System;
 using System.Drawing.Drawing2D;
@@ -226,10 +226,7 @@ namespace OpenMobile.Graphics
             {
                 if (v2)
                 {
-                    if (Platform.Factory.IsEmbedded)
-                        return "GreenNitrous v2 ES";
-                    else
-                        return "GreenNitrous v2";
+                    return "GreenNitrous v2";
                 }
                 else
                     return "GreenNitrous v1";
@@ -254,10 +251,7 @@ namespace OpenMobile.Graphics
         {
             get
             {
-                if (Platform.Factory.IsEmbedded)
-                    return "OpenGL ES";
-                else
-                    return "OpenGL";
+                return "OpenGL";
             }
         }
 
@@ -441,9 +435,9 @@ namespace OpenMobile.Graphics
         /// <param name="transparency"></param>
         /// <param name="angle"></param>
         /// <param name="rotation"></param>
-        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation)
+        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Vector3 rotation)
         {
-            implementation.DrawImage(image, X, Y, Width, Height, transparency, angle, rotation);
+            implementation.DrawImage(image, X, Y, Width, Height, transparency, angle, rotation.ToOpenTKVector3());
         }
         /// <summary>
         /// Draws an image
@@ -458,9 +452,9 @@ namespace OpenMobile.Graphics
         /// <param name="angle"></param>
         /// <param name="rotation"></param>
         /// <param name="reflectionData"></param>
-        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData)
+        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Vector3 rotation, ReflectionsData reflectionData)
         {
-            implementation.DrawImage(image, X, Y, Z, Width, Height, transparency, angle, rotation, reflectionData);
+            implementation.DrawImage(image, X, Y, Z, Width, Height, transparency, angle, rotation.ToOpenTKVector3(), reflectionData);
         }
         /// <summary>
         /// Draws an image
@@ -498,7 +492,7 @@ namespace OpenMobile.Graphics
         /// <param name="rotation"></param>
         public void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
         {
-            implementation.DrawCube(image, x, y, z, width, height, depth, rotation);
+            implementation.DrawCube(image, x, y, z, width, height, depth, rotation.ToOpenTKVector3());
         }
 
         /// <summary>
@@ -1016,7 +1010,7 @@ namespace OpenMobile.Graphics
         public Graphics(int screen)
         {
             // Initialize scale factors
-            _ScaleFactors = new PointF[DisplayDevice.AvailableDisplays.Count];
+            _ScaleFactors = new PointF[OpenTK.DisplayDevice.AvailableDisplays.Count];
             for (int i = 0; i < _ScaleFactors.Length; i++)
                 _ScaleFactors[i] = new PointF(1, 1);
 
@@ -1035,17 +1029,17 @@ namespace OpenMobile.Graphics
         }
 
         /// <summary>
-        /// Initializes the graphics engine (Selectes the proper rendering methods to use)
+        /// Initializes the graphics engine (Selects the proper rendering methods to use)
         /// </summary>
-        public void Initialize(GameWindow targetWindow, MouseData mouseData)
+        public void Initialize(OpenTK.GameWindow targetWindow, MouseData mouseData)
         {
             #if LINUX
-            if (Platform.Factory.IsEmbedded)
+            if (OpenTK.Configuration.RunningOnAndroid)
             {
-                version = ES11.GL.GetString(OpenMobile.Graphics.ES11.StringName.Version);
+                version = OpenTK.Graphics.ES11.GL.GetString(OpenTK.Graphics.ES11.StringName.Version);
                 v2 = true;
                 implementation = new ESGraphics(screen);
-                renderer = ES11.GL.GetString(OpenMobile.Graphics.ES11.StringName.Renderer);
+                renderer = OpenTK.Graphics.ES11.GL.GetString(OpenTK.Graphics.ES11.StringName.Renderer);
             }
             else
             #endif
@@ -1066,10 +1060,12 @@ namespace OpenMobile.Graphics
                     implementation = new V1Graphics(screen);
                 renderer = GL.GetString(StringName.Renderer);
             }
-            if (Configuration.RunningOnWindows)
+            if (OpenTK.Configuration.RunningOnWindows)
             {
-                IntPtr dc = GetDC(IntPtr.Zero);
-                dpi = GetDeviceCaps(dc, 88) / 96F;
+                // DPI readout is not working due to new security model in .Net4
+                //IntPtr dc = GetDC(IntPtr.Zero);
+                //dpi = GetDeviceCaps(dc, 88) / 96F;
+                dpi = 1;
             }
             implementation.Initialize(screen);
         }
@@ -1656,7 +1652,7 @@ namespace OpenMobile.Graphics
         /// Rotates the graphics
         /// </summary>
         /// <param name="rotation"></param>
-        public void Rotate(Vector3d rotation)
+        public void Rotate(Vector3 rotation)
         {
             Rotate(rotation.X, rotation.Y, rotation.Z);
         }
@@ -1682,7 +1678,7 @@ namespace OpenMobile.Graphics
         /// Scales the graphics
         /// </summary>
         /// <param name="scale"></param>
-        public void Scale(Vector3d scale)
+        public void Scale(Vector3 scale)
         {
             Scale(scale.X, scale.Y, scale.Z);
         }
@@ -1706,9 +1702,9 @@ namespace OpenMobile.Graphics
         /// <param name="cameraOffset">Offsets the camera</param>
         /// <param name="zoom">Zoom level</param>
         /// <param name="activateMatrix">Activates the matrix immediately. NB! This can only be done from the rendering thread</param>
-        public void _3D_ModelView_Set(Vector3d cameraLocation, Vector3d cameraRotation, Vector3d cameraOffset, double zoom, bool activateMatrix)
+        public void _3D_ModelView_Set(Vector3 cameraLocation, Vector3 cameraRotation, Vector3 cameraOffset, double zoom, bool activateMatrix)
         {
-            implementation._3D_ModelView_Set(cameraLocation, cameraRotation, cameraOffset, zoom, activateMatrix);
+            implementation._3D_ModelView_Set(cameraLocation.ToOpenTKVector3d(), cameraRotation.ToOpenTKVector3d(), cameraOffset.ToOpenTKVector3d(), zoom, activateMatrix);
         }
 
         /// <summary>
@@ -1734,30 +1730,30 @@ namespace OpenMobile.Graphics
         public void _3D_ModelView_Set(_3D_Control cameraData)
         {
             // Get current matrix
-            Matrix4d modelView = implementation._3D_ModelViewMatrix;
+            OpenTK.Matrix4d modelView = implementation._3D_ModelViewMatrix;
 
             bool changed = false;
 
             // Rotate camera
-            if (cameraData.CameraRotation != Vector3d.Zero)
+            if (!cameraData.CameraRotation.Equals(Vector3.Zero))
             {
-                modelView *= Matrix4d.CreateRotationX(MathHelper.DegreesToRadians(cameraData.CameraRotation.X));
-                modelView *= Matrix4d.CreateRotationY(MathHelper.DegreesToRadians(cameraData.CameraRotation.Y));
-                modelView *= Matrix4d.CreateRotationZ(MathHelper.DegreesToRadians(cameraData.CameraRotation.Z));
+                modelView *= OpenTK.Matrix4d.CreateRotationX(OpenMobile.Math.MathHelper.DegreesToRadians(cameraData.CameraRotation.X));
+                modelView *= OpenTK.Matrix4d.CreateRotationY(OpenMobile.Math.MathHelper.DegreesToRadians(cameraData.CameraRotation.Y));
+                modelView *= OpenTK.Matrix4d.CreateRotationZ(OpenMobile.Math.MathHelper.DegreesToRadians(cameraData.CameraRotation.Z));
                 changed = true;
             }
 
             // Offset camera
-            if (cameraData.CameraOffset != Vector3d.Zero)
+            if (!cameraData.CameraOffset.Equals(Vector3.Zero))
             {
-                modelView *= Matrix4d.CreateTranslation(cameraData.CameraOffset);
+                modelView *= OpenTK.Matrix4d.CreateTranslation(cameraData.CameraOffset.ToOpenTKVector3d());
                 changed = true;
             }
 
             // Zoom 
             if (cameraData.CameraZoom != 0)
             {
-                modelView *= Matrix4d.Scale(cameraData.CameraZoom);
+                modelView *= OpenTK.Matrix4d.Scale(cameraData.CameraZoom);
                 changed = true;
             }
 
@@ -1769,7 +1765,7 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Sets or gets the modelview matrix
         /// </summary>
-        public Matrix4d _3D_ModelViewMatrix
+        public OpenTK.Matrix4d _3D_ModelViewMatrix
         {
             get
             {
@@ -1785,9 +1781,9 @@ namespace OpenMobile.Graphics
         /// Resets and places the camera at the given location
         /// </summary>
         /// <param name="cameraLocation"></param>
-        public void _3D_ModelView_ResetAndPlaceCamera(Vector3d cameraLocation)
+        public void _3D_ModelView_ResetAndPlaceCamera(Vector3 cameraLocation)
         {
-            implementation._3D_ModelView_ResetAndPlaceCamera(cameraLocation);
+            implementation._3D_ModelView_ResetAndPlaceCamera(cameraLocation.ToOpenTKVector3d());
         }
 
     }
@@ -1907,7 +1903,7 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Control rotation 
         /// </summary>
-        public Vector3d ControlRotation
+        public Vector3 ControlRotation
         {
             get
             {
@@ -1915,18 +1911,15 @@ namespace OpenMobile.Graphics
             }
             set
             {
-                if (this._ControlRotation != value)
-                {
-                    this._ControlRotation = value;
-                }
+                this._ControlRotation = value;
             }
         }
-        private Vector3d _ControlRotation;
+        private Vector3 _ControlRotation;
 
         /// <summary>
         /// Control rotation center
         /// </summary>
-        public Vector3d ControlRotationPoint
+        public Vector3 ControlRotationPoint
         {
             get
             {
@@ -1934,18 +1927,15 @@ namespace OpenMobile.Graphics
             }
             set
             {
-                if (this._ControlRotationPoint != value)
-                {
-                    this._ControlRotationPoint = value;
-                }
+                this._ControlRotationPoint = value;
             }
         }
-        private Vector3d _ControlRotationPoint;
+        private Vector3 _ControlRotationPoint;
 
         /// <summary>
         /// Camera rotation 
         /// </summary>
-        public Vector3d CameraRotation
+        public Vector3 CameraRotation
         {
             get
             {
@@ -1953,18 +1943,15 @@ namespace OpenMobile.Graphics
             }
             set
             {
-                if (this._CameraRotation != value)
-                {
-                    this._CameraRotation = value;
-                }
+                this._CameraRotation = value;
             }
         }
-        private Vector3d _CameraRotation;
+        private Vector3 _CameraRotation;
 
         /// <summary>
         /// Camera offset
         /// </summary>
-        public Vector3d CameraOffset
+        public Vector3 CameraOffset
         {
             get
             {
@@ -1972,13 +1959,10 @@ namespace OpenMobile.Graphics
             }
             set
             {
-                if (this._CameraOffset != value)
-                {
-                    this._CameraOffset = value;
-                }
+                this._CameraOffset = value;
             }
         }
-        private Vector3d _CameraOffset;
+        private Vector3 _CameraOffset;
 
         /// <summary>
         /// Camera Zoom level
@@ -2003,12 +1987,12 @@ namespace OpenMobile.Graphics
         /// Initializes a new set of cameracontrol data
         /// </summary>
         /// <param name="controlRotation"></param>
-        public _3D_Control(Vector3d controlRotation)
+        public _3D_Control(Vector3 controlRotation)
         {
             _ControlRotation = controlRotation;
-            _ControlRotationPoint = Vector3d.Zero;
-            _CameraRotation = Vector3d.Zero;
-            _CameraOffset = Vector3d.Zero;
+            _ControlRotationPoint = Vector3.Zero;
+            _CameraRotation = Vector3.Zero;
+            _CameraOffset = Vector3.Zero;
             _CameraZoom = 0;
         }
         /// <summary>
@@ -2016,12 +2000,12 @@ namespace OpenMobile.Graphics
         /// </summary>
         /// <param name="controlRotation"></param>
         /// <param name="controlRotationPoint"></param>
-        public _3D_Control(Vector3d controlRotation, Vector3d controlRotationPoint)
+        public _3D_Control(Vector3 controlRotation, Vector3 controlRotationPoint)
         {
             _ControlRotation = controlRotation;
             _ControlRotationPoint = controlRotationPoint;
-            _CameraRotation = Vector3d.Zero;
-            _CameraOffset = Vector3d.Zero;
+            _CameraRotation = Vector3.Zero;
+            _CameraOffset = Vector3.Zero;
             _CameraZoom = 0;
         }
         /// <summary>
@@ -2030,12 +2014,12 @@ namespace OpenMobile.Graphics
         /// <param name="controlRotation"></param>
         /// <param name="controlRotationPoint"></param>
         /// <param name="cameraRotation"></param>
-        public _3D_Control(Vector3d controlRotation, Vector3d controlRotationPoint, Vector3d cameraRotation)
+        public _3D_Control(Vector3 controlRotation, Vector3 controlRotationPoint, Vector3 cameraRotation)
         {
             _ControlRotation = controlRotation;
             _ControlRotationPoint = controlRotationPoint;
             _CameraRotation = cameraRotation;
-            _CameraOffset = Vector3d.Zero;
+            _CameraOffset = Vector3.Zero;
             _CameraZoom = 0;
         }
         /// <summary>
@@ -2045,7 +2029,7 @@ namespace OpenMobile.Graphics
         /// <param name="controlRotationPoint"></param>
         /// <param name="cameraLocation"></param>
         /// <param name="cameraOffset"></param>
-        public _3D_Control(Vector3d controlRotation, Vector3d controlRotationPoint, Vector3d cameraRotation, Vector3d cameraOffset)
+        public _3D_Control(Vector3 controlRotation, Vector3 controlRotationPoint, Vector3 cameraRotation, Vector3 cameraOffset)
         {
             _ControlRotation = controlRotation;
             _ControlRotationPoint = controlRotationPoint;
@@ -2061,7 +2045,7 @@ namespace OpenMobile.Graphics
         /// <param name="cameraLocation"></param>
         /// <param name="cameraOffset"></param>
         /// <param name="cameraZoom"></param>
-        public _3D_Control(Vector3d controlRotation, Vector3d controlRotationPoint, Vector3d cameraRotation, Vector3d cameraOffset, int cameraZoom)
+        public _3D_Control(Vector3 controlRotation, Vector3 controlRotationPoint, Vector3 cameraRotation, Vector3 cameraOffset, int cameraZoom)
         {
             _ControlRotation = controlRotation;
             _ControlRotationPoint = controlRotationPoint;

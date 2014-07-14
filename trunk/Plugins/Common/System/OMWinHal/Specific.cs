@@ -24,7 +24,6 @@ using System.Text;
 using OpenMobile;
 using VistaAudio.CoreAudioApi;
 using WaveLib.AudioMixer;
-using OpenMobile.Platform.Windows;
 using System.Collections.Generic;
 
 namespace OMHal
@@ -318,43 +317,43 @@ namespace OMHal
         public static event getHandle OnHandleRequested;
         private static void SwitchOffMonitor(int screen)
         {
-            if (screen == 0)
-                SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
-            else
-            {
-                OpenMobile.Platform.Windows.DeviceMode dev = new OpenMobile.Platform.Windows.DeviceMode();
-                dev.DeviceName=screen.ToString();
-                dev.PelsHeight=0;
-                dev.PelsWidth=0;
-                dev.Fields=OpenMobile.Platform.Windows.Constants.DM_POSITION;
-                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), dev, IntPtr.Zero,0x4, null);
-            }
+            //if (screen == 0)
+            //    SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            //else
+            //{
+            //    OpenMobile.Platform.Windows.DeviceMode dev = new OpenMobile.Platform.Windows.DeviceMode();
+            //    dev.DeviceName=screen.ToString();
+            //    dev.PelsHeight=0;
+            //    dev.PelsWidth=0;
+            //    dev.Fields=OpenMobile.Platform.Windows.Constants.DM_POSITION;
+            //    OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), dev, IntPtr.Zero,0x4, null);
+            //}
         }
         private static void SwitchOnMonitor(int screen)
         {
-            if (screen == 0)
-                SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
-            else
-            {
-                OpenMobile.Platform.Windows.DeviceMode dev = new OpenMobile.Platform.Windows.DeviceMode();
-                dev.DeviceName = screen.ToString();
-                dev.Position = new POINT(getSize(screen - 1), 0);
-                dev.Fields = OpenMobile.Platform.Windows.Constants.DM_POSITION;
-                OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), dev, IntPtr.Zero, 0x4, null);
-            }
+            //if (screen == 0)
+            //    SendMessage(OnHandleRequested().ToInt32(), WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+            //else
+            //{
+            //    OpenMobile.Platform.Windows.DeviceMode dev = new OpenMobile.Platform.Windows.DeviceMode();
+            //    dev.DeviceName = screen.ToString();
+            //    dev.Position = new POINT(getSize(screen - 1), 0);
+            //    dev.Fields = OpenMobile.Platform.Windows.Constants.DM_POSITION;
+            //    OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), dev, IntPtr.Zero, 0x4, null);
+            //}
         }
 
-        private static int getSize(int screen)
-        {
-            WindowsDisplayDevice win_dev = new WindowsDisplayDevice();
-            Functions.EnumDisplayDevices(null, screen, win_dev, 0);
-            DeviceMode monitor_mode = new DeviceMode();
-            if (Functions.EnumDisplaySettingsEx(win_dev.DeviceName.ToString(), -1, monitor_mode, 0))
-            {
-                return monitor_mode.Position.X + monitor_mode.PelsWidth + 1;
-            }
-            return 0;
-        }
+        //private static int getSize(int screen)
+        //{
+        //    WindowsDisplayDevice win_dev = new WindowsDisplayDevice();
+        //    Functions.EnumDisplayDevices(null, screen, win_dev, 0);
+        //    DeviceMode monitor_mode = new DeviceMode();
+        //    if (Functions.EnumDisplaySettingsEx(win_dev.DeviceName.ToString(), -1, monitor_mode, 0))
+        //    {
+        //        return monitor_mode.Position.X + monitor_mode.PelsWidth + 1;
+        //    }
+        //    return 0;
+        //}
         public static int GetBrightness(int screen)
         {
             IntPtr dev = CreateFile(@"\\.\LCD", 0x80000000, 0x7, IntPtr.Zero, 0x3, 0, IntPtr.Zero);
@@ -375,28 +374,28 @@ namespace OMHal
         {
             if (os.Version.Major < 6)
             {
-                if (screen > 0)
-                {
-                    OpenMobile.Platform.Windows._VIDEOPARAMETERS par = new OpenMobile.Platform.Windows._VIDEOPARAMETERS();
-                    par.guid = new Guid("02C62061-1097-11d1-920F-00A024DF156E");
-                    par.dwCommand = 0x2;
-                    par.dwFlags = 0x0040;
-                    par.dwBrightness = (uint)targetBrightness;
-                    IntPtr vp = Marshal.AllocHGlobal(Marshal.SizeOf(par));
-                    try
-                    {
-                        Marshal.StructureToPtr(par, vp, false);
-                        OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), null, IntPtr.Zero, 0x20, vp);
-                    }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(vp);
-                    }
-                }
-                else
-                {
-                    planB(screen, targetBrightness);
-                }
+                //if (screen > 0)
+                //{
+                //    OpenMobile.Platform.Windows._VIDEOPARAMETERS par = new OpenMobile.Platform.Windows._VIDEOPARAMETERS();
+                //    par.guid = new Guid("02C62061-1097-11d1-920F-00A024DF156E");
+                //    par.dwCommand = 0x2;
+                //    par.dwFlags = 0x0040;
+                //    par.dwBrightness = (uint)targetBrightness;
+                //    IntPtr vp = Marshal.AllocHGlobal(Marshal.SizeOf(par));
+                //    try
+                //    {
+                //        Marshal.StructureToPtr(par, vp, false);
+                //        OpenMobile.Platform.Windows.Functions.ChangeDisplaySettingsEx(@"\\.\DISPLAY" + (screen + 1).ToString(), null, IntPtr.Zero, 0x20, vp);
+                //    }
+                //    finally
+                //    {
+                //        Marshal.FreeHGlobal(vp);
+                //    }
+                //}
+                //else
+                //{
+                //    planB(screen, targetBrightness);
+                //}
             }
             else
             {

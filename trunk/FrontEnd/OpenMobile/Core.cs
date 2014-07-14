@@ -41,7 +41,7 @@ namespace OpenMobile
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
         public static List<IBasePlugin> pluginCollectionDisabled = new List<IBasePlugin>();
         public static bool exitTransition = true;
-        public static GameWindowFlags Fullscreen;
+        public static OpenTK.GameWindowFlags Fullscreen;
 
         /// <summary>
         /// The maximum allowed time for a plugin to use for initialization
@@ -556,7 +556,7 @@ namespace OpenMobile
             // Unhide default OS mouse (in case it was hidden at time of crash)
             try
             {
-                Core.RenderingWindows[0].DefaultMouse.ShowCursor(Core.RenderingWindows[0].WindowInfo);
+                Core.RenderingWindows[0].CursorVisible = true;
             }
             catch { }
 
@@ -615,7 +615,7 @@ namespace OpenMobile
                     // Fullscreen mode?
                 else if (arg.ToLower() == "-fullscreen")
                 {
-                    Fullscreen = GameWindowFlags.Fullscreen;
+                    Fullscreen = OpenTK.GameWindowFlags.Fullscreen;
                 }
 
                 // Override current skin to use
@@ -660,7 +660,7 @@ namespace OpenMobile
             // Initialize screens
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)
-                RenderingWindows.Add(new RenderingWindow(i));
+                RenderingWindows.Add(new RenderingWindow(i, InitialScreenSize));
 
             #region Check for missing database (and create if needed)
 
@@ -701,9 +701,9 @@ namespace OpenMobile
             rapidMenu.Start();
 
             for (int i = 1; i < RenderingWindows.Count; i++)
-                RenderingWindows[i].RunAsync(Fullscreen, InitialScreenSize);
+                RenderingWindows[i].RunAsync();
 
-            RenderingWindows[0].Run(Fullscreen, InitialScreenSize);
+            RenderingWindows[0].Run();
 
             for (int i = 0; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].Dispose();

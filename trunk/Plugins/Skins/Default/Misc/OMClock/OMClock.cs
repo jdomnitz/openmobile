@@ -31,7 +31,6 @@ using System.Runtime.InteropServices;
 using OpenMobile.helperFunctions;
 using OpenMobile.helperFunctions.Graphics;
 using OpenMobile.helperFunctions.Controls;
-using OpenMobile.Graphics.OpenGL;
 using OpenMobile.helperFunctions.MenuObjects;
 using OpenMobile.Media;
 

@@ -22,6 +22,7 @@ using System;
 using System.ComponentModel;
 using OpenMobile.Graphics;
 using OpenMobile;
+using OpenTK;
 
 namespace OpenMobile.Controls
 {
@@ -68,7 +69,7 @@ namespace OpenMobile.Controls
         /// <param name="sender"></param>
         private void RaiseOnWindowCreated(OMTargetWindow sender)
         {
-            IntPtr handle = (IntPtr)sender.outputWindow.WindowHandle;
+            IntPtr handle = (IntPtr)sender.outputWindow.WindowInfo.Handle;
             int screen = sender.Parent.ActiveScreen;
 
             // Log info to debug log
@@ -89,7 +90,7 @@ namespace OpenMobile.Controls
         /// <param name="sender"></param>
         private void RaiseOnWindowDisposed(OMTargetWindow sender)
         {
-            IntPtr handle = (IntPtr)sender.outputWindow.WindowHandle;
+            IntPtr handle = (IntPtr)sender.outputWindow.WindowInfo.Handle;
             int screen = sender.Parent.ActiveScreen;
 
             // Log info to debug log
@@ -338,40 +339,40 @@ namespace OpenMobile.Controls
             // Nothing to clone here, we create new object instead
             OMTargetWindow newObject = (OMTargetWindow)base.Clone(parent);
 
-            // Try to create a separate video output window
-            newObject.outputWindow = new TargetWindow();
-            newObject.outputWindow.NativeInitialize(GameWindowFlags.Hidden | GameWindowFlags.AlwaysOnTop | GameWindowFlags.BlockAllRendering, Width, Height);
-            newObject.outputWindow.StopRendering = true;
-            newObject.outputWindow.Visible = this.visible;
+            //// Try to create a separate video output window
+            //newObject.outputWindow = new TargetWindow();
+            //newObject.outputWindow.NativeInitialize(GameWindowFlags.Hidden | GameWindowFlags.AlwaysOnTop | GameWindowFlags.BlockAllRendering, Width, Height);
+            //newObject.outputWindow.StopRendering = true;
+            //newObject.outputWindow.Visible = this.visible;
 
-            if (newObject.outputWindow.DefaultMouse != null)
-            {
-                newObject.outputWindow.DefaultMouse.MouseClick += new EventHandler<Input.MouseButtonEventArgs>(newObject.DefaultMouse_MouseClick);
+            //if (newObject.outputWindow.DefaultMouse != null)
+            //{
+            //    newObject.outputWindow.DefaultMouse.MouseClick += new EventHandler<Input.MouseButtonEventArgs>(newObject.DefaultMouse_MouseClick);
 
-                // Set mouse instance number (negative instance number = default os unit)
-                newObject.outputWindow.DefaultMouse.Instance = (parent.ActiveScreen * -1) - 1; // Instance is negative screen number for default units with an offset of one
+            //    // Set mouse instance number (negative instance number = default os unit)
+            //    newObject.outputWindow.DefaultMouse.Instance = (parent.ActiveScreen * -1) - 1; // Instance is negative screen number for default units with an offset of one
 
-                // Limit mouse area to the size of the screen
-                newObject.outputWindow.DefaultMouse.SetBounds(width, height);
-            }
+            //    // Limit mouse area to the size of the screen
+            //    newObject.outputWindow.DefaultMouse.SetBounds(width, height);
+            //}
 
-            // Place new window correctly
-            PlaceWindow(parent, ref newObject.outputWindow);
+            //// Place new window correctly
+            //PlaceWindow(parent, ref newObject.outputWindow);
 
-            newObject.outputWindow.Load += new EventHandler<EventArgs>(newObject.outputWindow_Load);
+            //newObject.outputWindow.Load += new EventHandler<EventArgs>(newObject.outputWindow_Load);
 
-            // Spawn thread to keep window alive
-            OpenMobile.Threading.SafeThread.Asynchronous(delegate()
-            {                
-                // Execute rendering code
-                newObject.outputWindow.Run(1, 60, false);
+            //// Spawn thread to keep window alive
+            //OpenMobile.Threading.SafeThread.Asynchronous(delegate()
+            //{                
+            //    // Execute rendering code
+            //    newObject.outputWindow.Run(1, 60, false);
 
-                // Dispose window
-                newObject.outputWindow.Dispose();
-            });
+            //    // Dispose window
+            //    newObject.outputWindow.Dispose();
+            //});
 
-            // Connect event to catch resize events
-            BuiltInComponents.Host.OnSystemEvent += new Plugin.SystemEvent(newObject.Host_OnSystemEvent);
+            //// Connect event to catch resize events
+            //BuiltInComponents.Host.OnSystemEvent += new Plugin.SystemEvent(newObject.Host_OnSystemEvent);
 
             return newObject;
         }
@@ -411,7 +412,7 @@ namespace OpenMobile.Controls
                     if (Screen == this.parent.ActiveScreen)
                     {   // Move embedded window to ensure it's placed correctly related to main window
                         Point newLocation = new Point(Location.X + (this.left * ScaleFactors.X), Location.Y + (this.top * ScaleFactors.Y));
-                        outputWindow.Location = newLocation;
+                        outputWindow.Location = newLocation.ToSystemPoint();
 
                         outputWindow.Width = (int)(this.width * ScaleFactors.X);
                         outputWindow.Height = (int)(this.height * ScaleFactors.Y);
@@ -435,7 +436,7 @@ namespace OpenMobile.Controls
             get
             {
                 if (outputWindow != null)
-                    return (IntPtr)outputWindow.WindowHandle;
+                    return (IntPtr)outputWindow.WindowInfo.Handle;
                 else
                     return IntPtr.Zero;
             }

@@ -1,4 +1,5 @@
 ﻿#pragma warning disable 0659,0661
+
 using System;
 using System.Reflection;
 using System.Collections.Generic;
@@ -184,10 +185,10 @@ namespace OpenMobile.Graphics
         static public GradientData CreateHorizontalGradient(params Color[] colors)
         {
             GradientData gradient = new GradientData();
-            double quadsize = 2.0;
+            float quadsize = 2.0f;
             if (colors.Length > 2)
                 quadsize /= (colors.Length-1);
-            double lastpos = -1;
+            float lastpos = -1;
             if (colors.Length > 1)
             {
                 for (int i = 0; i < colors.Length - 1; i++)
@@ -222,11 +223,11 @@ namespace OpenMobile.Graphics
         static public GradientData CreateHorizontalGradient(params ColorPoint[] colorPoints)
         {
             GradientData gradient = new GradientData();
-            double lastpos = -1;
+            float lastpos = -1;
             for (int i = 0; i < colorPoints.Length - 1; i++)
             {
                 // Create the quads
-                double newX = lastpos + colorPoints[i+1].Point.X;
+                float newX = lastpos + colorPoints[i + 1].Point.X;
                 // Limit endpos
                 if (newX > 1) newX = 1;
 
@@ -263,10 +264,10 @@ namespace OpenMobile.Graphics
         static public GradientData CreateVerticalGradient(params Color[] colors)
         {
             GradientData gradient = new GradientData();
-            double quadsize = 2.0;
+            float quadsize = 2.0f;
             if (colors.Length > 2)
                 quadsize /= (colors.Length - 1);
-            double lastpos = -1;
+            float lastpos = -1;
             if (colors.Length > 1)
             {
                 for (int i = 0; i < colors.Length - 1; i++)
@@ -302,11 +303,11 @@ namespace OpenMobile.Graphics
         static public GradientData CreateVerticalGradient(params ColorPoint[] colorPoints)
         {
             GradientData gradient = new GradientData();
-            double lastpos = -1;
+            float lastpos = -1;
             for (int i = 0; i < colorPoints.Length - 1; i++)
             {
                 // Create the quads
-                double newY = lastpos + colorPoints[i + 1].Point.Y;
+                float newY = lastpos + colorPoints[i + 1].Point.Y;
                 // Limit endpos
                 if (newY > 1) newY = 1;
 
@@ -341,9 +342,9 @@ namespace OpenMobile.Graphics
         public struct ColorPoint
         {
             public Color Color;
-            public Vector3d Point;
+            public Vector3 Point;
 
-            public ColorPoint(Vector3d point, Color color)
+            public ColorPoint(Vector3 point, Color color)
             {
                 //if (point.X > 1 || point.X < -1)
                 //    throw new Exception("Vectordata for point X is outside valid range (-1 to 1)");
@@ -355,9 +356,9 @@ namespace OpenMobile.Graphics
                 Point = point;
                 Color = color;
             }
-            public ColorPoint(double x, double y, Color color)
+            public ColorPoint(float x, float y, Color color)
             {
-                Point = new Vector3d(x, y, 0);
+                Point = new Vector3(x, y, 0);
 
                 //if (Point.X > 1 || Point.X < -1)
                 //    throw new Exception("Vectordata for point X is outside valid range (-1 to 1)");
@@ -1916,7 +1917,7 @@ namespace OpenMobile.Graphics
         static Font()
         {
             System.Drawing.FontFamily[] supported = System.Drawing.FontFamily.Families;
-            if (Configuration.RunningOnLinux)
+            if (OpenTK.Configuration.RunningOnLinux)
             {
                 if (Array.Exists<System.Drawing.FontFamily>(supported, p => p.Name == "Arial"))
                     arial = new Font("Arial");
@@ -1928,7 +1929,7 @@ namespace OpenMobile.Graphics
             else
                 arial = new Font("Arial");
             times=new Font("Times New Roman");
-            if (Configuration.RunningOnLinux)
+            if (OpenTK.Configuration.RunningOnLinux)
                 if (!Array.Exists<System.Drawing.FontFamily>(supported, p => p.Name == "Times New Roman"))
                     times = new Font("FreeSerif");
 
@@ -1975,7 +1976,7 @@ namespace OpenMobile.Graphics
             get
             {
                 #if OSX
-                if (Configuration.RunningOnMacOS)
+                if (OpenTK.Configuration.RunningOnMacOS)
                     return new Font("Helvetica");
                 else
                 #endif
@@ -2014,9 +2015,9 @@ namespace OpenMobile.Graphics
         {
             get
             {
-                if (Configuration.RunningOnLinux)
+                if (OpenTK.Configuration.RunningOnLinux)
                     return new Font("Kalimati");
-                else if (Configuration.RunningOnMacOS)
+                else if (OpenTK.Configuration.RunningOnMacOS)
                     return new Font("Geneva");
                 else
                     return new Font("Tahoma");
@@ -2049,9 +2050,9 @@ namespace OpenMobile.Graphics
         {
             get
             {
-                if (Configuration.RunningOnMacOS)
+                if (OpenTK.Configuration.RunningOnMacOS)
                     return new Font("Zapf Dingbats");
-                else if (Configuration.RunningOnLinux)
+                else if (OpenTK.Configuration.RunningOnLinux)
                     return new Font("Dingbats");
                 return new Font("Wingdings");
             }
@@ -2074,9 +2075,9 @@ namespace OpenMobile.Graphics
         {
             get
             {
-                if (Configuration.RunningOnWindows)
+                if (OpenTK.Configuration.RunningOnWindows)
                     return new Font("Lucida Sans Unicode");
-                else if (Configuration.RunningOnLinux)
+                else if (OpenTK.Configuration.RunningOnLinux)
                     return new Font("Garuda");
                 else
                     return new Font("Lucida Grande");
@@ -2086,9 +2087,9 @@ namespace OpenMobile.Graphics
         {
             get
             {
-                if (Configuration.RunningOnWindows)
+                if (OpenTK.Configuration.RunningOnWindows)
                     return new Font("Palatino Linotype");
-                else if (Configuration.RunningOnLinux)
+                else if (OpenTK.Configuration.RunningOnLinux)
                     return new Font("FreeSerif");
                 else
                     return new Font("Palatino");
@@ -2370,11 +2371,11 @@ namespace OpenMobile.Graphics
         {
             return new System.Drawing.Point(x, y);
         }
-
-        public OpenMobile.Math.Vector2 ToVector2()
+        public OpenTK.Vector2 ToVector2()
         {
-            return new OpenMobile.Math.Vector2(x, y);
+            return new OpenTK.Vector2(x, y);
         }
+
         static Point()
         {
             Empty = new Point();

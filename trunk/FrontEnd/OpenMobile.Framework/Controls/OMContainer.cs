@@ -24,7 +24,7 @@ using OpenMobile.helperFunctions.Graphics;
 using System;
 using OpenMobile.Input;
 using OpenMobile.Math;
-using OpenMobile.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 
 namespace OpenMobile.Controls
 {
@@ -898,24 +898,24 @@ namespace OpenMobile.Controls
             }
 
             // Offset camera
-            if (__3D_CameraData.CameraOffset != Vector3d.Zero)
+            if (__3D_CameraData.CameraOffset != Vector3.Zero)
             {
                 g.Translate(__3D_CameraData.CameraOffset.X, __3D_CameraData.CameraOffset.Y, __3D_CameraData.CameraOffset.Z);
             }
 
             // Rotate camera
-            if (__3D_CameraData.CameraRotation != Vector3d.Zero)
+            if (__3D_CameraData.CameraRotation != Vector3.Zero)
             {
                 g.Rotate(__3D_CameraData.CameraRotation);
             }
 
             // Rotate control?
-            if (__3D_CameraData.ControlRotation != Vector3d.Zero)
+            if (__3D_CameraData.ControlRotation != Vector3.Zero)
             {
                 // Calculate center point in absolute screen coordinates
                 Point center = g.GetScreenAbsPoint(Region.Center);
 
-                if (__3D_CameraData.ControlRotationPoint != Vector3d.Zero)
+                if (__3D_CameraData.ControlRotationPoint != Vector3.Zero)
                 {
                     // Move control to center of screen (to rotate around the center of the control)
                     g.Translate(__3D_CameraData.ControlRotationPoint.X, __3D_CameraData.ControlRotationPoint.Y);

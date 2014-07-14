@@ -1,5 +1,5 @@
 ﻿using System;
-using OpenMobile.Math;
+using OpenTK;
 
 namespace OpenMobile.Graphics
 {
@@ -21,8 +21,8 @@ namespace OpenMobile.Graphics
         void DrawImage(OImage image, Rectangle rect);
         void DrawImage(OImage image, int X, int Y, int Width, int Height);
         void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle);
-        void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation);
-        void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData);
+        void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Vector3 rotation);
+        void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Vector3 rotation, ReflectionsData reflectionData);
         void DrawImage(OImage image, Point[] destPoints);
         void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency);
         void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, Vector3 rotation);

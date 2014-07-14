@@ -1,2 +1,13 @@
 ﻿Bugs:
 	- OMMapProvider "Object is currently in use elsewhere." -> Caused by simultaneous access to the GDI object
+
+Non working stuff (priority / task):
+	- (low) Gestures need to be reimplemented
+	- (low) Multi mouse / keyboard support
+	- (high) Multi screen
+	- (Medium) Dynamic frame rendering (fps throttling)
+	- (postponed) Linux support is partially broken for embedding an application
+	- (high) Fullscreen startup
+	- (low) HAL: SwitchOffMonitor / SwitchOnMonitor
+	- (low) HAL: Brightness control for XP
+	- (low) OMTargetWindow

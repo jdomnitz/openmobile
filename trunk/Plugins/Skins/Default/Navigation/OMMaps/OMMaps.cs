@@ -111,10 +111,10 @@ namespace OMMaps2
             new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
-                    new GradientData.ColorPoint(0.0, 0, Color.Empty),
-                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(0.5, 0, Color.Empty))
+                    new GradientData.ColorPoint(0.0f, 0, Color.Empty),
+                    new GradientData.ColorPoint(0.5f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5f, 0, Color.Empty))
             });
             panel.addControl(shp_InfoGroup_Header);
 

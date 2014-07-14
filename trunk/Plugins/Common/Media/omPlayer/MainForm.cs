@@ -1111,27 +1111,28 @@ namespace OMPlayer
         */
         public int Resize()
         {
-            if (videoWindow == null)
-                return -1;
-            if (fullscreen == true)
-            {
-                OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
-                OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMPlayer.theHost.GetWindowHandle(zone.Screen),ref info);
-                if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
-                    return videoWindow.SetWindowPosition(0, 0, info.Window.Width - (info.Window.Width-info.Client.Width), info.Window.Height - (info.Window.Height-info.Client.Height));
-                else
-                    return videoWindow.SetWindowPosition(0, 0, info.Window.Width + 1, info.Window.Height);
-            }
-            else
-            {
-                object o;
-                theHost.getData(eGetData.GetScaleFactors, "", zone.Screen.ToString(), out o);
-                if (o == null)
-                    return -1;
-                PointF sf = (PointF)o;
-                Rectangle pos = theHost.GetVideoPosition(zone.Screen);
-                return videoWindow.SetWindowPosition((int)(pos.Left * sf.X), (int)(pos.Top * sf.Y), (int)(pos.Width * sf.X), (int)(pos.Height * sf.Y));
-            }
+            return -1;
+            //if (videoWindow == null)
+            //    return -1;
+            //if (fullscreen == true)
+            //{
+            //    OpenMobile.Platform.Windows.WindowInfo info = new OpenMobile.Platform.Windows.WindowInfo();
+            //    OpenMobile.Platform.Windows.Functions.GetWindowInfo((IntPtr)OMPlayer.theHost.GetWindowHandle(zone.Screen),ref info);
+            //    if ((info.Style & OpenMobile.Platform.Windows.WindowStyle.ThickFrame) == OpenMobile.Platform.Windows.WindowStyle.ThickFrame)
+            //        return videoWindow.SetWindowPosition(0, 0, info.Window.Width - (info.Window.Width-info.Client.Width), info.Window.Height - (info.Window.Height-info.Client.Height));
+            //    else
+            //        return videoWindow.SetWindowPosition(0, 0, info.Window.Width + 1, info.Window.Height);
+            //}
+            //else
+            //{
+            //    object o;
+            //    theHost.getData(eGetData.GetScaleFactors, "", zone.Screen.ToString(), out o);
+            //    if (o == null)
+            //        return -1;
+            //    PointF sf = (PointF)o;
+            //    Rectangle pos = theHost.GetVideoPosition(zone.Screen);
+            //    return videoWindow.SetWindowPosition((int)(pos.Left * sf.X), (int)(pos.Top * sf.Y), (int)(pos.Width * sf.X), (int)(pos.Height * sf.Y));
+            //}
         }
 
         public bool PlayMovieInWindow(Zone zone, string filename)
@@ -1276,7 +1277,7 @@ namespace OMPlayer
         {
             this.FormBorderStyle = FormBorderStyle.None;
             this.BackColor = System.Drawing.Color.Black;
-            OpenMobile.Platform.Windows.Functions.ShowCursor(false);
+            //OpenMobile.Platform.Windows.Functions.ShowCursor(false);
 
             // Ensure handle is created
             this.Handle.ToInt32();
