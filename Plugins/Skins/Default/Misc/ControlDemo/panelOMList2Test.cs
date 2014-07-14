@@ -82,7 +82,7 @@ namespace ControlDemo
 
             // List control
             OMObjectList lstListControl = new OMObjectList("lstListControl", 200, 150, 400, 400);
-            lstListControl._3D_CameraData = new _3D_Control(new OpenMobile.Math.Vector3d(0, -35, 0));
+            lstListControl._3D_CameraData = new _3D_Control(new OpenMobile.Math.Vector3(0, -35, 0));
             //lstListControl.SkinDebug = true;
             //lstListControl.BackgroundColor = Color.Black;
             //lstListControl.SoftEdges = FadingEdge.GraphicSides.Bottom | FadingEdge.GraphicSides.Left | FadingEdge.GraphicSides.Right | FadingEdge.GraphicSides.Top;
@@ -315,10 +315,10 @@ namespace ControlDemo
             OMSlider sldrY = sender.Parent[screen, "Slider_RotationY"] as OMSlider;
             if (lst != null && sldrY != null)
             {
-                lst._3D_CameraData = new _3D_Control(new OpenMobile.Math.Vector3d(sldrY.Value, 0, 0),
-                    new OpenMobile.Math.Vector3d(0, 0, 0),
-                    new OpenMobile.Math.Vector3d(0, 0, 0),
-                    new OpenMobile.Math.Vector3d(0, 0, 0),
+                lst._3D_CameraData = new _3D_Control(new OpenMobile.Math.Vector3(sldrY.Value, 0, 0),
+                    new OpenMobile.Math.Vector3(0, 0, 0),
+                    new OpenMobile.Math.Vector3(0, 0, 0),
+                    new OpenMobile.Math.Vector3(0, 0, 0),
                     0);
             }
         }

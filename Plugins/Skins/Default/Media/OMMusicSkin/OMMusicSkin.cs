@@ -726,11 +726,11 @@ namespace OMMusicSkin
             //zone.MediaHandler.ActiveMediaProvider.ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.StepForward));
         }
 
-        void VideoWindow_OnWindowCreated(OMTargetWindow sender, int screen, GameWindow window, IntPtr handle)
-        {
-            Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
-            // zone.MediaHandler.ActiveMediaProvider.ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.SetVideoTarget, sender, screen));
-        }
+        //void VideoWindow_OnWindowCreated(OMTargetWindow sender, int screen, GameWindow window, IntPtr handle)
+        //{
+        //    Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+        //    // zone.MediaHandler.ActiveMediaProvider.ExecuteCommand(zone, new MediaProvider_CommandWrapper(MediaProvider_Commands.SetVideoTarget, sender, screen));
+        //}
 
         void btnPause_OnClick(OMControl sender, int screen)
         {

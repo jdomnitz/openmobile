@@ -208,8 +208,8 @@ namespace ControlDemo
 
             if (_CameraControl)
             {
-                OM.Host.RenderingWindowInterface(screen).graphics._3D_ModelView_Set(OpenMobile.Math.Vector3d.Zero,
-                    new OpenMobile.Math.Vector3d(XValue, YValue, ZValue), OpenMobile.Math.Vector3d.Zero, 1, false);
+                OM.Host.RenderingWindowInterface(screen).graphics._3D_ModelView_Set(OpenMobile.Math.Vector3.Zero,
+                    new OpenMobile.Math.Vector3(XValue, YValue, ZValue), OpenMobile.Math.Vector3.Zero, 1, false);
             }
             else
             {

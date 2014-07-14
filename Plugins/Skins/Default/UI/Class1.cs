@@ -399,9 +399,9 @@ namespace OpenMobile
             {
                 GradientData = GradientData.CreateVerticalGradient
                 (
-                    new GradientData.ColorPoint(0, 0.0, Color.FromArgb(255, 0, 0, 0)),
-                    new GradientData.ColorPoint(0, 1.0, Color.FromArgb(255, 0, 0, 0)),
-                    new GradientData.ColorPoint(0, 1.0, Color.FromArgb(255, 30, 30, 50))
+                    new GradientData.ColorPoint(0, 0.0f, Color.FromArgb(255, 0, 0, 0)),
+                    new GradientData.ColorPoint(0, 1.0f, Color.FromArgb(255, 0, 0, 0)),
+                    new GradientData.ColorPoint(0, 1.0f, Color.FromArgb(255, 30, 30, 50))
                     )
             });
             UIPanel.addControl(Shape_UIBottomBar_Background);
@@ -410,10 +410,10 @@ namespace OpenMobile
             new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
-                    new GradientData.ColorPoint(0.0, 0, Color.Black),
-                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(0.5, 0, Color.Black))
+                    new GradientData.ColorPoint(0.0f, 0, Color.Black),
+                    new GradientData.ColorPoint(0.5f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5f, 0, Color.Black))
             });
             //Shape_UIBottomBar_Separator.Opacity = 128;
             UIPanel.addControl(Shape_UIBottomBar_Separator);
@@ -811,10 +811,10 @@ namespace OpenMobile
             new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
-                    new GradientData.ColorPoint(0.0, 0, Color.Black),
-                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(0.5, 0, Color.Black))
+                    new GradientData.ColorPoint(0.0f, 0, Color.Black),
+                    new GradientData.ColorPoint(0.5f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5f, 0, Color.Black))
             });
             UIPanel.addControl(Shape_UITopBar_Separator);
             //OMTestControl tstControl = new OMTestControl();
@@ -1201,10 +1201,10 @@ namespace OpenMobile
             new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
-                    new GradientData.ColorPoint(0.0, 0, Color.Black),
-                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(0.5, 0, Color.Black))
+                    new GradientData.ColorPoint(0.0f, 0, Color.Black),
+                    new GradientData.ColorPoint(0.5f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5f, 0, Color.Black))
             });
             //Shape_UIBottomBar_MediaImages_Background_Separator.Visible = false;
             panel.addControl(Shape_UIBottomBar_MediaImages_Background_Separator);

@@ -324,8 +324,8 @@ namespace OpenMobile.Framework
                             osVersion = "Windows 8.1"; 
                         break;
                 }
-                if (Configuration.TabletPC)
-                    osVersion += " Tablet";
+                //if (OpenTK.Configuration.TabletPC)
+                //    osVersion += " Tablet";
                 if ((ex.wSuiteMask & 0x40) == 0x40)
                     osVersion += " Embedded";
             }
@@ -336,8 +336,8 @@ namespace OpenMobile.Framework
                     case 5:
                         if ((ex.wSuiteMask & 0x8000) == 0x8000)
                             osVersion = "Windows Home Server";
-                        else if (Platform.Windows.Functions.GetSystemMetrics(89) != 0)
-                            osVersion = "Windows Server 2003 R2";
+                        //else if (Platform.Windows.Functions.GetSystemMetrics(89) != 0)
+                        //    osVersion = "Windows Server 2003 R2";
                         else
                             osVersion = "Windows Server 2003";
                         break;
@@ -513,10 +513,6 @@ namespace OpenMobile.Framework
         }
 
         #endregion
-
-
-
-
 
     }
 }

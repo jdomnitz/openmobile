@@ -112,10 +112,10 @@ namespace OMMusicSkin
             new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
-                    new GradientData.ColorPoint(0.0, 0, Color.Empty),
-                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(0.5, 0, Color.Empty))
+                    new GradientData.ColorPoint(0.0f, 0, Color.Empty),
+                    new GradientData.ColorPoint(0.5f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0f, 0, Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5f, 0, Color.Empty))
             });
             //new ShapeData(shapes.Rectangle, lblListItemDescription.Color, Color.Empty, 1));
             ItemBase.Add(shpListItemSeparator);
@@ -219,18 +219,18 @@ namespace OMMusicSkin
             ShapeData itemShapeData_Highlighted = new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
-                    new GradientData.ColorPoint(0.0, 0, Color.Empty),
-                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(0.5, 0, Color.Empty))
+                    new GradientData.ColorPoint(0.0f, 0, Color.Empty),
+                    new GradientData.ColorPoint(0.5f, 0, Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0f, 0, Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5f, 0, Color.Empty))
             };
             ShapeData itemShapeData_Selected = new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
-                    new GradientData.ColorPoint(0.0, 0, Color.Empty),
-                    new GradientData.ColorPoint(0.5, 0, Color.FromArgb(50, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(1.0, 0, Color.FromArgb(50, BuiltInComponents.SystemSettings.SkinFocusColor)),
-                    new GradientData.ColorPoint(0.5, 0, Color.Empty))
+                    new GradientData.ColorPoint(0.0f, 0, Color.Empty),
+                    new GradientData.ColorPoint(0.5f, 0, Color.FromArgb(50, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(1.0f, 0, Color.FromArgb(50, BuiltInComponents.SystemSettings.SkinFocusColor)),
+                    new GradientData.ColorPoint(0.5f, 0, Color.Empty))
             };
             ShapeData itemShapeData_Normal = new ShapeData(shapes.Rectangle, Color.Empty, Color.Empty, 1);
 

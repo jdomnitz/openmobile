@@ -11,8 +11,8 @@ using System;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("OpenMobile.Graphics")]
-[assembly: AssemblyCopyright("Copyright OpenMobile and OpenTK ©2011")]
-[assembly: AssemblyTrademark("Based off the OpenTK Project")]
+[assembly: AssemblyCopyright("Copyright OpenMobile")]
+[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -24,6 +24,7 @@ using System;
 [assembly: Guid("7aff77c1-5310-4ff2-9d50-0b79720ccbc8")]
 
 [assembly: System.Security.AllowPartiallyTrustedCallers]
+[assembly: System.Security.SecurityRules(System.Security.SecurityRuleSet.Level1)]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -36,4 +37,4 @@ using System;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.8.1.0")]
-[assembly: AssemblyFileVersion("0.8.2014.0621")]
+[assembly: AssemblyFileVersion("0.8.2014.0714")]

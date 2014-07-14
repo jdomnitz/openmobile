@@ -1848,10 +1848,12 @@ namespace OpenMobile
         /// <summary>
         /// Gets a list of available keyboards
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetAvailableKeyboards = 24,
         /// <summary>
         /// Gets a list of available mice
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetAvailableMice = 25,
         /// <summary>
         /// Gets the screen brightness
@@ -1862,54 +1864,64 @@ namespace OpenMobile
         /// <summary>
         /// Gets a list of currently mapped mice units
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetMappedMice = 27,
         /// <summary>
         /// Gets a list of currently unmapped mice units
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetUnMappedMice = 28,
         /// <summary>
         /// Gets a list of currently mapped keyboards units
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetMappedKeyboards = 29,
         /// <summary>
         /// Gets a list of currently unmapped keyboards units
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetUnMappedKeyboards = 30,
         /// <summary>
         /// Gets a list of valid keyboard units (and options) for the requested screen
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Screen [int]</para>
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetKeyboardUnitsForScreen = 31,
         /// <summary>
         /// Gets a list of valid mice units (and options) for the requested screen
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Screen [int]</para>
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetMiceUnitsForScreen = 32,
         /// <summary>
         /// Gets the currently mapped mouse for the given screen
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Screen [int]</para>
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetMiceCurrentUnitForScreen = 33,
         /// <summary>
         /// Gets the currently mapped keyboard for the given screen
         /// <para>----------------------------------------------------</para>
         /// <para>Param: Screen [int]</para>
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetKeyboardCurrentUnitForScreen = 34,
         /// <summary>
         /// Detect and return a mouse device (first detected click is returned as the device), 
         /// devices is returned as an integer number indicating the index of the device in the driver array.
         /// <para>This method will timeout after 10 seconds if no input is detected, this is returned as -3 (Not Found)</para>
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetMouseDetectedUnit = 35,
         /// <summary>
         /// Detect and return a keyboard device (first detected keypress is returned as the device), 
         /// devices is returned as an integer number indicating the index of the device in the driver array.
         /// <para>This method will timeout after 10 seconds if no input is detected, this is returned as -3 (Not Found)</para>
         /// </summary>
+        [Obsolete("Use datasources instead")]
         GetKeyboardDetectedUnit = 36,
 
         /// <summary>
@@ -2990,13 +3002,11 @@ namespace OpenMobile
         /// </summary>
         public float Alpha = 1.0f;
 
-        public Vector3d Rotation = new Vector3d();
-        public Vector3d Scale = new Vector3d(1, 1, 1);
-        public Matrix4 TransformationMatrix = new Matrix4();
+        public OpenTK.Vector3d Rotation = new OpenTK.Vector3d();
+        public OpenTK.Vector3d Scale = new OpenTK.Vector3d(1, 1, 1);
+        public OpenTK.Matrix4 TransformationMatrix = new OpenTK.Matrix4();
 
-        public bool TransitionActive = false;
-
-        
+        public bool TransitionActive = false;        
     }
 
     /// <summary>

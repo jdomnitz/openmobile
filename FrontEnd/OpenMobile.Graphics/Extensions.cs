@@ -43,4 +43,37 @@ namespace OpenMobile.Graphics
             return (Convert.ToInt64(value) & longFlags) == longFlags;
         }
     }
+
+    public static class Misc
+    {
+        public static OpenMobile.Graphics.Point ToOpenMobilePoint(this System.Drawing.Point point)
+        {
+            return new OpenMobile.Graphics.Point(point.X, point.Y);
+        }
+
+        public static System.Drawing.Point ToSystemPoint(this OpenMobile.Graphics.Point point)
+        {
+            return new System.Drawing.Point(point.X, point.Y);
+        }
+
+        public static OpenMobile.Graphics.Size ToOpenMobileSize(this System.Drawing.Size size)
+        {
+            return new OpenMobile.Graphics.Size(size.Width, size.Height);
+        }
+
+        public static System.Drawing.Size ToSystemSize(this OpenMobile.Graphics.Size size)
+        {
+            return new System.Drawing.Size(size.Width, size.Height);
+        }
+
+        public static OpenTK.Vector3 ToOpenTKVector3(this OpenMobile.Math.Vector3 v)
+        {
+            return new OpenTK.Vector3(v.X, v.Y, v.Z);
+        }
+        public static OpenTK.Vector3d ToOpenTKVector3d(this OpenMobile.Math.Vector3 v)
+        {
+            return new OpenTK.Vector3d(v.X, v.Y, v.Z);
+        }
+
+    }
 }

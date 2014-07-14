@@ -48,36 +48,22 @@ namespace OpenMobile.Graphics
         {
             #if WINDOWS
             int ret;
-            if (Configuration.RunningOnWindows)
-            {
-                OpenMobile.Platform.Windows.MSG msg = new OpenMobile.Platform.Windows.MSG();
-                while (msg.Message != Platform.Windows.WindowMessage.CLOSE && _Run)
-                {
-                    Thread.Sleep(0);
-                    ret = OpenMobile.Platform.Windows.Functions.GetMessage(ref msg, IntPtr.Zero, 0, 0);
-                    if (ret == -1)
-                    {
-                        throw new Exception(String.Format(
-                            "An error happened while processing the message queue. Windows error: {0}",
-                            Marshal.GetLastWin32Error()));
-                    }
 
-                    OpenMobile.Platform.Windows.Functions.TranslateMessage(ref msg);
-                    OpenMobile.Platform.Windows.Functions.DispatchMessage(ref msg);
-                }
-            }
+            // Start message pump
+            if (OpenTK.Configuration.RunningOnWindows)
+                System.Windows.Forms.Application.Run();
             #endif
         }
         public static void ShowError(object window, string text, string title)
         {
-            if (Configuration.RunningOnWindows)
+            if (OpenTK.Configuration.RunningOnWindows)
             {
                 if (window == null)
                     MessageBox(IntPtr.Zero, text, title, 0x10);
                 else
                     MessageBox((IntPtr)window, text, title, 0x10);
             }
-            else if (Configuration.RunningOnLinux)
+            else if (OpenTK.Configuration.RunningOnLinux)
             {
                 #if LINUX
                 if (File.Exists("/usr/bin/zenity"))

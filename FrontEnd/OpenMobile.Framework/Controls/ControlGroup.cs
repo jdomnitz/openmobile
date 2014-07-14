@@ -21,7 +21,6 @@
 using System.Collections.Generic;
 using OpenMobile.Graphics;
 using System;
-using OpenMobile.Input;
 
 namespace OpenMobile.Controls
 {

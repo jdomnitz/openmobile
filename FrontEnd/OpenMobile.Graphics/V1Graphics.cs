@@ -23,8 +23,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using OpenMobile.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 using OpenMobile.Math;
+using OpenTK;
 
 namespace OpenMobile.Graphics
 {
@@ -352,7 +353,7 @@ namespace OpenMobile.Graphics
         public void Clear(Color color)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.ClearColor(color);
+            GL.ClearColor(color.ToSystemColor());
         }
         public void DrawArc(Pen pen, Rectangle rect, float startAngle, float sweepAngle)
         {
@@ -361,7 +362,7 @@ namespace OpenMobile.Graphics
 
         public void DrawArc(Pen pen, int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
             GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.Multisample);
@@ -386,7 +387,7 @@ namespace OpenMobile.Graphics
         const float DEG2RAD = (float)(System.Math.PI / 180);
         public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
             GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.PointSmooth);
@@ -438,7 +439,7 @@ namespace OpenMobile.Graphics
                     return;
                 }
             GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
-            GL.Color4(Color.White);
+            GL.Color4(Color.White.ToSystemColor());
             GL.Begin(BeginMode.Quads);
             {
                 GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(destPoints[0].X, destPoints[0].Y);
@@ -462,10 +463,10 @@ namespace OpenMobile.Graphics
         {
             DrawImage(image, X, Y, Width, Height, transparency,eAngle.Normal);
         }
-        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation)
+        public void DrawImage(OImage image, int X, int Y, int Width, int Height, float transparency, eAngle angle, OpenTK.Vector3 rotation)
         {
         }
-        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, Math.Vector3 rotation, ReflectionsData reflectionData)
+        public void DrawImage(OImage image, int X, int Y, int Z, int Width, int Height, float transparency, eAngle angle, OpenTK.Vector3 rotation, ReflectionsData reflectionData)
         {
         }
         public void DrawImage(OImage image,int X, int Y,int Width, int Height,float transparency,eAngle angle)
@@ -527,7 +528,7 @@ namespace OpenMobile.Graphics
             GL.Disable(EnableCap.Texture2D);
         }
 
-        public void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, Vector3 rotation)
+        public void DrawCube(OImage[] image, int x, int y, int z, double width, double height, int depth, OpenTK.Vector3 rotation)
         {
         }
 
@@ -569,7 +570,7 @@ namespace OpenMobile.Graphics
                         }
                         catch (InvalidOperationException) { return false; }
                         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-                                        OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+                                        OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
                     case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
@@ -580,7 +581,7 @@ namespace OpenMobile.Graphics
                         }
                         catch (InvalidOperationException) { return false; }
                         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
-                                        OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                                        OpenTK.Graphics.OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         img.UnlockBits(data);
                         break;
                     case System.Drawing.Imaging.PixelFormat.Format8bppIndexed:
@@ -596,7 +597,7 @@ namespace OpenMobile.Graphics
                         }
                         catch (InvalidOperationException) { return false; }
                         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, data.Width, data.Height, 0,
-                                        OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                                        OpenTK.Graphics.OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                         tmp.UnlockBits(data);
                         tmp.Dispose();
                         break;
@@ -663,7 +664,7 @@ namespace OpenMobile.Graphics
                     return;
                 }
             GL.BindTexture(TextureTarget.Texture2D, image.GetTexture(screen));
-            GL.Color4(Color.White);
+            GL.Color4(Color.White.ToSystemColor());
             GL.Begin(BeginMode.Quads);
             {
                 GL.TexCoord2(srcX, srcHeight); GL.Vertex2(rect.X, rect.Height+rect.Y);
@@ -676,7 +677,7 @@ namespace OpenMobile.Graphics
         }
         public void DrawLine(Pen pen, Point[] points)
         {
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
             GL.Enable(EnableCap.LineSmooth);
             GL.Begin(BeginMode.LineStrip);
@@ -691,7 +692,7 @@ namespace OpenMobile.Graphics
         }
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
             GL.Enable(EnableCap.LineSmooth);
             if (pen.DashStyle != DashStyle.Solid)
@@ -713,7 +714,7 @@ namespace OpenMobile.Graphics
         {
             if (points.Length < 3)
                 return;
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
             GL.Enable(EnableCap.PointSmooth);
             GL.Enable(EnableCap.LineSmooth);
@@ -767,7 +768,7 @@ namespace OpenMobile.Graphics
         }
         public void DrawRoundRectangle(Pen pen, int x, int y, int width, int height,int radius)
         {
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
             double ang = 0;
             GL.Enable(EnableCap.LineSmooth);
@@ -858,7 +859,7 @@ namespace OpenMobile.Graphics
             GL.Enable(EnableCap.PointSmooth);
             GL.Begin(BeginMode.Polygon);
             {
-                GL.Color4(gr.SecondColor);
+                GL.Color4(gr.SecondColor.ToSystemColor());
                 GL.Vertex2(x, y + height - radius); //(0,1)
                 GL.Vertex2(x + radius, y + height); //(1,0)
                 GL.Vertex2(x + width - radius, y + height); //(2,0)
@@ -869,7 +870,7 @@ namespace OpenMobile.Graphics
             {
                 GL.Vertex2(x, y + height - radius); //(0,1)
                 GL.Vertex2(x + width, y + height - radius); //(3,1)
-                GL.Color4(gr.Color);
+                GL.Color4(gr.Color.ToSystemColor());
                 GL.Vertex2(x + width, y + radius); //(3,2)
                 GL.Vertex2(x, y + radius); //(0,2)
             }
@@ -903,7 +904,7 @@ namespace OpenMobile.Graphics
                 }
             }
             GL.End();
-            GL.Color4(gr.SecondColor);
+            GL.Color4(gr.SecondColor.ToSystemColor());
             GL.Begin(BeginMode.TriangleFan);
             {
                 cY = y + height - radius; //top right
@@ -930,7 +931,7 @@ namespace OpenMobile.Graphics
         private void FillSolidRoundRectangle(Color color, int x, int y, int width, int height, int radius)
         {
             double ang = 0;
-            GL.Color4(color);
+            GL.Color4(color.ToSystemColor());
             GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.PointSmooth);
             GL.Begin(BeginMode.Polygon);
@@ -994,7 +995,7 @@ namespace OpenMobile.Graphics
         }
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
-            GL.Color4(pen.Color);
+            GL.Color4(pen.Color.ToSystemColor());
             GL.LineWidth(pen.Width);
             GL.Begin(BeginMode.Lines);
             {
@@ -1037,7 +1038,7 @@ namespace OpenMobile.Graphics
         }
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
         {
-            GL.Color4(brush.Color);
+            GL.Color4(brush.Color.ToSystemColor());
             GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.PointSmooth);
             if (AA)
@@ -1057,7 +1058,7 @@ namespace OpenMobile.Graphics
         public void FillPolygon(Brush brush, Point[] points)
         {
             //TODO - Support LinearGradiantBrush
-            GL.Color4(brush.Color);
+            GL.Color4(brush.Color.ToSystemColor());
             GL.Enable(EnableCap.LineSmooth);
             GL.Begin(BeginMode.Polygon);
             {
@@ -1088,11 +1089,11 @@ namespace OpenMobile.Graphics
         {
             GL.Begin(BeginMode.Quads);
             {
-                GL.Color4(brush.SecondColor);
+                GL.Color4(brush.SecondColor.ToSystemColor());
                 GL.Vertex2(x+width, y+height); //(1,1)
                 GL.Vertex2(x+width, y); //(1,0)
-                
-                GL.Color4(brush.Color);
+
+                GL.Color4(brush.Color.ToSystemColor());
                 GL.Vertex2(x, y);
                 GL.Vertex2(x, y+height);
             }
@@ -1103,11 +1104,11 @@ namespace OpenMobile.Graphics
         {
             GL.Begin(BeginMode.Quads);
             {
-                GL.Color4(brush.SecondColor);
+                GL.Color4(brush.SecondColor.ToSystemColor());
                 GL.Vertex2(x+width, y+height);
                 GL.Vertex2(x, y+height);
 
-                GL.Color4(brush.Color);
+                GL.Color4(brush.Color.ToSystemColor());
                 GL.Vertex2(x, y);
                 GL.Vertex2(x+width, y);
             }
@@ -1115,7 +1116,7 @@ namespace OpenMobile.Graphics
         }
         private void fillRectangleSolid(Brush brush, float x, float y, float width, float height)
         {
-            GL.Color4(brush.Color);
+            GL.Color4(brush.Color.ToSystemColor());
             GL.Begin(BeginMode.Quads);
             {
                 GL.Vertex2(x+width, y+height);

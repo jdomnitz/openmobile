@@ -23,6 +23,7 @@ using System.IO;
 using System;
 using OpenMobile.Framework;
 using OpenMobile.Plugin;
+using OpenTK;
 
 namespace OpenMobile.Media
 {
@@ -75,13 +76,13 @@ namespace OpenMobile.Media
         }
         private static bool isSystemDrive(string path)
         {
-            if (Configuration.RunningOnWindows)
+            if (OpenTK.Configuration.RunningOnWindows)
             {
                 if (System.IO.Path.GetPathRoot(path) == System.IO.Path.GetPathRoot(System.Environment.GetFolderPath(System.Environment.SpecialFolder.System)))
                     return true;
                 return false;
             }
-            else if (Configuration.RunningOnLinux)
+            else if (OpenTK.Configuration.RunningOnLinux)
             {
                 return (path == "/");
             }
@@ -134,7 +135,7 @@ namespace OpenMobile.Media
                 // TODO: Add non english support
 
                 bool caseInsensitive = false;
-                if (Configuration.RunningOnLinux)
+                if (OpenTK.Configuration.RunningOnLinux)
                 {
                     DriveInfo info = new DriveInfo(path);
                     switch (info.DriveFormat)
@@ -150,14 +151,14 @@ namespace OpenMobile.Media
                 }
                 if (Directory.Exists(Path.Combine(path, "Playlists")))
                     playlists.Add(Path.Combine(path, "Playlists"));
-                if ((Configuration.RunningOnLinux) && !caseInsensitive)
+                if ((OpenTK.Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "playlists")))
                         playlists.Add(Path.Combine(path, "playlists"));
                 }
                 if (Directory.Exists(Path.Combine(path, "Music", "Playlists")))
                     playlists.Add(Path.Combine(path, "Music", "Playlists"));
-                if ((Configuration.RunningOnLinux) && !caseInsensitive)
+                if ((OpenTK.Configuration.RunningOnLinux) && !caseInsensitive)
                 {
                     if (Directory.Exists(Path.Combine(path, "Music", "playlists")))
                         playlists.Add(Path.Combine(path, "Music", "playlists"));

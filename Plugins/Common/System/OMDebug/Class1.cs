@@ -298,7 +298,7 @@ namespace OMDebug
             Texts.Clear();
             Texts.Add("Processors: " + Environment.ProcessorCount);
             Texts.Add("Architecture: " + OpenMobile.Framework.OSSpecific.getArchitecture().ToString());
-            Texts.Add("Screens: " + DisplayDevice.AvailableDisplays.Count.ToString());
+            Texts.Add("Screens: " + OM.Host.ScreenCount.ToString());
             Texts.Add("Embedded: " + Configuration.RunningOnEmbedded);
             WriteToLog(false, "------------------Hardware-------------------", new DebugMessage(DebugMessageType.Info), Texts.ToArray());
 

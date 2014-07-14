@@ -23,7 +23,7 @@ using System.ComponentModel;
 using OpenMobile.Graphics;
 using OpenMobile;
 using System.Collections.Generic;
-using OpenMobile.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 
 namespace OpenMobile.Controls
 {

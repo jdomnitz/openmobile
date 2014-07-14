@@ -32,14 +32,15 @@ using System.Diagnostics;
 using OpenMobile.Framework;
 using OpenMobile.helperFunctions.Graphics;
 using System.Linq;
+using OpenTK;
 
 namespace OpenMobile
 {
-    public class RenderingWindow : GameWindow, iRenderingWindow
+    public class RenderingWindow : OpenTK.GameWindow, iRenderingWindow
     {
 
         /// <summary>
-        /// Current screen dimming value
+        /// Current _Screen dimming value
         /// </summary>
         private int dimmer;
 
@@ -108,20 +109,20 @@ namespace OpenMobile
         /// </summary>
         object painting = new object();
 
-        /// <summary>
-        /// [REMOVE] Indicates that this screen uses the default mouse
-        /// </summary>
-        public bool defaultMouse { get; set; }
+        ///// <summary>
+        ///// [REMOVE] Indicates that this _Screen uses the default mouse
+        ///// </summary>
+        //public bool defaultMouse { get; set; }
 
         /// <summary>
-        /// [REMOVE] Indicates that video playback is currently active on this screen
+        /// [REMOVE] Indicates that video playback is currently active on this _Screen
         /// </summary>
         public bool VideoPlaying { get; set; }
 
-        /// <summary>
-        /// Currently active mouse device for this screen
-        /// </summary>
-        public MouseDevice currentMouse { get; set; }
+        ///// <summary>
+        ///// Currently active mouse device for this _Screen
+        ///// </summary>
+        //public MouseDevice currentMouse { get; set; }
 
         /// <summary>
         /// [REPLACE WITH TOPMOST CONTROLS INSTEAD] Blocks the functionallity of TransitionOutEverything
@@ -141,13 +142,21 @@ namespace OpenMobile
         {
             get
             {
-                return screen;
+                return this._Screen;
+            }
+            set
+            {
+                if (this._Screen != value)
+                {
+                    this._Screen = value;
+                }
             }
         }
+        private int _Screen;        
 
         private PointF _ScaleFactors = new PointF(1,1);
         /// <summary>
-        /// The scale factors for the screen
+        /// The scale factors for the _Screen
         /// </summary>
         public PointF ScaleFactors
         {
@@ -187,7 +196,7 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// The aspect ratio of the screen
+        /// The aspect ratio of the _Screen
         /// </summary>
         public float AspectRatio
         {
@@ -197,12 +206,11 @@ namespace OpenMobile
             }
         }
 
-        public RenderingWindow(int s)
+        public RenderingWindow(int s, Size initalScreenSize)
+            : base(initalScreenSize.Width, initalScreenSize.Height)
         {
             g = new OpenMobile.Graphics.Graphics(s);
-            this.screen = s;
-
-            tmrMeasureFPS.Elapsed += new System.Timers.ElapsedEventHandler(tmrMeasureFPS_Elapsed);
+            this._Screen = s;
 
             // Register redraw method
             ReDrawPanel = new ReDrawTrigger(Invalidate);
@@ -225,78 +233,36 @@ namespace OpenMobile
             base.Dispose(manual);
         }
 
-        void tmrMeasureFPS_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {   // Measure max fps and log it to the debug log
-            tmrMeasureFPS.Enabled = false;
-            MeasureFPS_Done = true;
-
-            FPS_Reset();
-            Stopwatch sw = new Stopwatch();
-            bool Measure = true;
-            sw.Reset();
-            sw.Start();
-            while (Measure)
-            {
-                if (sw.ElapsedMilliseconds > 1500)
-                    Measure = false;
-                Thread.Sleep(0);
-                refresh = true;
-            }
-            sw.Stop();
-            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Graphics", String.Format("Screen {0}: FPS Max (0ms) {1}", screen, FPS_Max));
-            FPS_Reset();
-            Measure = true;
-            sw.Reset();
-            sw.Start();
-            while (Measure)
-            {
-                if (sw.ElapsedMilliseconds > 1500)
-                    Measure = false;
-                Thread.Sleep(1);
-                refresh = true;
-            }
-            sw.Stop();
-            BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Graphics", String.Format("Screen {0}: FPS Max (1ms) {1}", screen, FPS_Max));
-            FPS_Reset();
-        }
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void InitializeRendering()
         {
-            // Check for specific startup screen
+            base.MakeCurrent();
+
+            // Check for specific startup _Screen
             int StartupScreen = Core.theHost.StartupScreen;
 
             // Set bounds
-            if (screen <= DisplayDevice.AvailableDisplays.Count - 1)
-                this.Bounds = new Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : screen].Bounds.Location, this.Size);
+            if (_Screen <= DisplayDevice.AvailableDisplays.Count - 1)
+                this.Bounds = new System.Drawing.Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : _Screen].Bounds.Location, this.Size);
 
             System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetCallingAssembly().Location);
-            FormTitle = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + screen.ToString();
+            FormTitle = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + _Screen.ToString();
             this.Title = FormTitle;
             
             // Connect events
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CommonResources));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("Icon")));
-            this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
+            //this.MouseLeave += new System.EventHandler<System.EventArgs>(this.RenderingWindow_MouseLeave);
             this.Closing += new EventHandler<System.ComponentModel.CancelEventArgs>(this.RenderingWindow_FormClosing);
             this.Resize += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
             this.Move += new EventHandler<EventArgs>(this.RenderingWindow_Resize);
-            this.Gesture += new EventHandler<OpenMobile.Graphics.TouchEventArgs>(RenderingWindow_Gesture);
-            this.ResolutionChange += new EventHandler<OpenMobile.Graphics.ResolutionChange>(RenderingWindow_ResolutionChange);
+            //this.Gesture += new EventHandler<OpenMobile.Graphics.TouchEventArgs>(RenderingWindow_Gesture);
+            //this.ResolutionChange += new EventHandler<OpenMobile.Graphics.ResolutionChange>(RenderingWindow_ResolutionChange);
             tmrClickHold.Elapsed += new System.Timers.ElapsedEventHandler(tmrClickHold_Elapsed);
 
             // Start input router
-            if (screen == 0)
+            if (_Screen == 0)
                 InputRouter.Initialize();
-
-            // Set window size
-            if (Configuration.RunningOnWindows)
-                if (options == GameWindowFlags.Fullscreen)
-                    OnWindowStateChanged(EventArgs.Empty);
-
-            // Set mouse startup location
-            if ((this.WindowState == WindowState.Fullscreen) && (screen == 0))
-                DefaultMouse.Location = this.Location;             
         }
 
         void tmrClickHold_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -319,24 +285,25 @@ namespace OpenMobile
         protected override void OnLoad(EventArgs e)
         {
             g.Initialize(this, _MouseData);
-            if (screen == 0)
+            if (_Screen == 0)
             {
                 if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))
-                    Application.ShowError(this.WindowHandle, "This application has been forced to use software rendering.  Performance will be horrible until you install proper graphics drivers!!", "Performance Warning");
+                    Application.ShowError(base.WindowInfo.Handle, "This application has been forced to use software rendering.  Performance will be horrible until you install proper graphics drivers!!", "Performance Warning");
             }
             base.OnLoad(e);
         }
 
-        public void Run(GameWindowFlags flags, Size initalScreenSize)
+        public void Run()
         {
-
-            //NativeInitialize(flags, 800, 480);
-            //NativeInitialize(flags, 1000, 600);
-            NativeInitialize(flags, initalScreenSize.Width, initalScreenSize.Height);
-            InitializeRendering();
             try
             {
-                Run(1.0, 60.0, BuiltInComponents.SystemSettings.OpenGLVSync);
+                InitializeRendering();
+
+                if (BuiltInComponents.SystemSettings.OpenGLVSync)
+                    base.VSync = OpenTK.VSyncMode.On;
+                else
+                    base.VSync = OpenTK.VSyncMode.Off;
+                Run(1.0, 60.0);
             }
             catch (Exception e)
             {
@@ -344,18 +311,18 @@ namespace OpenMobile
             }
         }
 
-        public void RunAsync(GameWindowFlags flags, Size initalScreenSize)
+        public void RunAsync()
         {
             Thread t = new Thread(delegate()
             {
-                Run(flags, initalScreenSize);
+                Run();
             });
             t.TrySetApartmentState(ApartmentState.STA);
-            t.Name = String.Format("RenderingWindow_{0}.RunAsync", screen);
+            t.Name = String.Format("RenderingWindow_{0}.RunAsync", _Screen);
             t.Start();
         }
 
-        protected override void OnRenderFrame(EventArgs e)
+        protected override void OnRenderFrame(FrameEventArgs e)
         {
             if (!MeasureFPS_Done)
                 tmrMeasureFPS.Enabled = true;
@@ -381,7 +348,7 @@ namespace OpenMobile
             RenderDebugInfo();
             //ShowDebugInfoTitle();
 
-            // Render a "dimmer" overlay to reduce screen brightness
+            // Render a "dimmer" overlay to reduce _Screen brightness
             RenderDimmer();
 
             SwapBuffers(); //show the new image before potentially lagging
@@ -390,14 +357,7 @@ namespace OpenMobile
             g.End();
         }
 
-
-        private void ShowDebugInfoTitle()
-        {
-            if (BuiltInComponents.Host.ShowDebugInfo)
-                this.Title = String.Format("{0} (FPS: {1}/{2}/{3})", FormTitle, FPS_Min, FPS, FPS_Max);
-        }
-
-        #region Local renderers
+        #region Local renders
 
         private void RenderDimmer()
         {
@@ -432,7 +392,7 @@ namespace OpenMobile
                             RenderUpdateMarker = @"-";
                             break;
                     }
-                    DebugString.Text = String.Format("OpenGL version {10} / OMEngine: {11} / Renderer: {12}\nScreen: {0} {1}\nFPS: {2}/{3}/{4}\nFocus: {5}.{6}\nFocusParent: {7}\nUnderMouse: {8}.{9}", screen, RenderUpdateMarker, FPS_Min, FPS, FPS_Max, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""), Graphics.Graphics.Version, Graphics.Graphics.GraphicsEngine, Graphics.Graphics.Renderer);
+                    DebugString.Text = String.Format("OpenGL version {8} / OMEngine: {9} / Renderer: {10}\nScreen: {0} {1}\nFPS: {2}\nFocus: {3}.{4}\nFocusParent: {5}\nUnderMouse: {6}.{7}", _Screen, RenderUpdateMarker, base.RenderFrequency, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""), Graphics.Graphics.Version, Graphics.Graphics.GraphicsEngine, Graphics.Graphics.Renderer);
                     if (DebugString.Changed)
                         RenderDebugInfoTexture = g.GenerateTextTexture(RenderDebugInfoTexture, 0, 0, 1000, 300, DebugString.Text, new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
                     g.DrawImage(RenderDebugInfoTexture, 0, 0, 1000, 300);
@@ -447,8 +407,8 @@ namespace OpenMobile
             {
                 lock (painting)
                 {
-                    if (identity.TextureGenerationRequired(screen))
-                        identity = g.GenerateTextTexture(identity, 0, 0, 1000, 600, screen.ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
+                    if (identity.TextureGenerationRequired(_Screen))
+                        identity = g.GenerateTextTexture(identity, 0, 0, 1000, 600, _Screen.ToString(), new Font(Font.GenericSansSerif, 400F), eTextFormat.Outline, Alignment.CenterCenter, Color.White, Color.Black);
                     g.DrawImage(identity, 0, 0, 1000, 600, IdentifyOpacity);
                 }
             }
@@ -474,7 +434,7 @@ namespace OpenMobile
             RenderingParam.Alpha = 1.0f;
             RenderingParam.TransitionActive = false;
 
-            // Exit after resetting transiton effects?
+            // Exit after resetting transition effects?
             if (e == null)
                 return;
 
@@ -483,11 +443,11 @@ namespace OpenMobile
 
             // Apply any rotation data
             if (e.Rotation.Length != 0)
-                g.Rotate(e.Rotation);
+                g.Rotate(new Math.Vector3((float)e.Rotation.X, (float)e.Rotation.Y, (float)e.Rotation.Z));
 
             // Apply any scale data
             if (e.Scale.X != 1 | e.Scale.Y != 1 | e.Scale.Y != 1)
-                g.Scale(e.Scale);
+                g.Scale(new Math.Vector3((float)e.Scale.X, (float)e.Scale.Y, (float)e.Scale.Z));
 
             // Apply transparency values (this is done via rendering parameters passed along to each control)
             RenderingParam.Alpha = e.Alpha;
@@ -546,7 +506,7 @@ namespace OpenMobile
                     if (!RenderingError)
                     {
                         RenderingError = true;
-                        BuiltInComponents.Host.DebugMsg(String.Format("RenderingWindow.RenderPanels (Screen {0}) Exception:", screen), e);
+                        BuiltInComponents.Host.DebugMsg(String.Format("RenderingWindow.RenderPanels (Screen {0}) Exception:", _Screen), e);
                     }
                 }
             }
@@ -574,18 +534,19 @@ namespace OpenMobile
 
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
-            // Stop rendering if window is minimized
-            if (this.WindowState == WindowState.Minimized)
-                this.StopRendering = true;
-            else
-            {
-                this.StopRendering = false;
-            }
+            //// Stop rendering if window is minimized
+            //if (this.WindowState == WindowState.Minimized)
+            //    this.StopRendering = true;
+            //else
+            //{
+            //    this.StopRendering = false;
+            //}
 
             ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
 
-            if (this.Context != null)
-                OnRenderFrameInternal();
+            //if (this.Context != null)
+            //    OnRenderFrameInternal();
+
             raiseResizeEvent();
 
             // Also make other windows follow the state of the main window (maximize and minimize)
@@ -596,7 +557,7 @@ namespace OpenMobile
             MakeCurrent();
             g.Resize(Width, Height);
             base.OnResize(e);
-            MakeCurrent(null);
+            MakeCurrent();
         }
         protected override void OnWindowStateChanged(EventArgs e)
         {
@@ -604,15 +565,11 @@ namespace OpenMobile
                 this.WindowState = WindowState.Fullscreen;
             if ((this.WindowState == WindowState.Fullscreen)) // && (!defaultMouse))
             {
-                //if (screen == 0)
-                //    DefaultMouse.TrapCursor();
-                DefaultMouse.HideCursor(this.WindowInfo);
+                base.CursorVisible = false;
             }
             else
             {
-                //if ((screen == 0) && (!defaultMouse))
-                //    DefaultMouse.UntrapCursor();
-                DefaultMouse.ShowCursor(this.WindowInfo);
+                base.CursorVisible = true;
             }
             base.OnWindowStateChanged(e);
             RenderingWindow_Resize(null, e);
@@ -630,28 +587,28 @@ namespace OpenMobile
                 gesture = (e.Arg1 * AspectRatio).ToString("0.00") + "|";
             gesture += ((e.Position.X - this.X) * _ScaleFactors.X).ToString() + ",";
             gesture += ((e.Position.Y - this.Y) * _ScaleFactors.Y).ToString();
-            Core.theHost.execute(eFunction.multiTouchGesture, screen.ToString(), gesture);
+            Core.theHost.execute(eFunction.multiTouchGesture, _Screen.ToString(), gesture);
         }
 
-        void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
-        {
-            try
-            {
-                DisplayDevice dev = DisplayDevice.AvailableDisplays[screen];
-                if (e.Landscape != dev.Landscape)
-                    Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
-            }
-            catch (Exception ex)
-            {
-                BuiltInComponents.Host.DebugMsg("RenderingWindow_ResolutionChange Exception", ex);
-            }
-        }
+        //void RenderingWindow_ResolutionChange(object sender, OpenMobile.Graphics.ResolutionChange e)
+        //{
+        //    try
+        //    {
+        //        DisplayDevice dev = DisplayDevice.AvailableDisplays[_Screen];
+        //        if (e.Landscape != dev.Landscape)
+        //            Core.theHost.raiseSystemEvent(eFunction.screenOrientationChanged, _Screen.ToString(), e.Landscape ? "Landscape" : "Portrait", String.Empty);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        BuiltInComponents.Host.DebugMsg("RenderingWindow_ResolutionChange Exception", ex);
+        //    }
+        //}
 
         private void RenderingWindow_FormClosing(object sender, CancelEventArgs e)
         {
             try
             {
-                if (screen == 0)
+                if (_Screen == 0)
                     Core.theHost.execute(eFunction.closeProgram);
             }
             catch (Exception) { }
@@ -676,7 +633,7 @@ namespace OpenMobile
         
         internal void RenderingWindow_MouseMove(object sender, MouseMoveEventArgs e)
         {
-            if ((int)sender != screen)
+            if ((int)sender != _Screen)
                 return;
 
             // Scale mouse data
@@ -730,14 +687,14 @@ namespace OpenMobile
                             if (CursorDistance > 5)
                             {
                                 bool cancel = false;
-                                ((IThrow)FocusedControlParent).MouseThrowStart(screen, MouseMoveStartPoint, CursorSpeed, _ScaleFactors, ref cancel);
+                                ((IThrow)FocusedControlParent).MouseThrowStart(_Screen, MouseMoveStartPoint, CursorSpeed, _ScaleFactors, ref cancel);
                                 ThrowActive = !cancel;
                                 UpdateControlFocus(FocusedControlParent, null, false);
                             }
                         }
                         else
                         {   // Throw started, update data for throw interface
-                            ((IThrow)FocusedControlParent).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative, CursorSpeed);
+                            ((IThrow)FocusedControlParent).MouseThrow(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative, CursorSpeed);
                         }
                     }
                 }
@@ -750,13 +707,13 @@ namespace OpenMobile
                             if (CursorDistance > 5)
                             {
                                 bool cancel = false;
-                                ((IThrow)FocusedControl).MouseThrowStart(screen, MouseMoveStartPoint, CursorSpeed, _ScaleFactors, ref cancel);
+                                ((IThrow)FocusedControl).MouseThrowStart(_Screen, MouseMoveStartPoint, CursorSpeed, _ScaleFactors, ref cancel);
                                 ThrowActive = !cancel;
                             }
                         }
                         else
                         {   // Throw started, update data for throw interface
-                            ((IThrow)FocusedControl).MouseThrow(screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative, CursorSpeed);
+                            ((IThrow)FocusedControl).MouseThrow(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative, CursorSpeed);
                         }
                     }
                 }
@@ -779,7 +736,7 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMousePreview)FocusedControlParent).MousePreviewMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        ((IMousePreview)FocusedControlParent).MousePreviewMove(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
                     }
             }
             else
@@ -787,7 +744,7 @@ namespace OpenMobile
                 // Mouse preview interface
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MousePreviewMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        ((IMousePreview)FocusedControl).MousePreviewMove(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
             }
 
             // Send event data
@@ -796,7 +753,7 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMouse)FocusedControlParent).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        ((IMouse)FocusedControlParent).MouseMove(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
                     }
             }
             else
@@ -804,29 +761,19 @@ namespace OpenMobile
                 // Mouse interface
                 if (FocusedControl != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                        ((IMouse)FocusedControl).MouseMove(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
+                        ((IMouse)FocusedControl).MouseMove(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, CursorDistanceXYRelative);
             }
 
             // Update relative distance data
             CursorDistanceXYRelative = _MouseData.CursorPosition;
             
-            // Redraw screen
+            // Redraw _Screen
             Invalidate();
-        }
-
-        /// <summary>
-        /// This event is not used 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        internal void RenderingWindow_MouseClick(object sender, OpenMobile.Input.MouseButtonEventArgs e)
-        {
-            // Not used
         }
 
         internal void RenderingWindow_MouseDown(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
-            if ((int)sender != screen)
+            if ((int)sender != _Screen)
                 return;
 
             // Scale mouse data
@@ -864,14 +811,14 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMousePreview)FocusedControlParent).MousePreviewDown(screen, eScaled, MouseMoveStartPoint);
+                        ((IMousePreview)FocusedControlParent).MousePreviewDown(_Screen, eScaled, MouseMoveStartPoint);
                     }
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MousePreviewDown(screen, eScaled, MouseMoveStartPoint);
+                        ((IMousePreview)FocusedControl).MousePreviewDown(_Screen, eScaled, MouseMoveStartPoint);
             }
 
             // No use in doing anything if nothing is focused
@@ -898,14 +845,14 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMouse)FocusedControlParent).MouseDown(screen, eScaled, MouseMoveStartPoint);
+                        ((IMouse)FocusedControlParent).MouseDown(_Screen, eScaled, MouseMoveStartPoint);
                     }
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                        ((IMouse)FocusedControl).MouseDown(screen, eScaled, MouseMoveStartPoint);
+                        ((IMouse)FocusedControl).MouseDown(_Screen, eScaled, MouseMoveStartPoint);
             }
 
             // Redraw
@@ -914,7 +861,7 @@ namespace OpenMobile
 
         internal void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
-            if ((int)sender != screen)
+            if ((int)sender != _Screen)
                 return;
 
             // Scale mouse data
@@ -963,13 +910,13 @@ namespace OpenMobile
             {   // Send event to focused control parent
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
-                        ((IMousePreview)FocusedControlParent).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
+                        ((IMousePreview)FocusedControlParent).MousePreviewUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MousePreviewUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
+                        ((IMousePreview)FocusedControl).MousePreviewUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
             }
 
             // Return if gesture is handled or no control has focus
@@ -1007,13 +954,13 @@ namespace OpenMobile
             {   // Send event to focused control parent
                 if (FocusedControlParent != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
-                        ((IMouse)FocusedControlParent).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                        ((IMouse)FocusedControlParent).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                        ((IMouse)FocusedControl).MouseUp(screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                        ((IMouse)FocusedControl).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
             }
 
             // Send Throw interface data
@@ -1023,7 +970,11 @@ namespace OpenMobile
                 {
                     if (FocusedControlParent != null)
                         if (typeof(IThrow).IsInstanceOfType(FocusedControlParent))
-                            ((IThrow)FocusedControlParent).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                        {
+                            OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                                ((IThrow)FocusedControlParent).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed)
+                            );
+                        }
                 }
             }
             else
@@ -1032,7 +983,11 @@ namespace OpenMobile
                 {
                     if (FocusedControl != null)
                         if (typeof(IThrow).IsInstanceOfType(FocusedControl))
-                            ((IThrow)FocusedControl).MouseThrowEnd(screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                        {
+                             OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                                ((IThrow)FocusedControl).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed)
+                             );
+                       }
                 }
             }
 
@@ -1063,7 +1018,7 @@ namespace OpenMobile
             OMControl iKeyControl = FocusedControl;
             if (iKeyControl != null)
                 if (typeof(IKey).IsInstanceOfType(iKeyControl))
-                    if (((IKey)iKeyControl).KeyDown_BeforeUI(screen, e, _ScaleFactors))
+                    if (((IKey)iKeyControl).KeyDown_BeforeUI(_Screen, e, _ScaleFactors))
                     {
                         Invalidate();
                         return;
@@ -1097,7 +1052,7 @@ namespace OpenMobile
             // iKey interface
             if (iKeyControl != null)
                 if (typeof(IKey).IsInstanceOfType(iKeyControl))
-                    ((IKey)iKeyControl).KeyDown_AfterUI(screen, e, _ScaleFactors);
+                    ((IKey)iKeyControl).KeyDown_AfterUI(_Screen, e, _ScaleFactors);
 
             Invalidate();
         }
@@ -1111,7 +1066,7 @@ namespace OpenMobile
             OMControl iKeyControl = FocusedControl;
             if (iKeyControl != null)
                 if (typeof(IKey).IsInstanceOfType(iKeyControl))
-                    if (((IKey)iKeyControl).KeyUp_BeforeUI(screen, e, _ScaleFactors))
+                    if (((IKey)iKeyControl).KeyUp_BeforeUI(_Screen, e, _ScaleFactors))
                     {
                         Invalidate();
                         return;
@@ -1124,7 +1079,7 @@ namespace OpenMobile
                     this.WindowState = WindowState.Normal;
                 else
                 {
-                    if (screen == 0)
+                    if (_Screen == 0)
                         Core.theHost.execute(eFunction.closeProgram);
                     else
                         CloseMe();
@@ -1157,7 +1112,7 @@ namespace OpenMobile
             // iKey interface
             if (iKeyControl != null)
                 if (typeof(IKey).IsInstanceOfType(iKeyControl))
-                    ((IKey)iKeyControl).KeyUp_AfterUI(screen, e, _ScaleFactors);
+                    ((IKey)iKeyControl).KeyUp_AfterUI(_Screen, e, _ScaleFactors);
 
             Invalidate();
         }
@@ -1231,12 +1186,12 @@ namespace OpenMobile
                             panel.Mode = eModeType.Normal;
 
                             // Raise event for entering panel
-                            ((iPanelEvents)panel).RaiseEvent(screen, eEventType.Entering);
+                            ((iPanelEvents)panel).RaiseEvent(_Screen, eEventType.Entering);
 
                             // Show infobar text (if present)
                             if (!String.IsNullOrEmpty(panel.Header))
                             {
-                                OM.Host.UIHandler.InfoBar_Show(screen, new InfoBar(panel.Header, panel.Icon));
+                                OM.Host.UIHandler.InfoBar_Show(_Screen, new InfoBar(panel.Header, panel.Icon));
                                 lastPanelTransition = panel;
                             }
                         }
@@ -1247,11 +1202,11 @@ namespace OpenMobile
                             panel.UpdateThisControl -= UpdateThisControl;
 
                             // Raise event for leaving panel
-                            ((iPanelEvents)panel).RaiseEvent(screen, eEventType.Leaving);
+                            ((iPanelEvents)panel).RaiseEvent(_Screen, eEventType.Leaving);
 
                             // Remove infobar text
                             if (!String.IsNullOrEmpty(panel.Header) && (lastPanelTransition == panel))
-                                OM.Host.UIHandler.InfoBar_Hide(screen);
+                                OM.Host.UIHandler.InfoBar_Hide(_Screen);
                         }
                     }
                 }
@@ -1266,7 +1221,7 @@ namespace OpenMobile
                 OMPanel ExistingPanel = RenderingQueue.Find(x => x == newP);
                 if (ExistingPanel == null)
                 {
-                    // Attach screen update event to new panel
+                    // Attach _Screen update event to new panel
                     newP.UpdateThisControl += UpdateThisControl;
 
                     // Unfocus currently focused control
@@ -1279,7 +1234,7 @@ namespace OpenMobile
                     insertPanel(newP);
 
                     // Raise panel event
-                    ((iPanelEvents)newP).RaiseEvent(screen, eEventType.Loaded);
+                    ((iPanelEvents)newP).RaiseEvent(_Screen, eEventType.Loaded);
 
                     return true;
                 }
@@ -1306,7 +1261,7 @@ namespace OpenMobile
                 oldP.Mode = eModeType.transitioningOut;
 
                 // Raise panel event
-                ((iPanelEvents)oldP).RaiseEvent(screen, eEventType.Unloaded);
+                ((iPanelEvents)oldP).RaiseEvent(_Screen, eEventType.Unloaded);
 
                 return true;
             }
@@ -1331,7 +1286,7 @@ namespace OpenMobile
                         RenderingQueue[i].Mode = eModeType.transitioningOut;
 
                         // Raise panel event
-                        ((iPanelEvents)RenderingQueue[i]).RaiseEvent(screen, eEventType.Unloaded);
+                        ((iPanelEvents)RenderingQueue[i]).RaiseEvent(_Screen, eEventType.Unloaded);
                     }
                 }
                 return true;
@@ -1339,7 +1294,7 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Closes this screen with animation
+        /// Closes this _Screen with animation
         /// </summary>
         public void CloseMe()
         {
@@ -1357,7 +1312,7 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Fades the screen to black
+        /// Fades the _Screen to black
         /// </summary>
         public void FadeOut()
         {
@@ -1372,15 +1327,15 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Requests a redraw of the screen
+        /// Requests a redraw of the _Screen
         /// </summary>
         private void Invalidate()
         {
-            refresh = true;
+            //refresh = true;
         }
 
         /// <summary>
-        /// Hookable method to request a redraw of the screen
+        /// Hookable method to request a redraw of the _Screen
         /// </summary>
         /// <param name="resetHighlighted"></param>
         public void UpdateThisControl(bool resetHighlighted)
@@ -1424,7 +1379,7 @@ namespace OpenMobile
         {
             SandboxedThread.Asynchronous(delegate()
                 {
-                    Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, screen.ToString(), this.ClientLocation, this.Size, this.ScaleFactors);
+                    Core.theHost.raiseSystemEvent(eFunction.RenderingWindowResized, _Screen.ToString(), this.Location.ToOpenMobilePoint(), this.Size.ToOpenMobileSize(), this.ScaleFactors);
                 }
             );
         }
@@ -1788,7 +1743,7 @@ namespace OpenMobile
             {
                 OMControl control = null;
                 float BestDistance = float.MaxValue;
-                OpenMobile.Math.Vector2 FocusedControlLocation = FocusedControl.Region.Center.ToVector2();
+                OpenTK.Vector2 FocusedControlLocation = FocusedControl.Region.Center.ToVector2();
 
                 // Do we have a modal panel?
                 OMPanel ModalPanel = GetModalPanel();
@@ -1936,9 +1891,9 @@ namespace OpenMobile
                             SandboxedThread.Asynchronous(delegate()
                             {
                                 if (typeof(IClickableAdvanced).IsInstanceOfType(control))
-                                    ((IClickableAdvanced)control).clickMe(screen, eScaled);
+                                    ((IClickableAdvanced)control).clickMe(_Screen, eScaled);
                                 else
-                                    ((IClickable)control).clickMe(screen);
+                                    ((IClickable)control).clickMe(_Screen);
                             });
                         }
                         break;
@@ -1947,9 +1902,9 @@ namespace OpenMobile
                             SandboxedThread.Asynchronous(delegate()
                             {
                                 if (typeof(IClickableAdvanced).IsInstanceOfType(control))
-                                    ((IClickableAdvanced)control).longClickMe(screen, eScaled);
+                                    ((IClickableAdvanced)control).longClickMe(_Screen, eScaled);
                                 else
-                                    ((IClickable)control).longClickMe(screen);
+                                    ((IClickable)control).longClickMe(_Screen);
                             });
                         }
                         break;
@@ -1958,9 +1913,9 @@ namespace OpenMobile
                             SandboxedThread.Asynchronous(delegate()
                             {
                                 if (typeof(IClickableAdvanced).IsInstanceOfType(control))
-                                    ((IClickableAdvanced)control).holdClickMe(screen, eScaled);
+                                    ((IClickableAdvanced)control).holdClickMe(_Screen, eScaled);
                                 else
-                                    ((IClickable)control).holdClickMe(screen);
+                                    ((IClickable)control).holdClickMe(_Screen);
                             });
                         }
                         break;
@@ -2011,7 +1966,7 @@ namespace OpenMobile
                     rec.AddPoint(p, false);
                 string s = rec.Recognize();
                 if (!string.IsNullOrEmpty(s))
-                    Core.theHost.raiseGestureEvent(screen, rec.Recognize(), RenderingQueue[RenderingQueue.Count - 1], FocusedControl);
+                    Core.theHost.raiseGestureEvent(_Screen, rec.Recognize(), RenderingQueue[RenderingQueue.Count - 1], FocusedControl);
                 currentGesture.Clear();
                 return true;
             }

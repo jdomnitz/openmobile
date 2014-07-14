@@ -711,20 +711,20 @@ namespace OpenMobile
                 // Create a datasource
                 BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "DateTime", "", 1000, DataSource.DataTypes.text, DateTimeProvider, "Current date and time in a local format"));
 
-                // CPU Usage
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "CPU", "Load", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total CPU load"));
+                //// CPU Usage
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "CPU", "Load", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total CPU load"));
 
-                // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "Free", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total free memory in bytes"));
+                //// Memory Usage
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "Free", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total free memory in bytes"));
 
-                // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "Used", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total used memory in bytes"));
+                //// Memory Usage
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "Used", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Total used memory in bytes"));
 
-                // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "UsedPercent", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total used memory in percent"));
+                //// Memory Usage
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "UsedPercent", 1000, DataSource.DataTypes.percent, ComputerDataProvider, "Total used memory in percent"));
 
-                // Memory Usage
-                BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "ProcessUsed", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Currently used memory by OM"));
+                //// Memory Usage
+                //BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "System", "Memory", "ProcessUsed", 1000, DataSource.DataTypes.bytes, ComputerDataProvider, "Currently used memory by OM"));
 
                 // Home location
                 BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "Location", "Favorite", "Home", 0, DataSource.DataTypes.raw, DataProvider, "Home location as set by the user"));
@@ -743,6 +743,7 @@ namespace OpenMobile
                 result = true;
                 switch (dataSource.FullName)
                 {
+                    /*
                     case "System.CPU.Load":
                         {
                             try
@@ -787,6 +788,7 @@ namespace OpenMobile
                         if (currentProcess == null)
                             currentProcess = System.Diagnostics.Process.GetCurrentProcess();
                         return currentProcess.WorkingSet64;
+                    */
 
                     default:
                         result = false;
