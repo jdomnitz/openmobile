@@ -45,13 +45,21 @@ namespace ControlDemo
             OMPanel p = new OMPanel("panel3D", "ControlDemo > 3D Rotation test");
 
             // Configure cube            
-            OMCube cubeTest = new OMCube("cubeTest", 500, OM.Host.ClientArea_Init.Top + 100, 200, 200); //, new imageItem(MediaLoader.MissingCoverImage));//OM.Host.getSkinImage("Unknown Album"));
-            cubeTest.Image1 = new imageItem(MediaLoader.MissingCoverImage);
-            cubeTest.Image2 = new imageItem(MediaLoader.MissingCoverImage);
-            cubeTest.Image3 = new imageItem(MediaLoader.MissingCoverImage);
-            cubeTest.Image4 = new imageItem(MediaLoader.MissingCoverImage);
-            cubeTest.Image5 = new imageItem(MediaLoader.MissingCoverImage);
-            cubeTest.Image6 = new imageItem(MediaLoader.MissingCoverImage);
+            OMCube cubeTest = new OMCube("cubeTest", 500, OM.Host.ClientArea_Init.Top + 80, 200, 200); //, new imageItem(MediaLoader.MissingCoverImage));//OM.Host.getSkinImage("Unknown Album"));
+
+            imageItem img = OM.Host.getSkinImage("Icons|Icon-OM_Large");
+            OImage oImg = img.image.Copy();
+            oImg.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
+            oImg.SetBackground(Color.FromArgb(150, Color.Black));
+            oImg.AddBorder(1, Color.Black);
+            img = new imageItem(oImg);
+
+            cubeTest.Image = img;//new imageItem(MediaLoader.MissingCoverImage);
+            //cubeTest.Image2 = cubeTest.Image1;
+            //cubeTest.Image3 = new imageItem(MediaLoader.MissingCoverImage);
+            //cubeTest.Image4 = new imageItem(MediaLoader.MissingCoverImage);
+            //cubeTest.Image5 = new imageItem(MediaLoader.MissingCoverImage);
+            //cubeTest.Image6 = new imageItem(MediaLoader.MissingCoverImage);
             p.addControl(cubeTest);
 
             OMImage imgReflectionTestSource = new OMImage("imgReflectionTestSource", 500, OM.Host.ClientArea_Init.Top + 100, 200, 200, new imageItem(MediaLoader.MissingCoverImage));//host.getSkinImage("Unknown Album.png"));

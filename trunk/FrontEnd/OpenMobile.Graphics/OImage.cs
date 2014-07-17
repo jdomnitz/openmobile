@@ -595,9 +595,46 @@ namespace OpenMobile.Graphics
                     int top = (img.Height - height) / 2;
                     int width = (int)(img.Width * percentageF);
                     int left = (img.Width - width) / 2;
-                    using (SolidBrush b = new SolidBrush(backColor.ToSystemColor()))
-                        g.FillRectangle(b, new System.Drawing.Rectangle(0, 0, img.Width, img.Height));
+
+                    float penWidth = System.Math.Min(img.Height - height, img.Width - width);
+                    using (System.Drawing.Pen p = new System.Drawing.Pen(backColor.ToSystemColor(), penWidth))
+                    {
+                        g.DrawRectangle(p, new System.Drawing.Rectangle(0, 0, img.Width, img.Height));
+                    }                    
+                    //using (SolidBrush b = new SolidBrush(backColor.ToSystemColor()))
+                    //{
+                    //    g.FillRectangle(b, new System.Drawing.Rectangle(0, 0, img.Width, img.Height));
+                    //}
                     g.DrawImage(img, new System.Drawing.Rectangle(left, top, width, height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
+                }
+
+                // Dispose original image
+                if (img != null)
+                {
+                    img.Dispose();
+                    img = null;
+                }
+
+                // Assign new image
+                img = bmp;
+            }
+            return this;
+        }
+
+        public OImage SetBackground(Color color)
+        {
+            if (img == null)
+                return this;
+
+            // Create new Bitmap object with the size of the picture
+            lock (img)
+            {
+                Bitmap bmp = new Bitmap(img.Width, img.Height);
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    using (SolidBrush b = new SolidBrush(color.ToSystemColor()))
+                        g.FillRectangle(b, new System.Drawing.Rectangle(0, 0, img.Width, img.Height));
+                    g.DrawImage(img, new System.Drawing.Rectangle(0, 0, img.Width, img.Height), 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
                 }
 
                 // Dispose original image

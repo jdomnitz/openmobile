@@ -486,22 +486,29 @@ namespace OpenMobile
 
         private static void initialize()
         {
+            SetStartupInfoText("Initializing...");
+
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
 
             // Load plugins
+            SetStartupInfoText("Loading plugins...");
             loadEmUp();
 
             // Initialize system plugins
+            SetStartupInfoText("Initializing system...");
             getEmReady(true); 
 
             // Load and initialize UI and MainMenu
             //loadMainMenu(); 
+            SetStartupInfoText("Initializing graphics...");
             initMainMenu();
 
             // Init plugins
+            SetStartupInfoText("Initializing plugins...");
             InitPluginsAndData();
 
             // Start application
+            SetStartupInfoText("Loading completed");
             Application.Run();
         }
 
@@ -589,6 +596,12 @@ namespace OpenMobile
             return err;
         }
 
+        static private void SetStartupInfoText(string text)
+        {
+            for (int i = 0; i < RenderingWindows.Count; i++)
+                RenderingWindows[i].StartupInfoText = text;
+        }
+
         [MTAThread]
         private static void Main()
         {
@@ -660,7 +673,7 @@ namespace OpenMobile
             // Initialize screens
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)
-                RenderingWindows.Add(new RenderingWindow(i, InitialScreenSize));
+                RenderingWindows.Add(new RenderingWindow(i, InitialScreenSize, Fullscreen));
 
             #region Check for missing database (and create if needed)
 
@@ -695,6 +708,8 @@ namespace OpenMobile
             // Error check
             if (RenderingWindows.Count == 0)
                 throw new Exception("Unable to detect any monitors on this platform!");
+
+            InputRouter.Initialize();
 
             Thread rapidMenu = new Thread(Core.initialize);
             rapidMenu.Name = "OpenMobile.Core.rapidMenu";

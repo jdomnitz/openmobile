@@ -3400,28 +3400,6 @@ namespace OpenMobile
             if (type == eFunction.nextMedia)
                 while ((!execute(eFunction.nextMedia, zone.ToString())) && (currentPlaylist[zone.AudioDevice.Instance].Count > 1))
                     Thread.Sleep(200);
-
-            #region Internal video playback status
-
-            // Set internal status for video playing
-            else if (type == eFunction.showVideoWindow)
-            {
-                for (int i = 0; i < _ScreenCount; i++)
-                    // TODO : Might be a problem!
-                    if (ZoneHandler.GetZone(i) == zone)
-                        Core.RenderingWindows[i].VideoPlaying = true;
-            }
-
-            // Reset internal status for video playing
-            else if (type == eFunction.hideVideoWindow)
-            {
-                for (int i = 0; i < _ScreenCount; i++)
-                    // TODO : Might be a problem!
-                    if (ZoneHandler.GetZone(i) == zone)
-                        Core.RenderingWindows[i].VideoPlaying = false;
-            }
-
-            #endregion 
         }
 
         /// <summary>
