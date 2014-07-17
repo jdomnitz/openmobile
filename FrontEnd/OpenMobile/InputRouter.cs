@@ -103,7 +103,7 @@ namespace OpenMobile
             thInput.IsBackground = true;
             thInput.Start();
 
-            //// Connect mouse events
+            // Connect events
             //for (int i = 0; i < Core.theHost.ScreenCount; i++)
             //{
             //    // Connect mouse events
@@ -135,6 +135,7 @@ namespace OpenMobile
         private static OpenTK.Input.MouseState _MouseStates_Tmp_Main;
         private static OpenTK.Input.MouseState[] _MouseStates_Tmp;
         private static OpenTK.Input.KeyboardState[] _KeyboardStates_Tmp;
+        private static OpenTK.Input.KeyboardState _KeyboardState_Stored;
 
         private static void Thread_InputHandler()
         {
@@ -148,6 +149,15 @@ namespace OpenMobile
 
             System.Drawing.Point[] lastMousePoint = new System.Drawing.Point[OM.Host.ScreenCount];
             MouseButton[] lastMouseButton = new MouseButton[OM.Host.ScreenCount];
+
+            // Connect events to system keyboard
+            for (int i = 0; i < Core.theHost.ScreenCount; i++)
+            {
+                // Connect keyboard events
+                Core.RenderingWindows[i].KeyDown += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(SourceDown);
+                Core.RenderingWindows[i].KeyUp += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(SourceUp);
+                Core.RenderingWindows[i].KeyPress += new EventHandler<OpenTK.KeyPressEventArgs>(SourcKeyPress);
+            }
 
             while (thInput_Run)
             {
@@ -174,8 +184,8 @@ namespace OpenMobile
                                     // Mouse move event
                                     if (clientPoint != lastMousePoint[i])
                                     {
-                                        MouseMoveEventArgs eOM = new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton);
-                                        Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
+                                            MouseMoveEventArgs eOM = new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton);
+                                            Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
                                     }
 
                                     // Mouse button events
@@ -199,6 +209,29 @@ namespace OpenMobile
                             }
                         }
                     }
+
+
+                    //OpenTK.Input.KeyboardState keyboardState = OpenTK.Input.Keyboard.GetState();
+
+                    //// Check if any screens are using default keyboard mapping (Standard)
+                    //for (int i = 0; i < OM.Host.ScreenCount; i++)
+                    //{
+                    //    if (_Mice_MappedIndex[i] == -1)
+                    //    {
+                    //        if (Core.RenderingWindows[i] != null && !Core.RenderingWindows[i].IsDisposed)
+                    //        {
+                    //            if (Core.RenderingWindows[i].Focused)
+                    //            {
+                    //                // Did something change at the keyboard?
+                    //                if (keyboardState != _KeyboardState_Stored)
+                    //                {   // Yes
+                    //                    keyboardState.
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                    //_KeyboardState_Stored = keyboardState;
 
 
                     //Point mouseCursorMoveDistance = new Point(
@@ -352,11 +385,14 @@ namespace OpenMobile
             // Pass event along
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
             {
-                IdleDetection_Restart(i);
-                KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs();
-                eOM.Character = e.KeyChar.ToString();
-                eOM.Screen = i;
-                raiseSourceDown(sender, eOM);
+                if (Core.RenderingWindows[i].Focused)
+                {
+                    IdleDetection_Restart(i);
+                    KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs();
+                    eOM.Character = e.KeyChar.ToString();
+                    eOM.Screen = i;
+                    raiseSourceDown(sender, eOM);
+                }
             }
         }
 
@@ -365,13 +401,16 @@ namespace OpenMobile
             // Pass event along
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
             {
-                IdleDetection_Restart(i);
-                KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs((OpenMobile.Input.Key)(int)e.Key);
-                eOM.Shift = e.Shift;
-                eOM.Control = e.Control;
-                eOM.Alt = e.Alt;
-                eOM.Screen = i;
-                raiseSourceUp(sender, eOM);
+                if (Core.RenderingWindows[i].Focused)
+                {
+                    IdleDetection_Restart(i);
+                    KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs((OpenMobile.Input.Key)(int)e.Key);
+                    eOM.Shift = e.Shift;
+                    eOM.Control = e.Control;
+                    eOM.Alt = e.Alt;
+                    eOM.Screen = i;
+                    raiseSourceUp(sender, eOM);
+                }
             } 
         }
         private static void raiseSourceUp(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)
@@ -401,13 +440,16 @@ namespace OpenMobile
             // Pass event along
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
             {
-                IdleDetection_Restart(i);
-                KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs((OpenMobile.Input.Key)(int)e.Key);
-                eOM.Shift = e.Shift;
-                eOM.Control = e.Control;
-                eOM.Alt = e.Alt;
-                eOM.Screen = i;
-                raiseSourceDown(sender, eOM);
+                if (Core.RenderingWindows[i].Focused)
+                {
+                    IdleDetection_Restart(i);
+                    KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs((OpenMobile.Input.Key)(int)e.Key);
+                    eOM.Shift = e.Shift;
+                    eOM.Control = e.Control;
+                    eOM.Alt = e.Alt;
+                    eOM.Screen = i;
+                    raiseSourceDown(sender, eOM);
+                }
             } 
         }
         private static void raiseSourceDown(object sender, OpenMobile.Input.KeyboardKeyEventArgs e)

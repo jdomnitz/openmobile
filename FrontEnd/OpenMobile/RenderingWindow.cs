@@ -55,11 +55,13 @@ namespace OpenMobile
         Stopwatch swCursorSpeedTiming = new Stopwatch();
         bool BlockRendering = false;
         bool _RenderingReset = false;
+        bool _ResizeRequired = false;
 
         double _FPS;
         double _FPS_Max = double.MinValue;
         double _FPS_Min = double.MaxValue;
         bool _Refresh = true;
+        bool _StopRendering = false;
         double _SecondsSinceLastRender = 0;
         double _SecondsBetweenMinRenderFrame = 1;
         int _FPS_SleepTime = 1;
@@ -363,6 +365,9 @@ namespace OpenMobile
                     return;
             }
 
+            if (_StopRendering)
+                return;
+
             _FPS = 1 / _SecondsSinceLastRender;
             _SecondsSinceLastRender = 0;
 
@@ -374,6 +379,12 @@ namespace OpenMobile
             }
 
             _Refresh = false;
+
+            if (_ResizeRequired)
+            {
+                g.Resize(Width, Height);
+                _ResizeRequired = false;
+            }
 
             g.Clear(Color.Black);
             g.ResetClip();
@@ -639,30 +650,18 @@ namespace OpenMobile
 
         private void RenderingWindow_Resize(object sender, EventArgs e)
         {
-            //// Stop rendering if window is minimized
-            //if (this.WindowState == WindowState.Minimized)
-            //    this.StopRendering = true;
-            //else
-            //{
-            //    this.StopRendering = false;
-            //}
-
-            ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
-
-            //if (this.Context != null)
-            //    OnRenderFrameInternal();
-
             raiseResizeEvent();
 
             // Also make other windows follow the state of the main window (maximize and minimize)
-            Core.theHost.SetAllWindowState(this.WindowState);
+            if (this.Screen == 0)
+                Core.theHost.SetAllWindowState(this.WindowState);
         }
         protected override void OnResize(EventArgs e)
         {
-            MakeCurrent();
-            g.Resize(Width, Height);
+            ScaleFactors = new PointF((this.ClientRectangle.Width / 1000F), (this.ClientRectangle.Height / 600F));
+            _ResizeRequired = true;
+            RenderingWindow_Resize(null, e);
             base.OnResize(e);
-            MakeCurrent();
         }
         protected override void OnWindowStateChanged(EventArgs e)
         {
@@ -677,6 +676,15 @@ namespace OpenMobile
                 base.CursorVisible = true;
             }
             base.OnWindowStateChanged(e);
+
+            // Stop rendering if window is minimized
+            if (this.WindowState == WindowState.Minimized)
+                this._StopRendering = true;
+            else
+            {
+                this._StopRendering = false;
+            }
+
             RenderingWindow_Resize(null, e);
         }
 
