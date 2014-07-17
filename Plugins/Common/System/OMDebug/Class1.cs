@@ -395,13 +395,13 @@ namespace OMDebug
                 else
                     Texts.Add("AudioDevice: No data/units available");
 
-                // List keyboard devices
-                foreach (string s in (theHost.getData(eGetData.GetAvailableKeyboards, "") as string[]))
-                    Texts.Add("Keyboard unit: " + s);
+                //// List keyboard devices
+                //foreach (string s in (theHost.getData(eGetData.GetAvailableKeyboards, "") as string[]))
+                //    Texts.Add("Keyboard unit: " + s);
 
-                // List mice devices
-                foreach (string s in (theHost.getData(eGetData.GetAvailableMice, "") as string[]))
-                    Texts.Add("Mice unit: " + s);
+                //// List mice devices
+                //foreach (string s in (theHost.getData(eGetData.GetAvailableMice, "") as string[]))
+                //    Texts.Add("Mice unit: " + s);
 
                 // Write out current multizone settings
                 Texts.Add("Multizone settings: ");

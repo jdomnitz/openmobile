@@ -53,9 +53,16 @@ namespace OpenMobile
         Point CursorDistanceXYRelative = new Point();
         PointF CursorSpeed = new PointF();
         Stopwatch swCursorSpeedTiming = new Stopwatch();
-        bool keyboardActive;
         bool BlockRendering = false;
         bool _RenderingReset = false;
+
+        double _FPS;
+        double _FPS_Max = double.MinValue;
+        double _FPS_Min = double.MaxValue;
+        bool _Refresh = true;
+        double _SecondsSinceLastRender = 0;
+        double _SecondsBetweenMinRenderFrame = 1;
+        int _FPS_SleepTime = 1;
 
         /// <summary>
         /// The graphic device
@@ -69,6 +76,34 @@ namespace OpenMobile
         }
 
         /// <summary>
+        /// Startup info text
+        /// </summary>
+        public string StartupInfoText
+        {
+            get
+            {
+                return this._StartupInfoText;
+            }
+            set
+            {
+                if (this._StartupInfoText != value)
+                {
+                    this._StartupInfoText = value;
+
+                    // Update label text
+                    if (panelStartUp != null)
+                    {
+                        OMLabel lbl = ((OMLabel)panelStartUp["lblStartUpInfo"]);
+                        if (lbl != null)
+                            lbl.Text = this._StartupInfoText;
+                    }
+                }
+
+            }
+        }
+        private string _StartupInfoText = "Initializing...";        
+
+        /// <summary>
         /// Contains the currently focused control's parent object (if any)
         /// <para>The control is only set if a control implements certain interfaces (like iContainer)</para>
         /// </summary>
@@ -80,9 +115,6 @@ namespace OpenMobile
 
         Timer tmrClickHold = new Timer(500);
         Stopwatch swClickTiming = new Stopwatch();
-
-        Timer tmrMeasureFPS = new Timer(100);
-        bool MeasureFPS_Done = false;
 
         ReDrawTrigger ReDrawPanel;
 
@@ -109,23 +141,8 @@ namespace OpenMobile
         /// </summary>
         object painting = new object();
 
-        ///// <summary>
-        ///// [REMOVE] Indicates that this _Screen uses the default mouse
-        ///// </summary>
-        //public bool defaultMouse { get; set; }
-
         /// <summary>
-        /// [REMOVE] Indicates that video playback is currently active on this _Screen
-        /// </summary>
-        public bool VideoPlaying { get; set; }
-
-        ///// <summary>
-        ///// Currently active mouse device for this _Screen
-        ///// </summary>
-        //public MouseDevice currentMouse { get; set; }
-
-        /// <summary>
-        /// [REPLACE WITH TOPMOST CONTROLS INSTEAD] Blocks the functionallity of TransitionOutEverything
+        /// [REPLACE WITH TOPMOST CONTROLS INSTEAD] Blocks the functionality of TransitionOutEverything
         /// </summary>
         public bool blockHome { get; set; }
 
@@ -206,8 +223,8 @@ namespace OpenMobile
             }
         }
 
-        public RenderingWindow(int s, Size initalScreenSize)
-            : base(initalScreenSize.Width, initalScreenSize.Height)
+        public RenderingWindow(int s, Size initalScreenSize, OpenTK.GameWindowFlags flags)
+            : base(initalScreenSize.Width, initalScreenSize.Height, OpenTK.Graphics.GraphicsMode.Default, "OpenMobile", flags)
         {
             g = new OpenMobile.Graphics.Graphics(s);
             this._Screen = s;
@@ -216,21 +233,25 @@ namespace OpenMobile
             ReDrawPanel = new ReDrawTrigger(Invalidate);
         }
 
+        public bool IsDisposed = false;
         public override void Dispose()
         {
+            IsDisposed = true;
             if (tmrClickHold != null)
                 tmrClickHold.Dispose();
-            if (tmrMeasureFPS != null)
-                tmrMeasureFPS.Dispose();
             base.Dispose();
-        }
+                    }
         protected override void Dispose(bool manual)
         {
             if (tmrClickHold != null)
                 tmrClickHold.Dispose();
-            if (tmrMeasureFPS != null)
-                tmrMeasureFPS.Dispose();
             base.Dispose(manual);
+        }
+
+        private string GetProductNameAndVersion()
+        {
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetCallingAssembly().Location);
+            return String.Format("OpenMobile [{0}.{1}.{2}.{3}]", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -245,8 +266,7 @@ namespace OpenMobile
             if (_Screen <= DisplayDevice.AvailableDisplays.Count - 1)
                 this.Bounds = new System.Drawing.Rectangle(DisplayDevice.AvailableDisplays[StartupScreen > 0 ? StartupScreen : _Screen].Bounds.Location, this.Size);
 
-            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Assembly.GetCallingAssembly().Location);
-            FormTitle = "openMobile v" + string.Format("{0}.{1}.{2}.{3}", fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart) + " (" + OpenMobile.Framework.OSSpecific.getOSVersion() + ") Screen " + _Screen.ToString();
+            FormTitle = String.Format("{0} ({1}) Screen {2}", GetProductNameAndVersion(), OpenMobile.Framework.OSSpecific.getOSVersion(), _Screen);
             this.Title = FormTitle;
             
             // Connect events
@@ -260,9 +280,9 @@ namespace OpenMobile
             //this.ResolutionChange += new EventHandler<OpenMobile.Graphics.ResolutionChange>(RenderingWindow_ResolutionChange);
             tmrClickHold.Elapsed += new System.Timers.ElapsedEventHandler(tmrClickHold_Elapsed);
 
-            // Start input router
-            if (_Screen == 0)
-                InputRouter.Initialize();
+            //// Start input router
+            //if (_Screen == 0)
+            //    InputRouter.Initialize();
         }
 
         void tmrClickHold_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -291,9 +311,12 @@ namespace OpenMobile
                     Application.ShowError(base.WindowInfo.Handle, "This application has been forced to use software rendering.  Performance will be horrible until you install proper graphics drivers!!", "Performance Warning");
             }
             base.OnLoad(e);
+
+            // Init startup logo
+            Initialize_StartUpPanel();
         }
 
-        public void Run()
+        public new void Run()
         {
             try
             {
@@ -303,7 +326,8 @@ namespace OpenMobile
                     base.VSync = OpenTK.VSyncMode.On;
                 else
                     base.VSync = OpenTK.VSyncMode.Off;
-                Run(1.0, 60.0);
+                //Run(1.0, 60.0);
+                Run(0);
             }
             catch (Exception e)
             {
@@ -324,8 +348,32 @@ namespace OpenMobile
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            if (!MeasureFPS_Done)
-                tmrMeasureFPS.Enabled = true;
+            _SecondsSinceLastRender += e.Time;
+            // Wait for a refresh
+            if (!_Refresh & (_SecondsSinceLastRender < _SecondsBetweenMinRenderFrame))
+            {
+                for (int i = 0; i < _FPS_SleepTime; i++)
+                {
+                    if (_Refresh)
+                        break;
+                    Thread.Sleep(1);
+                }
+                
+                if (!_Refresh)
+                    return;
+            }
+
+            _FPS = 1 / _SecondsSinceLastRender;
+            _SecondsSinceLastRender = 0;
+
+            if (_Refresh)
+            {
+                _FPS_Max = System.Math.Max(_FPS_Max, _FPS);
+                if (_FPS_Max > 15)
+                    _FPS_Min = System.Math.Min(_FPS_Min, _FPS);
+            }
+
+            _Refresh = false;
 
             g.Clear(Color.Black);
             g.ResetClip();
@@ -344,7 +392,7 @@ namespace OpenMobile
             // Render identity (if needed)
             RenderIndentity();
 
-            // Render debuginfo (if needed)
+            // Render debug info (if needed)
             RenderDebugInfo();
             //ShowDebugInfoTitle();
 
@@ -358,6 +406,51 @@ namespace OpenMobile
         }
 
         #region Local renders
+
+        private OMImage imgStartUpLogo;
+        private OMPanel panelStartUp;
+        private StringWrapper startUpString = new StringWrapper();
+        private OImage startUpStringTexture = null;
+
+        private void Initialize_StartUpPanel()
+        {
+            panelStartUp = new OMPanel("panelStartUp");
+            panelStartUp.FastRendering = true;
+
+            imageItem img = OM.Host.getSkinImage("Icons|Icon-OM_Large");
+            OImage oImg = img.image.Copy();
+            oImg.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
+            oImg.Glow(Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor));
+            oImg.ShaderEffect = OMShaders.Radar;
+            img = new imageItem(oImg);
+
+            imgStartUpLogo = new OMImage("imgStartUpLogo", 0, 0, img);
+            imgStartUpLogo.Left = (base.ClientRectangle.Width / 2) - (imgStartUpLogo.Region.Center.X);
+            imgStartUpLogo.Top = (base.ClientRectangle.Height / 2) - (imgStartUpLogo.Region.Center.Y);
+            panelStartUp.addControl(imgStartUpLogo);
+
+            OMLabel lblStartUpProductText = new OMLabel("lblStartUpProductText", 0, imgStartUpLogo.Region.Bottom, base.ClientRectangle.Width, 40);
+            lblStartUpProductText.Text = GetProductNameAndVersion();
+            lblStartUpProductText.TextAlignment = Alignment.CenterCenter;
+            panelStartUp.addControl(lblStartUpProductText);
+
+            OMLabel lblStartUpInfo = new OMLabel("lblStartUpInfo", 0, lblStartUpProductText.Region.Bottom, base.ClientRectangle.Width, 40);
+            lblStartUpInfo.Text = _StartupInfoText;
+            lblStartUpInfo.TextAlignment = Alignment.CenterCenter;
+            panelStartUp.addControl(lblStartUpInfo, ControlDirections.Down);
+
+            this.TransitionInPanel(panelStartUp);
+            this.ExecuteTransition(eGlobalTransition.CollapseGrowCenter.ToString(), 1.0f);
+
+            //panelStartUp.Render(g, RenderingParam);
+            //_Refresh = true;
+
+            //startUpString.Text = String.Format("Startup string");
+            //if (startUpString.Changed)
+            //    startUpStringTexture = g.GenerateTextTexture(startUpStringTexture, 0, 0, base.ClientRectangle.Width, base.ClientRectangle.Height, startUpString.Text, new Font(Font.Arial, 48), eTextFormat.GlowBoldBig, Alignment.TopLeft, Color.Blue, Color.Blue);
+            //g.DrawImage(startUpStringTexture, 0, 0, base.ClientRectangle.Width, base.ClientRectangle.Height);
+
+        }
 
         private void RenderDimmer()
         {
@@ -392,7 +485,7 @@ namespace OpenMobile
                             RenderUpdateMarker = @"-";
                             break;
                     }
-                    DebugString.Text = String.Format("OpenGL version {8} / OMEngine: {9} / Renderer: {10}\nScreen: {0} {1}\nFPS: {2}\nFocus: {3}.{4}\nFocusParent: {5}\nUnderMouse: {6}.{7}", _Screen, RenderUpdateMarker, base.RenderFrequency, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""), Graphics.Graphics.Version, Graphics.Graphics.GraphicsEngine, Graphics.Graphics.Renderer);
+                    DebugString.Text = String.Format("OpenGL version {10} / OMEngine: {11} / Renderer: {12}\nScreen: {0} {1}\nFPS: {2:0}/{3:0}/{4:0}\nFocus: {5}.{6}\nFocusParent: {7}\nUnderMouse: {8}.{9}", _Screen, RenderUpdateMarker, _FPS_Min, _FPS, _FPS_Max, (FocusedControl != null && FocusedControl.Parent != null ? FocusedControl.Parent.Name : ""), (FocusedControl != null ? FocusedControl.Name : ""), (FocusedControlParent != null ? FocusedControlParent.Name : ""), (MouseOverControl != null && MouseOverControl.Parent != null ? MouseOverControl.Parent.Name : ""), (MouseOverControl != null ? MouseOverControl.Name : ""), Graphics.Graphics.Version, Graphics.Graphics.GraphicsEngine, Graphics.Graphics.Renderer);
                     if (DebugString.Changed)
                         RenderDebugInfoTexture = g.GenerateTextTexture(RenderDebugInfoTexture, 0, 0, 1000, 300, DebugString.Text, new Font(Font.Arial, 12), eTextFormat.Normal, Alignment.TopLeft, Color.Yellow, Color.Yellow);
                     g.DrawImage(RenderDebugInfoTexture, 0, 0, 1000, 300);
@@ -491,13 +584,25 @@ namespace OpenMobile
                         //}
 
                         if (FilteredRenderingQueue[i].Mode != eModeType.Loaded && FilteredRenderingQueue[i].Mode != eModeType.Unloaded)
+                        {
                             FilteredRenderingQueue[i].Render(g, RenderingParam);
+
+                            // Should we redraw the screen as fast as possible?
+                            if (FilteredRenderingQueue[i].FastRendering)
+                                _Refresh = true;
+                        }
                     }
 
                     // Render any modal panel a second time on top of all others
                     OMPanel ModalPanel = GetModalPanel();
                     if (ModalPanel != null && ModalPanel.Mode != eModeType.Loaded && ModalPanel.Mode != eModeType.Unloaded)
+                    {
                         ModalPanel.Render(g, RenderingParam);
+
+                        // Should we redraw the screen as fast as possible?
+                        if (ModalPanel.FastRendering)
+                            _Refresh = true;
+                    }
 
                     RenderingError = false;
                 }
@@ -1218,6 +1323,10 @@ namespace OpenMobile
         {
             lock (this) // Lock to prevent multiple transitons at the same time
             {
+                // Remove startup panel
+                if (RenderingQueue.Contains(panelStartUp))
+                    RenderingQueue.Remove(panelStartUp);
+
                 OMPanel ExistingPanel = RenderingQueue.Find(x => x == newP);
                 if (ExistingPanel == null)
                 {
@@ -1331,7 +1440,7 @@ namespace OpenMobile
         /// </summary>
         private void Invalidate()
         {
-            //refresh = true;
+            _Refresh = true;
         }
 
         /// <summary>

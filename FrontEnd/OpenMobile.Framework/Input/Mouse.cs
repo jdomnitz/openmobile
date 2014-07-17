@@ -80,6 +80,17 @@ namespace OpenMobile.Input
             return MouseButton.None;
         }
 
+        public static MouseButton GetMouseButtons(OpenTK.Input.MouseState mouseState)
+        {
+            if (mouseState[OpenTK.Input.MouseButton.Left])
+                return MouseButton.Left;
+            else if (mouseState[OpenTK.Input.MouseButton.Right])
+                return MouseButton.Right;
+            else if (mouseState[OpenTK.Input.MouseButton.Middle])
+                return MouseButton.Middle;
+            return MouseButton.None;
+        }
+
 
     }
 

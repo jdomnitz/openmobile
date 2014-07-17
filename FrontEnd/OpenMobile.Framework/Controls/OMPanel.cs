@@ -354,6 +354,26 @@ namespace OpenMobile.Controls
         {
             return containedControls.Find(p => p.Name == name);
         }
+
+        /// <summary>
+        /// Set to true to render the screen with as high FPS as possible when rendering this panel
+        /// </summary>
+        public bool FastRendering
+        {
+            get
+            {
+                return this._FastRendering;
+            }
+            set
+            {
+                if (this._FastRendering != value)
+                {
+                    this._FastRendering = value;
+                }
+            }
+        }
+        private bool _FastRendering;        
+
         /// <summary>
         /// The current mode of the panel (used for transitions)
         /// </summary>

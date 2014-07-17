@@ -304,7 +304,7 @@ namespace OMWeather2
 
         private void Killing()
         {
-            for (int screen = 0; screen < theHost.ScreenCount; screen++)
+            for (int screen = 0; screen < OM.Host.ScreenCount; screen++)
             {
                 for (int i = 0; i < favoritesCounter[screen]; i++)
                 {

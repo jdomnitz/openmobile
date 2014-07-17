@@ -1351,125 +1351,131 @@ namespace GMap.NET.WindowsForms
 #if !DESIGN
       protected override void OnPaint(PaintEventArgs e)
       {
-         if(ForceDoubleBuffer)
-         {
-            #region -- manual buffer --
-            if(gxOff != null && backBuffer != null)
-            {
-               // render white background
-               gxOff.Clear(EmptyMapBackground);
+          try
+          {
+              if (ForceDoubleBuffer)
+              {
+                  #region -- manual buffer --
+                  if (gxOff != null && backBuffer != null)
+                  {
+                      // render white background
+                      gxOff.Clear(EmptyMapBackground);
 
 #if !PocketPC
-               if(MapRenderTransform.HasValue)
-               {
-                  if(!MobileMode)
+                      if (MapRenderTransform.HasValue)
+                      {
+                          if (!MobileMode)
+                          {
+                              var center = new GPoint(Width / 2, Height / 2);
+                              var delta = center;
+                              delta.OffsetNegative(Core.renderOffset);
+                              var pos = center;
+                              pos.OffsetNegative(delta);
+
+                              gxOff.ScaleTransform(MapRenderTransform.Value, MapRenderTransform.Value, MatrixOrder.Append);
+                              gxOff.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
+
+                              DrawMap(gxOff);
+                              gxOff.ResetTransform();
+
+                              gxOff.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
+                          }
+                          else
+                          {
+                              DrawMap(gxOff);
+                              gxOff.ResetTransform();
+                          }
+                          OnPaintOverlays(gxOff);
+                      }
+                      else
+#endif
+                      {
+#if !PocketPC
+                          if (!MobileMode)
+                          {
+                              gxOff.TranslateTransform(Core.renderOffset.X, Core.renderOffset.Y);
+                          }
+#endif
+                          DrawMap(gxOff);
+                          OnPaintOverlays(gxOff);
+                      }
+
+                      e.Graphics.DrawImage(backBuffer, 0, 0);
+                  }
+                  #endregion
+              }
+              else
+              {
+                  e.Graphics.Clear(EmptyMapBackground);
+
+#if !PocketPC
+                  if (MapRenderTransform.HasValue)
                   {
-                     var center = new GPoint(Width / 2, Height / 2);
-                     var delta = center;
-                     delta.OffsetNegative(Core.renderOffset);
-                     var pos = center;
-                     pos.OffsetNegative(delta);
+                      if (!MobileMode)
+                      {
+                          var center = new GPoint(Width / 2, Height / 2);
+                          var delta = center;
+                          delta.OffsetNegative(Core.renderOffset);
+                          var pos = center;
+                          pos.OffsetNegative(delta);
 
-                     gxOff.ScaleTransform(MapRenderTransform.Value, MapRenderTransform.Value, MatrixOrder.Append);
-                     gxOff.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
+                          e.Graphics.ScaleTransform(MapRenderTransform.Value, MapRenderTransform.Value, MatrixOrder.Append);
+                          e.Graphics.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
 
-                     DrawMap(gxOff);
-                     gxOff.ResetTransform();
+                          DrawMap(e.Graphics);
+                          e.Graphics.ResetTransform();
 
-                     gxOff.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
+                          e.Graphics.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
+                      }
+                      else
+                      {
+                          DrawMap(e.Graphics);
+                          e.Graphics.ResetTransform();
+                      }
+                      OnPaintOverlays(e.Graphics);
                   }
                   else
+#endif
                   {
-                     DrawMap(gxOff);
-                     gxOff.ResetTransform();
+#if !PocketPC
+                      if (IsRotated)
+                      {
+                          #region -- rotation --
+
+                          e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+                          e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                          e.Graphics.TranslateTransform((float)(Core.Width / 2.0), (float)(Core.Height / 2.0));
+                          e.Graphics.RotateTransform(-Bearing);
+                          e.Graphics.TranslateTransform((float)(-Core.Width / 2.0), (float)(-Core.Height / 2.0));
+
+                          e.Graphics.TranslateTransform(Core.renderOffset.X, Core.renderOffset.Y);
+
+                          DrawMap(e.Graphics);
+                          OnPaintOverlays(e.Graphics);
+
+                          #endregion
+                      }
+                      else
+#endif
+                      {
+#if !PocketPC
+                          if (!MobileMode)
+                          {
+                              e.Graphics.TranslateTransform(Core.renderOffset.X, Core.renderOffset.Y);
+                          }
+#endif
+                          DrawMap(e.Graphics);
+                          OnPaintOverlays(e.Graphics);
+                      }
                   }
-                  OnPaintOverlays(gxOff);
-               }
-               else
-#endif
-               {
-#if !PocketPC
-                  if(!MobileMode)
-                  {
-                     gxOff.TranslateTransform(Core.renderOffset.X, Core.renderOffset.Y);
-                  }
-#endif
-                  DrawMap(gxOff);
-                  OnPaintOverlays(gxOff);
-               }
+              }
 
-               e.Graphics.DrawImage(backBuffer, 0, 0);
-            }
-            #endregion
-         }
-         else
-         {
-            e.Graphics.Clear(EmptyMapBackground);
-
-#if !PocketPC
-            if(MapRenderTransform.HasValue)
-            {
-               if(!MobileMode)
-               {
-                  var center = new GPoint(Width / 2, Height / 2);
-                  var delta = center;
-                  delta.OffsetNegative(Core.renderOffset);
-                  var pos = center;
-                  pos.OffsetNegative(delta);
-
-                  e.Graphics.ScaleTransform(MapRenderTransform.Value, MapRenderTransform.Value, MatrixOrder.Append);
-                  e.Graphics.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
-
-                  DrawMap(e.Graphics);
-                  e.Graphics.ResetTransform();
-
-                  e.Graphics.TranslateTransform(pos.X, pos.Y, MatrixOrder.Append);
-               }
-               else
-               {
-                  DrawMap(e.Graphics);
-                  e.Graphics.ResetTransform();
-               }
-               OnPaintOverlays(e.Graphics);
-            }
-            else
-#endif
-            {
-#if !PocketPC
-               if(IsRotated)
-               {
-                  #region -- rotation --
-
-                  e.Graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-                  e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-                  e.Graphics.TranslateTransform((float)(Core.Width / 2.0), (float)(Core.Height / 2.0));
-                  e.Graphics.RotateTransform(-Bearing);
-                  e.Graphics.TranslateTransform((float)(-Core.Width / 2.0), (float)(-Core.Height / 2.0));
-
-                  e.Graphics.TranslateTransform(Core.renderOffset.X, Core.renderOffset.Y);
-
-                  DrawMap(e.Graphics);
-                  OnPaintOverlays(e.Graphics);
-
-                  #endregion
-               }
-               else
-#endif
-               {
-#if !PocketPC
-                  if(!MobileMode)
-                  {
-                     e.Graphics.TranslateTransform(Core.renderOffset.X, Core.renderOffset.Y);
-                  }
-#endif
-                  DrawMap(e.Graphics);
-                  OnPaintOverlays(e.Graphics);
-               }
-            }
-         }
-
-         base.OnPaint(e);
+              base.OnPaint(e);
+          }
+          catch
+          {
+          }
       }
 #endif
 
