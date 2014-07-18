@@ -165,6 +165,7 @@
     <Compile Include="Data\Vehicle.cs" />
     <Compile Include="Data\Weather.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Fonts\FontManager.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="helperFunctions\Controls.cs" />
     <Compile Include="helperFunctions\Graphics.cs" />
@@ -311,7 +312,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

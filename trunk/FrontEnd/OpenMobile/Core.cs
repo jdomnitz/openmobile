@@ -728,6 +728,7 @@ namespace OpenMobile
             InputRouter.Dispose();
             theHost.Dispose();
             OpenMobile.Threading.SafeThread.Dispose();
+            BuiltInComponents.Dispose();
             Application.Dispose();
             Thread.Sleep(2500);
             Environment.Exit(0); //Force

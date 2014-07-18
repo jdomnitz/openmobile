@@ -236,6 +236,83 @@ namespace OpenMobile.Controls
             return btn;
         }
 
+
+        public static OMButton PreConfigLayout_CleanStyle(string name, int left, int top, int width, int height, int? opacity = null, int? cornerRadius = null, GraphicCorners? corners = null, string icon = null, OImage iconImg = null, string text = null, Color? backColor1 = null, Color? backColor2 = null, Color? borderColor = null, string fontName = null, int? fontSize = null, Color? textColor = null)
+        {
+            OMButton btn = new OMButton(name, left, top, width, height);
+
+            // Create button graphics
+            OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData gd = new OpenMobile.helperFunctions.Graphics.ButtonGraphic.GraphicData();
+            gd.Style = helperFunctions.Graphics.ButtonGraphic.GraphicStyles.CleanAndSimple;
+            if (backColor1 != null)
+                gd.BackgroundColor1 = (Color)backColor1;
+            else
+                gd.BackgroundColor1 = Color.FromArgb(200,Color.Black);
+            if (backColor2 != null)
+                gd.BackgroundColor2 = (Color)backColor2;
+            if (borderColor != null)
+                gd.BorderColor = (Color)borderColor;
+            else
+                gd.BorderColor = Color.FromArgb(100, Color.White);
+            gd.Width = btn.Width;
+            gd.Height = btn.Height;
+            if (cornerRadius != null)
+                gd.CornerRadius = cornerRadius;
+            if (corners != null)
+                gd.CornersRadiusAppliesTo = (GraphicCorners)corners;
+            if (icon != null)
+                gd.Icon = icon;
+
+            // Default font data            
+            Font f = OpenMobile.Graphics.Font.OpenMobileDefault;
+            f.Size = 30;
+            if (!String.IsNullOrEmpty(fontName))
+                f = new Font(fontName, 36);
+            if (fontSize.HasValue)
+                f.Size = fontSize.Value;
+            gd.TextFont = f;
+
+            if (textColor.HasValue)
+                gd.TextColor = textColor.Value;
+
+            if (text != null)
+                gd.Text = text;
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundFocused;
+            btn.FocusImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackgroundClicked;
+            btn.DownImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            //gd.Opacity = 150;
+            //gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonForegroundFocused;
+            //btn.checkedImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            btn.checkedImage = btn.DownImage;
+            if (opacity != null)
+                gd.Opacity = opacity;
+            else
+                gd.Opacity = null;
+
+            if (backColor1 != null)
+                gd.BackgroundColor1 = (Color)backColor1;
+            else
+                gd.BackgroundColor1 = Color.FromArgb(140, Color.Black);
+
+            gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackground;
+            btn.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+
+            // Set overlay image
+            if (!String.IsNullOrEmpty(gd.Icon) || !String.IsNullOrEmpty(gd.Text))
+            {
+                gd.Opacity = 255;
+                gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonForeground;
+                btn.OverlayImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            }
+            else if (iconImg != null)
+            {
+                btn.OverlayImage = new imageItem(iconImg);
+            }
+
+            return btn;
+        }
+
         #endregion
 
         /// <summary>

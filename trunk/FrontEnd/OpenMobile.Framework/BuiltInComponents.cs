@@ -25,6 +25,8 @@ using OpenMobile.Plugin;
 using OpenMobile.helperFunctions;
 using OpenMobile.Graphics;
 using OpenMobile.Framework.Data;
+using System.Collections.Generic;
+using OpenMobile.Fonts;
 
 namespace OpenMobile
 {
@@ -79,7 +81,24 @@ namespace OpenMobile
         /// </summary>
         public static OpenMobile.Framework.ScreenManager Panels = null;
 
+        /// <summary>
+        /// The font mangager
+        /// </summary>
+        public static FontManager FontManager
+        {
+            get
+            {
+                return _FontManager;
+            }
+            set
+            {
+                _FontManager = value;
+            }
+        }
+        private static FontManager _FontManager;        
+
         private static IPluginHost _Host = null;
+        
         /// <summary>
         /// A reference to the pluginhost to use for the framework.
         /// NB! This reference is not valid unless it's initialized from the core at startup
@@ -95,6 +114,8 @@ namespace OpenMobile
                 _Host = value;
                 OMInternalPlugin = new OMInternalPluginClass();
                 Panels = new OpenMobile.Framework.ScreenManager(OMInternalPlugin);
+
+                LocalInit();
             }
         }
 
@@ -170,6 +191,19 @@ namespace OpenMobile
         }
 
         static IPluginHost theHost;
+
+        
+
+        static private void LocalInit()
+        {
+            // Init font manager
+            _FontManager = new FontManager();
+        }
+
+        static public void Dispose()
+        {
+            _FontManager.Dispose();
+        }
 
         /// <summary>
         /// Returns a settings object with OM system settings
