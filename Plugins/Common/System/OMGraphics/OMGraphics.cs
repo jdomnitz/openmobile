@@ -595,6 +595,375 @@ namespace OMGraphics
                                     #endregion
                                 }
                                 break;
+
+                            case ButtonGraphic.GraphicStyles.CleanAndSimple:
+                                {
+                                    #region Create clean and simple style button graphic
+
+                                    System.Drawing.Bitmap bmp = new Bitmap(gd.Width, gd.Height);
+                                    Bitmap bmpAlpha = new Bitmap(bmp.Width, bmp.Height);
+
+                                    using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bmp))
+                                    {
+                                        switch (gd.ImageType)
+                                        {
+                                            case ButtonGraphic.ImageTypes.ButtonBackgroundFocused:
+                                            case ButtonGraphic.ImageTypes.ButtonBackgroundClicked:
+                                            case ButtonGraphic.ImageTypes.ButtonBackground:
+                                                {
+                                                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                                                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                                    #region Colors
+
+                                                    Color glowColor;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundFocusColor.Name) || gd.BackgroundFocusColor.Name == "0")
+                                                        glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                                                    else
+                                                        glowColor = gd.BackgroundFocusColor.ToSystemColor();
+
+                                                    Color backColor1;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundColor1.Name) || gd.BackgroundColor1.Name == "0")
+                                                        //backColor = Color.FromArgb(0x7f, System.Drawing.Color.Black);
+                                                        backColor1 = Color.FromArgb(75, System.Drawing.Color.Black);
+                                                    else
+                                                        backColor1 = gd.BackgroundColor1.ToSystemColor();
+
+                                                    Color backColor2;
+                                                    if (String.IsNullOrEmpty(gd.BackgroundColor2.Name) || gd.BackgroundColor2.Name == "0")
+                                                        backColor2 = Color.FromArgb(158, 85, 98, 130);
+                                                    else
+                                                        backColor2 = gd.BackgroundColor2.ToSystemColor();
+
+                                                    Color borderColor;
+                                                    if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
+                                                        borderColor = System.Drawing.Color.FromArgb(50, System.Drawing.Color.White);
+                                                    else
+                                                        borderColor = gd.BorderColor.ToSystemColor();
+
+                                                    #endregion
+
+                                                    // Calculate corner radius (based on size of control)
+                                                    int CornerRadius = gd.Height;
+                                                    if (CornerRadius < 0) CornerRadius = 0;
+                                                    if (gd.CornerRadius != null)
+                                                        CornerRadius = (int)gd.CornerRadius;
+
+                                                    // Create outline path
+                                                    System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, bmp.Width - 1 , bmp.Height - 1);
+                                                    GraphicsPath gp = GetPath_RoundedRectangle(g, rect, CornerRadius, gd.CornersRadiusAppliesTo);
+                                                    g.SetClip(gp);
+
+                                                    #region Draw ButtonBackground
+
+                                                    using (System.Drawing.Brush br = new System.Drawing.SolidBrush(backColor1))
+                                                        g.FillPath(br, gp);
+
+                                                    //// Draw background
+                                                    //using (GraphicsPath bb = CreateRoundRectangle(rect, CornerRadius))
+                                                    //{
+                                                    //    using (System.Drawing.Brush br = new System.Drawing.SolidBrush(backColor1))
+                                                    //        g.FillPath(br, bb);
+
+                                                    //    // Draw outline
+                                                    //    using (Pen OutlinePen = new Pen(Color.Black, 1))
+                                                    //    {
+                                                    //        OutlinePen.Alignment = PenAlignment.Inset;
+                                                    //        g.DrawPath(OutlinePen, bb);
+                                                    //    }
+                                                    //}
+
+                                                    #endregion
+
+                                                    if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundFocused || gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundClicked)
+                                                    {
+                                                        #region Draw inner glow
+
+                                                        System.Drawing.Rectangle rectTop = new System.Drawing.Rectangle(0, 0, rect.Width, rect.Height / 2);
+                                                        //System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, rect.Height / 2, rect.Width, rect.Height / 2);
+                                                        System.Drawing.Rectangle rectBottom = new System.Drawing.Rectangle(0, (int)(rect.Height * (1 - gd.BackgroundFocusSize)), rect.Width, (int)(rect.Height * gd.BackgroundFocusSize));
+
+                                                        // Adjust innerglow to show clicked state
+                                                        if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonBackgroundClicked)
+                                                            rectBottom = new System.Drawing.Rectangle(0, (int)(rect.Height * (1 - gd.BackgroundFocusClickedSize)), rect.Width, (int)(rect.Height * gd.BackgroundFocusClickedSize));
+
+                                                        // Draw inner button glow
+
+                                                        using (GraphicsPath brad = CreateBottomRadialPath(rectBottom))
+                                                        {
+                                                            using (PathGradientBrush pgr = new PathGradientBrush(brad))
+                                                            {
+                                                                unchecked
+                                                                {
+                                                                    int opacity = 255;
+                                                                    System.Drawing.RectangleF bounds = brad.GetBounds();
+                                                                    pgr.CenterPoint = new System.Drawing.PointF((bounds.Left + bounds.Right) / 2f, (bounds.Top + bounds.Bottom) / 2f);
+                                                                    pgr.CenterColor = System.Drawing.Color.FromArgb(opacity, glowColor);
+                                                                    pgr.SurroundColors = new System.Drawing.Color[] { System.Drawing.Color.FromArgb(0, glowColor) };
+                                                                }
+                                                                g.FillPath(pgr, brad);
+                                                            }
+                                                        }
+
+                                                        #endregion
+                                                    }
+
+                                                    g.ResetClip();
+
+                                                    #region Draw outer border
+
+                                                    using (Pen p = new System.Drawing.Pen(borderColor, 1.5f))
+                                                    {
+                                                        p.Alignment = PenAlignment.Inset;
+                                                        g.DrawPath(p, gp);
+                                                    }
+
+                                                    #endregion
+                                                }
+                                                break;
+                                            case ButtonGraphic.ImageTypes.ButtonForegroundFocused:
+                                            case ButtonGraphic.ImageTypes.ButtonForeground:
+                                                {
+
+                                                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                                                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                                                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                                                    #region Colors
+
+                                                    Color glowColor;
+                                                    if (String.IsNullOrEmpty(gd.ForegroundFocusColor.Name) || gd.ForegroundFocusColor.Name == "0")
+                                                        glowColor = System.Drawing.Color.FromArgb(0, 0, 255);
+                                                    else
+                                                        glowColor = gd.ForegroundFocusColor.ToSystemColor();
+
+                                                    Color iconColor;
+                                                    if (String.IsNullOrEmpty(gd.IconColor.Name) || gd.IconColor.Name == "0")
+                                                        iconColor = System.Drawing.Color.FromArgb(225, 225, 255);
+                                                    else
+                                                        iconColor = gd.IconColor.ToSystemColor();
+                                                    if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
+                                                        iconColor = gd.TextColor.ToSystemColor();
+
+                                                    Color textColor;
+                                                    if (String.IsNullOrEmpty(gd.TextColor.Name) || gd.TextColor.Name == "0")
+                                                        textColor = System.Drawing.Color.LightGray;
+                                                    else
+                                                        textColor = gd.TextColor.ToSystemColor();
+
+                                                    #endregion
+
+                                                    System.Drawing.Rectangle rect = new Rectangle(0, 0, 0, 0);
+
+                                                    #region Draw Icon
+
+                                                    if ((!String.IsNullOrEmpty(gd.Icon)) && gd.IconImage == null)
+                                                    {
+                                                        // Calculate placement (if no text it's centered in graphic)
+                                                        rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)((bmp.Width - 1) * 0.33F), bmp.Height - 1);
+                                                        if (String.IsNullOrEmpty(gd.Text))
+                                                            rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, bmp.Width - 1, bmp.Height - 1);
+
+                                                        // Set font format
+                                                        StringFormat sf = new StringFormat();
+                                                        sf.Alignment = StringAlignment.Center;
+                                                        sf.LineAlignment = StringAlignment.Center;
+                                                        System.Drawing.Font f = (gd.IconFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.Webdings.Name, 76) : new System.Drawing.Font(gd.IconFont.Name, gd.IconFont.Size));
+
+                                                        SizeF FSize = g.MeasureString(gd.Icon, f, new SizeF(bmp.Width, bmp.Height), sf);
+                                                        // Calculate scaling factor
+                                                        float Scale = bmp.Height / FSize.Height;
+
+                                                        // Recalculate font based on scaling
+                                                        f = new Font(f.Name, f.Size * Scale);
+
+                                                        // Check placement data
+                                                        if ((gd.IconLocation.X == -1) && (gd.IconLocation.Y == -1))
+                                                            gd.IconLocation = new OpenMobile.Graphics.Point(0, 7);
+
+                                                        // Wanted scale between font and height is 90 / 76 = 1,184210526315789
+                                                        GraphicsPath gpTxt = new GraphicsPath();
+                                                        gpTxt.AddString(gd.Icon, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rect, sf);
+
+                                                        if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonForegroundFocused)
+                                                        {
+                                                            #region Draw Icon glow
+
+                                                            for (int i = 1; i < 15; ++i)
+                                                            {
+                                                                //System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32, 0, 128, 192), i);
+                                                                System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, glowColor), i);
+                                                                pen.LineJoin = LineJoin.Round;
+                                                                g.DrawPath(pen, gpTxt);
+                                                                pen.Dispose();
+                                                            }
+
+                                                            #endregion
+                                                        }
+
+                                                        System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(iconColor);
+                                                        g.FillPath(brush, gpTxt);
+                                                        //g.DrawPath(new System.Drawing.Pen(glowColor, 0.5F), gpTxt);
+                                                    }
+
+                                                    #endregion
+
+                                                    #region Draw Image Icon
+
+                                                    if (gd.IconImage != null)
+                                                    {
+                                                        imageItem img = new imageItem(gd.IconImage);
+                                                        if (img.image != null)
+                                                            if (img.image.image != null)
+                                                            {
+                                                                Bitmap image = img.image.image;
+                                                                // Calculate aspect
+                                                                float Aspect = image.Width / image.Height;
+
+                                                                // Calculate placement (if no text it's centered in graphic)
+                                                                rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)((bmp.Width - 1) * 0.33F), bmp.Height - 1);
+                                                                if (String.IsNullOrEmpty(gd.Text))
+                                                                    rect = new System.Drawing.Rectangle(gd.IconLocation.X, gd.IconLocation.Y, bmp.Width - 1, bmp.Height - 1);
+
+                                                                Rectangle imgRect = new Rectangle(gd.IconLocation.X, gd.IconLocation.Y, (int)(rect.Width * 0.60f), (int)(rect.Height * 0.60f));
+
+                                                                // Center graphic 
+                                                                imgRect.X = (rect.Width - imgRect.Width) / 2;
+                                                                imgRect.Y = (rect.Height - imgRect.Height) / 2;
+
+                                                                // Calculate width to draw
+                                                                if (image.Width > image.Height)
+                                                                {
+                                                                    if (image.Width > imgRect.Width)
+                                                                        imgRect.Width = imgRect.Width;
+                                                                    else
+                                                                        imgRect.Width = image.Width;
+                                                                    imgRect.Height = (int)(imgRect.Width * Aspect);
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (image.Height > imgRect.Height)
+                                                                        imgRect.Height = imgRect.Height;
+                                                                    else
+                                                                        imgRect.Height = image.Height;
+                                                                    imgRect.Width = (int)(imgRect.Height * Aspect);
+                                                                }
+
+                                                                if (BuiltInComponents.SystemSettings.UseIconOverlayColor)
+                                                                    img.image.Overlay(gd.TextColor);
+
+                                                                // Draw image
+                                                                g.DrawImage(img.image.image, imgRect);
+                                                            }
+                                                    }
+
+                                                    #endregion
+
+                                                    #region Draw text
+
+                                                    if (!String.IsNullOrEmpty(gd.Text))
+                                                    {
+                                                        // Check placement data
+                                                        if ((gd.TextLocation.X == -1) && (gd.TextLocation.Y == -1))
+                                                            gd.TextLocation = new OpenMobile.Graphics.Point(0, 0);
+
+                                                        // Calculate placement (if no icon it's centered in graphic)
+                                                        rect = new System.Drawing.Rectangle(rect.Width + gd.TextLocation.X, gd.TextLocation.Y, (bmp.Width - 1) - rect.Width, bmp.Height - 1);
+
+                                                        // Set style
+                                                        StringFormat sf = new StringFormat();
+                                                        if (String.IsNullOrEmpty(gd.Icon) && gd.IconImage == null)
+                                                            sf.Alignment = StringAlignment.Center;
+                                                        else
+                                                            sf.Alignment = StringAlignment.Near;
+                                                        sf.LineAlignment = StringAlignment.Center;
+
+                                                        // Get font
+                                                        System.Drawing.Font f = (gd.TextFont.Name == null ? new System.Drawing.Font(OpenMobile.Graphics.Font.OpenMobileDefault.Name, 34) : new System.Drawing.Font(gd.TextFont.Name, gd.TextFont.Size));
+
+                                                        // Limit size of font to ensure it doesn't go outside the controls regions
+                                                        SizeF textSize = g.MeasureString(gd.Text, f, new SizeF(rect.Width, rect.Height), sf);
+                                                        float textHeightLimit = (gd.Height * 0.85f);
+                                                        if (textSize.Height > textHeightLimit)
+                                                        {
+                                                            float fontScale = textHeightLimit / textSize.Height;
+                                                            f = new Font(f.FontFamily, f.Size * fontScale);
+                                                        }
+
+                                                        // Draw text
+
+                                                        //OpenMobile.Graphics.Graphics.renderText(g, rect.Left, rect.Top, rect.Width, rect.Height, gd.Text, gd.TextFont, OpenMobile.Graphics.eTextFormat.Normal, OpenMobile.Graphics.Alignment.CenterCenter, gd.TextColor, gd.TextColor, OpenMobile.Graphics.FitModes.None);
+
+                                                        using (GraphicsPath gpTxt = new GraphicsPath())
+                                                        {
+                                                            gpTxt.AddString(gd.Text, f.FontFamily, (int)System.Drawing.FontStyle.Regular, f.Size, rect, sf);
+
+                                                            if (gd.ImageType == ButtonGraphic.ImageTypes.ButtonForegroundFocused)
+                                                            {
+                                                                #region Draw Text glow
+
+                                                                for (int i = 1; i < 20; ++i)
+                                                                {
+                                                                    //System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32, 0, 128, 192), i);
+                                                                    System.Drawing.Pen pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(32 - i, glowColor), i);
+                                                                    pen.LineJoin = LineJoin.Round;
+                                                                    g.DrawPath(pen, gpTxt);
+                                                                    pen.Dispose();
+                                                                }
+
+                                                                #endregion
+                                                            }
+
+                                                            g.FillPath(new System.Drawing.SolidBrush(textColor), gpTxt);
+                                                        }
+                                                    }
+
+                                                    #endregion
+                                                }
+                                                break;
+                                            default:
+                                                break;
+                                        }
+
+                                        #region Apply overall opacity to resulting image
+                                        float Alpha = 1f;
+                                        if (gd.Opacity != null)
+                                            Alpha = ((int)gd.Opacity / 255f);
+
+                                        // Apply overall opacity to resulting image
+                                        System.Drawing.Imaging.ColorMatrix cm = new System.Drawing.Imaging.ColorMatrix(new float[][]
+                                        {
+                                            // Matrix config
+                                            //           R  G  B  A  w
+                                            new float[] {1, 0, 0, 0, 0}, // R
+                                            new float[] {0, 1, 0, 0, 0}, // G
+                                            new float[] {0, 0, 1, 0, 0}, // B
+                                            new float[] {0, 0, 0, Alpha, 0}, // A
+                                            new float[] {0, 0, 0, 0, 1}, // w
+                                        });
+
+                                        System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+                                        ia.SetColorMatrix(cm);
+
+                                        // Draw image using color matrix
+                                        using (System.Drawing.Graphics gAlpha = System.Drawing.Graphics.FromImage(bmpAlpha))
+                                        {
+                                            gAlpha.DrawImage(bmp, new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, ia);
+                                            ia.Dispose();
+                                            bmp.Dispose();
+                                        }
+
+                                        #endregion
+
+                                        g.Flush();
+                                    }
+                                    gd.Image = new OpenMobile.Graphics.OImage(bmpAlpha);
+
+                                    #endregion
+                                }
+                                break;
+
                         }
 
 
@@ -1458,14 +1827,14 @@ namespace OMGraphics
             g.DrawPath(p, gp);
         }
 
-        private static System.Drawing.Drawing2D.GraphicsPath GetPath_RoundedRectangle(System.Drawing.Graphics g, System.Drawing.Rectangle r, int d, OpenMobile.Graphics.GraphicCorners corners)
+        private static System.Drawing.Drawing2D.GraphicsPath GetPath_RoundedRectangle(System.Drawing.Graphics g, System.Drawing.Rectangle r, int radius, OpenMobile.Graphics.GraphicCorners corners)
         {
             System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath();
-            if (d != 0)
+            if (radius != 0)
             {
                 if ((corners & OpenMobile.Graphics.GraphicCorners.TopLeft) == OpenMobile.Graphics.GraphicCorners.TopLeft)
                 {
-                    gp.AddArc(r.X, r.Y, d, d, 180, 90);
+                    gp.AddArc(r.X, r.Y, radius, radius, 180, 90);
                 }
                 else
                 {
@@ -1474,7 +1843,7 @@ namespace OMGraphics
 
                 if ((corners & OpenMobile.Graphics.GraphicCorners.TopRight) == OpenMobile.Graphics.GraphicCorners.TopRight)
                 {
-                    gp.AddArc(r.X + r.Width - d, r.Y, d, d, 270, 90);
+                    gp.AddArc(r.X + r.Width - radius, r.Y, radius, radius, 270, 90);
                 }
                 else
                 {
@@ -1483,7 +1852,7 @@ namespace OMGraphics
 
                 if ((corners & OpenMobile.Graphics.GraphicCorners.BottomRight) == OpenMobile.Graphics.GraphicCorners.BottomRight)
                 {
-                    gp.AddArc(r.X + r.Width - d, r.Y + r.Height - d, d, d, 0, 90);
+                    gp.AddArc(r.X + r.Width - radius, r.Y + r.Height - radius, radius, radius, 0, 90);
                 }
                 else
                 {
@@ -1492,28 +1861,49 @@ namespace OMGraphics
 
                 if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
                 {
-                    gp.AddArc(r.X, r.Y + r.Height - d, d, d, 90, 90);
+                    gp.AddArc(r.X, r.Y + r.Height - radius, radius, radius, 90, 90);
                 }
                 else
                 {
                     gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y + r.Height);
                 }
 
-                // Close figure
-                if ((corners & OpenMobile.Graphics.GraphicCorners.TopLeft) == OpenMobile.Graphics.GraphicCorners.TopLeft)
-                {
-                    if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
-                        gp.AddLine(r.X, r.Y + r.Height - d, r.X, r.Y + d / 2);
-                    else
-                        gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y + d / 2);
-                }
-                else
-                {
-                    if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
-                        gp.AddLine(r.X, r.Y + r.Height - d, r.X, r.Y);
-                    else
-                        gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y);
-                }
+                gp.CloseFigure();
+
+                //if (radius < r.Height)
+                //{
+                //    // Close figure
+                //    if ((corners & OpenMobile.Graphics.GraphicCorners.TopLeft) == OpenMobile.Graphics.GraphicCorners.TopLeft)
+                //    {
+                //        if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
+                //        {
+                //            int lineLength = System.Math.Abs((r.Y + r.Height - radius) - (r.Y + radius / 2));
+                //            if (lineLength > 0)
+                //                gp.AddLine(r.X, r.Y + r.Height - radius, r.X, r.Y + radius / 2);
+                //        }
+                //        else
+                //        {
+                //            int lineLength = System.Math.Abs(r.Y + r.Height - (r.Y + radius / 2));
+                //            if (lineLength > 0)
+                //                gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y + radius / 2);
+                //        }
+                //    }
+                //    else
+                //    {
+                //        if ((corners & OpenMobile.Graphics.GraphicCorners.BottomLeft) == OpenMobile.Graphics.GraphicCorners.BottomLeft)
+                //        {
+                //            int lineLength = System.Math.Abs((r.Y + r.Height - radius) - (r.Y));
+                //            if (lineLength > 0)
+                //                gp.AddLine(r.X, r.Y + r.Height - radius, r.X, r.Y);
+                //        }
+                //        else
+                //        {
+                //            int lineLength = System.Math.Abs((r.Y + r.Height) - (r.Y));
+                //            if (lineLength > 0)
+                //                gp.AddLine(r.X, r.Y + r.Height, r.X, r.Y);
+                //        }
+                //    }
+                //}
 
             }
             else

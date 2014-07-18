@@ -433,22 +433,22 @@ namespace ControlDemo
             p.addControl(btnPopupMenu);
 
 
-            OMBasicShape shp = new OMBasicShape("shp", 0, 350, 400, 200,
-                new ShapeData(shapes.Rectangle, Color.FromArgb(0xFF, 25, 25, 25)));
-            p.addControl(shp);
+            //OMBasicShape shp = new OMBasicShape("shp", 0, 350, 400, 200,
+            //    new ShapeData(shapes.Rectangle, Color.FromArgb(0xFF, 25, 25, 25)));
+            //p.addControl(shp);
 
-            OMImage TestImg = new OMImage("TestImg", 10, 400);
-            TestImg.FitControlToImage = true;
-            TestImg.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(180, 107, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
-            p.addControl(TestImg);
+            //OMImage TestImg = new OMImage("TestImg", 10, 400);
+            //TestImg.FitControlToImage = true;
+            //TestImg.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(180, 107, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
+            //p.addControl(TestImg);
 
-            OMImage TestImg2 = new OMImage("TestImg2", 210, 400);
-            TestImg2.FitControlToImage = true;
-            TestImg2.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(100, 60, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
-            p.addControl(TestImg2);
+            //OMImage TestImg2 = new OMImage("TestImg2", 210, 400);
+            //TestImg2.FitControlToImage = true;
+            //TestImg2.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(100, 60, ButtonGraphic.ImageTypes.ButtonBackground, ButtonGraphic.GraphicStyles.Style1));
+            //p.addControl(TestImg2);
 
             // OMList2 test
-            OMButton btnOMList2Test = OMButton.PreConfigLayout_BasicStyle("btnOMList2Test", 320, OM.Host.ClientArea_Init.Top + 10, 300, 90, GraphicCorners.Top, "", "OMList2");
+            OMButton btnOMList2Test = OMButton.PreConfigLayout_CleanStyle("btnOMList2Test", 320, OM.Host.ClientArea_Init.Top + 10, 300, 90, corners:GraphicCorners.Top, icon:"", text:"OMList2");
             btnOMList2Test.Tag = "OMList2Test";
             btnOMList2Test.OnClick += new userInteraction(btnCommonTransitionToPanel_OnClick);
             p.addControl(btnOMList2Test);
@@ -456,22 +456,22 @@ namespace ControlDemo
             panelOMList2Test.Initialize(this.pluginName, manager, theHost);
 
             // Playlist test
-            OMButton btnPlayList = OMButton.PreConfigLayout_BasicStyle("btnPlayList", btnOMList2Test.Region.Left, btnOMList2Test.Region.Bottom - 1, 300, 90, GraphicCorners.None, "", "PlayList");
+            OMButton btnPlayList = OMButton.PreConfigLayout_CleanStyle("btnPlayList", btnOMList2Test.Region.Left, btnOMList2Test.Region.Bottom - 1, 300, 90, corners:GraphicCorners.None, icon:"", text:"PlayList");
             btnPlayList.OnClick += new userInteraction(btnPlayList_OnClick);
             p.addControl(btnPlayList);
 
             // Images test
-            OMButton btnImages = OMButton.PreConfigLayout_BasicStyle("btnImages", btnOMList2Test.Region.Left, btnPlayList.Region.Bottom - 1, 300, 90, GraphicCorners.None, "", "Images");
+            OMButton btnImages = OMButton.PreConfigLayout_CleanStyle("btnImages", btnOMList2Test.Region.Left, btnPlayList.Region.Bottom - 1, 300, 90, corners: GraphicCorners.None, icon: "", text: "Images");
             btnImages.OnClick += new userInteraction(btnImages_OnClick);
             p.addControl(btnImages);
 
             // SlideIn test
-            OMButton btnSlideInTest = OMButton.PreConfigLayout_BasicStyle("btnSlideInTest", btnOMList2Test.Region.Left, btnImages.Region.Bottom - 1, 300, 90, GraphicCorners.None, "", "SlideIn");
+            OMButton btnSlideInTest = OMButton.PreConfigLayout_CleanStyle("btnSlideInTest", btnOMList2Test.Region.Left, btnImages.Region.Bottom - 1, 300, 90, corners: GraphicCorners.None, icon: "", text: "SlideIn");
             btnSlideInTest.OnClick += new userInteraction(btnSlideInTest_OnClick);
             p.addControl(btnSlideInTest);
 
             // Datasources
-            OMButton btnDataSources = OMButton.PreConfigLayout_BasicStyle("btnDataSources", btnOMList2Test.Region.Left, btnSlideInTest.Region.Bottom - 1, 300, 90, GraphicCorners.Bottom, "", "DataSources");
+            OMButton btnDataSources = OMButton.PreConfigLayout_CleanStyle("btnDataSources", btnOMList2Test.Region.Left, btnSlideInTest.Region.Bottom - 1, 300, 90, corners: GraphicCorners.Bottom, icon: "", text: "DataSources");
             btnDataSources.Command_Click = "Screen{:S:}.Panel.Goto.ControlDemo.DataSources";
             p.addControl(btnDataSources);
 

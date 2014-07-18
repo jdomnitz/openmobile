@@ -92,20 +92,24 @@ namespace OpenMobile
                     #region Calculate left placement
 
                     int Left = 0;
+                    GraphicCorners corners = GraphicCorners.All;
                     switch (i)
                     {
                         case 1:
                         case 4:
                         case 7:
                             Left = 353;
+                            corners = GraphicCorners.All;
                             break;
                         case 2:
                         case 5:
                         case 8:
-                            Left = 680;
+                            Left = 701;
+                            corners = GraphicCorners.Left;
                             break;
                         default:
-                            Left = 25;
+                            Left = 0;
+                            corners = GraphicCorners.Right;
                             break;
                     }
 
@@ -134,7 +138,8 @@ namespace OpenMobile
                     #endregion
 
                     //MainMenuButtons[i] = DefaultControls.GetButton(Name, Left, Top, 300, 120, "", Text);
-                    MainMenuButtons[i] = OMButton.PreConfigLayout_BasicStyle(Name, Left, Top, 300, 120, GraphicCorners.All, "", Text);
+                    //MainMenuButtons[i] = OMButton.PreConfigLayout_BasicStyle(Name, Left, Top, 300, 120, GraphicCorners.All, "", Text);
+                    MainMenuButtons[i] = OMButton.PreConfigLayout_CleanStyle(Name, Left, Top, 300, 100, corners: corners, text: Text);
                     MainMenuButtons[i].OnHoldClick += new userInteraction(OnHoldClick);
                     MainMenuButtons[i].Tag = settings.getSetting(this, String.Format("{0}.Plugin", Name));
                     MainMenuButtons[i].OnClick += new userInteraction(MainMenu_OnClick);
@@ -481,11 +486,11 @@ namespace OpenMobile
                             IBasePlugin plugin = Plugins.GetPlugin((string)Button.Tag);
 
                             ButtonGraphic.GraphicData gd = new ButtonGraphic.GraphicData();
-
+                            gd.Style = ButtonGraphic.GraphicStyles.CleanAndSimple;
                             //if (!String.IsNullOrEmpty((string)Button.Tag))
                             {
                                 // Set icon symbol
-                                Font f = Font.Webdings;
+                                //Font f = Font.Webdings;
                                 //gd.Icon = Plugins.GetPluginIconSymbol((string)Button.Tag, ref f)               ;
                                 //gd.IconFont = f;
 

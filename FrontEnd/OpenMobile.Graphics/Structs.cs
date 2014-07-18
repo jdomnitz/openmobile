@@ -1914,6 +1914,7 @@ namespace OpenMobile.Graphics
         FontStyle style;
         static Font arial;
         static Font times;
+
         static Font()
         {
             System.Drawing.FontFamily[] supported = System.Drawing.FontFamily.Families;
@@ -1928,6 +1929,7 @@ namespace OpenMobile.Graphics
             }
             else
                 arial = new Font("Arial");
+
             times=new Font("Times New Roman");
             if (OpenTK.Configuration.RunningOnLinux)
                 if (!Array.Exists<System.Drawing.FontFamily>(supported, p => p.Name == "Times New Roman"))
@@ -1964,11 +1966,25 @@ namespace OpenMobile.Graphics
                 return new Font("Arial Black");
             }
         }
+        public static Font OpenMobileDefault
+        {
+            get
+            {
+                return new Font("Century Gothic");//"Segoe UI Light");//"Roboto Lt");//"Century Gothic");
+            }
+        }
         public static Font Verdana
         {
             get
             {
                 return new Font("Verdana");
+            }
+        }
+        public static Font Roboto
+        {
+            get
+            {
+                return new Font("Roboto");
             }
         }
         public static Font TrebuchetMS

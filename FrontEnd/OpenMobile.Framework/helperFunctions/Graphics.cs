@@ -103,7 +103,12 @@ namespace OpenMobile.helperFunctions.Graphics
             /// <summary>
             /// Base style 1 button style
             /// </summary>
-            Style1
+            Style1,
+
+            /// <summary>
+            /// A clean and simple button style
+            /// </summary>
+            CleanAndSimple
         }
 
         /// <summary>

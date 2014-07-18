@@ -54,7 +54,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Sets the font of the text
         /// </summary>
-        protected Font _font = new Font(Font.GenericSansSerif, 18F);
+        protected Font _font = new Font(Font.OpenMobileDefault, 18f);//new Font(Font.GenericSansSerif, 18F);
         /// <summary>
         /// Outline color of the text
         /// </summary>
