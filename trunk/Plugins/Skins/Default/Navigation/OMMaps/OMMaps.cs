@@ -103,11 +103,11 @@ namespace OMMaps2
         {
             OMPanel panel = new OMPanel("OMMaps", "Map", this.pluginIcon);
 
-            OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height,
+            OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientFullArea.Left, OM.Host.ClientFullArea.Top, OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height,
                 new ShapeData(shapes.Rectangle, Color.FromArgb(255, Color.Black)));
             panel.addControl(shapeBackground);
 
-            OMBasicShape shp_InfoGroup_Header = new OMBasicShape("shp_InfoGroup_Header", shapeBackground.Region.Left + (shapeBackground.Region.Width / 2), shapeBackground.Region.Top + 30, shapeBackground.Region.Width / 2, 1,
+            OMBasicShape shp_InfoGroup_Header = new OMBasicShape("shp_InfoGroup_Header", OM.Host.ClientArea_Init.Left + (OM.Host.ClientArea_Init.Width / 2), OM.Host.ClientArea_Init.Top + 30, OM.Host.ClientArea_Init.Width / 2, 1,
             new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
@@ -122,7 +122,7 @@ namespace OMMaps2
             lbl_InfoGroup_Header.Text = "Route summary";
             panel.addControl(lbl_InfoGroup_Header);
 
-            OMContainer container_InfoGroup_Text = new OMContainer("container_InfoGroup_Text", shp_InfoGroup_Header.Region.Left + 10, shp_InfoGroup_Header.Region.Bottom + 10, shp_InfoGroup_Header.Region.Width - 20, shapeBackground.Region.Height - 47 - 70);
+            OMContainer container_InfoGroup_Text = new OMContainer("container_InfoGroup_Text", shp_InfoGroup_Header.Region.Left + 10, shp_InfoGroup_Header.Region.Bottom + 10, shp_InfoGroup_Header.Region.Width - 20, OM.Host.ClientArea_Init.Height - 47 - 70);
             panel.addControl(container_InfoGroup_Text);
 
             //OMLabel lbl_InfoGroup_Text = new OMLabel("lbl_InfoGroup_Text", shp_InfoGroup_Header.Region.Left + 10, shp_InfoGroup_Header.Region.Bottom + 10, shp_InfoGroup_Header.Region.Width - 20, shapeBackground.Region.Height - 47);
@@ -137,7 +137,7 @@ namespace OMMaps2
             btn_InfoGroup_Hide.OnClick += new userInteraction(btn_InfoGroup_Hide_OnClick);
             panel.addControl(btn_InfoGroup_Hide);
 
-            OMImage img_MapGroup_Map = new OMImage("img_MapGroup_Map", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height);
+            OMImage img_MapGroup_Map = new OMImage("img_MapGroup_Map", OM.Host.ClientFullArea.Left, OM.Host.ClientFullArea.Top, OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height);
             img_MapGroup_Map.BackgroundColor = Color.Black;
             img_MapGroup_Map.DataSource = "Screen{:S:}.Map.Image";
             img_MapGroup_Map.OnResize += new userInteraction(imgMap_OnResize);
@@ -150,18 +150,19 @@ namespace OMMaps2
             mouse_MapGroup_MapHandler.OnClick += new OMMouseHandler.MouseEventArgsHandler(mouseMapHandler_OnClick);
             panel.addControl(mouse_MapGroup_MapHandler);
 
-            OMButton btn_MapGroup_ZoomIn = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomIn", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Top + 10, 90, 90, null, null, GraphicCorners.All, "", null, "+", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
-            btn_MapGroup_ZoomIn.Opacity = 140;
+            //OMButton btn_MapGroup_ZoomIn = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomIn", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Top + 60, 90, 90, null, null, GraphicCorners.All, "", null, "+", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
+            OMButton btn_MapGroup_ZoomIn = OMButton.PreConfigLayout_CleanStyle("btn_MapGroup_ZoomIn", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Top + 60, 90, 90, null, null, GraphicCorners.All, "", null, "+", null, null, Color.White, null, 75, BuiltInComponents.SystemSettings.SkinTextColor);
+            btn_MapGroup_ZoomIn.Opacity = 200;
             btn_MapGroup_ZoomIn.Command_Click = "{:S:}Map.Zoom.In";
             panel.addControl(btn_MapGroup_ZoomIn);
 
-            OMButton btn_MapGroup_ZoomOut = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_ZoomOut", img_MapGroup_Map.Region.Right - 100, img_MapGroup_Map.Region.Top + 10, 90, 90, null, null, GraphicCorners.All, "", null, "-", null, null, null, "Arial", 75, BuiltInComponents.SystemSettings.SkinTextColor);
-            btn_MapGroup_ZoomOut.Opacity = 140;
+            OMButton btn_MapGroup_ZoomOut = OMButton.PreConfigLayout_CleanStyle("btn_MapGroup_ZoomOut", img_MapGroup_Map.Region.Right - 100, img_MapGroup_Map.Region.Top + 60, 90, 90, null, null, GraphicCorners.All, "", null, "-", null, null, Color.White, null, 75, BuiltInComponents.SystemSettings.SkinTextColor);
+            btn_MapGroup_ZoomOut.Opacity = 200;
             btn_MapGroup_ZoomOut.Command_Click = "{:S:}Map.Zoom.Out";
             panel.addControl(btn_MapGroup_ZoomOut);
 
-            OMButton btn_MapGroup_CurrentLoc = OMButton.PreConfigLayout_BasicStyle("btn_MapGroup_CurrentLoc", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Bottom - 100, 90, 90, null, null, GraphicCorners.All, "", OM.Host.getSkinImage("AIcons|10-device-access-location-found").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinTextColor), "", null, null, null);
-            btn_MapGroup_CurrentLoc.Opacity = 140;
+            OMButton btn_MapGroup_CurrentLoc = OMButton.PreConfigLayout_CleanStyle("btn_MapGroup_CurrentLoc", img_MapGroup_Map.Region.Left + 10, img_MapGroup_Map.Region.Bottom - 180, 90, 90, null, null, GraphicCorners.All, "", OM.Host.getSkinImage("AIcons|10-device-access-location-found").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinTextColor), "", null, null, Color.White);
+            btn_MapGroup_CurrentLoc.Opacity = 200;
             btn_MapGroup_CurrentLoc.Command_Click = "{:S:}Map.Goto.Current";
 
             OMLabel lbl_MapGroup_ZoomLevel = new OMLabel("lbl_MapGroup_ZoomLevel", btn_MapGroup_ZoomIn.Region.Left, btn_MapGroup_ZoomIn.Region.Bottom, btn_MapGroup_ZoomIn.Region.Width, 35);

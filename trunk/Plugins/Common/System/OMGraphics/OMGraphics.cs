@@ -638,7 +638,7 @@ namespace OMGraphics
 
                                                     Color borderColor;
                                                     if (String.IsNullOrEmpty(gd.BorderColor.Name) || gd.BorderColor.Name == "0")
-                                                        borderColor = System.Drawing.Color.FromArgb(50, System.Drawing.Color.White);
+                                                        borderColor = System.Drawing.Color.FromArgb(75, System.Drawing.Color.White);
                                                     else
                                                         borderColor = gd.BorderColor.ToSystemColor();
 

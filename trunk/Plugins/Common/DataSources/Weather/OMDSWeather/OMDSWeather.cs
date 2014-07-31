@@ -851,7 +851,7 @@ namespace OMDSWeather
             string temp = DegreeCheck(html.Substring(0, html.IndexOf("<")), degreecheck);
             if (updateCurrent)
             {
-                if (currentWeatherNotificationImage != null)
+                if (currentWeatherNotificationImage != null && currentWeatherNotification != null)
                     currentWeatherNotification.Dispose();
                 currentWeatherNotificationImage = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
                 Font f = Font.Arial;

@@ -184,22 +184,24 @@ namespace OpenMobile
                                     // Mouse move event
                                     if (clientPoint != lastMousePoint[i])
                                     {
-                                            MouseMoveEventArgs eOM = new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton);
-                                            Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
+                                        MouseMoveEventArgs eOM = new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton);
+                                        Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
                                     }
-
-                                    // Mouse button events
-                                    if (mouseButton != lastMouseButton[i])
+                                    else
                                     {
-                                        if (mouseButton != MouseButton.None)
-                                        {   // Mouse down event
-                                            MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, true);
-                                            Core.RenderingWindows[i].RenderingWindow_MouseDown(i, eOM);
-                                        }
-                                        else
-                                        {   // Mouse up event
-                                            MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, false);
-                                            Core.RenderingWindows[i].RenderingWindow_MouseUp(i, eOM);
+                                        // Mouse button events
+                                        if (mouseButton != lastMouseButton[i])
+                                        {
+                                            if (mouseButton != MouseButton.None)
+                                            {   // Mouse down event
+                                                MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, true);
+                                                Core.RenderingWindows[i].RenderingWindow_MouseDown(i, eOM);
+                                            }
+                                            else
+                                            {   // Mouse up event
+                                                MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, false);
+                                                Core.RenderingWindows[i].RenderingWindow_MouseUp(i, eOM);
+                                            }
                                         }
                                     }
 
@@ -285,7 +287,7 @@ namespace OpenMobile
                     //}
 
                     //_MouseCursorState_Stored = mouseCursorState;
-                    Thread.Sleep(1);
+                    Thread.Sleep(0);
                 }
                 catch
                 {

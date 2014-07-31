@@ -81,6 +81,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\References\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Data.Sqlite">
       <HintPath>.\Mono.Data.Sqlite.dll</HintPath>
     </Reference>
@@ -168,6 +171,7 @@
     <Compile Include="Fonts\FontManager.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="helperFunctions\Controls.cs" />
+    <Compile Include="helperFunctions\File.cs" />
     <Compile Include="helperFunctions\Graphics.cs" />
     <Compile Include="helperFunctions\Forms.cs" />
     <Compile Include="helperFunctions\Globalization.cs" />
@@ -312,7 +316,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

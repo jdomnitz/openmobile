@@ -183,5 +183,25 @@ namespace OpenMobile.Plugin
         {
             //
         }
+
+        /// <summary>
+        /// Get's the path to this plugins folder
+        /// </summary>
+        /// <returns></returns>
+        public string GetPluginPath()
+        {
+            string PluginPath = System.Reflection.Assembly.GetAssembly(this.GetType()).Location;
+            return System.IO.Path.GetDirectoryName(PluginPath);
+        }
+
+        /// <summary>
+        /// Returns a full path reference to the filename located under the plugin folder
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public string GetPluginFilePath(string fileName)
+        {
+            return Path.Combine(GetPluginPath(), fileName);
+        }
     }
 }
