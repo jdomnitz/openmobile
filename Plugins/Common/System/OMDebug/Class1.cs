@@ -8,6 +8,7 @@ using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 using OpenMobile.Data;
 using System.Diagnostics;
+using System.Linq;
 
 namespace OMDebug
 {
@@ -217,9 +218,13 @@ namespace OMDebug
         IPluginHost theHost;
         StreamWriter writer;
         int time = 0;
+        string _LogFilePath;
+
         public eLoadStatus initialize(IPluginHost host)
         {
             theHost = host;
+
+            _LogFilePath = OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt");
 
             // Get setting from DB
             using (PluginSettings setting = new PluginSettings())
@@ -235,7 +240,9 @@ namespace OMDebug
                 }
             }
 
-            writer = new StreamWriter(OpenMobile.Path.Combine(theHost.DataPath, "Debug.txt"), true);
+            CheckFileSize();
+
+            writer = new StreamWriter(_LogFilePath, true);
             if (time == 0)
                 time = Environment.TickCount;
             writer.WriteLine("");
@@ -465,6 +472,8 @@ namespace OMDebug
         }
         private void WriteToLog(bool TimeStamp, string header, DebugMessage Msg)
         {
+            CheckFileSize();
+
             if (time == 0)
                 time = Environment.TickCount;
 
@@ -521,6 +530,8 @@ namespace OMDebug
         }
         private void WriteToLog(bool TimeStamp, string header, DebugMessage Msg, string[] texts)
         {
+            CheckFileSize();
+
             if (time == 0)
                 time = Environment.TickCount;
             
@@ -603,6 +614,38 @@ namespace OMDebug
         }
 
         #endregion
+
+        private int _Logfiles_MaxCount = 100;
+
+        private void CheckFileSize()
+        {
+            // Create new log file if current file is too large
+            if (File.Exists(_LogFilePath))
+            {
+                FileInfo fInfo = new FileInfo(_LogFilePath);
+                if (fInfo.Length > 1000000)
+                {   // File is too large, replace with new file
+                    string path = System.IO.Path.GetDirectoryName(_LogFilePath);
+                    //var logfileNames = Directory.EnumerateFiles(path, "Debug_v*.txt").OrderBy(x => x).ToArray();
+                    var logfileNames = Directory.GetFiles(path, "Debug_v*").OrderBy(x => x).ToArray();
+                    for (int i = logfileNames.Length - 1; i >= 0; i--)
+                    {
+                        // Delete file if too many files is present
+                        if (i >= 100)
+                        {
+                            File.Delete(logfileNames[i]);
+                            continue;
+                        }
+
+                        // Rename files
+                        File.Move(logfileNames[i], System.IO.Path.Combine(path, String.Format("Debug_v{0:00}.txt", i + 1)));
+                    }
+
+                    // Rename current file
+                    File.Move(_LogFilePath, System.IO.Path.Combine(path, String.Format("Debug_v{0:00}.txt", 0)));
+                }
+            }
+        }
 
         #region IDisposable Members
 

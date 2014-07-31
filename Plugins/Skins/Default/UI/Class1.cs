@@ -283,7 +283,7 @@ namespace OpenMobile
             PopUpButtonStripContainer.ButtonSize = new Size(300, 64);
 
             // Configure the actual container to match the skin
-            PopUpButtonStripContainer.Container.ShapeData = new ShapeData(shapes.Rectangle, Color.FromArgb(235, Color.Black), Color.FromArgb(50, Color.White), 2);
+            PopUpButtonStripContainer.Container.ShapeData = new ShapeData(shapes.Rectangle, Color.FromArgb(230, Color.Black), Color.FromArgb(50, Color.White), 2);
             PopUpButtonStripContainer.Container.ScrollBar_Vertical_Enabled = true;
             PopUpButtonStripContainer.Container.ScrollBar_Horizontal_Enabled = true;
             PopUpButtonStripContainer.Container.Visible = false;
@@ -392,21 +392,23 @@ namespace OpenMobile
             #endregion
             */
             OMImage Image_UIBottomBar_Background = new OMImage("Image_UIBottomBar_Background", 0, bottomBarPlacement, 1000, bottomBarHeight, new imageItem(Color.Black, 1000, bottomBarHeight));
+            Image_UIBottomBar_Background.Opacity = 100;
             UIPanel.addControl(Image_UIBottomBar_Background);
 
-            OMBasicShape Shape_UIBottomBar_Background = new OMBasicShape("Shape_UIBottomBar_Background", 0, bottomBarPlacement, 1000, bottomBarHeight,
-            new ShapeData(shapes.Rectangle)
-            {
-                GradientData = GradientData.CreateVerticalGradient
-                (
-                    new GradientData.ColorPoint(0, 0.0f, Color.FromArgb(255, 0, 0, 0)),
-                    new GradientData.ColorPoint(0, 1.0f, Color.FromArgb(255, 0, 0, 0)),
-                    new GradientData.ColorPoint(0, 1.0f, Color.FromArgb(255, 30, 30, 50))
-                    )
-            });
-            UIPanel.addControl(Shape_UIBottomBar_Background);
+            //OMBasicShape Shape_UIBottomBar_Background = new OMBasicShape("Shape_UIBottomBar_Background", 0, bottomBarPlacement, 1000, bottomBarHeight,
+            //new ShapeData(shapes.Rectangle)
+            //{
+            //    GradientData = GradientData.CreateVerticalGradient
+            //    (
+            //        new GradientData.ColorPoint(0, 0.0f, Color.FromArgb(255, 0, 0, 0)),
+            //        new GradientData.ColorPoint(0, 1.0f, Color.FromArgb(255, 0, 0, 0)),
+            //        new GradientData.ColorPoint(0, 1.0f, Color.FromArgb(255, 30, 30, 50))
+            //        )
+            //});
+            //Shape_UIBottomBar_Background.Opacity = 100;
+            //UIPanel.addControl(Shape_UIBottomBar_Background);
 
-            OMBasicShape Shape_UIBottomBar_Separator = new OMBasicShape("Shape_UIBottomBar_Separator", 0, Shape_UIBottomBar_Background.Region.Top, 1000, 1,
+            OMBasicShape Shape_UIBottomBar_Separator = new OMBasicShape("Shape_UIBottomBar_Separator", 0, Image_UIBottomBar_Background.Region.Top, 1000, 1,
             new ShapeData(shapes.Rectangle)
             {
                 GradientData = GradientData.CreateHorizontalGradient(
@@ -800,6 +802,7 @@ namespace OpenMobile
             gd.CornerRadius = 0;
             gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonBackground;
             Image_UITopBar_Background.Image = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
+            Image_UITopBar_Background.Opacity = 100;
             UIPanel.addControl(Image_UITopBar_Background);
 
             //OMImage Image_UITopBar_Separator = new OMImage("Image_UITopBar_Separator", 0, Image_UITopBar_Background.Region.Bottom, 1000, 1);
@@ -1051,11 +1054,12 @@ namespace OpenMobile
 
             panelNotifyDropDown = new OMPanel("UI_NotifyDropDown");
 
-            OMImage Image_NotifyDropdown_Background = new OMImage("Image_NotifyDropdown_Background", 0, Shape_UITopBar_Separator.Region.Bottom, 1000, 84);//new imageItem(Color.FromArgb(26, 30, 40), 1000, 80));
+            OMImage Image_NotifyDropdown_Background = new OMImage("Image_NotifyDropdown_Background", 0, 0, 1000, 134);//new imageItem(Color.FromArgb(26, 30, 40), 1000, 80));
             Image_NotifyDropdown_Background.BackgroundColor = Color.Black;
+            Image_NotifyDropdown_Background.Opacity = 230;
             panelNotifyDropDown.addControl(Image_NotifyDropdown_Background);
 
-            OMImage Image_NotifyDropdown_Separator = new OMImage("Image_NotifyDropdown_Separator", 0, Image_NotifyDropdown_Background.Region.Top + 80, 1000, 2, new imageItem(Color.FromArgb(50, Color.White), 1000, 2));//new imageItem(Color.Black, 1000, 1));
+            OMImage Image_NotifyDropdown_Separator = new OMImage("Image_NotifyDropdown_Separator", 0, Image_NotifyDropdown_Background.Region.Top + 80 + 50, 1000, 2, new imageItem(Color.FromArgb(50, Color.White), 1000, 2));//new imageItem(Color.Black, 1000, 1));
             panelNotifyDropDown.addControl(Image_NotifyDropdown_Separator);
 
             //OMLabel label_NotifyDropdown_InfoLine = new OMLabel("label_NotifyDropdown_InfoLine", 0, Image_NotifyDropdown_Background.Region.Top, Image_NotifyDropdown_Background.Region.Width, 20);
@@ -1070,7 +1074,7 @@ namespace OpenMobile
             // Menu buttons container
             ButtonStripContainer ButtonStrip_NotifyDropdown = new ButtonStripContainer("Container_NotifyDropdown_ButtonStrip",
                 0,
-                Image_NotifyDropdown_Background.Region.Top,
+                Image_NotifyDropdown_Background.Region.Top + 50,
                 Image_NotifyDropdown_Background.Region.Width,
                 80);
             ButtonStrip_NotifyDropdown.Alignment = ButtonStripContainer.Alignments.Left;
@@ -1116,6 +1120,7 @@ namespace OpenMobile
             OMContainer NotificationList = theHost.UIHandler.NotificationListControl;
             NotificationList.Name = "Container_NotifyDropdown_NotificationList";
             NotificationList.BackgroundColor = Color.Black;
+            NotificationList.Opacity = 230;
             NotificationList.Left = 0;
             NotificationList.Top = Image_NotifyDropdown_Separator.Region.Bottom;
             NotificationList.Width = 1000;

@@ -31,6 +31,7 @@ using OpenMobile.Framework;
 using System.Diagnostics;
 using OpenMobile.Graphics;
 using OpenMobile.helperFunctions.Plugins;
+using System.Linq;
 
 namespace OpenMobile
 {
@@ -84,7 +85,7 @@ namespace OpenMobile
                 // Load dll
                 try
                 {
-                    Plugin = loadAndCheck(file, true);
+                    Plugin = loadAndCheck(theHost.PluginPath, file, true);
                     if (Plugin != null)
                     {
                         status[0] = Plugin.initialize(theHost);
@@ -203,7 +204,7 @@ namespace OpenMobile
             {
                 try
                 {
-                    loadAndCheck(file, true);
+                    loadAndCheck(theHost.PluginPath, file, true);
                 }
                 catch (Exception e)
                 {
@@ -221,7 +222,7 @@ namespace OpenMobile
             {
                 try
                 {
-                    loadAndCheck(file, true);
+                    loadAndCheck(theHost.SkinPath, file, true);
                 }
                 catch (Exception e)
                 {
@@ -240,14 +241,23 @@ namespace OpenMobile
             return (plugin != null ? true : false);
         }
 
-        private static IBasePlugin loadAndCheck(string file)
+        private static IBasePlugin loadAndCheck(string baseFolder, string file)
         {
-            return loadAndCheck(file, false);
+            return loadAndCheck(baseFolder, file, false);
         }
-        private static IBasePlugin loadAndCheck(string file, bool LoadSpecific)
+        private static IBasePlugin loadAndCheck(string baseFolder, string file, bool LoadSpecific)
         {
             try
             {
+                // Should we limit the amount of folders to search trough?
+                if (!String.IsNullOrWhiteSpace(baseFolder))
+                {   // Yes. Limit is set to maximum one level below the base folder
+                    string diffPath = file.Replace(baseFolder, "");
+                    int folderLevel = diffPath.Count(x => x.Equals(System.IO.Path.DirectorySeparatorChar));
+                    if (folderLevel > 2)
+                        return null;
+                }
+
                 Assembly pluginAssembly;
                 if (!LoadSpecific)
                     pluginAssembly = Assembly.Load(Path.GetFileNameWithoutExtension(file));
@@ -284,7 +294,7 @@ namespace OpenMobile
             catch (Exception ex)
             {
                 //BuiltInComponents.Host.DebugMsg( DebugMessageType.Error, String.Format("Unable to load file: {0}", file));
-                OM.Host.DebugMsg(String.Format("Plugin Manager was unable to load file {0}", file), ex);
+                //OM.Host.DebugMsg(String.Format("Plugin Manager was unable to load file {0}", file), ex);
             }
             return null;
         }
@@ -327,7 +337,7 @@ namespace OpenMobile
         /// <summary>
         /// Order to of types to try to load the plugins by
         /// </summary>
-        private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IDataSource),typeof(IMediaProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
+        private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IAudioDeviceProvider), typeof(IDataSource), typeof(IMediaProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
         public static eLoadStatus[] status;
 
         private static void Plugin_Initialize(int index)
@@ -714,10 +724,9 @@ namespace OpenMobile
             Thread rapidMenu = new Thread(Core.initialize);
             rapidMenu.Name = "OpenMobile.Core.rapidMenu";
             rapidMenu.Start();
-
+            
             for (int i = 1; i < RenderingWindows.Count; i++)
                 RenderingWindows[i].RunAsync();
-
             RenderingWindows[0].Run();
 
             for (int i = 0; i < RenderingWindows.Count; i++)
@@ -737,7 +746,7 @@ namespace OpenMobile
         internal static bool loadPlugin(string arg)
         {
             int count = pluginCollection.Count;
-            loadAndCheck(arg);
+            loadAndCheck(null, arg);
             if (pluginCollection.Count == count + 1)
             {
                 eLoadStatus status;

@@ -128,7 +128,7 @@ namespace OMMapProvider
                     _Map_Point_RouteStart[screen] = new PointLatLng();
                     _Map_Point_RouteEnd[screen] = new PointLatLng();
                     _Map_FollowsCurrentLoc[screen] = true;
-                    _MapSize[screen] = new Size(OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height);
+                    _MapSize[screen] = new Size(OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height);
                 });
 
             // Settings

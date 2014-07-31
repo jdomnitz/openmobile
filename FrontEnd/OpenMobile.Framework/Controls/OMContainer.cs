@@ -2433,7 +2433,9 @@ namespace OpenMobile.Controls
 
                 // End throw
                 if (ThrowSpeed.X <= 0 & ThrowSpeed.Y <= 0)
+                {
                     _ThrowRun = false;
+                }
 
                 if (!_ThrowRun || _Controls.Count == 0)
                     break;
@@ -2445,8 +2447,8 @@ namespace OpenMobile.Controls
                 Refresh();
 
                 System.Threading.Thread.Sleep(LoopSpeedMS);
-            }            
-            
+            }
+
             _ScrollBar_Vertical_ScrollInProgress = false;
             _ScrollBar_Horizontal_ScrollInProgress = false;
 

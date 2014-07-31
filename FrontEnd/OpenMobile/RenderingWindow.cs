@@ -53,6 +53,7 @@ namespace OpenMobile
         Point CursorDistanceXYRelative = new Point();
         PointF CursorSpeed = new PointF();
         Stopwatch swCursorSpeedTiming = new Stopwatch();
+        PointF CursorSpeedScaling = new PointF(1, 1);
         bool BlockRendering = false;
         bool _RenderingReset = false;
         bool _ResizeRequired = false;
@@ -65,6 +66,7 @@ namespace OpenMobile
         double _SecondsSinceLastRender = 0;
         double _SecondsBetweenMinRenderFrame = 1;
         int _FPS_SleepTime = 1;
+        bool _StartupControl = true;
 
         /// <summary>
         /// The graphic device
@@ -113,7 +115,7 @@ namespace OpenMobile
         OMControl FocusedControl = null;
         OMControl MouseOverControl = null;
         private List<Point> currentGesture = new List<Point>();
-        bool ThrowActive = false;
+        private bool ThrowActive;        
 
         Timer tmrClickHold = new Timer(500);
         Stopwatch swClickTiming = new Stopwatch();
@@ -261,6 +263,11 @@ namespace OpenMobile
         {
             base.MakeCurrent();
 
+            if (BuiltInComponents.SystemSettings.OpenGLVSync)
+                base.VSync = OpenTK.VSyncMode.On;
+            else
+                base.VSync = OpenTK.VSyncMode.Off;
+
             // Check for specific startup _Screen
             int StartupScreen = Core.theHost.StartupScreen;
 
@@ -306,6 +313,7 @@ namespace OpenMobile
 
         protected override void OnLoad(EventArgs e)
         {
+            InitializeRendering();
             g.Initialize(this, _MouseData);
             if (_Screen == 0)
             {
@@ -322,18 +330,11 @@ namespace OpenMobile
         {
             try
             {
-                InitializeRendering();
-
-                if (BuiltInComponents.SystemSettings.OpenGLVSync)
-                    base.VSync = OpenTK.VSyncMode.On;
-                else
-                    base.VSync = OpenTK.VSyncMode.Off;
-                //Run(1.0, 60.0);
                 Run(0);
             }
             catch (Exception e)
             {
-                BuiltInComponents.Host.DebugMsg("RenderingWindow.Run Exception", e);
+                BuiltInComponents.Host.DebugMsg(String.Format("RenderingWindow[{0}].Run Exception", _Screen), e);
             }
         }
 
@@ -384,6 +385,14 @@ namespace OpenMobile
             {
                 g.Resize(Width, Height);
                 _ResizeRequired = false;
+            }
+
+            // Remove startup panel if present when additional panels are shown
+            if (_StartupControl)
+            {
+                _StartupControl = false;
+                if (RenderingQueue.Contains(panelStartUp) && RenderingQueue.Count > 1)
+                    RenderingQueue.Remove(panelStartUp);
             }
 
             g.Clear(Color.Black);
@@ -763,7 +772,9 @@ namespace OpenMobile
 
             // Calculate mouse move speed (pixels since last execution)
             swCursorSpeedTiming.Stop();
-            CursorSpeed = new PointF(CursorDistanceXYRelative.X / (float)swCursorSpeedTiming.Elapsed.TotalMilliseconds, CursorDistanceXYRelative.Y / (float)swCursorSpeedTiming.Elapsed.TotalMilliseconds);
+            CursorSpeed = new PointF(
+                (CursorDistanceXYRelative.X / (float)swCursorSpeedTiming.Elapsed.TotalMilliseconds) * CursorSpeedScaling.X,
+                (CursorDistanceXYRelative.Y / (float)swCursorSpeedTiming.Elapsed.TotalMilliseconds) * CursorSpeedScaling.Y);
             swCursorSpeedTiming.Reset();
             swCursorSpeedTiming.Start();
 
@@ -975,7 +986,9 @@ namespace OpenMobile
         internal void RenderingWindow_MouseUp(object sender, OpenMobile.Input.MouseButtonEventArgs e)
         {
             if ((int)sender != _Screen)
+            {
                 return;
+            }
 
             // Scale mouse data
             MouseButtonEventArgs eScaled = new MouseButtonEventArgs(e);
@@ -1085,7 +1098,9 @@ namespace OpenMobile
                         if (typeof(IThrow).IsInstanceOfType(FocusedControlParent))
                         {
                             OpenMobile.Threading.SafeThread.Asynchronous(() =>
-                                ((IThrow)FocusedControlParent).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed)
+                                {
+                                ((IThrow)FocusedControlParent).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                                }
                             );
                         }
                 }
@@ -1098,7 +1113,9 @@ namespace OpenMobile
                         if (typeof(IThrow).IsInstanceOfType(FocusedControl))
                         {
                              OpenMobile.Threading.SafeThread.Asynchronous(() =>
-                                ((IThrow)FocusedControl).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed)
+                                 {
+                                ((IThrow)FocusedControl).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                                 }
                              );
                        }
                 }
@@ -1329,7 +1346,7 @@ namespace OpenMobile
 
         public bool TransitionInPanel(OMPanel newP)
         {
-            lock (this) // Lock to prevent multiple transitons at the same time
+            lock (this) // Lock to prevent multiple transitions at the same time
             {
                 // Remove startup panel
                 if (RenderingQueue.Contains(panelStartUp))

@@ -1,4 +1,12 @@
-﻿---- < Distributed >-----
+﻿20140731
+	Upgraded to .Net4
+	+ Added Helper methods for File: OpenMobile.helperFunctions.FileHelpers.ExtractZipFile 
+	# Replaced media player plugin OMWinPlayer2 with OMVLCPlayer
+	# Changed load level for DLL's from all dll's located below OpenMobile to maximum one level below plugin folder
+	  and skin folder. Dll's located lower than this will be skipped from load attempts.
+	+ Added new Audio handler plugin OMAudioControl, this renders the old OMPlayer plugin useless. Plugin is removed.
+
+---- < Distributed >-----
 20140422
 	+ Several changes, including DataSourceGroups and CommandGroups
 	+ New Media Player using datasources and commands (old interface not yet removed)

@@ -253,7 +253,7 @@ namespace OpenMobile.Controls
             if (borderColor != null)
                 gd.BorderColor = (Color)borderColor;
             else
-                gd.BorderColor = Color.FromArgb(100, Color.White);
+                gd.BorderColor = Color.FromArgb(125, Color.White);
             gd.Width = btn.Width;
             gd.Height = btn.Height;
             if (cornerRadius != null)

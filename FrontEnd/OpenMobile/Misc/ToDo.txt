@@ -13,3 +13,6 @@ Non working stuff (priority / task):
 	- (low) HAL: Brightness control for XP
 	- (low) OMTargetWindow
 	OK - (medium) Add OM logo when rendering starts
+
+Issues:
+	OK - Startup doesn't always detect all screens

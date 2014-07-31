@@ -2859,7 +2859,7 @@ namespace OpenMobile
         public bool UpdateMissingInfo(string album = null, string artist = null, string name = null, string genre = null, int? length = null, int? tracknumber = null, OImage coverArt = null, eMediaType? type = null)
         {
             bool updated = false;
-            if (type.HasValue != null)
+            if (type.HasValue)
                 if (this.Type != type.Value)
                 {
                     this.Type = type.Value;

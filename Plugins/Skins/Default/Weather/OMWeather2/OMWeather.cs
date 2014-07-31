@@ -153,12 +153,14 @@ namespace OMWeather2
 
             OMPanel weatherPanel = new OMPanel("OMWeather2", "Weather");
 
-            OMButton currentBackground = OMButton.PreConfigLayout_BasicStyle("currentbackground", (int)(float)(theHost.ClientArea_Init.Width * .15), theHost.ClientArea_Init.Top - 6, (int)(float)(theHost.ClientArea_Init.Width * .70), (int)(float)(theHost.ClientArea_Init.Height * .213) + 6, GraphicCorners.All);
+            //OMButton currentBackground = OMButton.PreConfigLayout_BasicStyle("currentbackground", (int)(float)(theHost.ClientArea_Init.Width * .15), theHost.ClientArea_Init.Top - 6, (int)(float)(theHost.ClientArea_Init.Width * .70), (int)(float)(theHost.ClientArea_Init.Height * .213) + 6, GraphicCorners.All);
+            OMButton currentBackground = OMButton.PreConfigLayout_CleanStyle("currentbackground", (int)(float)(theHost.ClientArea_Init.Width * .15), theHost.ClientArea_Init.Top-2, (int)(float)(theHost.ClientArea_Init.Width * .70), (int)(float)(theHost.ClientArea_Init.Height * .213) + 6, corners:GraphicCorners.Bottom, borderColor:Color.Transparent);
             currentBackground.BorderColor = Color.White;
             currentBackground.BorderSize = 1;
             currentBackground.FocusImage = imageItem.NONE;
             currentBackground.DownImage = imageItem.NONE;
             weatherPanel.addControl(currentBackground);
+
             OMImage currentimage = new OMImage("currentimage", currentBackground.Region.Left + 40, currentBackground.Region.Top - 5, 120, 120); //currentbackground.Region.Height - 15);
             weatherPanel.addControl(currentimage);
             OMLabel currenttemp = new OMLabel("currenttemp", currentBackground.Region.Right - 200, currentBackground.Region.Top + 10, 200, currentBackground.Region.Height - 15);
