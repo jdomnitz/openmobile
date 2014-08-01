@@ -73,11 +73,11 @@ namespace OMTicTacToe
             imgWonO = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_O").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinFocusColor));
 
             OMPanel TicTacToe = new OMPanel("OMTicTacToe", "TicTacToe", this.pluginIcon);
-            OMButton SinglePlayer = OMButton.PreConfigLayout_BasicStyle("SinglePlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) - 75, (int)(OM.Host.ClientArea_Init.Width * .2), 80, GraphicCorners.All);
+            OMButton SinglePlayer = OMButton.PreConfigLayout_CleanStyle("SinglePlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) - 75, (int)(OM.Host.ClientArea_Init.Width * .2), 80, corners:GraphicCorners.Top);
             SinglePlayer.Text = "Single Player";
             SinglePlayer.OnClick += new userInteraction(SinglePlayer_OnClick);
             TicTacToe.addControl(SinglePlayer);
-            OMButton MultiPlayer = OMButton.PreConfigLayout_BasicStyle("MultiPlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, GraphicCorners.All);
+            OMButton MultiPlayer = OMButton.PreConfigLayout_CleanStyle("MultiPlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, corners: GraphicCorners.Bottom);
             MultiPlayer.Text = "Multiplayer";
             MultiPlayer.OnClick += new userInteraction(MultiPlayer_OnClick);
             TicTacToe.addControl(MultiPlayer);
@@ -97,7 +97,7 @@ namespace OMTicTacToe
             MultiplayerList.OnClick += new userInteraction(MultiplayerList_OnClick);
             MultiplayerList.Visible = false;
             TicTacToe.addControl(MultiplayerList);
-            OMButton multiplayerCancel = OMButton.PreConfigLayout_BasicStyle("multiplayerCancel", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), MultiplayerList.Top + MultiplayerList.Height + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, GraphicCorners.All);
+            OMButton multiplayerCancel = OMButton.PreConfigLayout_CleanStyle("multiplayerCancel", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), MultiplayerList.Top + MultiplayerList.Height + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, corners: GraphicCorners.All);
             multiplayerCancel.Text = "Cancel";
             multiplayerCancel.Visible = false;
             multiplayerCancel.OnClick += new userInteraction(multiplayerCancel_OnClick);
@@ -109,17 +109,17 @@ namespace OMTicTacToe
             OMLabel challengeLabelMain = new OMLabel("challengeLabelMain", challengeBackgroundMain.Left + 5, challengeBackgroundMain.Top + 5, challengeBackgroundMain.Width - 10, challengeBackgroundMain.Height - 90);
             challengeLabelMain.Visible = false;
             TicTacToe.addControl(challengeLabelMain);
-            OMButton challengeCancel = OMButton.PreConfigLayout_BasicStyle("challengeCancel", (challengeBackgroundMain.Width / 2) - 50, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, GraphicCorners.All);
+            OMButton challengeCancel = OMButton.PreConfigLayout_CleanStyle("challengeCancel", (challengeBackgroundMain.Width / 2) - 50, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, corners: GraphicCorners.All);
             challengeCancel.Text = "Cancel";
             challengeCancel.Visible = false;
             challengeCancel.OnClick += new userInteraction(challengeCancel_OnClick);
             TicTacToe.addControl(challengeCancel);
-            OMButton challengeAccept = OMButton.PreConfigLayout_BasicStyle("challengeAccept", (challengeBackgroundMain.Width / 2) - 110, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, GraphicCorners.All);
+            OMButton challengeAccept = OMButton.PreConfigLayout_CleanStyle("challengeAccept", (challengeBackgroundMain.Width / 2) - 110, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, corners: GraphicCorners.All);
             challengeAccept.Text = "Accept";
             challengeAccept.Visible = false;
             challengeAccept.OnClick += new userInteraction(challengeAccept_OnClick);
             TicTacToe.addControl(challengeAccept);
-            OMButton challengeDecline = OMButton.PreConfigLayout_BasicStyle("challengeDecline", challengeAccept.Left + challengeAccept.Width + 20, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, GraphicCorners.All);
+            OMButton challengeDecline = OMButton.PreConfigLayout_CleanStyle("challengeDecline", challengeAccept.Left + challengeAccept.Width + 20, challengeLabelMain.Top + challengeLabelMain.Height + 5, 100, 75, corners: GraphicCorners.All);
             challengeDecline.Text = "Decline";
             challengeDecline.Visible = false;
             challengeDecline.OnClick += new userInteraction(challengeDecline_OnClick);
@@ -131,14 +131,14 @@ namespace OMTicTacToe
             shapeBackgroundMain.Visible = false;
             TicTacToe.addControl(shapeBackgroundMain);
 
-            OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", 0, OM.Host.ClientArea_Init.Bottom - 110, 200, 100, GraphicCorners.All);
+            OMButton Rematch = OMButton.PreConfigLayout_CleanStyle("Rematch", 0, OM.Host.ClientArea_Init.Bottom - 110, 200, 100, corners:GraphicCorners.All);
             Rematch.Left = (shapeBackgroundMain.Left / 2) - (Rematch.Width / 2);
             Rematch.Text = "Rematch";
             Rematch.Visible = false;
             Rematch.OnClick += new userInteraction(Rematch_OnClick);
             TicTacToe.addControl(Rematch);
 
-            OMButton Quit = OMButton.PreConfigLayout_BasicStyle("Quit", OM.Host.ClientArea_Init.Right - 230, OM.Host.ClientArea_Init.Bottom - 110, 200, 100, GraphicCorners.All);
+            OMButton Quit = OMButton.PreConfigLayout_CleanStyle("Quit", OM.Host.ClientArea_Init.Right - 230, OM.Host.ClientArea_Init.Bottom - 110, 200, 100, corners: GraphicCorners.All);
             Quit.Visible = false;
             Quit.Text = "Quit";
             Quit.OnClick += new userInteraction(Quit_OnClick);
