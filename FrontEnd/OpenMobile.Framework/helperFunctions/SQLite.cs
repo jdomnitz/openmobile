@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 
 namespace OpenMobile.helperFunctions.SQLite
 {
@@ -73,11 +73,11 @@ namespace OpenMobile.helperFunctions.SQLite
             DataTable dt = new DataTable();
             try
             {
-                SqliteConnection cnn = new SqliteConnection(dbConnection);
+                SQLiteConnection cnn = new SQLiteConnection(dbConnection);
                 cnn.Open();
-                SqliteCommand mycommand = new SqliteCommand(cnn);
+                SQLiteCommand mycommand = new SQLiteCommand(cnn);
                 mycommand.CommandText = sql;
-                SqliteDataReader reader = mycommand.ExecuteReader();
+                SQLiteDataReader reader = mycommand.ExecuteReader();
                 dt.Load(reader);
                 reader.Close();
                 cnn.Close();
@@ -96,9 +96,9 @@ namespace OpenMobile.helperFunctions.SQLite
         /// <returns>An Integer containing the number of rows updated.</returns>
         public int ExecuteNonQuery(string sql)
         {
-            SqliteConnection cnn = new SqliteConnection(dbConnection);
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             cnn.Open();
-            SqliteCommand mycommand = new SqliteCommand(cnn);
+            SQLiteCommand mycommand = new SQLiteCommand(cnn);
             mycommand.CommandText = sql;
             int rowsUpdated = mycommand.ExecuteNonQuery();
             cnn.Close();
@@ -112,9 +112,9 @@ namespace OpenMobile.helperFunctions.SQLite
         /// <returns>A string.</returns>
         public string ExecuteScalar(string sql)
         {
-            SqliteConnection cnn = new SqliteConnection(dbConnection);
+            SQLiteConnection cnn = new SQLiteConnection(dbConnection);
             cnn.Open();
-            SqliteCommand mycommand = new SqliteCommand(cnn);
+            SQLiteCommand mycommand = new SQLiteCommand(cnn);
             mycommand.CommandText = sql;
             object value = mycommand.ExecuteScalar();
             cnn.Close();

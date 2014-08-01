@@ -126,13 +126,13 @@ namespace OpenMobile
 
         /// <summary>
         /// The copyright information to be displayed on the about screen
+        /// <para>WARNING: REMOVING OR EDITING ANY OF THE ABOUT TEXT IS A VIOLATION OF THE LICENSE AGREEMENT</para>
         /// </summary>
         public static string AboutText
         {
             get
             {
-                //WARNING: REMOVING ANY OF THE BELOW DESCRIPTION IS A VIOLATION OF THE LICENSE AGREEMENT
-
+                //WARNING: REMOVING OR EDITING ANY OF THE BELOW DESCRIPTION IS A VIOLATION OF THE LICENSE AGREEMENT
                 string Text = "OpenMobile is copyrighted (2009 - 2013) to the OpenMobile Foundation and its contributors.\r\n\r\n";
                 Text += "This program in full or in part is protected under a clarified version of the GPLv3 license which can be found in the application directory.\r\n\r\n";
                 Text += "Contributors:\r\n";
@@ -143,9 +143,12 @@ namespace OpenMobile
                 Text += "jheizer - Developer\r\n";
                 Text += "jmullan99@gmail.com - Tester / plugin developer\r\n";
                 Text += "Efess - Navit developer\r\n";
-                Text += "detlion1643 - Plugin Developer\r\n";
+                Text += "detlion1643 - Developer\r\n";
                 Text += "\r\nSupporting Projects:\r\n";
-                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge, CoreAudio, mPlayer and the Open ToolKit Project";
+                Text += "TagLib Sharp, The Mono Project, iPod Sharp, DBusSharp, Sqlite, Aqua Gauge, CoreAudio, VLC, nVLC and OpenTK";
+                Text += "\r\n";
+                Text += "\r\n";
+                Text += "Click this message to return";
                 return Text;
             }
         }
@@ -165,20 +168,15 @@ namespace OpenMobile
                 panelAbout.BackgroundType = backgroundStyle.SolidColor;
                 panelAbout.BackgroundColor1 = Color.FromArgb(180, Color.Black);
 
-                OMContainer contAboutContainer = new OMContainer("contAboutContainer", 0, 0, 1000, 600);
+                OMContainer contAboutContainer = new OMContainer("contAboutContainer", OM.Host.ClientFullArea.Left, OM.Host.ClientFullArea.Top, OM.Host.ClientFullArea.Width, OM.Host.ClientFullArea.Height - 25);
                 panelAbout.addControl(contAboutContainer);
 
-                //OMLabel description = new OMLabel(30, 55, 940, 540);
-                OMLabel lblDescription = new OMLabel("lblDescription", 25, 0, 950, 550);
+                OMLabel lblDescription = new OMLabel("lblDescription", 25, 0, 950, 650);
                 lblDescription.TextAlignment = OpenMobile.Graphics.Alignment.WordWrap | OpenMobile.Graphics.Alignment.TopCenter;
                 lblDescription.Text = AboutText;
                 contAboutContainer.addControl(lblDescription);
 
-                OMLabel lblInfo = new OMLabel("lblInfo", lblDescription.Left, lblDescription.Region.Bottom, lblDescription.Width, 25);
-                lblInfo.Text = "Click this message to return";
-                contAboutContainer.addControl(lblInfo);
-
-                OMButton btnReturn = new OMButton("btnReturn", lblDescription.Left, lblDescription.Top, lblDescription.Width, lblDescription.Height + lblInfo.Height);
+                OMButton btnReturn = new OMButton("btnReturn", lblDescription.Left, lblDescription.Top, lblDescription.Width, lblDescription.Height);
                 btnReturn.OnClick += new userInteraction(btnReturn_OnClick);
                 contAboutContainer.addControl(btnReturn);
             }

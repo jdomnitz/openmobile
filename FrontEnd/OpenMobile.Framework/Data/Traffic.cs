@@ -18,7 +18,7 @@
     The About Panel or its contents must be easily accessible by the end users.
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using System;
 using OpenMobile;
 using System.Text;
@@ -125,27 +125,27 @@ namespace OpenMobile.Data
     /// </summary>
     public class Traffic : IDisposable
     {
-        private SqliteConnection con;
-        //private SqliteDataReader asyncReader;
+        private SQLiteConnection con;
+        //private SQLiteDataReader asyncReader;
         private bool tableCreated;
         /// <summary>
         /// Stores traffic information
         /// </summary>
         public Traffic()
         {
-            con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
+            con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
             con.Open();
         }
         private bool createTable()
         {
-            using (SqliteCommand cmd = new SqliteCommand(con))
+            using (SQLiteCommand cmd = new SQLiteCommand(con))
             {
                 cmd.CommandText = "CREATE TABLE Traffic (startDate Julian, endDate Julian, title TEXT, description TEXT, type INTEGER, severity INTEGER, direction INTEGER, longitude NUMERIC, latitude NUMERIC, location TEXT);";
                 try
                 {
                     cmd.ExecuteNonQuery();
                 }
-                catch (SqliteException) { return false; }
+                catch (SQLiteException) { return false; }
                 return true;
             }
         }
@@ -156,7 +156,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool writeTraffic(TrafficItem item)
         {
-            using (SqliteCommand cmd = new SqliteCommand(con))
+            using (SQLiteCommand cmd = new SQLiteCommand(con))
             {
                 StringBuilder query = new StringBuilder("INSERT INTO Traffic (startDate, endDate, title, description, type, severity, direction, longitude, latitude, location)VALUES('");
                 query.Append(item.Start.ToString());
@@ -184,7 +184,7 @@ namespace OpenMobile.Data
                 {
                     return (cmd.ExecuteNonQuery() != 0);
                 }
-                catch (SqliteException e)
+                catch (SQLiteException e)
                 {
                     if (e.Message.Contains("no such table"))
                     {

@@ -24,7 +24,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Data
@@ -34,7 +34,7 @@ namespace OpenMobile.Data
     /// </summary>
     public static class Credentials
     {
-        private static SqliteConnection con;
+        private static SQLiteConnection con;
         /// <summary>
         /// Reserved
         /// </summary>
@@ -49,7 +49,7 @@ namespace OpenMobile.Data
         public static event Authorization OnAuthorizationRequested;
         private static void createDB()
         {
-            SqliteCommand cmd = new SqliteCommand(con);
+            SQLiteCommand cmd = new SQLiteCommand(con);
             cmd.CommandText = "BEGIN TRANSACTION;CREATE TABLE tblCache(UID INTEGER PRIMARY KEY, EncryptedName TEXT, Value TEXT);CREATE TABLE tblAccess(UID INTEGER, AssemblyHash TEXT);COMMIT;";
             try
             {
@@ -74,22 +74,22 @@ namespace OpenMobile.Data
                         uid += (char)(Environment.UserName[i] << Environment.ProcessorCount);
                 }
                 if (con == null)
-                    con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=True");
+                    con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=True");
                 if (con.State == ConnectionState.Closed)
                 {
                     con.Open();
-                    using (SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con))
+                    using (SQLiteCommand cmd = new SQLiteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con))
                         cmd.ExecuteNonQuery();
                 }
             }
-            catch (SqliteException)
+            catch (SQLiteException)
             {
                 if (con != null)
                     con.Dispose();
-                con = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;");
+                con = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMSecure") + ";Version=3;FailIfMissing=False;");
                 con.Open();
                 createDB();
-                using (SqliteCommand cmd = new SqliteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con))
+                using (SQLiteCommand cmd = new SQLiteCommand("PRAGMA locking_mode='Exclusive';BEGIN EXCLUSIVE;DELETE FROM tblCache WHERE UID=0;INSERT INTO tblCache (UID,EncryptedName,Value)VALUES('0','Lock',time('now'));COMMIT", con))
                     cmd.ExecuteNonQuery();
             }
         }
@@ -113,7 +113,7 @@ namespace OpenMobile.Data
                 if (blockedHashes.Contains(hash))
                     return null;
                 string md5 = Encryption.md5Encode(credentialName + uid);
-                SqliteCommand cmd = new SqliteCommand(con);
+                SQLiteCommand cmd = new SQLiteCommand(con);
                 cmd.CommandText = "SELECT Value from tblCache where EncryptedName='" + md5 + "'";
                 object ret = cmd.ExecuteScalar();
                 string value;
@@ -176,7 +176,7 @@ namespace OpenMobile.Data
                 string hash = Assembly.GetCallingAssembly().GetModules()[0].ModuleVersionId.ToString();
                 if (blockedHashes.Contains(hash))
                     return;
-                SqliteCommand cmd = new SqliteCommand(con);
+                SQLiteCommand cmd = new SQLiteCommand(con);
                 string md5 = Encryption.md5Encode(credentialName + uid);
                 cmd.CommandText = "SELECT Count(*) from tblCache WHERE EncryptedName='" + md5 + "'";
                 int count = (int)(Int64)cmd.ExecuteScalar();

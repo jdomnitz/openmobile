@@ -21,7 +21,7 @@
 using System;
 using System.Data;
 using System.Text;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using OpenMobile.helperFunctions;
 
 namespace OpenMobile.Data
@@ -137,7 +137,7 @@ namespace OpenMobile.Data
 
         private static void createDB()
         {
-            SqliteCommand cmd = new SqliteCommand(asyncCon);
+            SQLiteCommand cmd = new SQLiteCommand(asyncCon);
             cmd.CommandText = "BEGIN TRANSACTION;CREATE TABLE Message (Attachment TEXT, Content TEXT, Date Julian, Flags NUMERIC, fromEmailOrNum TEXT, fromName TEXT, ID INTEGER PRIMARY KEY, Subject TEXT, Source TEXT, toName TEXT);COMMIT;";
             try
             {
@@ -152,15 +152,15 @@ namespace OpenMobile.Data
             try
             {
                 if (asyncCon == null)
-                    asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMMessages") + ";Version=3;FailIfMissing=True");
+                    asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMMessages") + ";Version=3;FailIfMissing=True");
                 if (asyncCon.State == ConnectionState.Closed)
                     asyncCon.Open();
             }
-            catch (SqliteException)
+            catch (SQLiteException)
             {
                 if (asyncCon != null)
                     asyncCon.Dispose();
-                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMMessages") + ";Version=3;FailIfMissing=False;");
+                asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMMessages") + ";Version=3;FailIfMissing=False;");
                 asyncCon.Open();
                 createDB();
             }
@@ -185,9 +185,9 @@ namespace OpenMobile.Data
             return Collections.Messages.Count;
         }
 
-        static SqliteConnection asyncCon;
-        static SqliteCommand asyncCmd;
-        static SqliteDataReader asyncReader;
+        static SQLiteConnection asyncCon;
+        static SQLiteCommand asyncCmd;
+        static SQLiteDataReader asyncReader;
 
         /// <summary>
         /// Begins an asynchronous connection to the Message database

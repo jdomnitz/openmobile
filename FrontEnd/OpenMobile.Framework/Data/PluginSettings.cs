@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using OpenMobile.helperFunctions;
 using System.Resources;
 using System.Reflection;
@@ -51,7 +51,7 @@ namespace OpenMobile.Data
         /// </summary>
         public bool DBCreated { get; set; }
 
-        SqliteConnection asyncCon;
+        SQLiteConnection asyncCon;
         /// <summary>
         /// Stores and retrieves settings from the database
         /// </summary>
@@ -64,7 +64,7 @@ namespace OpenMobile.Data
                 CreateDatabase = true;
 
             // Connect to SQLite and create DB file
-            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;temp_store=2");
+            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;temp_store=2");
             asyncCon.Open();
 
             // If DB file is present, then create tables
@@ -79,7 +79,7 @@ namespace OpenMobile.Data
         {
             if (!DBCreated)
             {
-                SqliteCommand cmd = new SqliteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
+                SQLiteCommand cmd = new SQLiteCommand(OpenMobile.Framework.Data.SQL.OMData, asyncCon);
                 cmd.ExecuteNonQuery();
                 DBCreated = true;
                 BuiltInComponents.Host.DebugMsg(DebugMessageType.Info,"Database created (OMData)");
@@ -97,7 +97,7 @@ namespace OpenMobile.Data
             {
                 if (asyncCon.State == System.Data.ConnectionState.Closed)
                     asyncCon.Open();
-                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                using (SQLiteCommand cmd = asyncCon.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Value FROM PluginSettings WHERE Name='" + name + "'";
                     object result = cmd.ExecuteScalar();
@@ -120,7 +120,7 @@ namespace OpenMobile.Data
         public bool setSetting(IBasePlugin plugin,  string name, string value)
         {
             name = SettingNameBuilder(plugin, name);
-            using (SqliteCommand cmd = asyncCon.CreateCommand())
+            using (SQLiteCommand cmd = asyncCon.CreateCommand())
             {
                 cmd.CommandText = "UPDATE OR REPLACE PluginSettings SET Value='" + General.escape(value) + "' WHERE Name='" + General.escape(name) + "'";
                 int rowsAffected = cmd.ExecuteNonQuery();
@@ -142,7 +142,7 @@ namespace OpenMobile.Data
         public bool DeleteSetting(IBasePlugin plugin, string name)
         {
             name = SettingNameBuilder(plugin, name);
-            using (SqliteCommand cmd = asyncCon.CreateCommand())
+            using (SQLiteCommand cmd = asyncCon.CreateCommand())
             {
                 cmd.CommandText = "DELETE FROM PluginSettings WHERE Name='" + General.escape(name) + "'";
                 int rowsAffected = cmd.ExecuteNonQuery();
@@ -191,10 +191,10 @@ namespace OpenMobile.Data
 
                 if (asyncCon.State == System.Data.ConnectionState.Closed)
                     asyncCon.Open();
-                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                using (SQLiteCommand cmd = asyncCon.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Name, Value FROM PluginSettings WHERE Name like '" + prefix + "%'";
-                    SqliteDataReader rdr = cmd.ExecuteReader();
+                    SQLiteDataReader rdr = cmd.ExecuteReader();
 
                     while (rdr.Read())
                         Dic.Add(rdr.GetString(0), rdr.GetString(1));
@@ -240,7 +240,7 @@ namespace OpenMobile.Data
             {
                 if (asyncCon.State == System.Data.ConnectionState.Closed)
                     asyncCon.Open();
-                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                using (SQLiteCommand cmd = asyncCon.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Value FROM Objects WHERE Name='" + name + "'";
                     object result = cmd.ExecuteScalar();
@@ -294,10 +294,10 @@ namespace OpenMobile.Data
                 }
 
                 // Save object to database
-                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                using (SQLiteCommand cmd = asyncCon.CreateCommand())
                 {
-                    cmd.Parameters.Add(new SqliteParameter("@name", General.escape(name)));
-                    cmd.Parameters.Add(new SqliteParameter("@data", ms.ToArray()));
+                    cmd.Parameters.Add(new SQLiteParameter("@name", General.escape(name)));
+                    cmd.Parameters.Add(new SQLiteParameter("@data", ms.ToArray()));
 
                     cmd.CommandText = "UPDATE OR REPLACE Objects SET Value=@data WHERE Name=@name";
                     int rowsAffected = cmd.ExecuteNonQuery();
@@ -334,10 +334,10 @@ namespace OpenMobile.Data
             }
 
             // Save object to database
-            using (SqliteCommand cmd = asyncCon.CreateCommand())
+            using (SQLiteCommand cmd = asyncCon.CreateCommand())
             {
-                cmd.Parameters.Add(new SqliteParameter("@name", General.escape(name)));
-                cmd.Parameters.Add(new SqliteParameter("@data", System.Text.UTF8Encoding.UTF8.GetBytes(xml)));
+                cmd.Parameters.Add(new SQLiteParameter("@name", General.escape(name)));
+                cmd.Parameters.Add(new SQLiteParameter("@data", System.Text.UTF8Encoding.UTF8.GetBytes(xml)));
 
                 cmd.CommandText = "UPDATE OR REPLACE Objects SET Value=@data WHERE Name=@name";
                 int rowsAffected = cmd.ExecuteNonQuery();
@@ -368,7 +368,7 @@ namespace OpenMobile.Data
             {
                 if (asyncCon.State == System.Data.ConnectionState.Closed)
                     asyncCon.Open();
-                using (SqliteCommand cmd = asyncCon.CreateCommand())
+                using (SQLiteCommand cmd = asyncCon.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Value FROM Objects WHERE Name='" + name + "'";
                     object result = cmd.ExecuteScalar();
@@ -409,7 +409,7 @@ namespace OpenMobile.Data
         public bool DeleteObject(IBasePlugin plugin, string name)
         {
             name = SettingNameBuilder(plugin, name);
-            using (SqliteCommand cmd = asyncCon.CreateCommand())
+            using (SQLiteCommand cmd = asyncCon.CreateCommand())
             {
                 cmd.CommandText = "DELETE FROM Objects WHERE Name='" + General.escape(name) + "'";
                 int rowsAffected = cmd.ExecuteNonQuery();
