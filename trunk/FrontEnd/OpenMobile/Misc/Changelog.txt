@@ -1,4 +1,7 @@
-﻿20140731
+﻿20140801
+	# Replaced Mono.Data.SQLite with latest System.Data.SQLite files. Added automatic handling of 64bit vs 32bit installs, no more need for EnvironmentSetup.exe
+
+20140731
 	Upgraded to .Net4
 	+ Added Helper methods for File: OpenMobile.helperFunctions.FileHelpers.ExtractZipFile 
 	# Replaced media player plugin OMWinPlayer2 with OMVLCPlayer

@@ -30,7 +30,7 @@ using OpenMobile.Framework;
 using OpenMobile.helperFunctions;
 using OpenMobile;
 using OpenMobile.Data;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using OpenMobile.Graphics;
 
 namespace OMDSWeather
@@ -52,7 +52,7 @@ namespace OMDSWeather
         Settings settings;
         //System.Threading.Timer polltmr;
         System.Diagnostics.Stopwatch pollsw;
-        private SqliteConnection sqlConn;
+        private SQLiteConnection sqlConn;
         Thread polling;
         private bool stillpolling;
         bool refreshQueue;
@@ -1452,7 +1452,7 @@ namespace OMDSWeather
         private void Starting()
         {
             if (sqlConn == null)
-                sqlConn = new SqliteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
+                sqlConn = new SQLiteConnection(@"Data Source=" + OpenMobile.Path.Combine(theHost.DataPath, "OMMedia2") + ";Pooling=false;synchronous=0;temp_store=2;count_changes=0");
             if (sqlConn.State != System.Data.ConnectionState.Open)
                 sqlConn.Open();
         }

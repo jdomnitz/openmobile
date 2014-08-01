@@ -187,11 +187,12 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>EnvironmentSetup.exe</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

@@ -19,7 +19,7 @@
     This is to ensure all project contributors are given due credit not only in the source code.
 *********************************************************************************/
 using System;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using System.Text;
 using OpenMobile.helperFunctions;
 
@@ -30,9 +30,9 @@ namespace OpenMobile.Data
     /// </summary>
     public sealed class Tasks : IDisposable
     {
-        private SqliteConnection asyncCon;
-        private SqliteCommand cmd;
-        private SqliteDataReader asyncReader;
+        private SQLiteConnection asyncCon;
+        private SQLiteCommand cmd;
+        private SQLiteDataReader asyncReader;
 
         /// <summary>
         /// State of the task
@@ -111,7 +111,7 @@ namespace OpenMobile.Data
         public bool beginRead()
         {
             if (asyncCon == null)
-                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
+                asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
             cmd = asyncCon.CreateCommand();
             cmd.CommandText = "SELECT * FROM Tasks";
             asyncCon.Open();
@@ -126,7 +126,7 @@ namespace OpenMobile.Data
         public bool beginRead(int ID)
         {
             if (asyncCon == null)
-                asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
+                asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;FailIfMissing=True;temp_store=2");
             cmd = asyncCon.CreateCommand();
             cmd.CommandText = "SELECT * FROM Tasks WHERE ID='" + ID.ToString() + "'";
             asyncCon.Open();
@@ -156,7 +156,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool beginWrite()
         {
-            asyncCon = new SqliteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
+            asyncCon = new SQLiteConnection(@"Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "openMobile", "OMData") + ";Version=3;Pooling=True;Max Pool Size=6;");
             asyncCon.Open();
             cmd = asyncCon.CreateCommand();
             return true;

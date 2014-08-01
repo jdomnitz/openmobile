@@ -24,7 +24,7 @@ using System.Data;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Mono.Data.Sqlite;
+using System.Data.SQLite;
 using OpenMobile;
 using OpenMobile.Data;
 using OpenMobile.Graphics;
@@ -88,7 +88,7 @@ namespace OMMediaDB2
         /// <summary>
         /// The SQLite database connection object
         /// </summary>
-        private SqliteConnection _DBConnection;
+        private SQLiteConnection _DBConnection;
 
         /// <summary>
         /// Notification for indexing status
@@ -98,7 +98,7 @@ namespace OMMediaDB2
         /// <summary>
         /// The local reader object
         /// </summary>
-        private SqliteDataReader _DBReader;
+        private SQLiteDataReader _DBReader;
 
         /// <summary>
         /// Is cover retrival from folders enabled?
@@ -383,7 +383,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand command = _DBConnection.CreateCommand())
+                using (SQLiteCommand command = _DBConnection.CreateCommand())
                 {
                     command.CommandText = "SELECT Location FROM tblMediaInfo WHERE ObjectType=@ObjectType AND Location=@Location AND ObjectTag=@ObjectTag";
                     command.Parameters.AddWithValue("@ObjectType", (int)objectType);
@@ -420,7 +420,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     cmd.CommandText = "INSERT INTO tblMediaInfo (ObjectType, ObjectTag, Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArtID) " +
                                       "VALUES (@ObjectType, @ObjectTag, @Name, @Artist, @Album, @Location, @TrackNumber, @Genre, @Lyrics, @Length, @Rating, @Type, @CoverArtID)";
@@ -480,7 +480,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     cmd.CommandText = "INSERT INTO tblMediaInfoCoverArt (ID, IDText, CoverArt) VALUES (@ID, @IDText, @CoverArt)";
                     cmd.Parameters.AddWithValue("@ID", coverArtID);
@@ -508,7 +508,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand command = _DBConnection.CreateCommand())
+                using (SQLiteCommand command = _DBConnection.CreateCommand())
                 {
                     command.CommandText = "SELECT ID FROM tblMediaInfoCoverArt WHERE ID =@ID";
                     command.Parameters.AddWithValue("@ID", coverArtID);
@@ -535,8 +535,8 @@ namespace OMMediaDB2
             if (!DB_ConnectAndOpen())
                 return locations;
 
-            using (SqliteCommand cmd = new SqliteCommand(String.Format("SELECT Location FROM tblMediaInfo WHERE ObjectType='{0}'", (int)objectType), _DBConnection))
-                using (SqliteDataReader r = cmd.ExecuteReader())
+            using (SQLiteCommand cmd = new SQLiteCommand(String.Format("SELECT Location FROM tblMediaInfo WHERE ObjectType='{0}'", (int)objectType), _DBConnection))
+                using (SQLiteDataReader r = cmd.ExecuteReader())
                     while (r.Read() == true)
                         locations.Enqueue(r[0].ToString());
 
@@ -562,14 +562,14 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     cmd.CommandText = "SELECT Artist, CoverArt, CoverArtID FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType =@ObjectType AND Artist =@Artist GROUP BY CoverArtID";
                     if (limit > 0)
                         cmd.CommandText += " LIMIT " + limit.ToString();
                     cmd.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.IndexedItem);
                     cmd.Parameters.AddWithValue("@Artist", artist);
-                    SqliteDataReader reader = cmd.ExecuteReader();
+                    SQLiteDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
                         // Extract cover art
@@ -604,7 +604,7 @@ namespace OMMediaDB2
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        private mediaInfo DB_GetMediaInfoItem(SqliteDataReader reader, MediaDataBaseCommands commandType)
+        private mediaInfo DB_GetMediaInfoItem(SQLiteDataReader reader, MediaDataBaseCommands commandType)
         {
 
             if (reader == null || !reader.Read())
@@ -715,7 +715,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand command = _DBConnection.CreateCommand())
+                using (SQLiteCommand command = _DBConnection.CreateCommand())
                 {
                     command.CommandText = "Select Count(DISTINCT Album) FROM tblMediaInfo WHERE ObjectType =@ObjectType AND Artist LIKE @Artist";
                     command.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.IndexedItem);
@@ -756,7 +756,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand command = _DBConnection.CreateCommand())
+                using (SQLiteCommand command = _DBConnection.CreateCommand())
                 {
                     command.CommandText = "SELECT Count(ObjectTag) FROM tblMediaInfo WHERE ObjectType =@ObjectType AND ObjectTag =@ObjectTag GROUP BY ObjectTag";
                     command.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.PlaylistItem);
@@ -786,7 +786,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand command = _DBConnection.CreateCommand())
+                using (SQLiteCommand command = _DBConnection.CreateCommand())
                 {
                     command.CommandText = "SELECT Value FROM tblMediaSettings WHERE ObjectType =@ObjectType AND ObjectTag =@ObjectTag AND Name =@Name ORDER BY ROWID ASC LIMIT 1";
                     command.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.PlaylistSetting);
@@ -814,7 +814,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     // Try to update
                     cmd.CommandText = "UPDATE tblMediaSettings SET Value=@Value WHERE Name=@Name AND ObjectTag=@ObjectTag AND ObjectType=@ObjectType";
@@ -853,7 +853,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     cmd.CommandText = "DELETE FROM tblMediaInfo WHERE ObjectType =@ObjectType";
                     cmd.Parameters.AddWithValue("@ObjectType", (int)objectType);
@@ -883,7 +883,7 @@ namespace OMMediaDB2
             int recordCount = 0;
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     cmd.CommandText = "DELETE FROM tblMediaInfo WHERE ObjectType =@ObjectType AND ObjectTag =@ObjectTag";
                     cmd.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.PlaylistItem);
@@ -917,7 +917,7 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     cmd.CommandText = "DELETE FROM tblMediaInfoCoverArt WHERE ID IN (";
                     foreach (int i in unusedCovers)
@@ -948,10 +948,10 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand cmd = new SqliteCommand(_DBConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
                     cmd.CommandText = "SELECT t1.ID, t1.IDText FROM tblMediaInfoCoverArt t1 LEFT JOIN tblMediaInfo t2 ON t1.ID = t2.CoverArtID WHERE t2.CoverArtID IS NULL";
-                    SqliteDataReader reader = cmd.ExecuteReader();
+                    SQLiteDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                         IDs.Add(reader.GetInt32(0));
                 }
@@ -978,7 +978,7 @@ namespace OMMediaDB2
             if (!_DBValid)
                 return;
 
-            SqliteCommand cmd = new SqliteCommand(
+            SQLiteCommand cmd = new SQLiteCommand(
                 "BEGIN TRANSACTION;" +
                 "CREATE TABLE tblDBInfo (Owner TEXT, Description TEXT, Version TEXT);" +
                 String.Format("INSERT INTO tblDBInfo VALUES('{0}', '{1}', '{2}');", base.pluginName, base.pluginDescription, dbVersion.ToString().Replace(',','.')) +
@@ -1006,7 +1006,7 @@ namespace OMMediaDB2
             try
             {
                 if (_DBConnection == null)
-                    _DBConnection = new SqliteConnection(String.Format(@"Data Source={0};Pooling=false;synchronous=0;", _DBFile));
+                    _DBConnection = new SQLiteConnection(String.Format(@"Data Source={0};Pooling=false;synchronous=0;", _DBFile));
                 if (_DBConnection.State != ConnectionState.Open)
                 {
                     _DBConnection.Open();
@@ -1033,7 +1033,7 @@ namespace OMMediaDB2
             if (!DB_ConnectAndOpen())
                 return false;
 
-            using (SqliteCommand command = _DBConnection.CreateCommand())
+            using (SQLiteCommand command = _DBConnection.CreateCommand())
             {
                 command.CommandText = "SELECT Version FROM tblDBInfo"; 
                 object returnValue = command.ExecuteScalar();
@@ -1046,9 +1046,9 @@ namespace OMMediaDB2
             return false;
         }
 
-        private SqliteDataReader DB_ExecuteCommand(string SQL)
+        private SQLiteDataReader DB_ExecuteCommand(string SQL)
         {
-            SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection);
+            SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection);
             try
             {
                 return cmd.ExecuteReader();
@@ -1113,7 +1113,7 @@ namespace OMMediaDB2
                 SQL += " AND Artist LIKE @Artist";
             SQL += " GROUP BY Upper(Artist)";
 
-            using (SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection))
             {
                 cmd.Parameters.AddWithValue("@Artist", artistFilter.Replace('*', '%'));
                 _DBReader = cmd.ExecuteReader();
@@ -1138,7 +1138,7 @@ namespace OMMediaDB2
                 SQL += " AND Genre LIKE @Genre";
             SQL += " GROUP BY Upper(Album), Upper(Artist), Upper(Genre)";
 
-            using (SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection))
             {
                 cmd.Parameters.AddWithValue("@Artist", artistFilter.Replace('*', '%'));
                 cmd.Parameters.AddWithValue("@Album", albumFilter.Replace('*', '%'));
@@ -1207,7 +1207,7 @@ namespace OMMediaDB2
 
             #endregion
 
-            using (SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection))
             {
                 cmd.Parameters.AddWithValue("@Name", songFilter.Replace('*','%'));
                 cmd.Parameters.AddWithValue("@Artist", artistFilter.Replace('*', '%'));
@@ -1231,7 +1231,7 @@ namespace OMMediaDB2
             string SQL = DB_GetMediaInfoSQLBase(DBObjectTypes.IndexedItem);
             SQL += " GROUP BY Genre";
 
-            using (SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection))
             {
                 _DBReader = cmd.ExecuteReader();
             }
@@ -1248,7 +1248,7 @@ namespace OMMediaDB2
 
             string SQL = "UPDATE tblMediaInfo SET Rating=@Rating WHERE Location=@Location";
             
-            using (SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection))
             {
                 cmd.Parameters.AddWithValue("@Rating", info.Rating);
                 cmd.Parameters.AddWithValue("@Location", info.Location);
@@ -1327,7 +1327,7 @@ namespace OMMediaDB2
             string SQL = DB_GetMediaInfoSQLBase(DBObjectTypes.PlaylistItem);
             SQL += String.Format(" AND ObjectTag='{0}'", name);
 
-            using (SqliteCommand cmd = new SqliteCommand(SQL, _DBConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection))
                 _DBReader = cmd.ExecuteReader();
 
             _BeginCommand = MediaDataBaseCommands.GetPlaylists;
@@ -1371,11 +1371,11 @@ namespace OMMediaDB2
 
             try
             {
-                using (SqliteCommand command = _DBConnection.CreateCommand())
+                using (SQLiteCommand command = _DBConnection.CreateCommand())
                 {
                     command.CommandText = "SELECT ObjectTag FROM tblMediaInfo WHERE ObjectType =@ObjectType AND ObjectTag IS NOT NULL GROUP BY ObjectTag";
                     command.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.PlaylistItem);
-                    SqliteDataReader reader = command.ExecuteReader();
+                    SQLiteDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                         playlists.Add(reader.GetString(0));
                 }

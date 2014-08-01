@@ -190,7 +190,7 @@ namespace OpenMobile.Media
                     if (!db.beginGetAlbums(artist))
                         return false;
                 }
-                catch (Mono.Data.Sqlite.SqliteException)
+                catch (Mono.Data.Sqlite.SQLiteException)
                 {
                     return false;
                 }
@@ -232,7 +232,7 @@ namespace OpenMobile.Media
                     if (!db.beginGetSongs("", "", "", "", "", -1, true, eMediaField.Title))
                         return false;
                 }
-                catch (Mono.Data.Sqlite.SqliteException)
+                catch (Mono.Data.Sqlite.SQLiteException)
                 {
                     return false;
                 }
@@ -303,7 +303,7 @@ namespace OpenMobile.Media
                     if (!db.beginGetSongsByGenre(genre, true, eMediaField.Title))
                         return false;
                 }
-                catch (Mono.Data.Sqlite.SqliteException)
+                catch (Mono.Data.Sqlite.SQLiteException)
                 {
                     return false;
                 }
@@ -366,7 +366,7 @@ namespace OpenMobile.Media
                     if (!db.beginGetSongsByArtist(artist, true, sort))
                         return false;
                 }
-                catch (Mono.Data.Sqlite.SqliteException)
+                catch (Mono.Data.Sqlite.SQLiteException)
                 {
                     return false;
                 }
