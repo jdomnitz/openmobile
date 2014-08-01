@@ -46,7 +46,7 @@ namespace OMTicTacToe
         imageItem imgWonO;
 
         public OMTicTacToe()
-            : base("OMTicTacToe", OM.Host.getPluginImage<OMTicTacToe>("Icon-OMTicTacToe"), 0.1f, "Tic Tac Toe", "Tic Tac Toe", "Peter Yeaney", "peter.yeaney@outlook.com")
+            : base("OMTicTacToe", imageItem.NONE, 0.1f, "Tic Tac Toe", "Tic Tac Toe", "Peter Yeaney", "peter.yeaney@outlook.com")
         {
         }
 
@@ -72,33 +72,38 @@ namespace OMTicTacToe
             imgWonX = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_X").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinFocusColor));
             imgWonO = new imageItem((OImage)OM.Host.getPluginImage(this, "Images|Icon-Glass-OMTicTacToe_O").image.Copy().Overlay(BuiltInComponents.SystemSettings.SkinFocusColor));
 
-             OMPanel TicTacToe = new OMPanel("OMTicTacToe", this.displayName, this.pluginIcon);
-            OMButton SinglePlayer = OMButton.PreConfigLayout_BasicStyle("SinglePlayer", (OM.Host.ClientArea[0].Width / 2) - 100, (OM.Host.ClientArea[0].Height / 2) - 75, 200, 80, GraphicCorners.All);
+            OMPanel TicTacToe = new OMPanel("OMTicTacToe", "TicTacToe", this.pluginIcon);
+            OMButton SinglePlayer = OMButton.PreConfigLayout_BasicStyle("SinglePlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) - 75, (int)(OM.Host.ClientArea_Init.Width * .2), 80, GraphicCorners.All);
             SinglePlayer.Text = "Single Player";
             SinglePlayer.OnClick += new userInteraction(SinglePlayer_OnClick);
             TicTacToe.addControl(SinglePlayer);
-            OMButton MultiPlayer = OMButton.PreConfigLayout_BasicStyle("MultiPlayer", (OM.Host.ClientArea[0].Width / 2) - 100, (OM.Host.ClientArea[0].Height / 2) + 5, 200, 80, GraphicCorners.All);
+            OMButton MultiPlayer = OMButton.PreConfigLayout_BasicStyle("MultiPlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, GraphicCorners.All);
             MultiPlayer.Text = "Multiplayer";
             MultiPlayer.OnClick += new userInteraction(MultiPlayer_OnClick);
             TicTacToe.addControl(MultiPlayer);
-            
-            //OMPanel MultiplayerPanel = new OMPanel("MultiplayerPanel", "TicTacToe -> Multiplayer", this.pluginIcon);
 
-            OMList MultiplayerList = new OMList("multiplayerList", 100, 80, 390, 400);
+            OMBasicShape multiplayerListBackground = new OMBasicShape("multiplayerListBackground", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .25), 80, (int)(OM.Host.ClientArea_Init.Width * .5), 350, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+            multiplayerListBackground.Visible = false;
+            TicTacToe.addControl(multiplayerListBackground);
+            OMList MultiplayerList = new OMList("multiplayerList", multiplayerListBackground.Left + 7, multiplayerListBackground.Top + 7, multiplayerListBackground.Width - 14, multiplayerListBackground.Height - 14);
+            MultiplayerList.ListStyle = eListStyle.MultiListText;
+            MultiplayerList.ListItemHeight = 40;
+            MultiplayerList.SeparatorColor = Color.Silver;
+            MultiplayerList.SeparatorSize = 4;
+            MultiplayerList.ItemColor1 = Color.Transparent;
+            MultiplayerList.HighlightColor = Color.White;
+            MultiplayerList.SelectedItemColor1 = BuiltInComponents.SystemSettings.SkinFocusColor;
+            MultiplayerList.TextAlignment = Alignment.CenterCenter;
             MultiplayerList.OnClick += new userInteraction(MultiplayerList_OnClick);
             MultiplayerList.Visible = false;
             TicTacToe.addControl(MultiplayerList);
-            OMButton multiplayerCancel = OMButton.PreConfigLayout_BasicStyle("multiplayerCancel", 100, 480, 390, 80, GraphicCorners.All);
+            OMButton multiplayerCancel = OMButton.PreConfigLayout_BasicStyle("multiplayerCancel", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), MultiplayerList.Top + MultiplayerList.Height + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, GraphicCorners.All);
             multiplayerCancel.Text = "Cancel";
             multiplayerCancel.Visible = false;
             multiplayerCancel.OnClick += new userInteraction(multiplayerCancel_OnClick);
             TicTacToe.addControl(multiplayerCancel);
-            //OMList MultiplayerListPlaying = new OMList("MultiplayerListPlaying", 610, 80, 380, 440);
-            //MultiplayerPanel.addControl(MultiplayerList);
-            //MultiplayerPanel.addControl(MultiplayerListPlaying);
-            
-            //OMObjectList MultiPlayerList = new OMObjectList("MultiPlayerList", 100, 80, 390, 440);
-            OMBasicShape challengeBackgroundMain = new OMBasicShape("challengeBackgroundMain", OM.Host.ClientArea[0].Left, OM.Host.ClientArea[0].Top + (OM.Host.ClientArea[0].Height / 2) - 100, OM.Host.ClientArea[0].Width, 200, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
+
+            OMBasicShape challengeBackgroundMain = new OMBasicShape("challengeBackgroundMain", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top + (OM.Host.ClientArea_Init.Height / 2) - 100, OM.Host.ClientArea_Init.Width, 200, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
             challengeBackgroundMain.Visible = false;
             TicTacToe.addControl(challengeBackgroundMain);
             OMLabel challengeLabelMain = new OMLabel("challengeLabelMain", challengeBackgroundMain.Left + 5, challengeBackgroundMain.Top + 5, challengeBackgroundMain.Width - 10, challengeBackgroundMain.Height - 90);
@@ -125,8 +130,8 @@ namespace OMTicTacToe
             shapeBackgroundMain.Left = OM.Host.ClientArea_Init.Center.X - shapeBackgroundMain.Region.Center.X;
             shapeBackgroundMain.Visible = false;
             TicTacToe.addControl(shapeBackgroundMain);
-            
-            OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", 0, OM.Host.ClientArea[0].Bottom - 110, 200, 100, GraphicCorners.All);
+
+            OMButton Rematch = OMButton.PreConfigLayout_BasicStyle("Rematch", 0, OM.Host.ClientArea_Init.Bottom - 110, 200, 100, GraphicCorners.All);
             Rematch.Left = (shapeBackgroundMain.Left / 2) - (Rematch.Width / 2);
             Rematch.Text = "Rematch";
             Rematch.Visible = false;
@@ -143,6 +148,7 @@ namespace OMTicTacToe
             statusLabel.Visible = false;
             statusLabel.Color = Color.FromArgb(178, BuiltInComponents.SystemSettings.SkinTextColor);
             statusLabel.ShapeData = new ShapeData(shapes.RoundedRectangle, Color.FromArgb(25, Color.White), Color.Transparent, 0, 5);
+            statusLabel.AutoFitTextMode = FitModes.FitFill;
             TicTacToe.addControl(statusLabel);
 
             for (int i = 0; i < OM.Host.ScreenCount; i++)
@@ -228,8 +234,8 @@ namespace OMTicTacToe
                     ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeLabelMain"]).Tag = screenChallenger.ToString();
                     ShowChallengeMain(true, screen, false);
                     //challengeCancel, challengeAccept, challengeDecline
-                    
-                    
+
+
 
                 }
                 else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "ChallengeAccepted"))
@@ -249,13 +255,13 @@ namespace OMTicTacToe
                     ToggleChallengeControlsOff(((List<int>)sensor.Value)[0]);
                     ToggleChallengeControlsOff(((List<int>)sensor.Value)[1]);
                 }
-                else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "Spectate")  && (((List<int>)sensor.Value)[0] == screen))
+                else if ((sensor.NameLevel2 == "Multiplayer") && (sensor.NameLevel3 == "Spectate") && (((List<int>)sensor.Value)[0] == screen))
                 {
                     boardIDs[screen] = ((List<int>)sensor.Value)[1];
                 }
                 else if (sensor.NameLevel2 == "Notification" && sensor.NameLevel3 == "Click")
                 {
-                    if(screen == Convert.ToInt32(sensor.Value))
+                    if (screen == Convert.ToInt32(sensor.Value))
                         base.GotoPanel(screen, "OMTicTacToe");
                 }
                 else //if (boardIDs[screen] == Convert.ToInt32(sensor.NameLevel2))
@@ -365,6 +371,7 @@ namespace OMTicTacToe
             }
             else
             {
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["multiplayerListBackground"]).Visible = false;
                 ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"]).Visible = false;
                 ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["multiplayerCancel"]).Visible = false;
                 ((OMLabel)base.PanelManager[screen, "OMTicTacToe"]["challengeCancel"]).Visible = false;
@@ -423,7 +430,7 @@ namespace OMTicTacToe
                         //OM.Host.DebugMsg(String.Format("boardTile_{0}_{1}.Visible: true", r.ToString(), c.ToString()));
                     }
                     else
-                    {   
+                    {
                         ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["boardTile_" + r.ToString() + "_" + c.ToString()]).Visible = false;
                         //OM.Host.DebugMsg(String.Format("boardTile_{0}_{1}.Visible: false", r.ToString(), c.ToString()));
                     }
@@ -495,11 +502,13 @@ namespace OMTicTacToe
         {
             if (Visible)
             {
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["multiplayerListBackground"]).Visible = true;
                 ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"]).Visible = true;
                 ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["multiplayerCancel"]).Visible = true;
             }
             else
             {
+                ((OMBasicShape)base.PanelManager[screen, "OMTicTacToe"]["multiplayerListBackground"]).Visible = false;
                 ((OMList)base.PanelManager[screen, "OMTicTacToe"]["multiplayerList"]).Visible = false;
                 ((OMButton)base.PanelManager[screen, "OMTicTacToe"]["multiplayerCancel"]).Visible = false;
             }

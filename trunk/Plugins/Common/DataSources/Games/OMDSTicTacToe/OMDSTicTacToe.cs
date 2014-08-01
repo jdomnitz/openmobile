@@ -48,7 +48,7 @@ namespace OMDSTicTacToe
         public static Notification[] gameNotifications;
 
         public OMDSTicTacToe()
-            : base("OMDSTicTacToe", OM.Host.getPluginImage<OMDSTicTacToe>("Icon-OMTicTacToe"), 0.1f, "Tic Tac Toe Datasource", "Peter Yeaney", "peter.yeaney@outlook.com")
+            : base("OMDSTicTacToe", imageItem.NONE, 0.1f, "Tic Tac Toe Datasource", "Peter Yeaney", "peter.yeaney@outlook.com")
         {
         }
 
@@ -133,7 +133,7 @@ namespace OMDSTicTacToe
             //        break;
             //    }
             //}
-            
+
             //send the message to go back to the game
             //BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { screen, "BackToGame" } }, true);
         }
@@ -142,13 +142,20 @@ namespace OMDSTicTacToe
         {
             cancel = true;
         }
-        
 
         private object ChallengeCancelled(OpenMobile.Command command, object[] param, out bool result)
         {
             result = true;
             ModifyMultiplayerListBack(Convert.ToInt32(param[0]), Convert.ToInt32(param[1]));
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.ChallengeDeclined", new List<int> { Convert.ToInt32(param[0]), Convert.ToInt32(param[1]) }, true);
+            if (displayNotifications[Convert.ToInt32(param[1])])
+            {
+                displayNotifications[Convert.ToInt32(param[1])] = false;
+                gameNotifications[Convert.ToInt32(param[1])].ClearAction -= TicTacToeBoard_ClearAction;
+                gameNotifications[Convert.ToInt32(param[1])] = null;
+                OM.Host.UIHandler.RemoveAllMyNotifications(this, Convert.ToInt32(param[1]));
+                displayNotifications[Convert.ToInt32(param[1])] = true;
+            }
             return null;
         }
 
@@ -157,6 +164,14 @@ namespace OMDSTicTacToe
             result = true;
             ModifyMultiplayerListBack(Convert.ToInt32(param[0]), Convert.ToInt32(param[1]));
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.ChallengeDeclined", new List<int> { Convert.ToInt32(param[0]), Convert.ToInt32(param[1]) }, true);
+            if (displayNotifications[Convert.ToInt32(param[1])])
+            {
+                displayNotifications[Convert.ToInt32(param[1])] = false;
+                gameNotifications[Convert.ToInt32(param[1])].ClearAction -= TicTacToeBoard_ClearAction;
+                gameNotifications[Convert.ToInt32(param[1])] = null;
+                OM.Host.UIHandler.RemoveAllMyNotifications(this, Convert.ToInt32(param[1]));
+                displayNotifications[Convert.ToInt32(param[1])] = true;
+            }
             return null;
         }
 
@@ -188,7 +203,7 @@ namespace OMDSTicTacToe
                         if ((gameBoards[gameBoards.Keys.ElementAt(i)].Player1 == challengedScreen) || (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 == challengedScreen))
                         {
                             multiplayerList[screen] = "*** Screen: " + screen.ToString() + " (Spectating Screen: " + challengedScreen.ToString() + ")";
-                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.Spectate", new List<int> {screen, gameBoards[gameBoards.Keys.ElementAt(i)].ID }, true);
+                            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.Spectate", new List<int> { screen, gameBoards[gameBoards.Keys.ElementAt(i)].ID }, true);
                             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardVisibility", true, true);
                             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardUpdated", gameBoards[gameBoards.Keys.ElementAt(i)].Layout, true);
                             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardMessages", new Dictionary<int, string>() { { screen, "Spectating..." } }, true);
@@ -206,7 +221,7 @@ namespace OMDSTicTacToe
             multiplayerList[screen] = String.Format("Screen: {0} (Challenging Screen: {1})", screen.ToString(), challengedScreen.ToString());
             multiplayerList[challengedScreen] = String.Format("Screen: {0} (Challenged By Screen: {1})", challengedScreen.ToString(), screen.ToString());
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.List", multiplayerList, true);
-            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.Challenged", new List<int> {screen, challengedScreen}, true);
+            BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.Challenged", new List<int> { screen, challengedScreen }, true);
             if (displayNotifications[challengedScreen])
             {
                 ShowNotification(this, challengedScreen, String.Format("Screen {0} has challenged you to a game of Tic Tac Toe", screen.ToString()));
@@ -224,9 +239,11 @@ namespace OMDSTicTacToe
         {
             result = true;
             displayNotifications[Convert.ToInt32(param[0])] = false;
-            gameNotifications[Convert.ToInt32(param[0])].ClearAction -= TicTacToeBoard_ClearAction;
-            gameNotifications[Convert.ToInt32(param[0])] = null;
-
+            if (gameNotifications[Convert.ToInt32(param[0])] != null)
+            {
+                gameNotifications[Convert.ToInt32(param[0])].ClearAction -= TicTacToeBoard_ClearAction;
+                gameNotifications[Convert.ToInt32(param[0])] = null;
+            }
             ////does this do all the below?
             ////gameNotifications[Convert.ToInt32(param[0])].Dispose();
 
@@ -290,7 +307,7 @@ namespace OMDSTicTacToe
 
             if (Convert.ToInt32(param[1]) != -1)
             {
-                
+
                 multiplayerList[Convert.ToInt32(param[0])] = "*** Screen: " + param[0].ToString() + " (VS. Screen: " + param[1].ToString() + ")";
                 if (!displayNotifications[Convert.ToInt32(param[0])])
                     OM.Host.UIHandler.InfoBanner_Show(Convert.ToInt32(param[0]), new InfoBanner(String.Format("You VS Screen: {0}{1}GOOD LUCK!!!", param[1].ToString(), Environment.NewLine)));
@@ -303,7 +320,7 @@ namespace OMDSTicTacToe
             {
                 multiplayerList[Convert.ToInt32(param[0])] = "*** Screen: " + param[0].ToString() + " (VS. AI)";
                 OM.Host.UIHandler.InfoBanner_Show(Convert.ToInt32(param[0]), new InfoBanner(String.Format("You VS: AI{0}GOOD LUCK!!!", Environment.NewLine)));
-                OM.Host.DebugMsg(String.Format("Game added ({0}): Screen {1} vs AI", currentBoardID.ToString(), param[0].ToString() ));
+                OM.Host.DebugMsg(String.Format("Game added ({0}): Screen {1} vs AI", currentBoardID.ToString(), param[0].ToString()));
             }
 
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.List", multiplayerList, true);
@@ -375,7 +392,7 @@ namespace OMDSTicTacToe
                     //OM.Host.DebugMsg(String.Format("Removing from gameBoards: {0}", gameBoards.Keys.ElementAt(i).ToString()));
                     //the screen is playing on boardID = i
                     multiplayerList[Convert.ToInt32(param[0])] = String.Format("Screen: {0}", param[0].ToString());
-                    if(gameBoards[gameBoards.Keys.ElementAt(i)].Player2 != -1)
+                    if (gameBoards[gameBoards.Keys.ElementAt(i)].Player2 != -1)
                         multiplayerList[gameBoards[gameBoards.Keys.ElementAt(i)].Player2] = String.Format("Screen: {0}", gameBoards[gameBoards.Keys.ElementAt(i)].Player2.ToString());
                     BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe.Multiplayer.List", multiplayerList, true);
                     BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + gameBoards[gameBoards.Keys.ElementAt(i)].ID.ToString() + ".BoardVisibility", false, true);
@@ -547,7 +564,7 @@ namespace OMDSTicTacToe
             }
             return null;
         }
-#endregion
+        #endregion
 
     }
 
@@ -606,14 +623,14 @@ namespace OMDSTicTacToe
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".Spectator", "Watching Game...");
             if (Turn == Player1) //player 1 turn
             {
-                messageP1 = "It is your turn, please make a move!";
+                messageP1 = String.Format("It is your turn, please make a move!{0}You are: {1}", Environment.NewLine, Piece[0]);
                 if (Player2 != -1) //not ai
                     messageP2 = "Opponent's turn, please wait!";
             }
             else if ((Player2 != -1) && (Turn == Player2)) //player 2 turn
             {
                 messageP1 = "Opponent's turn, please wait!";
-                messageP2 = "It is your turn, please make a move!";
+                messageP2 = String.Format("It is your turn, please make a move!{0}You are: {1}", Environment.NewLine, Piece[1]);
 
             }
             else if (Turn == -1) //ai turn
@@ -632,11 +649,11 @@ namespace OMDSTicTacToe
                 for (int c = 1; c < 4; c++)
                 {
                     Layout[r - 1][c - 1] = "B";
-                 }
+                }
             }
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardUpdated", Layout, true);
             if (quit)
-            {   
+            {
                 if (screenQuit != -1)
                 {
                     if (!gameOver)
@@ -658,7 +675,7 @@ namespace OMDSTicTacToe
             {
                 gameOver = false;
                 BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSTicTacToe;TicTacToe." + ID.ToString() + ".BoardVisibility", true);
-             }
+            }
         }
 
         public void EndGame(int screenQuit = -1)
@@ -679,7 +696,7 @@ namespace OMDSTicTacToe
             {
                 Layout[row][col] = Piece[1];
             }
-            
+
             SwitchTurns(oldTurn);
         }
 
@@ -702,7 +719,7 @@ namespace OMDSTicTacToe
                     else
                     {
                         messageP1 = "Opponent's turn, please wait!";
-                        messageP2 = "It is your turn, please make a move!";
+                        messageP2 = String.Format("It is your turn, please make a move!{0}You are: {1}", Environment.NewLine, Piece[1]);
                         Turn = Player2;
                         if (OMDSTicTacToe.displayNotifications[Player2])
                         {
@@ -713,7 +730,7 @@ namespace OMDSTicTacToe
                 }
                 else if (oldTurn == Player2)
                 {
-                    messageP1 = "It is your turn, please make a move!";
+                    messageP1 = String.Format("It is your turn, please make a move!{0}You are: {1}", Environment.NewLine, Piece[0]);
                     if (Player2 != -1) //not ai
                         messageP2 = "Opponent's turn, please wait!";
                     Turn = Player1;
@@ -965,7 +982,7 @@ namespace OMDSTicTacToe
                 // Invalid move, make a random one instead
                 if (!ValidMove(nextMove))
                     nextMove = GetRandomMove();
- 
+
 
                 FlipTile(nextMove.Y, nextMove.X);
             }
