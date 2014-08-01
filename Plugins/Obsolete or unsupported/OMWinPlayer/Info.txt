@@ -1,2 +1,0 @@
-Build path at this level: 
-..\..\..\..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\<PluginName>
