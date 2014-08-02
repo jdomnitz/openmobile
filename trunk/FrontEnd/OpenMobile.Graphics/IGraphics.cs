@@ -51,7 +51,8 @@ namespace OpenMobile.Graphics
         void renderText(System.Drawing.Graphics g, int x, int y, int w, int h, string text, Font font, eTextFormat format, Alignment alignment, Color c, Color sC);
         void ResetClip();
         void ResetTransform();
-        void Resize(int Width, int Height);
+        void Resize(int left, int top, int width, int height);
+        void Location(int left, int top);
         void SetClip(Rectangle Rect);
         void SetClipFast(int x, int y, int width, int height);
         void Translate(double dx, double dy);

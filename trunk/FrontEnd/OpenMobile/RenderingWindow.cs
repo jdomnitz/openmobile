@@ -378,12 +378,14 @@ namespace OpenMobile
                 if (_FPS_Max > 15)
                     _FPS_Min = System.Math.Min(_FPS_Min, _FPS);
             }
-
             _Refresh = false;
+
+            // Send window location to graphics engine
+            g.Location(base.Location.X, base.Location.Y);
 
             if (_ResizeRequired)
             {
-                g.Resize(Width, Height);
+                g.Resize(base.Location.X, base.Location.Y, base.Width, base.Height);
                 _ResizeRequired = false;
             }
 

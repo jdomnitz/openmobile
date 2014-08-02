@@ -66,7 +66,6 @@ namespace ControlDemo
             Bricks brick = new Bricks();
             p.addControl(brick);
 
-
             OM.Host.LoadSkinSprite("maneuvers-2x", 
                 new Sprite("TurnSharpLeft", 0, 2, 38, 30),
                 new Sprite("TurnLeft", 0, 36, 38, 27),
@@ -86,9 +85,19 @@ namespace ControlDemo
             p.addControl(new OMImage("img9PatchTest3", 0, 0, OM.Host.getSkinImage("9Patch|box_launcher_top_normal.9", new Size(250, 90))), ControlDirections.Down);
             p.addControl(new OMImage("img9PatchTest4", 0, 0, OM.Host.getSkinImage("9Patch|box_launcher_top_normal.9", new Size(250, 60))), ControlDirections.Down);
 
-            OMImage imgBackground = new OMImage("imgBackground", 330, 100, OM.Host.getSkinImage("OMIconBlack_Transparent"));
-            imgBackground.BackgroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;
-            imgBackground.Image.image.ShaderEffect = OMShaders.MouseDot;
+
+            imageItem img = OM.Host.getSkinImage("Icons|Icon-OM_Large");
+            OImage oImg = img.image.Copy();
+            oImg.Overlay(BuiltInComponents.SystemSettings.SkinFocusColor);
+            oImg.Glow(Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor));
+            oImg.ShaderEffect = OMShaders.Radar;
+            img = new imageItem(oImg);
+
+
+            OMImage imgBackground = new OMImage("imgBackground", 330, 100, img);
+
+            //imgBackground.BackgroundColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+            //imgBackground.Image.image.ShaderEffect = OMShaders.Radar;
             imgBackground.Left = 500 - (imgBackground.Image.image.Width / 2);
             imgBackground.Top = 300 - (imgBackground.Image.image.Height / 2);
             p.addControl(imgBackground);

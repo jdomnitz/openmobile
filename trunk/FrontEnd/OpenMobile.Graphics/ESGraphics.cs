@@ -814,13 +814,22 @@ namespace OpenMobile.Graphics
             GL.LoadIdentity();
         }
 
-        public void Resize(int Width, int Height)
+        public void Resize(int left, int top, int width, int height)
         {
-            width = Width;
-            height = Height;
+            this.width = width;
+            this.height = height;
             wscale = (width / 1000F);
             hscale = (height / 600F);
             GL.Viewport(0, 0, width, height);
+        }
+
+        int _Left;
+        int _Top;
+
+        public void Location(int left, int top)
+        {
+            _Left = left;
+            _Top = top;
         }
 
         public void SetClip(Rectangle Rect)
