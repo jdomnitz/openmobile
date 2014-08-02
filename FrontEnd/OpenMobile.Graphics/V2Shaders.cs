@@ -310,7 +310,10 @@ vec3 target = vec3(0., 0., 0.);
 precision mediump float;
 #endif
 
+uniform vec2 windowpos;
 uniform vec2 resolution;
+uniform vec2 position;
+uniform vec2 scale;
 uniform float time;
 uniform sampler2D u_Texture;
 
@@ -324,10 +327,12 @@ void main(void)
 {
     //vec2 texcoord = vec2(gl_TexCoord[0]);
     //resolution = texcoord;
+    position = position * 2;
+
 
     vec4 irgb = texture2D(u_Texture, gl_TexCoord[0].st).rgba;
 
-	vec2 p = (-1.0 + 2.0 * ((gl_FragCoord.xy) / resolution.xy));
+	vec2 p = (-1.0 + 2.0 * ((gl_FragCoord.xy) / position));
 	p.x *= (resolution.x / resolution.y);
 
 	float a = (atan(p.y,p.x) + time);
@@ -374,16 +379,20 @@ void main(void)
 precision mediump float;
 #endif
 
+uniform vec2 windowpos;
 uniform vec2 mouse;
 uniform vec2 resolution;
+uniform vec2 scale;
 uniform sampler2D u_Texture;
 
 /* Made by Krisztián Szabó */
 void main(){
 	/* The light's positions */
-	vec2 light_pos = resolution*mouse;
+	vec2 light_pos = resolution * mouse;
+
 	/* The radius of the light */
 	float radius = 200.0;
+
 	/* Intensity range: 0.0 - 1.0 */
 	float intensity = 0.2;
 
@@ -391,6 +400,7 @@ void main(){
 	
 	/* Distance between the fragment and the light */
 	float dist = distance(gl_FragCoord.xy, light_pos);
+    dist = dist / scale;
 	
 	/* Basic light color, change it to your likings */
 	//vec3 light_color = vec3(0.2, 1.0, 1.0);
@@ -448,7 +458,7 @@ void main(){
             swTime.Start();
         }
 
-        public static void ActivateShader(GameWindow targetWindow, MouseData mouseData, OMShaders shader, int width, int height)
+        public static void ActivateShader(GameWindow targetWindow, MouseData mouseData, OMShaders shader, int effectPosX, int effectPosY, int windowLeft, int windowTop, int windowWidth, int windowHeight, float widthScale, float heightScale)
         {
             Init();
 
@@ -508,16 +518,15 @@ void main(){
 
                         GL.ActiveTexture(TextureUnit.Texture0);
                         GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "u_Texture"), TextureUnit.Texture0 - TextureUnit.Texture0);
-
                         GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "time"), (float)swTime.Elapsed.TotalSeconds);
-                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "resolution"), new Vector2(width, height));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "resolution"), new Vector2(windowWidth, windowHeight));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "scale"), new Vector2(widthScale, heightScale));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "windowpos"), new Vector2(windowLeft, windowTop));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "position"), new Vector2(effectPosX, effectPosY));
 
                         Vector2 mouse = new Vector2();
-                        mouse.X = (float)mouseData.CursorPosition.X / (float)width;
-                        mouse.Y = 1 - ((float)mouseData.CursorPosition.Y / (float)height);
-                        //mouse.X = 0.5f;
-                        //mouse.Y = 0.5f;
-
+                        mouse.X = ((((float)mouseData.CursorPosition.X) * widthScale) / (float)windowWidth);
+                        mouse.Y = 1 - ((((float)mouseData.CursorPosition.Y) * heightScale) / (float)windowHeight);
                         GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "mouse"), mouse);
                     }
                     catch (Exception ex)

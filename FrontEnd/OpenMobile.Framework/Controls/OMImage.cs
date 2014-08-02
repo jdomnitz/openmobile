@@ -330,6 +330,10 @@ namespace OpenMobile.Controls
 
             // End rendering
             base.RenderFinish(g, e);
+
+            // Keep rendering if shader is active
+            if (img != null && img.image != null && img.ShaderEffect != OMShaders.None)
+                base.Refresh();
         }
         /// <summary>
         /// Draw modes for an image

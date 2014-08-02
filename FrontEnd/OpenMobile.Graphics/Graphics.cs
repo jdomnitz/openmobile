@@ -1573,9 +1573,19 @@ namespace OpenMobile.Graphics
         /// </summary>
         /// <param name="Width"></param>
         /// <param name="Height"></param>
-        public void Resize(int Width, int Height)
+        public void Resize(int left, int top, int width, int height)
         {
-            implementation.Resize(Width, Height);
+            implementation.Resize(left, top, width, height);
+        }
+
+        /// <summary>
+        /// Informs the graphic engine of the current window location
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        public void Location(int left, int top)
+        {
+            implementation.Location(left, top);
         }
 
         /// <summary>

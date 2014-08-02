@@ -315,7 +315,7 @@ namespace OpenMobile.Graphics
             // Should we use a shader effect?
             if (image.ShaderEffect != OMShaders.None)
             {   // Yes
-                V2Shaders.ActivateShader(_TargetWindow, _MouseData, image.ShaderEffect, _Width, _Height);
+                V2Shaders.ActivateShader(_TargetWindow, _MouseData, image.ShaderEffect, X + (Width / 2), Y + (Height / 2), _Left, _Top, _Width, _Height, _WidthScale, _HeightScale);
             }
 
             if (useReflection)
@@ -1407,13 +1407,24 @@ namespace OpenMobile.Graphics
             _3D_ModelView_Set(Vector3d.Zero, Vector3d.Zero, Vector3d.Zero, 0, true);
         }
 
-        public void Resize(int Width, int Height)
+        public void Resize(int left, int top, int width, int height)
         {
-            _Width = Width;
-            _Height = Height;
+            _Width = width;
+            _Height = height;
             _WidthScale = (_Width / 1000F);
             _HeightScale = (_Height / 600F);
+            _Left = left;
+            _Top = top;
             GL.Viewport(0, 0, _Width, _Height);
+        }
+
+        int _Left;
+        int _Top;
+
+        public void Location(int left, int top)
+        {
+            _Left = left;
+            _Top = top;
         }
 
         public void SetClip(Rectangle Rect)
