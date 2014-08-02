@@ -1551,7 +1551,10 @@ namespace OpenMobile.Controls
 
             if (System.Math.Abs(throwSpeed.X) > 0)
             {
-                _tmrThrowHandler.Interval = 250 / System.Math.Abs(throwSpeed.X);
+                double interval = 250 / System.Math.Abs(throwSpeed.X);
+                if (interval <= 0)
+                    interval = 1;
+                _tmrThrowHandler.Interval = interval;
                 if (_tmrThrowHandler.Interval < 350)
                     _tmrThrowHandler.Enabled = true;
             }

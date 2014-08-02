@@ -42,6 +42,7 @@ Imports OpenMobile.Graphics
 Imports Microsoft.VisualBasic
 Imports OpenMobile.Plugin
 Imports System.IO.Ports
+Imports OpenMobile.Threading
 
 Namespace OMLCD
 
@@ -54,13 +55,15 @@ Namespace OMLCD
         Private _isnew As Boolean
         Private _value As String
         Private _onScreen As Boolean
+        Private _lastChar As Integer
 
-        Public Sub New(ByVal source As String, ByVal label As String, ByVal isnew As Boolean, ByVal value As String, ByVal onscreen As Boolean)
-            Me._source = source
-            Me._label = label
-            Me._isnew = isnew
-            Me._value = value
-            Me._onScreen = onscreen
+        Public Sub New(ByVal source As String, ByVal label As String, ByVal isnew As Boolean, ByVal value As String, ByVal onscreen As Boolean, ByVal lastchar As Integer)
+            Me._source = source     ' data source
+            Me._label = label       ' user assigned label
+            Me._isnew = isnew       ' updated?
+            Me._value = value       ' value of data source
+            Me._onScreen = onscreen ' current on screen?
+            Me._lastChar = lastchar ' last displayed character (for scrolling)
         End Sub
 
         Public Property Source As String
@@ -105,6 +108,19 @@ Namespace OMLCD
             End Get
             Set(ByVal value As Boolean)
                 Me._onScreen = value
+            End Set
+        End Property
+
+        Public Property lastChar As Integer
+            Get
+                Return Me._lastChar
+            End Get
+            Set(ByVal value As Integer)
+                If value > Len(Me._value) Then
+                    Me._lastChar = Len(Me._value)
+                Else
+                    Me._lastChar = value
+                End If
             End Set
         End Property
 
@@ -157,7 +173,8 @@ Namespace OMLCD
         Private settings As Settings
 
         Private m_Key_Timeout As Integer = 10               ' Time to wait for keypress for key assignment in seconds
-        Private m_refresh As Integer = 5000                 ' Default time between display page changes
+        Private m_refresh As Integer = 5                    ' Default time between display page changes in seconds
+        Private m_delay As Integer = 500                    ' Default step rate for scrollng in cell in milliseconds
         Private manager_busy As Boolean = False             ' Prevent multiple concurrent calls on display manager
         Private timer_busy As Boolean = False               ' Prevents subscription updates when page change is due to occur
         Private LastKeyAssign As Integer = 0                ' The keycode received while assigning buttons
@@ -167,6 +184,8 @@ Namespace OMLCD
         Private display_data As New List(Of display_items_struct)              ' To track displayable items
 
         Private m_Justification As String = "Left"          ' Left, Right, Center, Full
+        Private m_Verbose As Boolean = False
+        Private m_Initialized As Boolean = False            ' Flags if BackgroundLoad() has finished
         Private m_Ignore As Boolean = False                 ' Ignore user label if data doesn't fit cell
         Private m_Last_Item As Integer = 0                  ' Last item displayed
         Private m_Num_Pages As Integer = 0                  ' Current number of display pages
@@ -177,6 +196,7 @@ Namespace OMLCD
         Private DEFAULT_CELL_SIZE_ROWS As Integer = 1
         Private m_Cell_Size_Cols As Integer = DEFAULT_CELL_SIZE_COLS ' User specified column width of display cell
         Private m_Cell_Size_Rows As Integer = DEFAULT_CELL_SIZE_ROWS ' User specified row length of display cell
+        Private m_Cell_Size As Integer = m_Cell_Size_Cols & m_Cell_Size_Rows ' Number of characters displayable
         Private m_Number_Cell_Cols As Integer = 20          ' How many cells across the display
         Private m_Number_Cell_Rows As Integer = 1           ' How many cells down the display
 
@@ -192,56 +212,95 @@ Namespace OMLCD
         Public m_Panel_Function As String = "Data"                    ' Could be "Data", "Keys", "GPOs"
         Public m_Mode As String = "none"
 
-        Private WithEvents m_Refresh_tmr As New Timers.Timer(m_refresh)
+        Private WithEvents m_Refresh_tmr As New Timers.Timer(m_refresh * 1000)
+        Private WithEvents m_Delay_tmr As New Timers.Timer(m_delay)
 
         Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
 
             theHost = host
             AddHandler theHost.OnPowerChange, AddressOf m_Host_OnPowerChange
 
+            SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
+
+            Return eLoadStatus.LoadSuccessful
+
+        End Function
+
+        Private Sub BackgroundLoad()
+
             ' This loop is only for testing.  To remove GPO settings values
             'Dim q As Integer
             'For q = 0 To 255
-            'OpenMobile.helperFunctions.StoredData.Delete(Me, Me.pluginName &".GPOs." & q.ToString)
+            'helperfunctions.StoredData.Delete(Me, Me.pluginName &".GPOs." & q.ToString)
             'Next
 
-            ' Create the datasource object to be subscribed to
-            host.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Function", "State", DataSource.DataTypes.binary, "State of Fn key"), False)
+            ' Removes old settings
+            helperFunctions.StoredData.Delete(Me, "VerboseDebug")
+            helperFunctions.StoredData.Delete(Me, "Settings.Verbose")
+            helperFunctions.StoredData.Delete(Me, "OMLCD.loadPanel")
 
             ' We have hard coded to only try Matrix Orbital devices for now
             '  since I have no knowledge of other devices at this time
-            LCD = New Matrix_Orbital(host)
+            LCD = New Matrix_Orbital(theHost)
             Drivers.Add(LCD.Name)
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Selecting {0}.", LCD.Name))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Selecting {0}.", LCD.Name))
+            End If
 
             ' Set or get saved communication parameters
             ' Not really needed right now since we auto-detect every time
             ' If we support multiple displays in the future, then we might need to
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".ComPort", LCD.Port)
-            LCD.Port = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".ComPort")
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".BaudRate", LCD.Baud)
-            LCD.Baud = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".BaudRate")
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".CellSize", LCD.CellSize)
-            LCD.CellSize = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".CellSize")
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".CycleRate", m_refresh)
-            m_refresh = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".CycleRate")
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.ComPort", LCD.Port)
+            LCD.Port = helperFunctions.StoredData.Get(Me, "Settings.ComPort")
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.BaudRate", LCD.Baud)
+            LCD.Baud = helperFunctions.StoredData.GetInt(Me, "Settings.BaudRate")
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.CellSize", LCD.CellSize)
+            LCD.CellSize = helperFunctions.StoredData.GetInt(Me, "Settings.CellSize")
+
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.CycleRate", m_refresh)
+            m_refresh = helperFunctions.StoredData.GetInt(Me, "Settings.CycleRate")
+
+            ' Settings.DelayRate = 250 in the database, m_delay has been initialized to 500
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.DelayRate", m_delay)
+            m_delay = helperFunctions.StoredData.GetInt(Me, "Settings.DelayRate")
+            ' m_delay = 500 but should be 250 since it is already set in the database
+
+            Dim xyz As Integer
 
             ' These settings cannot be applied to the LCD until it's connected ( see sub FindLCD() )
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".KeyPadBrightness", LCD.KeyPadBrightness)
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".LCDBrightness", LCD.LCDBrightness)
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".LCDContrast", LCD.LCDContrast)
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.KeyPadBrightness", LCD.KeyPadBrightness)
+            xyz = helperFunctions.StoredData.GetInt(Me, "Settings.KeyPadBrightness")
+            LCD.KeyPadBrightness = xyz
+            theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.KEY.Brightness", xyz)
 
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".Cell_Size_Cols", m_Cell_Size_Cols)
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".Cell_Size_Rows", m_Cell_Size_Rows)
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".UseSysTextColor", True)
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.LCDBrightness", LCD.LCDBrightness)
+            LCD.LCDBrightness = helperFunctions.StoredData.GetInt(Me, "Settings.LCDBrightness")
+            theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.LCD.Brightness", LCD.LCDBrightness)
+
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.LCDContrast", LCD.LCDContrast)
+            LCD.LCDContrast = helperFunctions.StoredData.GetInt(Me, "Settings.LCDContrast")
+            theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.LCD.Contrast", LCD.LCDContrast)
+
+            m_Cell_Size_Cols = LCD.GetModuleCols
+            m_Cell_Size_Rows = 1
+
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.Cell_Size_Cols", m_Cell_Size_Cols)
+            m_Cell_Size_Cols = helperFunctions.StoredData.GetInt(Me, "Settings.Cell_Size_Cols")
+            helperFunctions.StoredData.SetDefaultValue(Me, "Settings.Cell_Size_Rows", m_Cell_Size_Rows)
+            m_Cell_Size_Rows = helperFunctions.StoredData.GetInt(Me, "Settings.Cell_Size_Rows")
+
+            helperfunctions.StoredData.SetDefaultValue(Me, "Settings.UseSysTextColor", True)
             Dim tcolor As Color = BuiltInComponents.SystemSettings.SkinTextColor
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".UserTextColor", String.Format("{0},{1},{2}", _
+            helperfunctions.StoredData.SetDefaultValue(Me, "Settings.UserTextColor", String.Format("{0},{1},{2}", _
                                                                                             tcolor.R.ToString("X2"), _
                                                                                             tcolor.G.ToString("X2"), _
                                                                                             tcolor.B.ToString("X2")))
 
             ' Miscellaneous settings
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".SelectedAction", 1)
+            helperfunctions.StoredData.SetDefaultValue(Me, "Settings.SelectedAction", 1)
+
+            helperfunctions.StoredData.SetDefaultValue(Me, "Settings.VerboseDebug", m_Verbose)
+            m_Verbose = helperFunctions.StoredData.GetBool(Me, "Settings.VerboseDebug")
 
             FindLCD()
 
@@ -268,7 +327,8 @@ Namespace OMLCD
             text1lbl.FontSize = 24
             panel.addControl(text1lbl)
 
-            Dim text1btn = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Text1Btn", x + 420, y + 350, 150, 80, "", "OK")
+            Dim text1btn = OMButton.PreConfigLayout_CleanStyle("_Text1Btn", x + 420, y + 350, 150, 80)
+            text1btn.text = "OK"
             text1btn.Visible = False
             text1btn.FontSize = 24
             AddHandler text1btn.OnClick, AddressOf text1btn_OnClick
@@ -288,7 +348,9 @@ Namespace OMLCD
             lbl1.TextAlignment = OpenMobile.Graphics.Alignment.CenterCenter
             panel.addControl(lbl1)
 
-            Dim btn1 = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Main_Button1", x + 50, y + 60, 200, 60, "", "Display")
+            'Dim btn1 = helperFunctions.Controls.DefaultControls.GetButton("_Main_Button1", x + 50, y + 60, 200, 60, "", "Display")
+            Dim btn1 = OMButton.PreConfigLayout_CleanStyle("_Main_Button1", x + 50, y + 60, 200, 60)
+            btn1.text = "Display"
             btn1.Visible = True
             AddHandler btn1.OnClick, AddressOf btn1_OnClick
             panel.addControl(btn1)
@@ -299,7 +361,8 @@ Namespace OMLCD
             lbl2.FontSize = 24
             panel.addControl(lbl2)
 
-            Dim btn2 = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Main_Button2", x + 50, y + 130, 200, 60, "", "Set Key")
+            Dim btn2 = OMButton.PreConfigLayout_CleanStyle("_Main_Button2", x + 50, y + 130, 200, 60)
+            btn2.Text = "Set Key"
             btn2.Visible = True
             AddHandler btn2.OnClick, AddressOf btn2_OnClick
             panel.addControl(btn2)
@@ -310,7 +373,8 @@ Namespace OMLCD
             lbl3.FontSize = 24
             panel.addControl(lbl3)
 
-            Dim btn3 = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Main_Button3", x + 50, y + 200, 200, 60, "", "Set GPO")
+            Dim btn3 = OMButton.PreConfigLayout_CleanStyle("_Main_Button3", x + 50, y + 200, 200, 60)
+            btn3.text = "Set GPO"
             btn3.Visible = True
             AddHandler btn3.OnClick, AddressOf btn3_OnClick
             panel.addControl(btn3)
@@ -321,55 +385,54 @@ Namespace OMLCD
             lbl4.FontSize = 24
             panel.addControl(lbl4)
 
-            Dim slide1 As New OMSlider("_Main_Slider1", x + 50, y + 290, 850, 20, 20, 20)
+            Dim slide1 As New OMSlider("_Main_Slider1", x + 50, y + 285, 850, 20, 20, 20)
             slide1.Visible = True
             slide1.Minimum = 0
             slide1.Maximum = 255
-            slide1.Value = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".LCDBrightness")
+            slide1.Value = helperfunctions.StoredData.Get(Me, "Settings.LCDBrightness")
             slide1.SliderBar = Me.theHost.getSkinImage("Slider.Bar")
             slide1.Slider = Me.theHost.getSkinImage("Slider")
             AddHandler slide1.OnSliderMoved, AddressOf slide1_moved
             panel.addControl(slide1)
 
-            Dim lbl5 As New OMLabel("_Main_Label5", x + 50, y + 300, 850, 50)
+            Dim lbl5 As New OMLabel("_Main_Label5", x + 50, y + 295, 850, 50)
             lbl5.Visible = True
             lbl5.Text = "LCD Brightness"
             lbl5.FontSize = 16
             panel.addControl(lbl5)
 
-            Dim slide2 As New OMSlider("_Main_Slider2", x + 50, y + 360, 850, 20, 20, 20)
+            Dim slide2 As New OMSlider("_Main_Slider2", x + 50, y + 350, 850, 20, 20, 20)
             slide2.Visible = True
             slide2.Minimum = 0
             slide2.Maximum = 255
-            slide2.Value = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".LCDContrast")
+            slide2.Value = helperfunctions.StoredData.Get(Me, "Settings.LCDContrast")
             slide2.SliderBar = Me.theHost.getSkinImage("Slider.Bar")
             slide2.Slider = Me.theHost.getSkinImage("Slider")
             AddHandler slide2.OnSliderMoved, AddressOf slide2_moved
             panel.addControl(slide2)
 
-            Dim lbl6 As New OMLabel("_Main_Label6", x + 50, y + 370, 850, 50)
+            Dim lbl6 As New OMLabel("_Main_Label6", x + 50, y + 360, 850, 50)
             lbl6.Visible = True
             lbl6.Text = "LCD Contrast"
             lbl6.FontSize = 16
             panel.addControl(lbl6)
 
-            Dim slide3 As New OMSlider("_Main_Slider3", x + 50, y + 430, 850, 20, 20, 20)
+            Dim slide3 As New OMSlider("_Main_Slider3", x + 50, y + 415, 850, 20, 20, 20)
             slide3.Visible = True
             slide3.Minimum = 0
             slide3.Maximum = 255
-            slide3.Value = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".KeyPadBrightness")
+            slide3.Value = helperfunctions.StoredData.Get(Me, "Settings.KeyPadBrightness")
             slide3.SliderBar = Me.theHost.getSkinImage("Slider.Bar")
             slide3.Slider = Me.theHost.getSkinImage("Slider")
             AddHandler slide3.OnSliderMoved, AddressOf slide3_moved
             panel.addControl(slide3)
 
-            Dim lbl7 As New OMLabel("_Main_Label7", x + 50, y + 440, 850, 50)
+            Dim lbl7 As New OMLabel("_Main_Label7", x + 50, y + 425, 850, 50)
             lbl7.Visible = True
             lbl7.Text = "Keypad Brightness"
             lbl7.FontSize = 16
             panel.addControl(lbl7)
 
-            'Dim theList As New OMList("_Sub_List1", x + 30, y + 70, 850, 320)
             Dim theList As New OMList("_Sub_List1", theHost.ClientArea(0).Left, theHost.ClientArea(0).Top + 60, theHost.ClientArea(0).Width, theHost.ClientArea(0).Height - 150)
             theList.BackgroundColor = BuiltInComponents.SystemSettings.SkinTextColor
             theList.Scrollbars = True
@@ -388,37 +451,44 @@ Namespace OMLCD
             AddHandler theList.OnHoldClick, AddressOf thelist_HoldClick
             panel.addControl(theList)
 
-            Dim btnAssign = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Sub_ButtonAssign", x + 250, y + 420, 200, 60, "", "Assign")
+            Dim btnAssign = OMButton.PreConfigLayout_CleanStyle("_Sub_ButtonAssign", x + 250, y + 395, 200, 60)
+            btnAssign.Text = "Assign"
             btnAssign.Visible = False
             AddHandler btnAssign.OnClick, AddressOf btnAssign_OnClick
             panel.addControl(btnAssign)
 
-            Dim btnAdd = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Sub_ButtonAdd", x + 250, y + 420, 200, 60, "", "Add")
+            Dim btnAdd = OMButton.PreConfigLayout_CleanStyle("_Sub_ButtonAdd", x + 250, y + 395, 200, 60)
+            btnAdd.Text = "Add"
             btnAdd.Visible = False
             AddHandler btnAdd.OnClick, AddressOf btnAdd_OnClick
             panel.addControl(btnAdd)
 
-            Dim btnUp = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Sub_ButtonUp", x + 30, y + 420, 60, 60, "", "Up")
+            Dim btnUp = OMButton.PreConfigLayout_CleanStyle("_Sub_ButtonUp", x + 30, y + 395, 60, 60)
+            btnUp.Text = "Up"
             btnUp.Visible = False
             AddHandler btnUp.OnClick, AddressOf btnUp_OnClick
             panel.addControl(btnUp)
 
-            Dim btnDn = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Sub_ButtonDn", x + 100, y + 420, 60, 60, "", "Dn")
+            Dim btnDn = OMButton.PreConfigLayout_CleanStyle("_Sub_ButtonDn", x + 100, y + 395, 60, 60)
+            btnDn.Text = "Dn"
             btnDn.Visible = False
             AddHandler btnDn.OnClick, AddressOf btnDn_OnClick
             panel.addControl(btnDn)
 
-            Dim btnDone = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_Sub_ButtonDone", x + 500, y + 420, 200, 60, "", "Done")
+            Dim btnDone = OMButton.PreConfigLayout_CleanStyle("_Sub_ButtonDone", x + 500, y + 395, 200, 60)
+            btnDone.Text = "Done"
             btnDone.Visible = False
             AddHandler btnDone.OnClick, AddressOf btnDone_OnClick
             panel.addControl(btnDone)
 
-            Dim btnEdit = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_ButtonEdit", x + 750, y + 420, 150, 60, "", "Edit")
+            Dim btnEdit = OMButton.PreConfigLayout_CleanStyle("_ButtonEdit", x + 750, y + 395, 150, 60)
+            btnEdit.Text = "Edit"
             btnEdit.Visible = False
             AddHandler btnEdit.OnClick, AddressOf btnEdit_onclick
             panel.addControl(btnEdit)
 
-            Dim btnInvert = OpenMobile.helperFunctions.Controls.DefaultControls.GetButton("_ButtonInvert", x + 10, y + 420, 200, 60, "", "NOT")
+            Dim btnInvert = OMButton.PreConfigLayout_CleanStyle("_ButtonInvert", x + 10, y + 395, 200, 60)
+            btnInvert.Text = "NOT"
             btnInvert.Visible = False
             btnInvert.FontSize = 24
             AddHandler btnInvert.OnClick, AddressOf btnInvert_OnClick
@@ -426,9 +496,19 @@ Namespace OMLCD
 
             manager.loadPanel(panel, True)
 
-            Return eLoadStatus.LoadSuccessful
+            ' Create the datasource object other plugins can subscribe to
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Function", "State", DataSource.DataTypes.binary, "State of Fn key"), False)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "LCD", "Contrast", DataSource.DataTypes.raw, "LCD contrast value"), LCD.LCDContrast)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "LCD", "Brightness", DataSource.DataTypes.raw, "LCD Brightness"), LCD.LCDBrightness)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "KEY", "Brightness", DataSource.DataTypes.raw, "KEY Brightness"), LCD.KeyPadBrightness)
 
-        End Function
+            If Not theHost.DataHandler.SubscribeToDataSource("Location.Current.Daytime", AddressOf m_Subscriptions_Updated) Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMLCD - Could not subscribe to Location.Current.Daytime")
+            End If
+
+            m_Initialized = True
+
+        End Sub
 
         Public Function loadPanel(ByVal name As String, ByVal screen As Integer) As OpenMobile.Controls.OMPanel Implements OpenMobile.Plugin.IHighLevel.loadPanel
 
@@ -445,11 +525,11 @@ Namespace OMLCD
             ' Don't go in if there is no device found/connected
 
             If Not LCD.IsOpen Then
-                Dim dialog As New OpenMobile.helperFunctions.Forms.dialog(Me.pluginName, sender.Name)
+                Dim dialog As New helperfunctions.Forms.dialog(Me.pluginName, sender.Name)
                 dialog.Header = Me.pluginName()
                 dialog.Text = "Nothing to do. No LCD display detected."
-                dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Information
-                dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK
+                dialog.Icon = helperfunctions.Forms.icons.Information
+                dialog.Button = helperfunctions.Forms.buttons.OK
                 If (dialog.ShowMsgBox(screen) = helperFunctions.Forms.buttons.OK) Then
                     theHost.execute(eFunction.goBack, screen)
                 End If
@@ -568,11 +648,11 @@ Namespace OMLCD
             End If
 
             ' Dialog to confirm delete
-            Dim dialog As New OpenMobile.helperFunctions.Forms.dialog(Me.pluginName, sender.Parent.Name)
+            Dim dialog As New helperfunctions.Forms.dialog(Me.pluginName, sender.Parent.Name)
             dialog.Header = m_Dialog_Header
             dialog.Text = m_Dialog_Message & " " & item
-            dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Information
-            dialog.Button = OpenMobile.helperFunctions.Forms.buttons.No + OpenMobile.helperFunctions.Forms.buttons.Yes
+            dialog.Icon = helperfunctions.Forms.icons.Information
+            dialog.Button = helperfunctions.Forms.buttons.No + helperfunctions.Forms.buttons.Yes
 
             Dim m_Settings As New OpenMobile.Data.PluginSettings
 
@@ -629,7 +709,7 @@ Namespace OMLCD
             ' Used to add a label to a displayed data item
 
             Dim itemText As String = ""
-            Dim rText As String = "Data"
+            Dim rText As String = "[Data]"
             Dim itemNum As Integer = 0
             Dim msetting As String = ""
             Dim settingText As String = ""
@@ -649,7 +729,9 @@ Namespace OMLCD
             ' If we are editing the label, then we have a selected index
             '  if this is new, then we don't
 
-            ' theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Label selected: {0}", myText.Text))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Label selected: {0}", myText.Text))
+            End If
             If m_Mode = "edit" Then
                 itemNum = myList.SelectedIndex
                 itemText = myList.SelectedItem.text
@@ -667,27 +749,35 @@ Namespace OMLCD
                 itemNum = myList.Count - 1
             End If
 
-            ' theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("List index: {0}", itemNum.ToString))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("List index: {0}", itemNum.ToString))
+            End If
             itemText = myList(itemNum).text
-            ' theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("List item: {0}", itemText))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("List item: {0}", itemText))
+            End If
 
             If Not String.IsNullOrEmpty(myText.Text) Then
 
                 ' Get rid of the old setting (did we save it already?)
                 msetting = Me.pluginName & ".Data." & itemNum.ToString
-                ' theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting key: {0}", msetting))
-                ' Do we need the next line?
-                'OpenMobile.helperFunctions.StoredData.Delete(Me, msetting)
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting key: {0}", msetting))
+                End If
 
-                ' Swap the "Data" text with the new label (entered into text box)
+                ' Swap the "[Data]" text with the new label (entered into text box)
                 itemText = itemText.Replace(rText, myText.Text)
-                ' theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("New list item: {0}", itemText))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("New list item: {0}", itemText))
+                End If
                 settingText = itemText.Replace(" -> ", ";")
-                ' theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("New setting value: {0}", settingText))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("New setting value: {0}", settingText))
+                End If
 
                 ' Update the setting, update the list
                 myList(itemNum).text = itemText
-                OpenMobile.helperFunctions.StoredData.Set(Me, msetting, settingText)
+                helperfunctions.StoredData.Set(Me, msetting, settingText)
 
             End If
 
@@ -758,8 +848,8 @@ Namespace OMLCD
             settingName1 = Me.pluginName & ".Data." & pickedIndex.ToString
             settingName2 = Me.pluginName & ".Data." & otherIndex.ToString
 
-            OpenMobile.helperFunctions.StoredData.Set(Me, settingName1, settingText2)
-            OpenMobile.helperFunctions.StoredData.Set(Me, settingName2, settingText1)
+            helperfunctions.StoredData.Set(Me, settingName1, settingText2)
+            helperfunctions.StoredData.Set(Me, settingName2, settingText1)
 
             ' then reload list
             ReLoadList(sender, screen)
@@ -812,8 +902,8 @@ Namespace OMLCD
             settingName1 = Me.pluginName & ".Data." & pickedIndex.ToString
             settingName2 = Me.pluginName & ".Data." & otherIndex.ToString
 
-            OpenMobile.helperFunctions.StoredData.Set(Me, settingName1, settingText2)
-            OpenMobile.helperFunctions.StoredData.Set(Me, settingName2, settingText1)
+            helperfunctions.StoredData.Set(Me, settingName1, settingText2)
+            helperfunctions.StoredData.Set(Me, settingName2, settingText1)
 
             ' then reload list
             ReLoadList(sender, screen)
@@ -828,6 +918,7 @@ Namespace OMLCD
             Dim m_Settings As New OpenMobile.Data.PluginSettings
             Dim myList As OMList = sender.Parent(screen, "_Sub_List1")
             Dim myListItem As New OMListItem("text")
+            'Dim myItemFormat As New OMListItem.subItemFormat()
 
             Dim myAssignButton As OMButton = sender.Parent(screen, "_Sub_ButtonAssign")
             Dim myAddButton As OMButton = sender.Parent(screen, "_Sub_ButtonAdd")
@@ -854,22 +945,32 @@ Namespace OMLCD
                     myInvertButton.Visible = False
                     ' Fill list with available sensor items
                     myList.Clear()
-                    Dim sources = BuiltInComponents.Host.DataHandler.GetDataSources("")
-                    Dim names As Generic.List(Of String) = New List(Of String)
-                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} available sources", sources.Count.ToString))
-                    myListItem.text = "-BLANK-"
-                    myListItem.subItem = "Display blank cell"
+                    Dim sources As Generic.List(Of OpenMobile.Data.DataSource) = BuiltInComponents.Host.DataHandler.GetDataSources("")
+                    'Dim sources = BuiltInComponents.Host.DataHandler.GetDataSources("")
+                    Dim names As Generic.List(Of OMListItem) = New List(Of OMListItem)
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} available sources", sources.Count.ToString))
+                    End If
+                    myListItem = New OMListItem("-BLANK-", "   Display blank cell")
+                    'myListItem = New OMListItem("-BLANK-", "   Display blank cell", New OMListItem.subItemFormat.font = New Font(networkList.Font))
+                    names.Add(myListItem)
+                    myListItem = New OMListItem("-STATIC-", "   Display static text")
+                    names.Add(myListItem)
                     For x = 0 To sources.Count - 1
-                        names.Add(sources(x).FullName)
-                        myListItem.text = sources(x).FullName
-                        myListItem.subItem = sources(x).Description
-                        'myList.Add(myListItem)
-                        'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Item {0}: {1} - {2}", myList.Count, myListItem.text, myListItem.subItem))
+                        myListItem = New OMListItem(sources(x).FullName, "   " & sources(x).Description)
+                        names.Add(myListItem)
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Item {0}: {1} - {2}", myList.Count, myListItem.text, myListItem.subItem))
+                        End If
                     Next
-                    names.Sort()
+                    If sources.Count > 0 Then
+                        names.Sort(2, names.Count() - 2, Nothing)
+                    End If
                     For y = 0 To names.Count - 1
                         myList.Add(names(y))
-                        'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Source {0}: {1}", x, names(y)))
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Source {0}: {1}", y, names(y)))
+                        End If
                     Next
                     myList.Refresh()
 
@@ -882,19 +983,30 @@ Namespace OMLCD
                     myList.Clear()
                     Dim myScreen = "Screen" & screen.ToString & "*"
                     Dim ActionNames As New Generic.List(Of OpenMobile.Command)
-                    ActionNames = theHost.CommandHandler.GetCommands("", False, False)
+                    ActionNames = theHost.CommandHandler.GetCommands("")
                     myList.Add("Fn")
                     For x = 0 To ActionNames.Count - 1
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Available command: {0}", ActionNames(x).FullName))
+                        End If
                         If ActionNames(x).FullName Like "Screen*" Then
                             ' This is a screen specific command
                             If ActionNames(x).FullName Like myScreen Then
                                 ' We want this one (it's our screen)
                                 myList.Add(ActionNames(x).FullName)
+                                'myList.Add(ActionNames(x).Description)
+                                If m_Verbose Then
+                                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Adding command: {0}", ActionNames(x).FullName))
+                                End If
                             End If
                         Else
                             myList.Add(ActionNames(x).FullName)
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Adding command: {0}", ActionNames(x).FullName))
+                            End If
                         End If
                     Next
+                    myList.Sort()
                     myList.Refresh()
 
                 Case "GPOs"  ' Adding new GPO assignment
@@ -909,11 +1021,15 @@ Namespace OMLCD
                         m_GPO_Selected = myList.SelectedIndex + 1
                         myList.Clear()
                         Dim sources = BuiltInComponents.Host.DataHandler.GetDataSources("")
-                        'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} available sources", sources.Count.ToString))
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} available sources", sources.Count.ToString))
+                        End If
                         For x = 0 To sources.Count - 1
                             If sources(x).DataType = DataSource.DataTypes.binary Then
                                 myList.Add(sources(x).FullName)
-                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Source {0}: {1}", x, sources(x)))
+                                If m_Verbose Then
+                                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Source {0}: {1}", x, sources(x)))
+                                End If
                             End If
                         Next
                         myInvertButton.Visible = False
@@ -970,7 +1086,7 @@ Namespace OMLCD
             keys = key.Split(New Char() {";"c})
             oldLabel = keys(0)
 
-            If oldLabel = "Data" Then
+            If oldLabel = "[Data]" Then
                 myText.Text = ""
             Else
                 myText.Text = keys(0)
@@ -1021,16 +1137,18 @@ Namespace OMLCD
                     settingName = Me.pluginName & "." & m_Panel_Function & "." & itemCount.ToString
 
                     ' Need to get a user label for this item, default value for now
-                    user_label = "Data"
+                    user_label = "[Data]"
 
                     settingText = user_label & ";" & pickedAction
                     itemText = settingText.Replace(";", " -> ")
 
-                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Key: {0}  Value: {1}.", settingName, settingText))
-                    OpenMobile.helperFunctions.StoredData.Set(Me, settingName, settingText)
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Key: {0}  Value: {1}.", settingName, settingText))
+                    End If
+                    helperfunctions.StoredData.Set(Me, settingName, settingText)
 
                     ' Subscribe to the datasource
-                    If pickedAction <> "-BLANK-" Then
+                    If pickedAction <> "-BLANK-" AndAlso pickedAction <> "-STATIC-" Then
                         theHost.DataHandler.SubscribeToDataSource(pickedAction, AddressOf m_Subscriptions_Updated)
                     End If
 
@@ -1072,8 +1190,6 @@ Namespace OMLCD
                     Dim lastSeconds As Integer = 0
                     startTime = Now
 
-                    'theHost.UIHandler.InfoBanner_Show(screen, New InfoBanner(InfoBanner.Styles.AnimatedBanner, bannerText & m_Key_Timeout.ToString))
-
                     Do While True
                         ' We have to set the flag to indicate we expect to receive a keypress to assign to an action
                         '  This resets the properties KeyNameAssigned and KeyAssigned, causes a seperate event to be raised, 
@@ -1094,12 +1210,12 @@ Namespace OMLCD
                             myAssignButton.Visible = False
                             myAddButton.Visible = True
                             Me.ReLoadList(sender, screen)
-                            Dim dialog As New OpenMobile.helperFunctions.Forms.dialog(Me.pluginName, sender.Parent.Name)
+                            Dim dialog As New helperfunctions.Forms.dialog(Me.pluginName, sender.Parent.Name)
                             dialog.Header = "Aborted."
                             dialog.Text = "No button press detected."
                             dialog.Width = 300
-                            dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Information
-                            dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK
+                            dialog.Icon = helperfunctions.Forms.icons.Information
+                            dialog.Button = helperfunctions.Forms.buttons.OK
                             If (dialog.ShowMsgBox(screen) = helperFunctions.Forms.buttons.OK) Then
                                 Exit Sub
                             End If
@@ -1141,12 +1257,30 @@ Namespace OMLCD
 
                     ' Translate the key name into the first part of the item text
                     ' Translate the action name into the second part of the item text
-                    'Dim FoundDevice As Device = Devices.Find(Function(c) c.ID = m_moduleType)
 
+                    ' Build the data value
                     settingText = pAssignedName & ";" & pickedAction
+
+                    ' Some commands require parameters
+                    ' Add in the required number of parameters
+                    If pickedAction <> "Fn" Then
+                        Dim ActionItem As OpenMobile.Command
+                        ActionItem = theHost.CommandHandler.GetCommand(pickedAction)
+                        If ActionItem.RequiresParameters Then
+                            ' We need parameter(s) for this item
+                            settingText = settingText & ";" & screen.ToString
+                            For z = 2 To ActionItem.RequiredParamCount
+                                settingText = settingText & ";0"
+                            Next
+                        End If
+                    End If
+
+                    ' On-screen value
                     itemText = pAssignedName & " -> " & pickedAction
 
-                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Assigning {0} ({1}) to {2}", pAssignedName, pAssignedKey.ToString, pickedAction))
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Assigning {0} ({1}) to {2}", pAssignedName, pAssignedKey.ToString, pickedAction))
+                    End If
 
                     ' Show on LCD to confirm keypress Testing only
                     ' LCD.PrintText(Chr(10) & "Key: " & pAssignedName & " (" & pAssignedKey.ToString & ")")
@@ -1160,12 +1294,12 @@ Namespace OMLCD
                         If UBound(Me.scan_settings("Keys", settingText)) < 0 Then
                             ' This exact combo does not already exist
                             settingName = Me.pluginName & "." & m_Panel_Function & "." & itemCount.ToString
-                            OpenMobile.helperFunctions.StoredData.Set(Me, settingName, settingText)
+                            helperfunctions.StoredData.Set(Me, settingName, settingText)
                         End If
                     Else
                         ' No matches, so just add it
                         settingName = Me.pluginName & "." & m_Panel_Function & "." & itemCount.ToString
-                        OpenMobile.helperFunctions.StoredData.Set(Me, settingName, settingText)
+                        helperfunctions.StoredData.Set(Me, settingName, settingText)
                     End If
 
                     pAssignedKey = 0
@@ -1186,8 +1320,10 @@ Namespace OMLCD
                     settingText = "GPO" & m_GPO_Selected & ";" & pickedAction
                     itemText = "GPO" & m_GPO_Selected & " -> " & pickedAction
 
-                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Key: {0}  Value: {1}.", settingName, settingText))
-                    OpenMobile.helperFunctions.StoredData.Set(Me, settingName, settingText)
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Key: {0}  Value: {1}.", settingName, settingText))
+                    End If
+                    helperfunctions.StoredData.Set(Me, settingName, settingText)
 
                     ' Subscribe to the datasource
                     theHost.DataHandler.SubscribeToDataSource(pickedAction, AddressOf m_Subscriptions_Updated)
@@ -1237,7 +1373,7 @@ Namespace OMLCD
                         myList.SelectedItem.text = keys(0) & " -> " & sourceName & ".NOT"
                         settingText = keys(0) & ";" & sourceName & ".NOT"
                     End If
-                    OpenMobile.helperFunctions.StoredData.Set(Me, settingName, settingText)
+                    helperfunctions.StoredData.Set(Me, settingName, settingText)
                     'myList.Refresh()
                     m_Subscriptions()
                     Me.ReLoadList(sender, screen)
@@ -1282,11 +1418,13 @@ Namespace OMLCD
             Dim myInvertButton As OMButton = sender.Parent(screen, "_ButtonInvert")
             Dim myUpButton As OMButton = sender.Parent(screen, "_Sub_ButtonUp")
             Dim myDnButton As OMButton = sender.Parent(screen, "_Sub_ButtonDn")
+            Dim myAssignButton As OMButton = sender.Parent(screen, "_Sub_ButtonAssign")
             Dim myEditButton As OMButton = sender.Parent(screen, "_ButtonEdit")
 
             mainGroup.Visible = False
             subGroup.Visible = True
             myInvertButton.Visible = False
+            myAssignButton.Visible = False
             myUpButton.Visible = True
             myDnButton.Visible = True
             myEditButton.Visible = True
@@ -1313,11 +1451,13 @@ Namespace OMLCD
             Dim myInvertButton As OMButton = sender.Parent(screen, "_ButtonInvert")
             Dim myUpButton As OMButton = sender.Parent(screen, "_Sub_ButtonUp")
             Dim myDnButton As OMButton = sender.Parent(screen, "_Sub_ButtonDn")
+            Dim myAssignButton As OMButton = sender.Parent(screen, "_Sub_ButtonAssign")
             Dim myEditButton As OMButton = sender.Parent(screen, "_ButtonEdit")
 
             mainGroup.Visible = False
             subGroup.Visible = True
             myInvertButton.Visible = False
+            myAssignButton.Visible = False
             myUpButton.Visible = False
             myDnButton.Visible = False
             myEditButton.Visible = False
@@ -1343,12 +1483,14 @@ Namespace OMLCD
             Dim myInvertButton As OMButton = sender.Parent(screen, "_ButtonInvert")
             Dim myUpButton As OMButton = sender.Parent(screen, "_Sub_ButtonUp")
             Dim myDnButton As OMButton = sender.Parent(screen, "_Sub_ButtonDn")
+            Dim myAssignButton As OMButton = sender.Parent(screen, "_Sub_ButtonAssign")
             Dim myEditButton As OMButton = sender.Parent(screen, "_ButtonEdit")
             Dim key As String = ""
 
             mainGroup.Visible = False
             subGroup.Visible = True
             myInvertButton.Visible = True
+            myAssignButton.Visible = False
             myUpButton.Visible = False
             myDnButton.Visible = False
             myEditButton.Visible = False
@@ -1368,21 +1510,21 @@ Namespace OMLCD
             '  there is exactly the right number, with default = none for each un-used GPO
 
             Dim myArray() As String = Me.scan_settings(m_Panel_Function, pAssignedName & ".*")
-            OpenMobile.helperFunctions.StoredData.Delete(Me, Me.pluginName & ".GPOs.0")
+            helperfunctions.StoredData.Delete(Me, Me.pluginName & ".GPOs.0")
             For x = 1 To LCD.GetModuleGPOs
                 settingName = Me.pluginName & ".GPOs." & x.ToString
-                key = OpenMobile.helperFunctions.StoredData.Get(Me, settingName)
+                key = helperfunctions.StoredData.Get(Me, settingName)
                 If Not String.IsNullOrEmpty(key) Then
                     ' Setting exists already
                 Else
                     ' Setting does NOT already exist
                     key = "GPO" & x.ToString & ";" & "none"
-                    OpenMobile.helperFunctions.StoredData.Set(Me, settingName, key)
+                    helperfunctions.StoredData.Set(Me, settingName, key)
                 End If
             Next
             For x = LCD.GetModuleGPOs + 1 To 255
                 settingName = Me.pluginName & ".GPOs." & x.ToString
-                OpenMobile.helperFunctions.StoredData.Delete(Me, settingName)
+                helperfunctions.StoredData.Delete(Me, settingName)
             Next
 
             ' Add items from settings to the list control
@@ -1412,24 +1554,26 @@ Namespace OMLCD
                 mStart = 1
             End If
 
+            'helperfunctions.StoredData.Delete(me, "")
             ' Max number of list items (only because of possible key codes)
+
             For x = mStart To 255
 
                 msetting = Me.pluginName & "." & m_Panel_Function & "." & x.ToString
-                key = OpenMobile.helperFunctions.StoredData.Get(Me, msetting)
+                key = helperfunctions.StoredData.Get(Me, msetting)
 
-                If key <> String.Empty Then
+                If Not String.IsNullOrEmpty(key) Then
                     ' add to list
                     key.Replace(" -> ", ";")
                     keys = key.Split(New Char() {";"c})
-                    If keys.Count = 2 Then
+                    If keys.Length > 1 Then
                         ' Valid setting value
                         keycode = keys(0)
                         action = keys(1)
                         myList.Add(keys(0) & " -> " & keys(1))
                     Else
                         ' This setting is in an invalid format
-                        OpenMobile.helperFunctions.StoredData.Delete(Me, msetting)
+                        helperfunctions.StoredData.Delete(Me, msetting)
                     End If
                 Else
                     Exit For
@@ -1451,12 +1595,12 @@ Namespace OMLCD
             Dim results() As String = scan_settings("Keys", "*")
 
             For x = 0 To 255
-                OpenMobile.helperFunctions.StoredData.Delete(Me, Me.pluginName & ".Keys." & x.ToString)
+                helperfunctions.StoredData.Delete(Me, Me.pluginName & ".Keys." & x.ToString)
             Next
 
             ' re-write the entries, newly indexed
             For x = 0 To UBound(results)
-                OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".Keys." & x.ToString, results(x))
+                helperfunctions.StoredData.Set(Me, Me.pluginName & ".Keys." & x.ToString, results(x))
             Next
 
             Return True
@@ -1470,12 +1614,12 @@ Namespace OMLCD
             Dim results() As String = scan_settings("Data", "*")
 
             For x = 0 To 255
-                OpenMobile.helperFunctions.StoredData.Delete(Me, Me.pluginName & ".Data." & x.ToString)
+                helperfunctions.StoredData.Delete(Me, Me.pluginName & ".Data." & x.ToString)
             Next
 
             ' re-write the entries, newly indexed
             For x = 0 To UBound(results)
-                OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".Data." & x.ToString, results(x))
+                helperfunctions.StoredData.Set(Me, Me.pluginName & ".Data." & x.ToString, results(x))
             Next
 
             Return True
@@ -1490,7 +1634,7 @@ Namespace OMLCD
             Dim results() = New String() {}
 
             For x = 0 To 255
-                key = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & "." & mfunction & "." & x.ToString)
+                key = helperfunctions.StoredData.Get(Me, Me.pluginName & "." & mfunction & "." & x.ToString)
                 If key <> String.Empty Then
                     key.Replace(" -> ", ";")
                     If key Like pattern Then
@@ -1508,8 +1652,9 @@ Namespace OMLCD
 
             Dim sldr = CType(sender, OMSlider)
             LCD.LCDBrightness = sldr.Value
+            theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.LCD.Brightness", sldr.Value)
             Dim m_Settings As New OpenMobile.Data.PluginSettings
-            m_Settings.setSetting(Me, Me.pluginName & ".LCDBrightness", sldr.Value)
+            m_Settings.setSetting(Me, "Settings.LCDBrightness", sldr.Value)
 
         End Sub
 
@@ -1517,8 +1662,9 @@ Namespace OMLCD
 
             Dim sldr = CType(sender, OMSlider)
             LCD.LCDContrast = sldr.Value
+            theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.LCD.Contrast", sldr.Value)
             Dim m_Settings As New OpenMobile.Data.PluginSettings
-            m_Settings.setSetting(Me, Me.pluginName & ".LCDContrast", sldr.Value)
+            m_Settings.setSetting(Me, "Settings.LCDContrast", sldr.Value)
 
         End Sub
 
@@ -1526,42 +1672,51 @@ Namespace OMLCD
 
             Dim sldr = CType(sender, OMSlider)
             LCD.KeyPadBrightness = sldr.Value
+            theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.KEY.Brightness", sldr.Value)
             Dim m_Settings As New OpenMobile.Data.PluginSettings
-            m_Settings.setSetting(Me, Me.pluginName & ".KeyPadBrightness", sldr.Value)
+            m_Settings.setSetting(Me, "Settings.KeyPadBrightness", sldr.Value)
 
         End Sub
 
         Public Function loadSettings() As OpenMobile.Plugin.Settings Implements OpenMobile.Plugin.IBasePlugin.loadSettings
 
-            System.Threading.Thread.Sleep(50)
+            System.Threading.Thread.Sleep(100)
 
             ' Create a handler for settings
             Dim mySettings As New Settings(Me.pluginName & " Settings")
 
             ' Load the main panel for OMLCD
-            Dim loadPanelBtn = New Setting(SettingTypes.Button, Me.pluginName & ".loadPanel", "", "Define I/O")
+            Dim loadPanelBtn = New Setting(SettingTypes.Button, "Settings.loadPanel", "", "Define I/O")
             loadPanelBtn.Value = ""
             mySettings.Add(loadPanelBtn)
 
+            mySettings.Add(New Setting(SettingTypes.MultiChoice, "Settings.VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
+
             ' Create a setting for showing Fn indicator
-            Dim settingShowFnInd = New Setting(SettingTypes.MultiChoice, Me.pluginName & ".ShowFnInd", String.Empty, "Show Fn indicator on LCD?", Setting.BooleanList, Setting.BooleanList)
-            m_Use_Fn_Ind = OpenMobile.helperFunctions.StoredData.GetBool(Me, Me.pluginName & ".ShowFnInd") ' Read from DB
+            Dim settingShowFnInd = New Setting(SettingTypes.MultiChoice, "Settings.ShowFnInd", String.Empty, "Show Fn indicator on LCD?", Setting.BooleanList, Setting.BooleanList)
+            m_Use_Fn_Ind = helperfunctions.StoredData.GetBool(Me, "Settings.ShowFnInd") ' Read from DB
             settingShowFnInd.Value = m_Use_Fn_Ind
             mySettings.Add(settingShowFnInd)
 
             ' Text Entry of RGB values
-            Dim settingUserTextColor = New Setting(SettingTypes.Text, Me.pluginName & ".UserTextColor", "User color", "Hex R,G,B")
-            settingUserTextColor.Value = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".UserTextColor") ' Read from DB
+            Dim settingUserTextColor = New Setting(SettingTypes.Text, "Settings.UserTextColor", "User color", "Hex R,G,B")
+            settingUserTextColor.Value = helperfunctions.StoredData.Get(Me, "Settings.UserTextColor") ' Read from DB
             mySettings.Add(settingUserTextColor)
 
             ' Create a setting for using system text color
-            Dim settingUseSysTextColor = New Setting(SettingTypes.MultiChoice, Me.pluginName & ".UseSysTextColor", String.Empty, "Use System Text Color?", Setting.BooleanList, Setting.BooleanList)
-            settingUseSysTextColor.Value = OpenMobile.helperFunctions.StoredData.GetBool(Me, Me.pluginName & ".UseSysTextColor") ' Read from DB
+            Dim settingUseSysTextColor = New Setting(SettingTypes.MultiChoice, "Settings.UseSysTextColor", String.Empty, "Use System Text Color?", Setting.BooleanList, Setting.BooleanList)
+            settingUseSysTextColor.Value = helperfunctions.StoredData.GetBool(Me, "Settings.UseSysTextColor") ' Read from DB
             mySettings.Add(settingUseSysTextColor)
 
-            Dim settingCycleRate = New Setting(SettingTypes.Text, Me.pluginName & ".CycleRate", "Page Cycle", "Seconds between page changes")
-            settingCycleRate.Value = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".CycleRate")
+            ' Create a setting for page cycle rate
+            Dim settingCycleRate = New Setting(SettingTypes.Text, "Settings.CycleRate", "Page Cycle", "Seconds between page changes")
+            settingCycleRate.Value = m_refresh.ToString
             mySettings.Add(settingCycleRate)
+
+            ' Create a setting for page cycle rate
+            Dim settingDelayRate = New Setting(SettingTypes.Text, "Settings.DelayRate", "Scroll Delay", "Milliseconds to scroll (not working)")
+            settingDelayRate.Value = m_delay.ToString
+            mySettings.Add(settingDelayRate)
 
             Dim cOptions As List(Of String) = New List(Of String)
             Select Case LCD.GetModuleCols
@@ -1580,8 +1735,7 @@ Namespace OMLCD
                 Case Else
                     cOptions.Add("0")
             End Select
-            Dim settingUserCellCols = New Setting(SettingTypes.MultiChoice, Me.pluginName & ".Cell_Size_Cols", "Cell Columns", "Display cell width", cOptions, cOptions)
-            settingUserCellCols.Value = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".Cell_Size_Cols")
+            Dim settingUserCellCols = New Setting(SettingTypes.MultiChoice, "Settings.Cell_Size_Cols", "Cell Columns", "Display cell width", cOptions, cOptions, helperFunctions.StoredData.GetInt(Me, "Settings.Cell_Size_Cols").ToString)
             mySettings.Add(settingUserCellCols)
 
             Dim cOptions2 As List(Of String) = New List(Of String)
@@ -1598,9 +1752,12 @@ Namespace OMLCD
                 Case Else
                     cOptions2.Add("0")
             End Select
-            Dim settingUserCellRows = New Setting(SettingTypes.MultiChoice, Me.pluginName & ".Cell_Size_Rows", "Cell Rows", "Display cell height", cOptions2, cOptions2)
-            settingUserCellRows.Value = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".Cell_Size_Rows")
+            Dim settingUserCellRows = New Setting(SettingTypes.MultiChoice, "Settings.Cell_Size_Rows", "Cell Rows", "Display cell height", cOptions2, cOptions2, helperFunctions.StoredData.GetInt(Me, "Settings.Cell_Size_Rows").ToString)
             mySettings.Add(settingUserCellRows)
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting {0} rows by {1} columns.", LCD.Port, LCD.Baud))
+            End If
 
             ' Connect event to get updates when setting change
             AddHandler mySettings.OnSettingChanged, AddressOf mySettings_OnSettingChanged
@@ -1612,41 +1769,65 @@ Namespace OMLCD
         Private Sub mySettings_OnSettingChanged(ByVal screen As Integer, ByVal settings As Setting)
             ' Setting was changed, update database
 
-            OpenMobile.helperFunctions.StoredData.Set(Me, settings.Name, settings.Value)
-
             Select Case settings.Name
-                Case Me.pluginName & ".ShowFnInd"
+                Case "Settings.ShowFnInd"
                     m_Use_Fn_Ind = CBool(settings.Value)
-                Case Me.pluginName & ".loadPanel"
+                    helperFunctions.StoredData.Set(Me, settings.Name, m_Use_Fn_Ind)
+                Case "Settings.loadPanel"
                     theHost.CommandHandler.ExecuteCommand("Screen0.Panel.Goto.Default." & Me.pluginName)
-                Case Me.pluginName & ".CycleRate"
+                Case "Settings.CycleRate"
                     ' Rate to cycle through display pages
-                    m_refresh = CInt(OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".CycleRate"))
+                    m_refresh = CInt(settings.Value)
+                    helperFunctions.StoredData.Set(Me, settings.Name, m_refresh)
+                    If m_refresh < 2 Then
+                        ' anything less than 200ms might bog down the system
+                        m_refresh = 2
+                        helperFunctions.StoredData.Set(Me, settings.Name, m_refresh)
+                    End If
                     m_Refresh_tmr.Stop()
                     m_Refresh_tmr.Interval = m_refresh * 1000
                     m_Refresh_tmr.Start()
-                Case Me.pluginName & ".Cell_Size_Cols"
+                Case "Settings.DelayRate"
+                    ' Step rate to scroll data cell
+                    m_delay = CInt(settings.Value)
+                    helperFunctions.StoredData.Set(Me, settings.Name, m_delay)
+                    If m_delay < 250 Then
+                        ' anything less than 250ms might bog down the system
+                        m_delay = 250
+                        helperFunctions.StoredData.Set(Me, settings.Name, m_delay)
+                    End If
+                    m_Delay_tmr.Stop()
+                    m_Delay_tmr.Interval = m_delay
+                    m_Delay_tmr.Start()
+                Case "Settings.Cell_Size_Cols"
                     ' User picked width of display cell
-                    m_Cell_Size_Cols = CInt(OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".Cell_Size_Cols"))
+                    m_Cell_Size_Cols = CInt(settings.Value)
+                    helperFunctions.StoredData.Set(Me, settings.Name, m_Cell_Size_Cols)
                     reCalc()
-                Case Me.pluginName & ".Cell_Size_Rows"
+                Case "Settings.Cell_Size_Rows"
                     ' User picked height of display cell
-                    m_Cell_Size_Rows = CInt(OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".Cell_Size_Rows"))
+                    m_Cell_Size_Rows = CInt(settings.Value)
+                    helperFunctions.StoredData.Set(Me, settings.Name, m_Cell_Size_Rows)
                     reCalc()
-                Case Me.pluginName & ".UseSysTextColor"
+                Case "Settings.UseSysTextColor"
                     ' Grab system color and save it user specified color
+                    helperFunctions.StoredData.Set(Me, settings.Name, settings.Value)
                     Dim tcolor As Color = BuiltInComponents.SystemSettings.SkinTextColor
                     If settings.Value = False Then
-                        'OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName &".UserTextColor", String.Format("{0},{1},{2}", _
+                        'helperfunctions.StoredData.Set(Me, Me.pluginName &".UserTextColor", String.Format("{0},{1},{2}", _
                         '                                                                                                        tcolor.R.ToString("X2"), _
                         '                                                                                                        tcolor.G.ToString("X2"), _
                         '                                                                                                       tcolor.B.ToString("X2")))
-                        tcolor = OpenMobile.helperFunctions.StoredData.GetColor(Me, Me.pluginName & ".UserTextColor", Color.White)
+                        tcolor = helperfunctions.StoredData.GetColor(Me, "Settings.UserTextColor", Color.White)
                     End If
                     LCD.SetBackgroundColor(tcolor.R, tcolor.G, tcolor.B)
-                Case Me.pluginName & ".UserTextColor"
-                    Dim tcolor As Color = OpenMobile.helperFunctions.StoredData.GetColor(Me, Me.pluginName & ".UserTextColor", Color.White)
+                Case "Settings.UserTextColor"
+                    helperFunctions.StoredData.Set(Me, settings.Name, settings.Value)
+                    Dim tcolor As Color = helperFunctions.StoredData.GetColor(Me, "Settings.UserTextColor", Color.White)
                     LCD.SetBackgroundColor(tcolor.R, tcolor.G, tcolor.B)
+                Case "Settings.VerboseDebug"
+                    m_Verbose = CBool(settings.Value)
+                    helperFunctions.StoredData.Set(Me, settings.Name, m_Verbose)
             End Select
 
         End Sub
@@ -1655,40 +1836,110 @@ Namespace OMLCD
 
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "Requesting driver to connect.")
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Current setting PORT={0} BAUD={1}", LCD.Port, LCD.Baud))
-            OpenMobile.Threading.SafeThread.Asynchronous(AddressOf Connect)
+
+            OpenMobile.Threading.SafeThread.Asynchronous(AddressOf connect)
+
         End Sub
 
-        Private Sub Connect()
-            LCD.Connect(Me, False)
+        Private Sub connect()
+
+            LCD.Connect(Me, m_Verbose)
+
+        End Sub
+
+        Private Sub m_Delay_tmr_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_Delay_tmr.Elapsed
+            ' Handles the scrolling of data within a cell
+
+            Dim needsRefresh As Boolean = False
+            Dim slabel As String = ""
+            Dim sValue As String = ""
+
+            If timer_busy = False Then
+
+                timer_busy = True
+
+                ' See if it is a DATA subscription
+                For x = 0 To display_data.Count - 1
+                    If display_data(x).Value = "-STATIC-" Then
+                        ' label is data, data is label (don't ask)
+                        sValue = display_data(x).Label
+                        slabel = ""
+                    Else
+                        If display_data(x).Label = "[Data]" Then
+                            slabel = ""
+                        Else
+                            slabel = display_data(x).Label
+                        End If
+                        sValue = display_data(x).Value
+                    End If
+                    If m_delay <> 0 AndAlso Len(slabel & sValue) > m_Cell_Size Then
+                        ' The cell data value is greater than available space
+                        If display_data(x).OnScreen = True Then
+                            ' This item is flagged as being on the display right now
+                            display_data(x).IsNew = True
+                            needsRefresh = True
+                        End If
+                    End If
+                Next
+
+                If needsRefresh Then
+                    ' Call display manager so it can be updated immediately
+                    display_manager()
+                End If
+
+                timer_busy = False
+
+            End If
+
         End Sub
 
         Private Sub m_Refresh_tmr_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_Refresh_tmr.Elapsed
+            ' Handles page changing
 
-            ' Time to change the display page
-            timer_busy = True
+            If timer_busy = False Then
 
-            ' This is used by display_manager to detect a changed page
-            m_Last_Page = m_Curr_Page
+                ' Time to change the display page
+                timer_busy = True
 
-            ' Increment page to be displayed
-            If m_Curr_Page >= m_Num_Pages Then
-                m_Curr_Page = 1
-            Else
-                m_Curr_Page += 1
+                ' This is used by display_manager to detect a changed page
+                m_Last_Page = m_Curr_Page
+
+                ' Increment page to be displayed
+                If m_Curr_Page >= m_Num_Pages Then
+                    m_Curr_Page = 1
+                Else
+                    m_Curr_Page += 1
+                End If
+
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Change to page {0}", m_Curr_Page))
+                End If
+                display_manager()
+
+                timer_busy = False
+
             End If
 
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Change to page {0}", m_Curr_Page))
-            display_manager()
+        End Sub
 
-            timer_busy = False
+        Private Sub NoComms() Handles LCD.CommLost
+            '  Called when the LCD device disappears (unplugged?)
+
+            m_Refresh_tmr.Stop()
+            m_Refresh_tmr.Enabled = False
+            m_Delay_tmr.Stop()
+            m_Delay_tmr.Enabled = False
+
+            theHost.UIHandler.RemoveAllMyNotifications(Me)
+            theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "LCD Stopped responding."))
 
         End Sub
 
         Private Sub NoDevice() Handles LCD.NoDevice
 
             ' Reset the flag
-            OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".ComPort", LCD.Default_Port)
-            OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".BaudRate", LCD.Default_Baud)
+            helperfunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Default_Port)
+            helperfunctions.StoredData.Set(Me, "Settings.BaudRate", LCD.Default_Baud)
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("No LCD device found."))
             theHost.UIHandler.RemoveAllMyNotifications(Me)
             theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "No devices were found."))
@@ -1716,7 +1967,9 @@ Namespace OMLCD
 
             ' We have already been called, so give up
             If manager_busy Then
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Concurrent call"))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Concurrent call"))
+                End If
                 Exit Sub
             End If
 
@@ -1727,7 +1980,12 @@ Namespace OMLCD
             Dim cellData As String
             Dim tempData As String = ""
             Dim keys(0) As String
-            Dim cellChars As Integer = (m_Cell_Size_Cols * m_Cell_Size_Rows)
+            Dim iStart As Integer = 0
+            Dim sLabel As String = ""
+            Dim sValue As String = ""
+            Dim sSource As String = ""
+
+            m_Cell_Size = (m_Cell_Size_Cols * m_Cell_Size_Rows)
 
             ' Shouldn't happen, but just in case
             If m_Curr_Page > m_Num_Pages Then
@@ -1739,7 +1997,9 @@ Namespace OMLCD
                 display_data(x).OnScreen = False
             Next
 
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Displaying Page {0}/{1}", m_Curr_Page, m_Num_Pages))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Displaying Page {0}/{1}", m_Curr_Page, m_Num_Pages))
+            End If
 
             ' Loop thru the number of cells that fit on a page
             For cell_pos = 1 To m_Page_Size
@@ -1749,11 +2009,15 @@ Namespace OMLCD
                 ' v = the data item index to display
                 theIndex = (m_Curr_Page - 1) * m_Page_Size + cell_pos - 1
 
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Page {0}, Cell {1} (index: {2}/{3})", m_Curr_Page, cell_pos, theIndex, display_data.Count.ToString))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Page {0}, Cell {1} (index: {2}/{3})", m_Curr_Page, cell_pos, theIndex, display_data.Count.ToString))
+                End If
 
                 If theIndex > display_data.Count - 1 Then
                     ' We don't have enough data items
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Not enough data items. Index {0}, Page {1}", theIndex, m_Curr_Page))
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Not enough data items. Index {0}, Page {1}", theIndex, m_Curr_Page))
+                    End If
                     Exit For
                 End If
 
@@ -1776,21 +2040,51 @@ Namespace OMLCD
 
                     ' Determine what the label is.  If "Data" then use no label
                     '  but why don't we just use a blank label?
-                    If display_data(theIndex).Label Like "Data*" Then
-                        cellData = Left(display_data(theIndex).Value, cellChars)
-                    Else
-                        cellData = Left(display_data(theIndex).Label & display_data(theIndex).Value, cellChars)
-                    End If
-                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Displaying: '{0}'", cellData))
 
-                    ' Format the data for the cell according to user specified alignment
+                    If display_data(theIndex).Label = "[Data]" Then
+                        sLabel = ""
+                    Else
+                        sLabel = display_data(theIndex).Label
+                    End If
+                    sValue = display_data(theIndex).Value
+                    sSource = display_data(theIndex).Source
+
+                    If sValue Like "*example*" Then
+                        sValue = sValue
+                    End If
+
+                    If m_delay <> 0 AndAlso Len(sLabel) + Len(sValue) > m_Cell_Size Then
+
+                        ' We have a scroll speed value, and data is greater than cell size
+                        ' so user allows scrolling and scrolling is necessary
+
+                        ' Calculate the new starting position of the value that will be displayed
+                        iStart = display_data(theIndex).lastChar + 1
+                        If iStart > Len(sValue) - (m_Cell_Size - 1) Then
+                            iStart = 1
+                        End If
+                        ' Save the new character position for next time
+                        display_data(theIndex).lastChar = iStart
+
+                        ' Saves the scrolled value for display (should not get truncated later as we clip it here already)
+                        ' NOTE: we do not scroll the label portion
+                        cellData = Left(sLabel & Mid(sValue, iStart), m_Cell_Size)
+
+                    Else
+
+                        ' No scrolling, just save as is (will be truncated later if necessary)
+                        cellData = sLabel & sValue
+
+                    End If
+
+                    ' Now we format the data for the cell according to user specified alignment
                     ' Find out where the data will fall within the cell size
                     '  and determine where any line breaks (extra spaces) should be
 
-                    ' We could reserve a special character to force a break.  Maybe the tilde ~
+                    ' NOTE: We could reserve a special character to force a break.  Maybe the tilde ~
 
                     cellData = textWrap(cellData, m_Cell_Size_Cols)
-                    cellData = Left(cellData & Space(cellChars), cellChars)
+                    cellData = Left(cellData & Space(m_Cell_Size), m_Cell_Size)
 
                     ' Work out cell alignment
 
@@ -1803,7 +2097,9 @@ Namespace OMLCD
                         LCD.SetCursorPosition(a, x)
                         'output the formatted line for the cell
                         tempData = Mid(cellData, (a - y) * m_Cell_Size_Cols + 1, m_Cell_Size_Cols)
-                        'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("LCD.SetCursorPosition({0},{1}): '{2}'", a, x, tempData))
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("LCD.SetCursorPosition({0},{1}): '{2}'", a, x, tempData))
+                        End If
                         LCD.PrintText(tempData)
                     Next
 
@@ -1820,7 +2116,9 @@ Namespace OMLCD
             If m_Use_Fn_Ind = True Then
                 If m_Function_Key = True Then
                     ' Function key is active
-                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Fn flag is set"))
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Fn flag is set"))
+                    End If
                     ' Overwrite the bottom corner with the special Fn character
                     ' Set cursor to end of display
                     LCD.SetCursorPosition(LCD.GetModuleRows, LCD.GetModuleCols)
@@ -1907,22 +2205,34 @@ Namespace OMLCD
 
             ' temporarily stop the interupt timer so we
             m_Refresh_tmr.Stop()
+            m_Delay_tmr.Stop()
 
             theHost.DataHandler.UnsubscribeFromDataSource(Me.pluginName & ";" & Me.pluginName & ".Function.State", AddressOf m_Subscriptions_Updated)
             If theHost.DataHandler.SubscribeToDataSource(Me.pluginName & ";" & Me.pluginName & ".Function.State", AddressOf m_Subscriptions_Updated) Then
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Subscribe to: " & Me.pluginName & ";" & Me.pluginName & ".Function.State"))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Subscribe to: " & Me.pluginName & ";" & Me.pluginName & ".Function.State"))
+                End If
             Else
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Issue subscribing to: " & Me.pluginName &";" & Me.pluginName &".Function.State"))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Issue subscribing to: " & Me.pluginName & ";" & Me.pluginName & ".Function.State"))
+                End If
             End If
 
             ' Set up Data display subscriptions
             For x = 0 To display_data.Count - 1
                 If Not String.IsNullOrEmpty(display_data(x).Source) Then
                     If display_data(x).Source <> "-BLANK-" Then
-                        theHost.DataHandler.UnsubscribeFromDataSource(display_data(x).Source, AddressOf m_Subscriptions_Updated)
-                        If theHost.DataHandler.SubscribeToDataSource(display_data(x).Source, AddressOf m_Subscriptions_Updated) Then
-                            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Subscribe to: {0}", display_data(x).Source))
-                        End If
+                        Try
+                            theHost.DataHandler.UnsubscribeFromDataSource(display_data(x).Source, AddressOf m_Subscriptions_Updated)
+                            theHost.DataHandler.SubscribeToDataSource(display_data(x).Source, AddressOf m_Subscriptions_Updated)
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Subscribe to: {0}", display_data(x).Source))
+                            End If
+                        Catch ex As Exception
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Datasource no longer available: {0}", display_data(x).Source))
+                            End If
+                        End Try
                     End If
                 End If
             Next
@@ -1930,17 +2240,23 @@ Namespace OMLCD
             ' Set up GPO subscriptions
             For x = 0 To LCD.GetModuleGPOs - 1
                 settingName = Me.pluginName & ".GPOs." & x.ToString
-                settingData = OpenMobile.helperFunctions.StoredData.Get(Me, settingName)
+                settingData = helperfunctions.StoredData.Get(Me, settingName)
                 ' Strip the .NOT if the user has specified inverted logic for this subscription
                 settingData = settingData.Replace(".NOT", "")
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting {0} = {1}", settingName, settingData))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting {0} = {1}", settingName, settingData))
+                End If
                 If Not String.IsNullOrEmpty(settingData) Then
                     keys = settingData.Split(New Char() {";"})
                     ' Avoid trying to subscribe if un-assigned GPO
                     If keys(1) <> "none" Then
-                        'theHost.DataHandler.UnsubscribeFromDataSource(keys(1), AddressOf m_Subscriptions_Updated)
+                        If m_Verbose Then
+                            theHost.DataHandler.UnsubscribeFromDataSource(keys(1), AddressOf m_Subscriptions_Updated)
+                        End If
                         If theHost.DataHandler.SubscribeToDataSource(keys(1), AddressOf m_Subscriptions_Updated) Then
-                            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Subscribe to: {0}", keys(1)))
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Subscribe to: {0}", keys(1)))
+                            End If
                         End If
                     End If
                 End If
@@ -1954,26 +2270,68 @@ Namespace OMLCD
             '  Used to update the data items for display
             '  Or set GPOs
             Dim w As Integer
+            Dim x As Integer
             Dim key As String = ""
             Dim keys() As String
             Dim settingData As String = ""
             Dim settingName As String = ""
             Dim Inverted As Boolean = False
 
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Update from {0}: {1}", sensor.FullName, sensor.FormatedValue))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Update from {0}: {1}", sensor.FullName, sensor.FormatedValue))
+            End If
+
+            If sensor.FullName = "Location.Current.Daytime" Then
+                ' When we make an option to auto-dim, we can test the value here
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Sensor {0}: {1}", sensor.FullName, sensor.FormatedValue))
+                End If
+                Dim m_Settings As New OpenMobile.Data.PluginSettings
+                If sensor.Value = True Then
+                    ' Set the display/keypad brightness to full
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "Setting brightness levels to FULL")
+                    End If
+                    LCD.LCDBrightness = 230
+                    theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.LCD.Brightness", LCD.LCDBrightness)
+                    LCD.KeyPadBrightness = 230
+                    theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.KEY.Brightness", LCD.KeyPadBrightness)
+                Else
+                    ' Set the display/keypad brightness to option values
+                    If Integer.TryParse(m_Settings.getSetting(Me, "Settings.LCDBrightness"), x) Then
+                        LCD.LCDBrightness = x
+                    Else
+                        LCD.LCDBrightness = 200
+                    End If
+                    theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.LCD.Brightness", LCD.LCDBrightness)
+                    If Integer.TryParse(m_Settings.getSetting(Me, "Settings.KeyPadBrightness"), x) Then
+                        LCD.KeyPadBrightness = x
+                    Else
+                        LCD.KeyPadBrightness = 200
+                    End If
+                    theHost.DataHandler.PushDataSourceValue("OMLCD;OMLCD.KEY.Brightness", LCD.KeyPadBrightness)
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting brightness levels to {0}", LCD.LCDBrightness.ToString))
+                    End If
+                End If
+            End If
 
             ' See if it is the Fn key subscription
             If sensor.FullNameWithProvider = Me.pluginName & ";" & Me.pluginName & ".Function.State" Then
                 ' The function key has changed state
                 m_Function_Key = sensor.Value
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Function Key: {0} ({1})", sensor.Value, sensor.FormatedValue))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Function Key: {0} ({1})", sensor.Value, sensor.FormatedValue))
+                End If
             End If
 
             ' See if it is a GPO subscription
             For w = 1 To LCD.GetModuleGPOs
                 settingName = Me.pluginName & ".GPOs." & w.ToString
-                settingData = OpenMobile.helperFunctions.StoredData.Get(Me, settingName)
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting {0} value {1}", settingName, settingData))
+                settingData = helperfunctions.StoredData.Get(Me, settingName)
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting {0} value {1}", settingName, settingData))
+                End If
                 If Not String.IsNullOrEmpty(settingData) Then
                     keys = settingData.Split(New Char() {";"})
                     If Right(keys(1), 4) = ".NOT" Then
@@ -1984,7 +2342,9 @@ Namespace OMLCD
                     keys(1) = keys(1).Replace(".NOT", "")
                     If keys(1) = sensor.FullName Then
                         ' There is a GPO assigned with this datasource
-                        'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Match {0} <-> {1}", keys(1), sensor.FullName))
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Match {0} <-> {1}", keys(1), sensor.FullName))
+                        End If
                         ' Check if user specified INVERTED Logic for this sensor
                         If Inverted Then
                             LCD.SetGPOState(w, Not sensor.Value)
@@ -1992,7 +2352,9 @@ Namespace OMLCD
                             LCD.SetGPOState(w, sensor.Value)
                         End If
                     Else
-                        'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("No match {0} <-> {1}", keys(1), sensor.FullName))
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("No match {0} <-> {1}", keys(1), sensor.FullName))
+                        End If
                     End If
                 End If
             Next
@@ -2002,6 +2364,7 @@ Namespace OMLCD
                 If display_data(x).Source = sensor.FullName Then
                     display_data(x).Value = sensor.FormatedValue
                     display_data(x).IsNew = True
+                    display_data(x).lastChar = 0
                     If display_data(x).OnScreen = True Then
                         ' This item is flagged as being on the display right now
                         ' Call display manager so it can be updated immediately
@@ -2011,6 +2374,17 @@ Namespace OMLCD
                     End If
                 End If
             Next
+
+        End Sub
+
+        Private Sub thehost_OnSystemEvent(ByVal efunc As eFunction, args() As Object) Handles theHost.OnSystemEvent
+
+            If efunc.Equals(eFunction.pluginLoadingComplete) Then
+                ' Subscribe so we detect when day/night happens
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "Subscribing to Location.Current.Daytime")
+                End If
+            End If
 
         End Sub
 
@@ -2028,23 +2402,30 @@ Namespace OMLCD
                 m_Cell_Size_Cols = DEFAULT_CELL_SIZE_COLS
                 m_Number_Cell_Cols = LCD.GetModuleCols / m_Cell_Size_Cols
             End Try
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Number_Cell_Cols: {0} / {1}.", LCD.GetModuleCols, m_Cell_Size_Cols))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Number_Cell_Cols: {0} / {1}.", LCD.GetModuleCols, m_Cell_Size_Cols))
+            End If
             Try
                 m_Number_Cell_Rows = LCD.GetModuleRows / m_Cell_Size_Rows
             Catch ex As Exception
                 m_Cell_Size_Rows = DEFAULT_CELL_SIZE_ROWS
                 m_Number_Cell_Rows = LCD.GetModuleRows / m_Cell_Size_Rows
             End Try
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Number_Cell_Rows: {0} / {1}.", LCD.GetModuleRows, m_Cell_Size_Rows))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Number_Cell_Rows: {0} / {1}.", LCD.GetModuleRows, m_Cell_Size_Rows))
+            End If
             m_Page_Size = m_Number_Cell_Cols * m_Number_Cell_Rows
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Page_Size: {0} * {1}.", m_Number_Cell_Cols, m_Number_Cell_Rows))
-
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Page_Size: {0} * {1}.", m_Number_Cell_Cols, m_Number_Cell_Rows))
+            End If
         End Sub
 
         Private Sub loadDisplayBlocks()
 
             ' Builds/Rebuilds the display_data collection with settings stuff
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Build/Rebuild display blocks...."))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Build/Rebuild display blocks...."))
+            End If
 
             ' Fetch display data items from settings and build the display block collection
 
@@ -2053,10 +2434,14 @@ Namespace OMLCD
             Dim keys() As String
             Dim key As String
             Dim data As String = ""
-
+            Dim label As String = ""
+            Dim source As String = ""
             Dim counter As Integer = 0
+
+            m_Cell_Size = m_Cell_Size_Cols & m_Cell_Size_Rows
+
             For x = 0 To 255
-                key = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".Data." & x.ToString)
+                key = helperfunctions.StoredData.Get(Me, Me.pluginName & ".Data." & x.ToString)
                 ' Note since this is the first build we mark all items as being new values
                 If Not String.IsNullOrEmpty(key) Then
                     key.Replace(" -> ", ";")
@@ -2064,27 +2449,46 @@ Namespace OMLCD
                     ' Keys(0) = Label
                     ' Keys(1) = Data Item Name
                     If keys(1) = "-BLANK-" Then
-                        data = Space(m_Cell_Size_Cols & m_Cell_Size_Rows)
+                        ' User wants a blank line here
+                        source = "-BLANK-"
+                        data = Space(m_Cell_Size)
+                        label = ""
+                    ElseIf keys(1) = "-STATIC-" Then
+                        ' User wants static text here
+                        label = ""
+                        source = "-STATIC-"
+                        If keys(0) <> "[Data]" Then
+                            ' The label is used as the static text
+                            data = keys(0)
+                        Else
+                            ' No static text specified
+                            data = Space(m_Cell_Size)
+                        End If
                     Else
-                        'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("keys(0): {0}  keys(1): {1}", keys(0), keys(1)))
+                        ' Standard data item display
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("keys(0): {0}  keys(1): {1}", keys(0), keys(1)))
+                        End If
                         Try
                             data = BuiltInComponents.Host.DataHandler.GetDataSource(keys(1)).FormatedValue
                         Catch
                             data = "n/a"
                         End Try
+                        label = keys(0)
+                        source = keys(1)
                     End If
                     ' Here, if user options selected specific time format
                     '  and this is a time datasource, we can reformat here
                     If keys(1) Like "*Time*" Then
-                        ' the datasource contains a time value
+                        ' the datasource probably contains a time value
                         data = TimeReformat(data)
                     End If
-                    display_data.Add(New display_items_struct(keys(1), keys(0), True, data, False))
+                    display_data.Add(New display_items_struct(source, label, True, data, False, 0))
                 Else
                     ' No more data to fill the current page
                     ' Fill with spaces
                     Do While ((x) Mod m_Page_Size) <> 0
-                        display_data.Add(New display_items_struct(Space(m_Cell_Size_Cols & m_Cell_Size_Rows), "", True, "", False))
+                        display_data.Add(New display_items_struct(Space(m_Cell_Size_Cols & m_Cell_Size_Rows), "", True, "", False, 0))
                         x += 1
                     Loop
                     Exit For
@@ -2095,12 +2499,16 @@ Namespace OMLCD
             If (display_data.Count / m_Page_Size) > Int(display_data.Count / m_Page_Size) Then
                 m_Num_Pages += 1
             End If
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Items {0} Page Size {1} = {2} Pages.", display_data.Count, m_Page_Size, m_Num_Pages))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Items {0} Page Size {1} = {2} Pages.", display_data.Count, m_Page_Size, m_Num_Pages))
+            End If
 
         End Sub
         Private Function TimeReformat(ByVal source As String) As String
 
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Time value: {0}", source))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Time value: {0}", source))
+            End If
             Return source
 
         End Function
@@ -2110,15 +2518,15 @@ Namespace OMLCD
             ' Reset the flag
 
             Dim m_Settings As New OpenMobile.Data.PluginSettings
-            LCD.LCDBrightness = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".LCDBrightness")
-            LCD.LCDContrast = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".LCDContrast")
-            LCD.KeyPadBrightness = OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".KeyPadBrightness")
+            LCD.LCDBrightness = helperfunctions.StoredData.Get(Me, "Settings.LCDBrightness")
+            LCD.LCDContrast = helperfunctions.StoredData.Get(Me, "Settings.LCDContrast")
+            LCD.KeyPadBrightness = helperfunctions.StoredData.Get(Me, "Settings.KeyPadBrightness")
 
             theHost.UIHandler.RemoveAllMyNotifications(Me)
             theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Connected to " & LCD.GetModuleType & " on " & LCD.Port))
 
-            OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".ComPort", LCD.Port)
-            OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".BaudRate", LCD.Baud)
+            helperfunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Port)
+            helperfunctions.StoredData.Set(Me, "Settings.BaudRate", LCD.Baud)
 
             ' Determine what our default cell size will be so they will get saved to settings DB
             '  if this is first run and user has not set any
@@ -2135,24 +2543,25 @@ Namespace OMLCD
 
             ' Make sure there are the required number of GPO entries
             For x = 1 To CByte(LCD.GetModuleGPOs)
-                OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".GPOs." & x.ToString, "GPO" & x.ToString & ";none")
+                helperfunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".GPOs." & x.ToString, "GPO" & x.ToString & ";none")
             Next
 
             ' Get the info required to manage the display.  Sets defaults if this is first run
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".Cell_Size_Cols", m_Cell_Size_Cols)
-            m_Cell_Size_Cols = CInt(OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".Cell_Size_Cols"))
-            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, Me.pluginName & ".Cell_Size_Rows", m_Cell_Size_Rows)
-            m_Cell_Size_Rows = CInt(OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".Cell_Size_Rows"))
+            helperfunctions.StoredData.SetDefaultValue(Me, "Settings.Cell_Size_Cols", m_Cell_Size_Cols)
+            m_Cell_Size_Cols = CInt(helperfunctions.StoredData.Get(Me, "Settings.Cell_Size_Cols"))
+            helperfunctions.StoredData.SetDefaultValue(Me, "Settings.Cell_Size_Rows", m_Cell_Size_Rows)
+            m_Cell_Size_Rows = CInt(helperfunctions.StoredData.Get(Me, "Settings.Cell_Size_Rows"))
 
             ' Set some variables for this session
+
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} on {1}", LCD.GetModuleType, LCD.Port))
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Display type: {0}", LCD.GetModuleStyle))
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("{0} Rows by {1} Cols", LCD.GetModuleRows, LCD.GetModuleCols))
             reCalc()
 
             Dim tcolor As Color = BuiltInComponents.SystemSettings.SkinTextColor
-            If OpenMobile.helperFunctions.StoredData.Get(Me, Me.pluginName & ".UseSysTextColor") = False Then
-                tcolor = OpenMobile.helperFunctions.StoredData.GetColor(Me, Me.pluginName & ".UserTextColor", Color.White)
+            If helperfunctions.StoredData.Get(Me, "Settings.UseSysTextColor") = False Then
+                tcolor = helperfunctions.StoredData.GetColor(Me, "Settings.UserTextColor", Color.White)
             End If
             LCD.SetBackgroundColor(tcolor.R, tcolor.G, tcolor.B)
 
@@ -2189,6 +2598,8 @@ Namespace OMLCD
             ' Start display refresh timer
             m_Refresh_tmr.Enabled = True
             m_Refresh_tmr.Start()
+            m_Delay_tmr.Enabled = True
+            m_Delay_tmr.Start()
 
         End Sub
 
@@ -2204,10 +2615,14 @@ Namespace OMLCD
             Dim result() As String = Me.scan_settings("Keys", pKeyName & ";*")
             Dim xResult As String = ""
 
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} matching assignments.", result.Count.ToString))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} matching assignments.", result.Count.ToString))
+            End If
+
             Dim assignment() As String
             Dim settingItems() As String
             Dim settingData() As String
+            Dim settingParms() As Object
 
             For x = 0 To UBound(result)
 
@@ -2260,7 +2675,20 @@ Namespace OMLCD
                 For y = 0 To UBound(settingItems)
                     ReDim settingData(1)
                     settingData = settingItems(y).Split(New Char() {";"c})
-                    theHost.CommandHandler.ExecuteCommand(settingData(1))
+                    Dim ActionItem As OpenMobile.Command
+                    ActionItem = theHost.CommandHandler.GetCommand(settingData(1))
+                    If ActionItem.RequiresParameters Then
+                        ' We need parameter(s) for this item
+                        If ActionItem.RequiredParamCount > 0 Then
+                            ReDim settingParms(ActionItem.RequiredParamCount - 1)
+                            For z = 2 To 2 + ActionItem.RequiredParamCount - 1
+                                settingParms(z - 2) = settingData(z)
+                            Next
+                            theHost.CommandHandler.ExecuteCommand(settingData(1), settingParms)
+                        End If
+                    Else
+                        theHost.CommandHandler.ExecuteCommand(settingData(1))
+                    End If
                 Next
 
             Next
@@ -2386,11 +2814,14 @@ Namespace OMLCD
                     powerEventReceived = True
                     m_Refresh_tmr.Enabled = False
                     m_Refresh_tmr.Stop()
+                    m_Delay_tmr.Enabled = False
+                    m_Delay_tmr.Stop()
+
                     'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, Me.pluginName & " sleep/hibernate pending.")
                     theHost.DataHandler.UnsubscribeFromDataSource("", AddressOf m_Subscriptions_Updated)
                     If LCD.IsOpen Then
                         'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Closing device connection."))
-                        OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".ComPort", LCD.Port)
+                        helperfunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Port)
                         LCD.ShowStartupScreen()
                         LCD.Close()
                     End If
@@ -2400,7 +2831,7 @@ Namespace OMLCD
                     powerResumeReceived = False
                     'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, Me.pluginName & " shutdown pending.")
                     If LCD.IsOpen Then
-                        OpenMobile.helperFunctions.StoredData.Set(Me, Me.pluginName & ".ComPort", LCD.Port)
+                        helperfunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Port)
                         LCD.Close()
                     End If
 

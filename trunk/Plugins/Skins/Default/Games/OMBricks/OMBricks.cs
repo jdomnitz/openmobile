@@ -112,15 +112,15 @@ namespace OMBricks
             imgBackground.Transparency = 75;
             p.addControl(imgBackground);
 
-            OMButton singlePlayer = OMButton.PreConfigLayout_BasicStyle("singlePlayer", 400, 200, 200, 100, GraphicCorners.All);
+            OMButton singlePlayer = OMButton.PreConfigLayout_CleanStyle("singlePlayer", 400, 200, 200, 100, corners:GraphicCorners.Top);
             singlePlayer.Text = "Arcade";
             singlePlayer.OnClick += new userInteraction(singlePlayer_OnClick);
             p.addControl(singlePlayer);
 
-            OMButton singleEndless = OMButton.PreConfigLayout_BasicStyle("singleEndless", 400, 300, 200, 100, GraphicCorners.All);
+            OMButton singleEndless = OMButton.PreConfigLayout_CleanStyle("singleEndless", 0, 0, singlePlayer.Width, singlePlayer.Height, corners: GraphicCorners.Bottom);
             singleEndless.Text = "Endless";
             singleEndless.OnClick += new userInteraction(singleEndless_OnClick);
-            p.addControl(singleEndless);
+            p.addControl(singleEndless, ControlDirections.Down, 0, -1);
 
             OMLabel gameLivesLabel = new OMLabel("gameLivesLabel", OM.Host.ClientArea[0].Left, OM.Host.ClientArea[0].Top, OM.Host.ClientArea[0].Width, 15);
             gameLivesLabel.AutoFitTextMode = FitModes.FitFill;
