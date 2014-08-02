@@ -24,10 +24,11 @@
     ' Defines interface for serially connected displays
     Public Interface iLCDInterface
 
-        Event KeyPressReceived(ByVal key As Integer)                      'Informs when a key press was received
+        Event KeyPressReceived(ByVal key As Integer)                            'Informs when a key press was received
         Event KeyAssignReceived(ByVal key As Integer, ByVal name As String)     'Informs when a key press for assignment was received
         Event Connected()                               'Informs when device is connected
         Event NoDevice()                                'Informs when no devices were found
+        Event CommLost()                                'Informs when the LCD device disappeared
 
         ReadOnly Property Name() As Driver              ' Name of device specific class in use (driver)
         ReadOnly Property GetModuleType() As String     ' Get model of connected device
@@ -53,7 +54,7 @@
         Property BK_Green() As Integer
         Property BK_Blue() As Integer
 
-        Sub Connect()                                   ' Connect to display device
+        Sub Connect(plugin As OpenMobile.Plugin.IBasePlugin, Optional verbose As Boolean = False) ' Connect to display device
         Sub Close()                                     ' Disconnect display device
 
         Sub PrintText(ByVal Text As String)                   ' Send characters to display

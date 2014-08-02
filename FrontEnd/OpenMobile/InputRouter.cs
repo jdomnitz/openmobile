@@ -597,23 +597,29 @@ namespace OpenMobile
         /// <param name="screen"></param>
         private static void IdleDetection_Restart(int screen)
         {
-            if (tmrIdleDetection != null)
+            try
             {
-                if (tmrIdleDetection.Length > screen)
+                if (tmrIdleDetection != null)
                 {
-                    if (tmrIdleDetection[screen] != null)
+                    if (tmrIdleDetection.Length > screen)
                     {
-                        if ((IdleDetectionState)tmrIdleDetection[screen].Tag == IdleDetectionState.Idle)
-                        {   // Timer was active, send leaving idle mode event
-                            tmrIdleDetection[screen].Tag = IdleDetectionState.IdleLeaving;
-                            raiseIdleEvent(screen, true);
-                            tmrIdleDetection[screen].Tag = IdleDetectionState.Normal;
-                        }
+                        if (tmrIdleDetection[screen] != null)
+                        {
+                            if ((IdleDetectionState)tmrIdleDetection[screen].Tag == IdleDetectionState.Idle)
+                            {   // Timer was active, send leaving idle mode event
+                                tmrIdleDetection[screen].Tag = IdleDetectionState.IdleLeaving;
+                                raiseIdleEvent(screen, true);
+                                tmrIdleDetection[screen].Tag = IdleDetectionState.Normal;
+                            }
 
-                        tmrIdleDetection[screen].Stop();
-                        tmrIdleDetection[screen].Start();
+                            tmrIdleDetection[screen].Stop();
+                            tmrIdleDetection[screen].Start();
+                        }
                     }
                 }
+            }
+            catch
+            {
             }
         }
 

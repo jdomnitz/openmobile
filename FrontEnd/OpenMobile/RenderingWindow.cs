@@ -935,14 +935,20 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMousePreview)FocusedControlParent).MousePreviewDown(_Screen, eScaled, MouseMoveStartPoint);
+                        OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                            {
+                                ((IMousePreview)FocusedControlParent).MousePreviewDown(_Screen, eScaled, MouseMoveStartPoint);
+                            });
                     }
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MousePreviewDown(_Screen, eScaled, MouseMoveStartPoint);
+                        OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                            {
+                                ((IMousePreview)FocusedControl).MousePreviewDown(_Screen, eScaled, MouseMoveStartPoint);
+                            });
             }
 
             // No use in doing anything if nothing is focused
@@ -969,14 +975,20 @@ namespace OpenMobile
                 if (FocusedControlParent != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
                     {
-                        ((IMouse)FocusedControlParent).MouseDown(_Screen, eScaled, MouseMoveStartPoint);
+                        OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                            {
+                                ((IMouse)FocusedControlParent).MouseDown(_Screen, eScaled, MouseMoveStartPoint);
+                            });
                     }
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                        ((IMouse)FocusedControl).MouseDown(_Screen, eScaled, MouseMoveStartPoint);
+                        OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                            {
+                                ((IMouse)FocusedControl).MouseDown(_Screen, eScaled, MouseMoveStartPoint);
+                            });
             }
 
             // Redraw
@@ -1036,13 +1048,19 @@ namespace OpenMobile
             {   // Send event to focused control parent
                 if (FocusedControlParent != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControlParent))
-                        ((IMousePreview)FocusedControlParent).MousePreviewUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
+                        OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                            {
+                                ((IMousePreview)FocusedControlParent).MousePreviewUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
+                            });
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMousePreview).IsInstanceOfType(FocusedControl))
-                        ((IMousePreview)FocusedControl).MousePreviewUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
+                        OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                            {
+                                ((IMousePreview)FocusedControl).MousePreviewUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal, clickType);
+                            });
             }
 
             // Return if gesture is handled or no control has focus
@@ -1080,13 +1098,19 @@ namespace OpenMobile
             {   // Send event to focused control parent
                 if (FocusedControlParent != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
-                        ((IMouse)FocusedControlParent).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                        OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                            {
+                                ((IMouse)FocusedControlParent).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                            });
             }
             else
             {   // Send event to focused control
                 if (FocusedControl != null)
                     if (typeof(IMouse).IsInstanceOfType(FocusedControl))
-                        ((IMouse)FocusedControl).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                              OpenMobile.Threading.SafeThread.Asynchronous(() =>
+                                 {
+                                    ((IMouse)FocusedControl).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                                 });
             }
 
             // Send Throw interface data
@@ -1099,7 +1123,7 @@ namespace OpenMobile
                         {
                             OpenMobile.Threading.SafeThread.Asynchronous(() =>
                                 {
-                                ((IThrow)FocusedControlParent).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                                    ((IThrow)FocusedControlParent).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
                                 }
                             );
                         }
@@ -1114,7 +1138,7 @@ namespace OpenMobile
                         {
                              OpenMobile.Threading.SafeThread.Asynchronous(() =>
                                  {
-                                ((IThrow)FocusedControl).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                                    ((IThrow)FocusedControl).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
                                  }
                              );
                        }

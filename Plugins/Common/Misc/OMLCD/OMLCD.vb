@@ -1655,8 +1655,11 @@ Namespace OMLCD
 
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "Requesting driver to connect.")
             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Current setting PORT={0} BAUD={1}", LCD.Port, LCD.Baud))
-            OpenMobile.Threading.SafeThread.Asynchronous(AddressOf LCD.Connect, theHost)
+            OpenMobile.Threading.SafeThread.Asynchronous(AddressOf Connect)
+        End Sub
 
+        Private Sub Connect()
+            LCD.Connect(Me, False)
         End Sub
 
         Private Sub m_Refresh_tmr_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_Refresh_tmr.Elapsed
