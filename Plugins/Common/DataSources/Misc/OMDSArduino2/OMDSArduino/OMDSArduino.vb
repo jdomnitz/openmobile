@@ -156,7 +156,7 @@ Namespace OMDSArduino
 
         Public Sub New()
 
-            MyBase.New("OMDSArduino", OM.Host.getSkinImage("Icons|Icon-Arduino"), 0.1, "Arduino Interface", "John Mullan", "jmullan99@gmail.com")
+            MyBase.New("OMDSArduino", OM.Host.getPluginImage(Of OMDSArduino)("Images|Icon-Arduino"), 0.1, "Arduino Interface", "John Mullan", "jmullan99@gmail.com")
 
         End Sub
 
@@ -574,7 +574,7 @@ Namespace OMDSArduino
 
         Public Overrides ReadOnly Property pluginIcon() As imageItem
             Get
-                Return OM.Host.getPluginImage(Me, "Icon-Arduino")
+                Return OM.Host.getPluginImage(Me, "Images|Icon-Arduino")
             End Get
         End Property
 
