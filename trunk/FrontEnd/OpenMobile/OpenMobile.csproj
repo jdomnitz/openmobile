@@ -160,18 +160,6 @@
     <Content Include="Misc\Changelog.txt" />
     <Content Include="Icon.ico" />
     <Content Include="Misc\ToDo.txt" />
-    <None Include="Fonts\GOTHIC.TTF">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Fonts\GOTHICB.TTF">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Fonts\GOTHICBI.TTF">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Fonts\GOTHICI.TTF">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>
@@ -192,7 +180,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
