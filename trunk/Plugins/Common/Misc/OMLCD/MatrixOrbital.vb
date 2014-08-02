@@ -5,6 +5,7 @@ Imports OpenMobile.Data
 Imports OpenMobile.Plugin
 Imports System.IO.Ports
 
+
 Namespace OMLCD
 
     Public Structure Device
@@ -69,6 +70,9 @@ Namespace OMLCD
         Public Event NoDevice As iLCDInterface.NoDeviceEventHandler _
             Implements iLCDInterface.NoDevice
 
+        Public Event CommLost As iLCDInterface.CommLostEventHandler _
+            Implements iLCDInterface.CommLost
+
         Public Const DEFAULT_COM_PORT As String = "Auto"    'COM port name 
         Public Const DEFAULT_BAUD_RATE As Integer = 19200   'Baud rate
         Public Const DEFAULT_CELL_SIZE As Integer = 20      'Default character cell size
@@ -81,6 +85,7 @@ Namespace OMLCD
         Private m_moduleType As Integer = 0                 'Tracks module type
         Private m_lastRequest As Queue = New Queue          'Tracks data requests made to device
         ' 1=Model 2=Version
+        Private m_Verbose As Boolean = False
         Private m_autoscroll As Boolean = False
         Private m_linewrap As Boolean = False
         Private m_moduleVer As Integer = 0                  'Tracks module version
@@ -98,7 +103,9 @@ Namespace OMLCD
         Private mKeyNameAssigned As String = ""
         Private m_cell_size As Integer
         Private lock_timeout As Integer = 10000              'Max milliseconds to wait for serial port lock
-        Private query_response_time As Integer = 500        'Milliseconds to wait for query response from LCD
+        Private query_response_time As Integer = 1000        'Milliseconds to wait for query response from LCD
+
+        Private who_called As OpenMobile.Plugin.IBasePlugin
 
         Private m_connected As Boolean = False              'Are we all done our connection process?
 
@@ -249,7 +256,10 @@ Namespace OMLCD
                 Return m_lcd_brightness
             End Get
             Set(ByVal value As Integer)
-                Me.SetBrightness(value)
+                If value < 0 Then value = 0
+                If value > 255 Then value = 255
+                m_lcd_brightness = value
+                Me.SetBrightness(m_lcd_brightness)
             End Set
         End Property
 
@@ -258,7 +268,10 @@ Namespace OMLCD
                 Return m_lcd_contrast
             End Get
             Set(ByVal value As Integer)
-                Me.SetContrast(value)
+                If value < 0 Then value = 0
+                If value > 255 Then value = 255
+                m_lcd_contrast = value
+                Me.SetContrast(m_lcd_contrast)
             End Set
         End Property
 
@@ -267,7 +280,10 @@ Namespace OMLCD
                 Return m_keypad_brightness
             End Get
             Set(ByVal value As Integer)
-                Me.SetKeypadBrightness(value)
+                If value < 0 Then value = 0
+                If value > 255 Then value = 255
+                m_keypad_brightness = value
+                Me.SetKeypadBrightness(m_keypad_brightness)
             End Set
         End Property
 
@@ -430,7 +446,7 @@ Namespace OMLCD
                         End If
                     End If
                 Catch ex As Exception
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                    disconnected()
                 End Try
             End Set
         End Property
@@ -451,18 +467,21 @@ Namespace OMLCD
                         End If
                     End If
                 Catch ex As Exception
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                    disconnected()
                 End Try
             End Set
         End Property
 
         ' Try to find a compatible LCD
-        Public Sub Connect() Implements iLCDInterface.Connect
+        Public Sub Connect(caller As OpenMobile.Plugin.IBasePlugin, Optional verbose As Boolean = False) Implements iLCDInterface.Connect
 
-            ' If the current saved port name = "Auto" then we try to find a compatable device
+            ' If the current saved port name = "Auto" then we try to find a compatible device
             ' If the saved port name is a valid port, we will just connect to it
             ' If we had issue connecting, we will try to find a port
             ' If we are successful then Hurray!
+
+            m_Verbose = verbose
+            who_called = caller
 
             ' If there is already a port opened, close it
             If Not Me.SerialPort1 Is Nothing Then
@@ -471,7 +490,9 @@ Namespace OMLCD
                     Me.SerialPort1.Dispose()
                 End If
                 Me.SerialPort1 = Nothing
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Existing connection was terminated."))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Existing connection was terminated."))
+                End If
             End If
 
             m_open = False
@@ -479,14 +500,20 @@ Namespace OMLCD
 
             If m_comm_port = "Auto" Then
                 ' Let's auto-detect
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Auto detecting......"))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Auto detecting......"))
+                End If
                 auto_detect()
             Else
                 ' Try to connect to the last comm port
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Attempting to connect to last known port: {0}", m_comm_port))
-                probe_port(m_comm_port)
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Attempting to connect to last known port: {0}", m_comm_port))
+                End If
+                probe_port(m_comm_port, m_baud_rate)
                 If m_moduleType = 0 Then
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Previous port didn't work, switching to auto......"))
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Previous port didn't work, switching to auto......"))
+                    End If
                     m_comm_port = "Auto"
                     auto_detect()
                 End If
@@ -502,11 +529,21 @@ Namespace OMLCD
 
         End Sub
 
-        Private Sub probe_port(ByVal portname As String)
+        Private Sub probe_port(ByVal portname As String, Optional ByVal baudrate As Int16 = DEFAULT_BAUD_RATE)
             ' Try to connect to portname
 
             ' Wait our turn access serial ports
-            helperFunctions.SerialAccess.GetAccess(Me)
+            Dim access_granted As Boolean = False
+
+            access_granted = helperFunctions.SerialAccess.GetAccess(who_called)
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Serial access: {0}.", IIf(access_granted, "granted", "denied")))
+            End If
+
+            If Not access_granted Then
+                Exit Sub
+            End If
 
             Dim startTime As DateTime
             Dim elapsedTime As TimeSpan
@@ -517,10 +554,12 @@ Namespace OMLCD
                 Me.SerialPort1.Close()
             End If
 
-            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Probing {0}.", portname))
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Probing {0}.", portname))
+            End If
 
             Me.SerialPort1.PortName = portname
-            Me.SerialPort1.BaudRate = m_baud_rate
+            Me.SerialPort1.BaudRate = baudrate
             Me.SerialPort1.DataBits = 8
             Me.SerialPort1.Parity = IO.Ports.Parity.None
             Me.SerialPort1.StopBits = IO.Ports.StopBits.One
@@ -572,10 +611,12 @@ Namespace OMLCD
                             Exit Do
                         End If
                         ' We did not get a module code yet
-                        ' If we waited too long for this port to response then get outta here
+                        ' If we waited too long for this port to responsd then get outta here
                         elapsedTime = Now().Subtract(startTime)
                         If elapsedTime.Milliseconds > query_response_time Then
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Timeout. No response from {0}", portname))
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Timeout. No response from {0}", portname))
+                            End If
                             Exit Do
                         End If
                         ' Adds a little pause between loops
@@ -585,14 +626,18 @@ Namespace OMLCD
                         m_comm_port = portname
                         m_open = True
                         m_connected = True
-                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} on {1}", Me.GetModuleType, m_comm_port))
-                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Display type: {0}", Me.GetModuleStyle))
-                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("{0} Rows by {1} Cols", Me.GetModuleRows, Me.GetModuleCols))
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} on {1}", Me.GetModuleType, m_comm_port))
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Display type: {0}", Me.GetModuleStyle))
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("{0} Rows by {1} Cols", Me.GetModuleRows, Me.GetModuleCols))
+                        End If
                     Else
                         Me.SerialPort1.Close()
                     End If
                 Else
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("{0} did not open.", portname))
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("{0} did not open.", portname))
+                    End If
                 End If
             Catch ex As Exception
                 ' if port is already in use, we should get an exception
@@ -600,7 +645,7 @@ Namespace OMLCD
             End Try
 
             ' Reqlinquish our hold on serial ports
-            helperFunctions.SerialAccess.ReleaseAccess(Me)
+            helperFunctions.SerialAccess.ReleaseAccess(who_called)
 
             m_lastRequest.Clear()
 
@@ -623,7 +668,9 @@ Namespace OMLCD
                 ' There are no com ports
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found no comm ports."))
             Else
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Scanning available serial ports."))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Scanning available serial ports."))
+                End If
                 ' Loop thru each port name and see if we find a display
                 For x = 0 To UBound(available_ports)
                     probe_port(available_ports(x))
@@ -633,7 +680,96 @@ Namespace OMLCD
                         Exit For
                     End If
                 Next
+                End If
+
+        End Sub
+
+        ' Checking for connect/disconnect of the device
+        Private Sub m_Host_OnSystemEvent(ByVal efunc As eFunction, args() As Object) Handles theHost.OnSystemEvent
+
+            ' If there was a USB device connected, see if we can contact it as an LCD
+            If efunc.Equals(eFunction.USBDeviceAdded) Then
+                ' A USB device was added
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB device added"))
+                End If
+                If args(0) = "PORT" Then
+                    ' A serial port was added
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB Port device added"))
+                    End If
+                    If Not m_open Then
+                        ' We don't currently have a port open, so try to open it
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("We are not currently connected, initiate connection."))
+                        End If
+                        Me.Connect(who_called, m_Verbose)
+                    End If
+                End If
             End If
+
+            If efunc.Equals(eFunction.USBDeviceRemoved) Then
+                ' Was it a serial port?
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB device removed"))
+                End If
+                If args(0) = "PORT" Then
+                    ' A serial port was removed
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB Port device removed"))
+                    End If
+                    If m_open Then
+                        ' We had an open port
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("We are/were connected to a serial port"))
+                        End If
+                        Try
+                            ' See if we lost our port
+                            ' Port is supposedly open
+                            If Me.SerialPort1.IsOpen Then
+                                ' If the test did not fail, then the port is open
+                                If m_Verbose Then
+                                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Our serial port object is still open."))
+                                End If
+                            Else
+                                If m_Verbose Then
+                                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Our serial port seems closed"))
+                                End If
+                                disconnected()
+                                End If
+                        Catch
+                            ' The port test failed, so we likely lost the port
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Seems our serial port object has been lost."))
+                            End If
+                            disconnected()
+                        End Try
+                    End If
+                End If
+            End If
+
+        End Sub
+
+        ' Call when connection is lost
+        Private Sub disconnected()
+
+            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+            m_open = False
+            m_connected = False
+            Try
+                Me.SerialPort1.Close()
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Closed serial port object"))
+                End If
+                Me.SerialPort1.Dispose()
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Disposed serial port object"))
+                End If
+            Catch ex As Exception
+                ' Likely the OS already closed the serial port object on us
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Error closing serial port object: {0}", ex.Message))
+            End Try
+            RaiseEvent CommLost()
 
         End Sub
 
@@ -656,14 +792,20 @@ Namespace OMLCD
                 Do While SerialPort1.BytesToRead > 0
                     Dim inputData As Integer
                     inputData = SerialPort1.ReadByte
-                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Request queue value: {0}", m_request))
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Request queue value: {0}", m_request))
+                    End If
                     Select Case m_request
                         Case "0" ' No particular request
                         Case "1" ' Module Number request
-                            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Received response {0} to request type {1}.", inputData, m_request))
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Received response {0} to request type {1}.", inputData, m_request))
+                            End If
                             m_moduleType = inputData
                         Case "2" ' Version request
-                            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Received response {0} to request type {1}.", inputData, m_request))
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Received response {0} to request type {1}.", inputData, m_request))
+                            End If
                             m_moduleVer = inputData
                         Case Else
                             ' We did not ask for data
@@ -675,7 +817,9 @@ Namespace OMLCD
                                     Dim key As LCDKey = inputData
                                     mKeyAssigned = key
                                     mKeyNameAssigned = key.ToString()
-                                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Input/Key/Name: {0} / {1} / {2}", inputData, mKeyAssigned, mKeyNameAssigned))
+                                    If m_Verbose Then
+                                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Input/Key/Name: {0} / {1} / {2}", inputData, mKeyAssigned, mKeyNameAssigned))
+                                    End If
                                     RaiseEvent KeyAssignReceived(inputData, mKeyNameAssigned)
                                     SerialPort1.DiscardInBuffer()
                                 Else
@@ -696,7 +840,9 @@ Namespace OMLCD
                 Me.SerialPort1.Close()
                 Me.SerialPort1.Dispose()
                 Me.SerialPort1 = Nothing
-                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection was terminated."))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection was terminated."))
+                End If
             Catch ex As Exception
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Issue closing device. " & ex.Message))
             End Try
@@ -716,7 +862,7 @@ Namespace OMLCD
                     Me.SerialPort1.Write(data, 0, UBound(data) + 1)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
         End Sub
 
@@ -728,7 +874,7 @@ Namespace OMLCD
                     Me.SerialPort1.Write(data, 0, UBound(data) + 1)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
@@ -741,7 +887,7 @@ Namespace OMLCD
                     Me.SendCommand(Commands.GoHome)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
         End Sub
 
@@ -752,7 +898,7 @@ Namespace OMLCD
                     Me.SendCommand(Commands.GoHome)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
         End Sub
 
@@ -769,7 +915,7 @@ Namespace OMLCD
                     Me.SerialPort1.Write(data, 0, UBound(data) + 1)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
@@ -783,7 +929,7 @@ Namespace OMLCD
                     m_lcd_contrast = Contrast
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
@@ -805,7 +951,7 @@ Namespace OMLCD
                     Me.SerialPort1.Write(data, 0, 3)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
@@ -819,7 +965,7 @@ Namespace OMLCD
                     m_lcd_brightness = brightness
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
@@ -833,7 +979,7 @@ Namespace OMLCD
                     m_keypad_brightness = Brightness
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
@@ -845,7 +991,7 @@ Namespace OMLCD
                     Me.SerialPort1.Write(data, 0, UBound(data) + 1)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
@@ -856,13 +1002,14 @@ Namespace OMLCD
                     Me.SerialPort1.Write(changeBank, 0, UBound(changeBank) + 1)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
 
         Public Sub RebuildStartupScreen()
-            ' Rebuilds the splash screen
+            ' Builds and saves the startup screen with custom characters in Bank 0
+
             Dim data() As Byte = {254, Commands.ChangeStartUpScreen, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, _
                                   32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 1, 2, 3, 32, 32, Asc("O"), _
                                   Asc("P"), Asc("E"), Asc("N"), 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 4, 5, 6, 7, _
@@ -876,13 +1023,14 @@ Namespace OMLCD
                     Me.ShowStartupScreen()
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
 
         Public Sub ReloadStartupCharacters()
             ' Rebuilds the custom characters for splash screen
+            ' Saves the custom characters into Bank 0 for use in startup screen
 
             ' Data for OM Logo
             Dim char1() As Byte = {254, Commands.SaveCustomStartupChar, 0, 0, 1, 6, 8, 9, 18, 28, 28}
@@ -907,13 +1055,16 @@ Namespace OMLCD
                     Me.SerialPort1.Write(char8, 0, UBound(char1) + 1)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub
 
         Public Sub ShowStartupScreen()
             ' Show the startup splash screen
+            ' Must be done manually because stored startup screen only happens
+            '  on LCD power-up / restart
+
             ' Select Bank Command
             Dim cmd() As Byte = {254, Commands.LoadCustomChars, 0}
             ' Startup Page Data
@@ -930,7 +1081,7 @@ Namespace OMLCD
                     Me.SerialPort1.Write(data, 0, 80)
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection lost."))
+                disconnected()
             End Try
 
         End Sub

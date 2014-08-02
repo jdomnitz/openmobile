@@ -36,12 +36,12 @@
 Imports System
 Imports System.Net
 Imports OpenMobile
-Imports OpenMobile.Plugin
-Imports OpenMobile.Framework
-Imports OpenMobile.Graphics
 Imports OpenMobile.Controls
 Imports OpenMobile.Data
+Imports OpenMobile.Framework
+Imports OpenMobile.Graphics
 Imports OpenMobile.helperFunctions
+Imports OpenMobile.Plugin
 
 Namespace OMFuel
 
@@ -49,6 +49,7 @@ Namespace OMFuel
         Inherits HighLevelCode
 
         Private WithEvents theHost As IPluginHost
+        Private m_Verbose As Boolean = False
         Private bannerStyle As Integer = 0
         Private locationText As String = "None"
         Private gps_fixed As Boolean = False
@@ -59,10 +60,9 @@ Namespace OMFuel
         Private temp_count As Integer = 0
         Private updated As Boolean = False
         Private initialized As Boolean = False
+        Private GradeFilter As String = ""
 
         Dim myBanner As InfoBanner = New InfoBanner(bannerStyle, "Please wait...", 5000)
-
-        Private GradeFilter As String = ""
 
         Public Sub New()
 
@@ -75,6 +75,8 @@ Namespace OMFuel
             'host.DebugMsg("OMFuel - initialize()", "Initializing...")
 
             theHost = host
+
+            initialized = False
 
             OpenMobile.Threading.SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
 
@@ -107,7 +109,7 @@ Namespace OMFuel
             ' Build the panel to manually enter a favorite
             Dim fuelFavPanel As New OMPanel("EditFavs", "Fuel Prices")
 
-            Dim shpPriceBackground As New OMBasicShape("editFavBackground", theHost.ClientArea(0).Left + 150, theHost.ClientArea(0).Top + 100, theHost.ClientArea(0).Width - 300, 300, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(235, Color.Black), Color.Transparent, 0, 5))
+            Dim shpPriceBackground As New OMBasicShape("editFavBackground", theHost.ClientArea(0).Left + 150, theHost.ClientArea(0).Top + 100, theHost.ClientArea(0).Width - 300, 290, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(235, Color.Black), Color.Transparent, 0, 5))
             fuelFavPanel.addControl(shpPriceBackground)
 
             Dim zipLabel As New OMLabel("zipLabel", shpPriceBackground.Left + 15, shpPriceBackground.Top + 10, 150, 50)
@@ -142,12 +144,12 @@ Namespace OMFuel
             'favState.OSKType = 1
             'fuelFavPanel.addControl(favState)
 
-            Dim okButton As OMButton = OMButton.PreConfigLayout_BasicStyle("okButton", shpPriceBackground.Left + (shpPriceBackground.Width / 2) - 110, shpPriceBackground.Top + shpPriceBackground.Height - 50, 100, 40, OpenMobile.Graphics.GraphicCorners.All)
+            Dim okButton As OMButton = OMButton.PreConfigLayout_CleanStyle("okButton", shpPriceBackground.Left + (shpPriceBackground.Width / 2) - 110, shpPriceBackground.Top + shpPriceBackground.Height - 50, 100, 40, OpenMobile.Graphics.GraphicCorners.All)
             okButton.Text = "Ok"
             AddHandler okButton.OnClick, AddressOf okButton_OnClick
             fuelFavPanel.addControl(okButton)
 
-            Dim cancelButton As OMButton = OMButton.PreConfigLayout_BasicStyle("cancelButton", shpPriceBackground.Left + (shpPriceBackground.Width / 2) + 10, okButton.Top, 100, 40, OpenMobile.Graphics.GraphicCorners.All)
+            Dim cancelButton As OMButton = OMButton.PreConfigLayout_CleanStyle("cancelButton", shpPriceBackground.Left + (shpPriceBackground.Width / 2) + 10, okButton.Top, 100, 40, OpenMobile.Graphics.GraphicCorners.All)
             cancelButton.Text = "Cancel"
             AddHandler cancelButton.OnClick, AddressOf cancelButton_OnClick
             fuelFavPanel.addControl(cancelButton)
@@ -162,9 +164,49 @@ Namespace OMFuel
 
             'theHost.DebugMsg("OMFuel - BackgroundLoad()", "Complete. Requesting data refresh...")
 
-            initialized = True
+            ' Do we have a HOME location saved?
+            Dim xZip As String = "", xCountry As String = "", xCity As String = "", xState As String = "", mFilter As String = ""
+            Dim sysHome As OpenMobile.Location
+            sysHome = BuiltInComponents.SystemSettings.Location_Home
 
-            theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Last")
+            xZip = StoredData.Get(Me, "FAVS.homeZip")
+            xCity = StoredData.Get(Me, "FAVS.homeCity")
+            xState = StoredData.Get(Me, "FAVS.homeState")
+            xCountry = StoredData.Get(Me, "FAVS.homeCountry")
+
+            ' If there is currently no HOME saved, try to set one from SYSTEM home location
+            If String.IsNullOrEmpty(xZip) Then
+                ' No home location saved, check system setting
+                If Not sysHome.IsEmpty Then
+                    ' Save SYSTEM home to our HOME
+                    xZip = sysHome.Zip
+                    xCity = sysHome.City
+                    xState = sysHome.State
+                    xCountry = sysHome.Country
+                End If
+            Else
+                ' There is a saved HOME location
+            End If
+
+            ' If other systems are not ready, we don't get the initial load of data
+            '  so we'll just wait a couple of seconds. We "could" block panel_enter if
+            '  background loading is not complete.
+            System.Threading.Thread.Sleep(3000)
+
+            ' Find if there was a last searched filter
+            Try
+                mFilter = theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Last.Filter").FormatedValue
+                ' Request prices from last searched
+                theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Last")
+            Catch
+                ' Nothing found, request our saved HOME
+                ' (assuming it was not blank)
+                If Not String.IsNullOrEmpty(xZip) Then
+                    theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Home", {xZip, xCity, xState, xCountry})
+                End If
+            End Try
+
+            initialized = True
 
         End Sub
 
@@ -187,7 +229,7 @@ Namespace OMFuel
                     For x = 0 To theHost.ScreenCount - 1
                         mPanel = PanelManager(x, "FuelPrices")
                         If Not mPanel Is Nothing Then
-                            If mPanel.IsLoaded(x) Then
+                            If mPanel.IsVisible(x) Then
                                 If Not String.IsNullOrEmpty(sensor.FormatedValue) Then
                                     message = sensor.FormatedValue
                                     theHost.UIHandler.InfoBanner_Hide(x)
@@ -201,15 +243,14 @@ Namespace OMFuel
                     Next
 
                 Case "Fuel.Price.List"
-                    updated = True
+                    'updated = True
                     For x = 0 To theHost.ScreenCount - 1
                         If PanelManager.IsPanelLoaded(x, "FuelPrices") Then
                             mPanel = PanelManager(x, "FuelPrices")
                             panel_enter(mPanel, x)
-                            'theHost.UIHandler.InfoBanner_Hide(x)
                         End If
                     Next
-                    updated = False
+                    'updated = False
 
             End Select
 
@@ -219,9 +260,25 @@ Namespace OMFuel
 
             Dim mySettings As New Settings(Me.pluginName & " Settings")
 
+            ' Create a handler for settings changes
+            AddHandler mySettings.OnSettingChanged, AddressOf mySettings_OnSettingChanged
+
+            mySettings.Add(New Setting(SettingTypes.MultiChoice, Me.pluginName & ";Settings.VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
+
             Return mySettings
 
         End Function
+
+        Private Sub mySettings_OnSettingChanged(ByVal screen As Integer, ByVal settings As Setting)
+
+            OpenMobile.helperFunctions.StoredData.Set(Me, settings.Name, settings.Value)
+
+            Select Case settings.Name
+                Case "VerboseDebug"
+                    m_Verbose = settings.Value
+            End Select
+
+        End Sub
 
         Public Sub panel_leave(ByVal sender As OMPanel, ByVal screen As Integer)
 
@@ -264,16 +321,20 @@ Namespace OMFuel
             Dim theContainer As OMContainer = sender(screen, "mainContainer")
             theContainer.ClearControls()
 
-            'theHost.DebugMsg("OMFuel - panel_enter()", "Creating dictionaries.")
+            If m_Verbose Then
+                theHost.DebugMsg("OMFuel - panel_enter()", "Creating dictionaries.")
+            End If
 
             Dim Grades As Dictionary(Of String, Dictionary(Of Integer, Dictionary(Of String, String))) = TryCast(theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Price.List").Value, Dictionary(Of String, Dictionary(Of Integer, Dictionary(Of String, String))))
             Dim Results As New Dictionary(Of Integer, Dictionary(Of String, String))
             Dim GasPrices As New Dictionary(Of String, String)
 
-            'theHost.DebugMsg("OMFuel - panel_enter()", "Filling container.")
+            If m_Verbose Then
+                theHost.DebugMsg("OMFuel - panel_enter()", "Filling container.")
+            End If
 
             Dim x_coord As Integer = 10
-            Dim y_coord As Integer = 15
+            Dim y_coord As Integer = 1
 
             Dim data As imageItem
             'Dim xx As Integer
@@ -326,9 +387,9 @@ Namespace OMFuel
                         xdecimal = GasPrices("Decimal")
                         Dim mapLoc As Array = {name, address, area, state, country}
 
-                        Dim shpPriceBackground As New OMBasicShape("shpPriceBackground" & ind.ToString, x_coord, y_coord, 180, 470, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5))
+                        Dim shpPriceBackground As New OMBasicShape("shpPriceBackground" & ind.ToString, x_coord, y_coord, 180, 465, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 5))
 
-                        Dim invButton As OMButton = OMButton.PreConfigLayout_BasicStyle("invButton" & ind.ToString, x_coord, y_coord, 180, 470, OpenMobile.Graphics.GraphicCorners.All)
+                        Dim invButton As OMButton = OMButton.PreConfigLayout_CleanStyle("invButton" & ind.ToString, x_coord, y_coord, 180, 465, OpenMobile.Graphics.GraphicCorners.All)
                         invButton.BackgroundColor = Color.Transparent
                         invButton.BorderColor = Color.Transparent
                         invButton.Opacity = 0
@@ -451,24 +512,21 @@ Namespace OMFuel
             ' My Current Location
             theHost.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", {OM.Host.CurrentLocation, Me.pluginName, "Me", 1, "Me"})
             theHost.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", {myLoc, Me.pluginName, "Target", 2, myLoc.Keyword})
-
-            'x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Goto.Location", myLoc)
-            'x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Goto.Location", OM.Host.CurrentLocation)
-            'OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", New Location(60.72638, 10.61718), Me.pluginName, "testmarker", OM.Host.getSkinImage("OMFuel|Logos|Shell").image.Copy().Resize(30), "Shell\r\n$1.222 (Regular)")
-
-            ' Show the map
-            'theHost.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Panel.Goto.Default.OMMaps", screen))
             OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Show.MapPlugin")
-            'OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Goto.Current")
-
-            ' Start the route
             x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Route", Nothing, myLoc)
+            'System.Threading.Thread.Sleep(5000)
+            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Zoom.Level", 16)
+            'System.Threading.Thread.Sleep(5000)
+            'OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.ZoomAll")
 
+            ' x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Goto.Location", myLoc)
+            ' x = theHost.CommandHandler.ExecuteCommand(screen, "Map.Goto.Location", OM.Host.CurrentLocation)
+            ' OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.Add", New Location(60.72638, 10.61718), Me.pluginName, "testmarker", OM.Host.getSkinImage("OMFuel|Logos|Shell").image.Copy().Resize(30), "Shell\r\n$1.222 (Regular)")
             ' can map to button with this
             ' btn_ShowMap.Command_Click = "Screen{:S:}.Map.Show.MapPlugin"
-            'x = theHost.CommandHandler.ExecuteCommand("Map.Zoom.Out")
+            ' x = theHost.CommandHandler.ExecuteCommand("Map.Zoom.Out")
+            'OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Goto.Current")
 
-            OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Marker.ZoomAll")
 
         End Sub
 
@@ -487,7 +545,7 @@ Namespace OMFuel
                 Case "Current_Button"
                     ' Ask datasource to fetch prices for Current location
                     myBanner.Text = "Please wait..."
-                    myBanner.Timeout = 10000
+                    myBanner.Timeout = 5000
                     theHost.UIHandler.InfoBanner_Show(screen, myBanner)
                     theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Current")
                 Case "Home_Button"
@@ -650,15 +708,19 @@ Namespace OMFuel
             Dim cityBox As OMTextBox = fPanel("favCity")
 
             Dim myLoc As OpenMobile.Location = New OpenMobile.Location
+
             If String.IsNullOrEmpty(zipBox.Text) Then
                 myLoc.Keyword = cityBox.Text
             Else
                 myLoc.Keyword = zipBox.Text.Replace(" ", "")
+                myLoc.Keyword = zipBox.Text
             End If
+            'myLoc.Keyword = "44.1627579, -77.38323"
             myLoc = theHost.CommandHandler.ExecuteCommand("Map.Lookup.Location", myLoc)
 
             Dim xZip As String, xCity As String, xState As String, xCountry As String
             xZip = myLoc.Zip.Replace(" ", "")
+            xZip = myLoc.Zip
             xCity = myLoc.City
             xState = myLoc.State
             xCountry = myLoc.Country
