@@ -77,10 +77,11 @@ namespace OMTicTacToe
             SinglePlayer.Text = "Single Player";
             SinglePlayer.OnClick += new userInteraction(SinglePlayer_OnClick);
             TicTacToe.addControl(SinglePlayer);
-            OMButton MultiPlayer = OMButton.PreConfigLayout_CleanStyle("MultiPlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, corners: GraphicCorners.Bottom);
+            //OMButton MultiPlayer = OMButton.PreConfigLayout_CleanStyle("MultiPlayer", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .1), (OM.Host.ClientArea_Init.Bottom / 2) + 5, (int)(OM.Host.ClientArea_Init.Width * .2), 80, corners: GraphicCorners.Bottom);
+            OMButton MultiPlayer = OMButton.PreConfigLayout_CleanStyle("MultiPlayer", 0, 0, SinglePlayer.Width, SinglePlayer.Height, corners: GraphicCorners.Bottom);
             MultiPlayer.Text = "Multiplayer";
             MultiPlayer.OnClick += new userInteraction(MultiPlayer_OnClick);
-            TicTacToe.addControl(MultiPlayer);
+            TicTacToe.addControl(MultiPlayer, ControlDirections.Down, 0, -1);
 
             OMBasicShape multiplayerListBackground = new OMBasicShape("multiplayerListBackground", (OM.Host.ClientArea_Init.Width / 2) - (int)(OM.Host.ClientArea_Init.Width * .25), 80, (int)(OM.Host.ClientArea_Init.Width * .5), 350, new ShapeData(shapes.RoundedRectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0, 10));
             multiplayerListBackground.Visible = false;

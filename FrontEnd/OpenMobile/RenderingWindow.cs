@@ -349,82 +349,92 @@ namespace OpenMobile
             t.Start();
         }
 
+        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
+        [System.Security.SecurityCritical]
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            _SecondsSinceLastRender += e.Time;
-            // Wait for a refresh
-            if (!_Refresh & (_SecondsSinceLastRender < _SecondsBetweenMinRenderFrame))
+            try
             {
-                for (int i = 0; i < _FPS_SleepTime; i++)
+                _SecondsSinceLastRender += e.Time;
+                // Wait for a refresh
+                if (!_Refresh & (_SecondsSinceLastRender < _SecondsBetweenMinRenderFrame))
                 {
-                    if (_Refresh)
-                        break;
-                    Thread.Sleep(1);
+                    for (int i = 0; i < _FPS_SleepTime; i++)
+                    {
+                        if (_Refresh)
+                            break;
+                        Thread.Sleep(1);
+                    }
+
+                    if (!_Refresh)
+                        return;
                 }
-                
-                if (!_Refresh)
+
+                if (_StopRendering)
                     return;
+
+                _FPS = 1 / _SecondsSinceLastRender;
+                _SecondsSinceLastRender = 0;
+
+                if (_Refresh)
+                {
+                    _FPS_Max = System.Math.Max(_FPS_Max, _FPS);
+                    if (_FPS_Max > 15)
+                        _FPS_Min = System.Math.Min(_FPS_Min, _FPS);
+                }
+                _Refresh = false;
+
+                // Send window location to graphics engine
+                g.Location(base.Location.X, base.Location.Y);
+
+                if (_ResizeRequired)
+                {
+                    g.Resize(base.Location.X, base.Location.Y, base.Width, base.Height);
+                    _ResizeRequired = false;
+                }
+
+                // Remove startup panel if present when additional panels are shown
+                if (_StartupControl)
+                {
+                    _StartupControl = false;
+                    if (RenderingQueue.Contains(panelStartUp) && RenderingQueue.Count > 1)
+                        RenderingQueue.Remove(panelStartUp);
+                }
+
+                g.Clear(Color.Black);
+                g.ResetClip();
+
+                // Inform graphics that rendering begins
+                g.Begin();
+
+                RenderPanels();
+
+                // Render gestures
+                RenderGesture();
+
+                // Render cursors
+                RenderCursor();
+
+                // Render identity (if needed)
+                RenderIndentity();
+
+                // Render debug info (if needed)
+                RenderDebugInfo();
+                //ShowDebugInfoTitle();
+
+                // Render a "dimmer" overlay to reduce _Screen brightness
+                RenderDimmer();
+
+                SwapBuffers(); //show the new image before potentially lagging
+
+                // Inform graphics that rendering ends
+                g.End();
             }
-
-            if (_StopRendering)
-                return;
-
-            _FPS = 1 / _SecondsSinceLastRender;
-            _SecondsSinceLastRender = 0;
-
-            if (_Refresh)
-            {
-                _FPS_Max = System.Math.Max(_FPS_Max, _FPS);
-                if (_FPS_Max > 15)
-                    _FPS_Min = System.Math.Min(_FPS_Min, _FPS);
+            catch (Exception ex)
+            {   // Mask errors
+                if (ex is AccessViolationException)
+                    OM.Host.DebugMsg("RenderingWindow.OnRenderFrame Exception", ex);
             }
-            _Refresh = false;
-
-            // Send window location to graphics engine
-            g.Location(base.Location.X, base.Location.Y);
-
-            if (_ResizeRequired)
-            {
-                g.Resize(base.Location.X, base.Location.Y, base.Width, base.Height);
-                _ResizeRequired = false;
-            }
-
-            // Remove startup panel if present when additional panels are shown
-            if (_StartupControl)
-            {
-                _StartupControl = false;
-                if (RenderingQueue.Contains(panelStartUp) && RenderingQueue.Count > 1)
-                    RenderingQueue.Remove(panelStartUp);
-            }
-
-            g.Clear(Color.Black);
-            g.ResetClip();
-
-            // Inform graphics that rendering begins
-            g.Begin();
-
-            RenderPanels();
-
-            // Render gestures
-            RenderGesture();
-
-            // Render cursors
-            RenderCursor();
-
-            // Render identity (if needed)
-            RenderIndentity();
-
-            // Render debug info (if needed)
-            RenderDebugInfo();
-            //ShowDebugInfoTitle();
-
-            // Render a "dimmer" overlay to reduce _Screen brightness
-            RenderDimmer();
-
-            SwapBuffers(); //show the new image before potentially lagging
-
-            // Inform graphics that rendering ends
-            g.End();
         }
 
         #region Local renders

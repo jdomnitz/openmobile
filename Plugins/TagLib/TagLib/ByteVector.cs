@@ -436,24 +436,28 @@ namespace TagLib {
 		public ByteVector Mid (int startIndex, int length)
 		{
 			if (startIndex < 0 || startIndex > Count)
-				throw new ArgumentOutOfRangeException (
-					"startIndex");
+                return new ByteVector();
 			
 			if (length < 0 || startIndex + length > Count)
-				throw new ArgumentOutOfRangeException (
-					"length");
-			
-			if (length == 0)
-				return new ByteVector ();
-				
-			if(startIndex + length > this.data.Count)
-				length = this.data.Count - startIndex;
-			
-			byte [] data = new byte [length];
-			
-			this.data.CopyTo (startIndex, data, 0, length);
-			
-			return data;
+                return new ByteVector();
+
+            try
+            {
+                if (length == 0)
+                    return new ByteVector();
+
+                if (startIndex + length > this.data.Count)
+                    length = this.data.Count - startIndex;
+
+                byte[] data = new byte[length];
+
+                this.data.CopyTo(startIndex, data, 0, length);
+                return data;
+            }
+            catch
+            {
+                return new ByteVector();
+            }			
 		}
 		
 		/// <summary>

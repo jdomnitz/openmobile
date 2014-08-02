@@ -1,4 +1,14 @@
-﻿20140801
+﻿20140802 
+	# Added error handling to TagLib ByteVector.Mid method
+
+---- < Distributed >-----
+20140802
+	+ Added OpenMobile.Resources project which holds the current debug folder structure (Any global resources must be added here)
+	# Fixed incorrect image references
+	# Updated Shader code to properly adjust to window changes
+
+---- < Distributed >-----
+20140801
 	# Replaced Mono.Data.SQLite with latest System.Data.SQLite files. Added automatic handling of 64bit vs 32bit installs, no more need for EnvironmentSetup.exe
 	- Removed OMWinHal as it's no longer needed. It's functionality will be moved into OM itself over time.
 
