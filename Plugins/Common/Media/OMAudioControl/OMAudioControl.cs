@@ -24,7 +24,7 @@ using OpenMobile.Plugin;
 using OpenMobile.Data;
 using System.Collections.Generic;
 using System.Linq;
-using CoreAudioApi;
+using VistaAudio.CoreAudioApi;
 
 namespace OMDataSourceSample
 {
@@ -54,20 +54,34 @@ namespace OMDataSourceSample
 
         private void InitAudioDevices()
         {
+            string info = "OMAudioControl detected the following devices:\r\n";
+
             _OMAudioDevices = new List<AudioDevice>();
 
             // Add default device
             var defaultEndpoint = _AudioDeviceFactory.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
             AudioDevice_HookEvents(defaultEndpoint);
-            _OMAudioDevices.Add(new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, defaultEndpoint, true));
+            AudioDevice device = new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, defaultEndpoint, true);
+            info += device.Name + "\r\n";
+            _OMAudioDevices.Add(device);
 
             // Add other devices
             var audioDevices = _AudioDeviceFactory.EnumerateAudioEndPoints(EDataFlow.eRender, EDeviceState.DEVICE_STATEMASK_ALL);
             for (int i = 0; i < audioDevices.Count; i++)
             {
                 AudioDevice_HookEvents(audioDevices[i]);
-                _OMAudioDevices.Add(new AudioDevice(audioDevices[i].FriendlyName, i + 1, AudioDevice_Get, AudioDevice_Set, audioDevices[i]));
+
+                // Try to get the name of the device
+                string friendlyName = "Unknown device";
+                PropertyStoreProperty prop = audioDevices[i].Properties[PKEY.FriendlyName];
+                if (prop != null)
+                    friendlyName = prop.Value.ToString();
+
+                device = new AudioDevice(friendlyName, i + 1, AudioDevice_Get, AudioDevice_Set, audioDevices[i]);
+                info += device.Name + "\r\n";
+                _OMAudioDevices.Add(device);
             }
+            OM.Host.DebugMsg(DebugMessageType.Info, info);
         }
 
         private void AudioDevice_HookEvents(MMDevice device)
