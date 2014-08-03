@@ -36,8 +36,12 @@ namespace OpenMobile.helperFunctions
         /// <param name="archiveFilenameIn"></param>
         /// <param name="password"></param>
         /// <param name="outFolder"></param>
-        public static void ExtractZipFile(string archiveFilenameIn, string password, string outFolder)
+        public static void ExtractZipFile(string archiveFilenameIn, string password, string outFolder, Action<int, string> progressCallback = null)
         {
+            float stepCount_Total = 0;
+            float stepCount_Current = 0;
+            int progress = 0;
+
             ZipFile zf = null;
             try
             {
@@ -47,8 +51,12 @@ namespace OpenMobile.helperFunctions
                 {
                     zf.Password = password;     // AES encrypted entries are handled automatically
                 }
+
+                stepCount_Total = zf.Count;
+
                 foreach (ZipEntry zipEntry in zf)
                 {
+                    stepCount_Current++;
                     if (!zipEntry.IsFile)
                     {
                         continue;           // Ignore directories
@@ -57,6 +65,11 @@ namespace OpenMobile.helperFunctions
                     // to remove the folder from the entry:- entryFileName = Path.GetFileName(entryFileName);
                     // Optionally match entrynames against a selection list here to skip as desired.
                     // The unpacked length is available in the zipEntry.Size property.
+
+                    // Report progress
+                    progress = (int)((stepCount_Current / stepCount_Total) * 100f);
+                    if (progressCallback != null)
+                        progressCallback(progress, entryFileName);
 
                     byte[] buffer = new byte[4096];     // 4K is optimum
                     Stream zipStream = zf.GetInputStream(zipEntry);

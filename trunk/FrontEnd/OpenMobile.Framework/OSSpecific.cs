@@ -404,6 +404,25 @@ namespace OpenMobile.Framework
 #endif
             return "";
         }
+
+        /// <summary>
+        /// Returns TRUE if a 64bit setup is required
+        /// </summary>
+        /// <returns></returns>
+        public static bool Is64BitRequired
+        {
+            get
+            {
+#if WINDOWS
+                if (Configuration.RunningOnWindows)
+                {
+                    return (Windows.is64BitOperatingSystem | Windows.is64BitProcess);
+                }
+#endif
+                return false;
+            }
+        }
+
         /// <summary>
         /// Retrieves the operating system bit environment (32 or 64 bit)
         /// </summary>

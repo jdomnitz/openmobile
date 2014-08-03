@@ -106,6 +106,7 @@ namespace OMVLCPlayer
             Restart
         }
 
+        private Notification _NotificationIndexingStatus = null;
         private IMediaPlayerFactory _PlayerFactory;
         private AudioOutputModuleInfo _Player_DefaultAudioModule;
         private List<AudioOutputDeviceInfo> _Player_AudioOutputDevices = new List<AudioOutputDeviceInfo>();
@@ -256,23 +257,41 @@ namespace OMVLCPlayer
             }
 
             // Do we have to reinstall or install the vlc core?
-            if (!vlcCore_Installed)
+            //if (!vlcCore_Installed)
             {
-                if (!vlcCore_x64Installed & (Environment.Is64BitProcess | Environment.Is64BitOperatingSystem))
+                if (!vlcCore_x64Installed & OpenMobile.Framework.OSSpecific.Is64BitRequired)
                 {
                     vlcCore_x64InstallRequired = true;
                     OM.Host.DebugMsg(DebugMessageType.Info, "VLC Core not installed, 64bit installation required");
                 }
-                else if (!vlcCore_x32Installed)
+                else if (!vlcCore_x32Installed & !OpenMobile.Framework.OSSpecific.Is64BitRequired)
                 {
                     vlcCore_x32InstallRequired = true;
                     OM.Host.DebugMsg(DebugMessageType.Info, "VLC Core not installed, 32bit installation required");
                 }
             }
+            //else
+            //{
+            //    if (vlcCore_x32Installed & OpenMobile.Framework.OSSpecific.Is64BitRequired)
+            //    {
+            //        vlcCore_x64InstallRequired = true;
+            //        OM.Host.DebugMsg(DebugMessageType.Info, "Wrong VLC Core 32bit installed, 64bit installation required");
+            //    }
+            //    else if (vlcCore_x64Installed)
+            //    {
+            //        vlcCore_x32InstallRequired = true;
+            //        OM.Host.DebugMsg(DebugMessageType.Info, "Wrong VLC Core 32bit installed, 64bit installation required");
+            //    }
+            //}
 
             // install core?
             if (vlcCore_x64InstallRequired | vlcCore_x32InstallRequired)
             {
+                _NotificationIndexingStatus = new Notification(this, "NotificationIndexingStatus", this.pluginIcon.image, this.pluginIcon.image, "Installing VLC core", "Clearing existing files...");
+                _NotificationIndexingStatus.Global = true;
+                _NotificationIndexingStatus.State = Notification.States.Active;
+                OM.Host.UIHandler.AddNotification(_NotificationIndexingStatus);
+
                 // Yes install core, but first try to delete existing vlc core
                 try
                 {
@@ -294,9 +313,16 @@ namespace OMVLCPlayer
                 {
                     try
                     {
-                        OpenMobile.helperFunctions.FileHelpers.ExtractZipFile(System.IO.Path.Combine(base.GetPluginFilePath("VLC_Core"), "VLC_Core_x64.zip"), "", base.GetPluginPath());
+                        Action<int, string> progressCallback = new Action<int,string>((int progress, string name) =>
+                        {
+                            _NotificationIndexingStatus.Text = String.Format("Extracting 64bit core {0}%, please wait...", progress);
+                        });
+
+                        _NotificationIndexingStatus.Text = "Extracting 64bit core, please wait...";
+                        OpenMobile.helperFunctions.FileHelpers.ExtractZipFile(System.IO.Path.Combine(base.GetPluginFilePath("VLC_Core"), "VLC_Core_x64.zip"), "", base.GetPluginPath(), progressCallback);
                         File.WriteAllText(vlcCoreRef_FileName, "64");
                         OM.Host.DebugMsg(DebugMessageType.Info, "VLC Core 64bit installation completed");
+                        _NotificationIndexingStatus.Text = "Installation of 64bit core completed";
                     }
                     catch (Exception ex)
                     {
@@ -307,17 +333,26 @@ namespace OMVLCPlayer
                 {
                     try
                     {
-                        OpenMobile.helperFunctions.FileHelpers.ExtractZipFile(System.IO.Path.Combine(base.GetPluginFilePath("VLC_Core"), "VLC_Core_x32.zip"), "", base.GetPluginPath());
+                        Action<int, string> progressCallback = new Action<int, string>((int progress, string name) =>
+                        {
+                            _NotificationIndexingStatus.Text = String.Format("Extracting 64bit core {0}%, please wait...", progress);
+                        });
+
+                        _NotificationIndexingStatus.Text = "Extracting 32bit core, please wait...";
+                        OpenMobile.helperFunctions.FileHelpers.ExtractZipFile(System.IO.Path.Combine(base.GetPluginFilePath("VLC_Core"), "VLC_Core_x32.zip"), "", base.GetPluginPath(), progressCallback);
                         File.WriteAllText(vlcCoreRef_FileName, "32");
                         OM.Host.DebugMsg(DebugMessageType.Info, "VLC Core 32bit installation completed");
+                        _NotificationIndexingStatus.Text = "Installation of 32bit core completed";
                     }
                     catch (Exception ex)
                     {
                         OM.Host.DebugMsg("Error while extracting VLC Core files for 32bit", ex);
                     }
                 }
+                _NotificationIndexingStatus.State = Notification.States.Passive;
             }
         }
+
 
 
         #region DataSources 
