@@ -172,7 +172,13 @@ namespace GMap.NET.ImageRender
 
         public new void Dispose()
         {
-            Dispose(false);
+            try
+            {
+                Dispose(false);
+            }
+            catch
+            {
+            }
         }
 
         protected override void Dispose(bool disposing)

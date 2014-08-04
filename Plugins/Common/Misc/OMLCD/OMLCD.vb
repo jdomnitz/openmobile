@@ -173,8 +173,6 @@ Namespace OMLCD
         Private settings As Settings
 
         Private m_Key_Timeout As Integer = 10               ' Time to wait for keypress for key assignment in seconds
-        Private m_refresh As Integer = 5                    ' Default time between display page changes in seconds
-        Private m_delay As Integer = 500                    ' Default step rate for scrollng in cell in milliseconds
         Private manager_busy As Boolean = False             ' Prevent multiple concurrent calls on display manager
         Private timer_busy As Boolean = False               ' Prevents subscription updates when page change is due to occur
         Private LastKeyAssign As Integer = 0                ' The keycode received while assigning buttons
@@ -212,7 +210,10 @@ Namespace OMLCD
         Public m_Panel_Function As String = "Data"                    ' Could be "Data", "Keys", "GPOs"
         Public m_Mode As String = "none"
 
+        Private m_refresh As Integer = 5                    ' Default time between display page changes in seconds
         Private WithEvents m_Refresh_tmr As New Timers.Timer(m_refresh * 1000)
+
+        Private m_delay As Integer = 1000                   ' Default step rate for scrollng in cell in milliseconds
         Private WithEvents m_Delay_tmr As New Timers.Timer(m_delay)
 
         Public Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As OpenMobile.eLoadStatus Implements OpenMobile.Plugin.IBasePlugin.initialize
@@ -692,8 +693,7 @@ Namespace OMLCD
                     ' Delete the setting
                     settingName = Me.pluginName & ".Keys." & itemIndex.ToString
                     helperFunctions.StoredData.Delete(Me, settingName)
-                    theHost.DataHandler.UnsubscribeFromDataSource(keys(1), AddressOf m_Subscriptions_Updated)
-                    ' rebuild the DATA settings, giving new index
+                    ' rebuild the KEYS settings, giving new index
                     reindex_keys()
                 End If
 
@@ -1633,16 +1633,22 @@ Namespace OMLCD
             Dim key As String = ""
             Dim results() = New String() {}
 
+            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Find settings matching '{0}'.", mfunction))
+
             For x = 0 To 255
                 key = helperfunctions.StoredData.Get(Me, Me.pluginName & "." & mfunction & "." & x.ToString)
-                If key <> String.Empty Then
+                If Not String.IsNullOrEmpty(key) Then
                     key.Replace(" -> ", ";")
                     If key Like pattern Then
                         ReDim Preserve results(results.Count)
                         results(UBound(results)) = key
                     End If
+                Else
+                    Exit For
                 End If
             Next
+
+            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Search complete.  Found {0}", results.Count))
 
             Return results
 
@@ -1714,7 +1720,7 @@ Namespace OMLCD
             mySettings.Add(settingCycleRate)
 
             ' Create a setting for page cycle rate
-            Dim settingDelayRate = New Setting(SettingTypes.Text, "Settings.DelayRate", "Scroll Delay", "Milliseconds to scroll (not working)")
+            Dim settingDelayRate = New Setting(SettingTypes.Text, "Settings.DelayRate", "Scroll Delay", "Milliseconds to scroll")
             settingDelayRate.Value = m_delay.ToString
             mySettings.Add(settingDelayRate)
 
@@ -1791,9 +1797,9 @@ Namespace OMLCD
                     ' Step rate to scroll data cell
                     m_delay = CInt(settings.Value)
                     helperFunctions.StoredData.Set(Me, settings.Name, m_delay)
-                    If m_delay < 250 Then
+                    If m_delay < 500 Then
                         ' anything less than 250ms might bog down the system
-                        m_delay = 250
+                        m_delay = 500
                         helperFunctions.StoredData.Set(Me, settings.Name, m_delay)
                     End If
                     m_Delay_tmr.Stop()
@@ -2608,88 +2614,56 @@ Namespace OMLCD
             ' Reset idle timer
             ' Here, somehow, some way
 
-            pKeyName = [Enum].GetName(GetType(LCDKey), key)
-
-            ' scan settings to find the function assigned (if any)
-
-            Dim result() As String = Me.scan_settings("Keys", pKeyName & ";*")
-            Dim xResult As String = ""
-
-            If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} matching assignments.", result.Count.ToString))
-            End If
-
-            Dim assignment() As String
-            Dim settingItems() As String
-            Dim settingData() As String
+            Dim assignment(1) As String
             Dim settingParms() As Object
 
+            pKeyName = [Enum].GetName(GetType(LCDKey), key)
+            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format(">>> KeyPressReceived: {0} ({1})", pKeyName, key))
+
+            Dim result() As String = Me.scan_settings("Keys", pKeyName & ";*")
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} matching key assignments.", result.Count.ToString))
+            End If
+
             For x = 0 To UBound(result)
-
-                ReDim assignment(1)
                 assignment = result(x).Split(New Char() {";"c})
-
-                ' Execute the function assigned ( assignment(1) )
-
-                ' What about Fn key?
-                ' We should flag if there is a keypress=Fn
-                ' Reset it after processing the next keypress
-
-                If m_Function_Key = True Then
-                    ' Fn key was pressed last time
-                    ' Maybe we toggled
-                    'm_Function_Key = False
-                    theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";" & Me.pluginName & ".Function.State", False)
-                    If assignment(1) = "Fn" Then
-                        ' Fn pressed twice in a row
-                        ' We are done for now
-                        Exit Sub
-                    End If
-                    ' Process this button using 2nd function
-                    xResult = "Fn+"
-                    display_manager()
-                Else
-                    If assignment(1) = "Fn" Then
-                        ' We just pressed a key marked as Fn
-                        'm_Function_Key = True
-                        theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";" & Me.pluginName & ".Function.State", True)
-                        ' Force display so the indicator shows up
-                        display_manager()
-                        Exit Sub
-                    End If
-                End If
-
-                ' If we get this far, we process the selected item
-
-                ' xResult contains the key or key combination
-                xResult = xResult & pKeyName
-
-                ' Show the assignment for testing purposes
-                ' LCD.PrintText(Chr(10) & xResult)
-
-                ' Here we will process the action associated with the key / key combination
-                ' Look it up in the settings DB
-                ReDim settingItems(UBound(Me.scan_settings("Keys", xResult & ";*")))
-                settingItems = Me.scan_settings("Keys", xResult & ";*")
-
-                For y = 0 To UBound(settingItems)
-                    ReDim settingData(1)
-                    settingData = settingItems(y).Split(New Char() {";"c})
-                    Dim ActionItem As OpenMobile.Command
-                    ActionItem = theHost.CommandHandler.GetCommand(settingData(1))
-                    If ActionItem.RequiresParameters Then
-                        ' We need parameter(s) for this item
-                        If ActionItem.RequiredParamCount > 0 Then
-                            ReDim settingParms(ActionItem.RequiredParamCount - 1)
-                            For z = 2 To 2 + ActionItem.RequiredParamCount - 1
-                                settingParms(z - 2) = settingData(z)
-                            Next
-                            theHost.CommandHandler.ExecuteCommand(settingData(1), settingParms)
-                        End If
+                If assignment(1) = "Fn" Then
+                    ' Fn key pressed
+                    If m_Function_Key = True Then
+                        ' We already have Fn key active, toggle
+                        theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";" & Me.pluginName & ".Function.State", False)
                     Else
-                        theHost.CommandHandler.ExecuteCommand(settingData(1))
+                        ' Set the Fn key
+                        m_Function_Key = True
+                        theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";" & Me.pluginName & ".Function.State", True)
                     End If
-                Next
+                    display_manager()
+                    Exit Sub
+                End If
+                If m_Function_Key = True Then
+                    ' Fn key is active
+                    pKeyName = "Fn+" & pKeyName
+                End If
+                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Full key name: {0}", pKeyName))
+
+                Dim ActionItem As OpenMobile.Command
+                ActionItem = theHost.CommandHandler.GetCommand(assignment(1))
+                ' Does the command require parameters?
+                If ActionItem.RequiresParameters Then
+                    If ActionItem.RequiredParamCount > 0 Then
+                        ReDim settingParms(ActionItem.RequiredParamCount - 1)
+                        For z = 2 To 2 + ActionItem.RequiredParamCount - 1
+                            settingParms(z - 2) = assignment(z)
+                        Next
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format(">>> Sending command: {0}", assignment(1)))
+                        theHost.CommandHandler.ExecuteCommand(assignment(1), settingParms)
+                    End If
+                Else
+                    ' No parameters required
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format(">>> Sending command: {0}", assignment(1)))
+                    theHost.CommandHandler.ExecuteCommand(assignment(1))
+                End If
 
             Next
 

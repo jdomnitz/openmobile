@@ -335,7 +335,7 @@ namespace OMVLCPlayer
                     {
                         Action<int, string> progressCallback = new Action<int, string>((int progress, string name) =>
                         {
-                            _NotificationIndexingStatus.Text = String.Format("Extracting 64bit core {0}%, please wait...", progress);
+                            _NotificationIndexingStatus.Text = String.Format("Extracting 32bit core {0}%, please wait...", progress);
                         });
 
                         _NotificationIndexingStatus.Text = "Extracting 32bit core, please wait...";

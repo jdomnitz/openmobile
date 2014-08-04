@@ -190,7 +190,7 @@ namespace OMGPS3_DotSpatial
 
         private void Devices_DeviceDetectionCanceled(object sender, EventArgs e)
         {
-            OM.Host.DebugMsg(DebugMessageType.Warning, "Device detection canceled!");
+            //OM.Host.DebugMsg(DebugMessageType.Warning, "Device detection canceled!");
             //_GPSStatusNotification_SetData(text: "Device detection canceled!");
             OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
             OM.Host.DebugMsg(DebugMessageType.Info, "Serial port access released");
@@ -216,13 +216,13 @@ namespace OMGPS3_DotSpatial
 
         private void Devices_DeviceDetectionAttemptFailed(object sender, DeviceDetectionExceptionEventArgs e)
         {
-            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("No device detected at {0}. Message: ", e.Device, e.Exception.Message));
+            //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("No device detected at {0}. Message: ", e.Device, e.Exception.Message));
             //_GPSStatusNotification_SetData(text: String.Format("GPS detection failed :{0} ({1})", e.Device, e.Exception.Message));
         }
 
         private void Devices_DeviceDetectionAttempted(object sender, DeviceEventArgs e)
         {
-            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Trying to detect device at {0}",e.Device));
+            //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Trying to detect device at {0}",e.Device));
             //_GPSStatusNotification_SetData(text: String.Format("GPS detecting :{0}", e.Device));
         }
 

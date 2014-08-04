@@ -1299,44 +1299,50 @@ namespace GMap.NET.WindowsForms
 
       protected override void Dispose(bool disposing)
       {
-         if(disposing)
-         {
-            Core.OnMapClose();
+          try
+          {
+              if (disposing)
+              {
+                  Core.OnMapClose();
 
-            Overlays.CollectionChanged -= new NotifyCollectionChangedEventHandler(Overlays_CollectionChanged);
+                  Overlays.CollectionChanged -= new NotifyCollectionChangedEventHandler(Overlays_CollectionChanged);
 
-            foreach(var o in Overlays)
-            {
-               o.Dispose();
-            }
-            Overlays.Clear();
+                  foreach (var o in Overlays)
+                  {
+                      o.Dispose();
+                  }
+                  Overlays.Clear();
 
-            ScaleFont.Dispose();
-            ScalePen.Dispose();
-            CenterFormat.Dispose();
-            CenterPen.Dispose();
-            BottomFormat.Dispose();
-            CopyrightFont.Dispose();
-            EmptyTileBorders.Dispose();
-            EmptytileBrush.Dispose();
+                  ScaleFont.Dispose();
+                  ScalePen.Dispose();
+                  CenterFormat.Dispose();
+                  CenterPen.Dispose();
+                  BottomFormat.Dispose();
+                  CopyrightFont.Dispose();
+                  EmptyTileBorders.Dispose();
+                  EmptytileBrush.Dispose();
 
 #if !PocketPC
-            SelectedAreaFill.Dispose();
-            SelectionPen.Dispose();
+                  SelectedAreaFill.Dispose();
+                  SelectionPen.Dispose();
 #endif
-            if(backBuffer != null)
-            {
-               backBuffer.Dispose();
-               backBuffer = null;
-            }
+                  if (backBuffer != null)
+                  {
+                      backBuffer.Dispose();
+                      backBuffer = null;
+                  }
 
-            if(gxOff != null)
-            {
-               gxOff.Dispose();
-               gxOff = null;
-            }
-         }
-         base.Dispose(disposing);
+                  if (gxOff != null)
+                  {
+                      gxOff.Dispose();
+                      gxOff = null;
+                  }
+              }
+              base.Dispose(disposing);
+          }
+          catch
+          {
+          }
       }
 
       PointLatLng selectionStart;

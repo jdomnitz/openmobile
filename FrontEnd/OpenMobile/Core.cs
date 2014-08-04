@@ -729,16 +729,22 @@ namespace OpenMobile
                 RenderingWindows[i].RunAsync();
             RenderingWindows[0].Run();
 
-            for (int i = 0; i < RenderingWindows.Count; i++)
-                RenderingWindows[i].Dispose();
-            for (int i = 0; i < pluginCollection.Count; i++)
-                if (pluginCollection[i] != null)
-                    pluginCollection[i].Dispose();
-            InputRouter.Dispose();
-            theHost.Dispose();
-            OpenMobile.Threading.SafeThread.Dispose();
-            BuiltInComponents.Dispose();
-            Application.Dispose();
+            try
+            {
+                for (int i = 0; i < RenderingWindows.Count; i++)
+                    RenderingWindows[i].Dispose();
+                for (int i = 0; i < pluginCollection.Count; i++)
+                    if (pluginCollection[i] != null)
+                        pluginCollection[i].Dispose();
+                InputRouter.Dispose();
+                theHost.Dispose();
+                OpenMobile.Threading.SafeThread.Dispose();
+                BuiltInComponents.Dispose();
+                Application.Dispose();
+            }
+            catch
+            {   // No use of logging messages as we've already disposed the debug plugin...
+            }
             Thread.Sleep(2500);
             Environment.Exit(0); //Force
         }

@@ -24,7 +24,8 @@ using OpenMobile.Plugin;
 using OpenMobile.Data;
 using System.Collections.Generic;
 using System.Linq;
-using VistaAudio.CoreAudioApi;
+//using VistaAudio.CoreAudioApi;
+using CoreAudioApi;
 
 namespace OMDataSourceSample
 {
@@ -59,27 +60,32 @@ namespace OMDataSourceSample
             _OMAudioDevices = new List<AudioDevice>();
 
             // Add default device
+            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, "trying to detect the default audio device");
             var defaultEndpoint = _AudioDeviceFactory.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
+            // Try to get the name of the device
+            string friendlyNameDefaultUnit = defaultEndpoint.FriendlyName;
+            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("Default audio device detected as {0}", friendlyNameDefaultUnit));
+            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("Trying to hook events on device {0}", friendlyNameDefaultUnit));
             AudioDevice_HookEvents(defaultEndpoint);
             AudioDevice device = new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, defaultEndpoint, true);
-            info += device.Name + "\r\n";
+            info += device.Name + "(" + friendlyNameDefaultUnit + ")\r\n";
             _OMAudioDevices.Add(device);
+            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("OM successfully created AudioDevice for device {0}", friendlyNameDefaultUnit));
 
             // Add other devices
-            var audioDevices = _AudioDeviceFactory.EnumerateAudioEndPoints(EDataFlow.eRender, EDeviceState.DEVICE_STATEMASK_ALL);
+            var audioDevices = _AudioDeviceFactory.EnumerateAudioEndPoints(EDataFlow.eRender, EDeviceState.DEVICE_STATE_ACTIVE);
             for (int i = 0; i < audioDevices.Count; i++)
             {
-                AudioDevice_HookEvents(audioDevices[i]);
-
                 // Try to get the name of the device
-                string friendlyName = "Unknown device";
-                PropertyStoreProperty prop = audioDevices[i].Properties[PKEY.FriendlyName];
-                if (prop != null)
-                    friendlyName = prop.Value.ToString();
+                string friendlyName = audioDevices[i].FriendlyName;
+                OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("Trying to hook events on device {0}", friendlyName));
+                AudioDevice_HookEvents(audioDevices[i]);
 
                 device = new AudioDevice(friendlyName, i + 1, AudioDevice_Get, AudioDevice_Set, audioDevices[i]);
                 info += device.Name + "\r\n";
                 _OMAudioDevices.Add(device);
+
+                OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("OM successfully created AudioDevice for device {0}", friendlyName));
             }
             OM.Host.DebugMsg(DebugMessageType.Info, info);
         }
