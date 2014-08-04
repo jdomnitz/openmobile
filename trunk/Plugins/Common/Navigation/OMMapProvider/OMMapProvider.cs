@@ -1057,27 +1057,33 @@ namespace OMMapProvider
 
         void Map_OnImageAssigned(object sender, GMapImageUpdatedEventArgs e)
         {
-            GMapImageRender map = sender as GMapImageRender;
-            int screen = (int)map.Tag;
-            _MapImage[screen] = new OImage(map.TargetImage);//.Invert();
-
-            switch (_MapDrawMode)
+            try
             {
-                case MapDrawMode.Auto:
-                    if (_MapNightMode)
-                        _MapImage[screen].ShaderEffect = OMShaders.Negative;
-                    break;
-                case MapDrawMode.Day:
-                    _MapImage[screen].ShaderEffect = OMShaders.None;
-                    break;
-                case MapDrawMode.Night:
-                    _MapImage[screen].ShaderEffect = OMShaders.Negative;
-                    break;
-                default:
-                    break;
-            }
+                GMapImageRender map = sender as GMapImageRender;
+                int screen = (int)map.Tag;
+                _MapImage[screen] = new OImage(map.TargetImage);//.Invert();
 
-            OM.Host.DataHandler.PushDataSourceValue(screen, this, "Map.Image", _MapImage[screen]);
+                switch (_MapDrawMode)
+                {
+                    case MapDrawMode.Auto:
+                        if (_MapNightMode)
+                            _MapImage[screen].ShaderEffect = OMShaders.Negative;
+                        break;
+                    case MapDrawMode.Day:
+                        _MapImage[screen].ShaderEffect = OMShaders.None;
+                        break;
+                    case MapDrawMode.Night:
+                        _MapImage[screen].ShaderEffect = OMShaders.Negative;
+                        break;
+                    default:
+                        break;
+                }
+
+                OM.Host.DataHandler.PushDataSourceValue(screen, this, "Map.Image", _MapImage[screen]);
+            }
+            catch
+            {   // Mask errors
+            }
         }
         void Map_OnImageUpdated(object sender, GMapImageUpdatedEventArgs e)
         {

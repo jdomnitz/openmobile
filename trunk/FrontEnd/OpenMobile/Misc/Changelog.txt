@@ -1,4 +1,15 @@
-﻿20140802 
+﻿20140804
+	~ : Fixed a bug in shader code that caused shaders to be rendered at the wrong place
+	~ : Fixed a bug in inputhandler that caused thouch screens to misbehave
+	~ : Fixed a bug in OMAudioControl that did a lookup on the wrong type of audio connections
+
+20140803
+	# Change : Changed AudioControl from CoreAudio back to VistaAudio
+	~ Bugfix : Corrected a bug in OMVLCPlayer that caused it to not change the core when a change from 64bit to 32 bit happened
+	+ Added  : Added notifications from OMVLCPlayer when installing core since it might take some time on certain setups.
+
+
+20140802 
 	# Added error handling to TagLib ByteVector.Mid method
 
 ---- < Distributed >-----

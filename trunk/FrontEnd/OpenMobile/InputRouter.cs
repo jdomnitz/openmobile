@@ -187,21 +187,18 @@ namespace OpenMobile
                                         MouseMoveEventArgs eOM = new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton);
                                         Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
                                     }
-                                    else
+                                    // Mouse button events
+                                    if (mouseButton != lastMouseButton[i])
                                     {
-                                        // Mouse button events
-                                        if (mouseButton != lastMouseButton[i])
-                                        {
-                                            if (mouseButton != MouseButton.None)
-                                            {   // Mouse down event
-                                                MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, true);
-                                                Core.RenderingWindows[i].RenderingWindow_MouseDown(i, eOM);
-                                            }
-                                            else
-                                            {   // Mouse up event
-                                                MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, false);
-                                                Core.RenderingWindows[i].RenderingWindow_MouseUp(i, eOM);
-                                            }
+                                        if (mouseButton != MouseButton.None)
+                                        {   // Mouse down event
+                                            MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, true);
+                                            Core.RenderingWindows[i].RenderingWindow_MouseDown(i, eOM);
+                                        }
+                                        else
+                                        {   // Mouse up event
+                                            MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, false);
+                                            Core.RenderingWindows[i].RenderingWindow_MouseUp(i, eOM);
                                         }
                                     }
 

@@ -457,8 +457,8 @@ namespace OpenMobile
             img = new imageItem(oImg);
 
             imgStartUpLogo = new OMImage("imgStartUpLogo", 0, 0, img);
-            imgStartUpLogo.Left = (base.ClientRectangle.Width / 2) - (imgStartUpLogo.Region.Center.X);
-            imgStartUpLogo.Top = (base.ClientRectangle.Height / 2) - (imgStartUpLogo.Region.Center.Y);
+            imgStartUpLogo.Left = 500 - (imgStartUpLogo.Region.Center.X);
+            imgStartUpLogo.Top = 300 - (imgStartUpLogo.Region.Center.Y);
             panelStartUp.addControl(imgStartUpLogo);
 
             OMLabel lblStartUpProductText = new OMLabel("lblStartUpProductText", 0, imgStartUpLogo.Region.Bottom, base.ClientRectangle.Width, 40);

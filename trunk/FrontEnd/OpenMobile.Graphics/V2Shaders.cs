@@ -317,6 +317,8 @@ uniform vec2 scale;
 uniform float time;
 uniform sampler2D u_Texture;
 
+//layout(location = origin_upper_left) in vec4 gl_FragCoord;
+
 #define PI 3.1416
 
 vec3 color(float d) {
@@ -325,15 +327,18 @@ vec3 color(float d) {
 
 void main(void)
 {
+
     //vec2 texcoord = vec2(gl_TexCoord[0]);
     //resolution = texcoord;
-    position = position * 2;
-
+    position = position;
+    
+    vec2 fragCoord = gl_FragCoord.xy;
+    //fragCoord.y = -fragCoord.y + (fragCoord.y * 2);
 
     vec4 irgb = texture2D(u_Texture, gl_TexCoord[0].st).rgba;
 
-	vec2 p = (-1.0 + 2.0 * ((gl_FragCoord.xy) / position));
-	p.x *= (resolution.x / resolution.y);
+	vec2 p = (1.0 + -1.0 * (fragCoord / position));
+	//p.x *= (resolution.x / resolution.y);
 
 	float a = (atan(p.y,p.x) + time);
 	float r = dot(p,p);
@@ -497,6 +502,7 @@ void main(){
                         // Create program
                         _ShaderProgramHandles[(int)shader] = GL.CreateProgram();
                         GL.AttachShader(_ShaderProgramHandles[(int)shader], _Shaders[(int)shader].Handle);
+                        System.Diagnostics.Debug.WriteLine(String.Format("Shader [{0}] compiled without problems", _Shaders[(int)shader].ShaderID));
                     }
                 }
                 catch (Exception ex)
@@ -516,13 +522,16 @@ void main(){
                         GL.LinkProgram(_ShaderProgramHandles[(int)shader]);
                         GL.UseProgram(_ShaderProgramHandles[(int)shader]);
 
+                        //// Calculate screen coordinates 
+                        //System.Drawing.Point effectPos_Screen = targetWindow.PointToScreen(new System.Drawing.Point(effectPosX, effectPosY));
+
                         GL.ActiveTexture(TextureUnit.Texture0);
                         GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "u_Texture"), TextureUnit.Texture0 - TextureUnit.Texture0);
                         GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "time"), (float)swTime.Elapsed.TotalSeconds);
                         GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "resolution"), new Vector2(windowWidth, windowHeight));
                         GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "scale"), new Vector2(widthScale, heightScale));
                         GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "windowpos"), new Vector2(windowLeft, windowTop));
-                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "position"), new Vector2(effectPosX, effectPosY));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "position"), new Vector2(effectPosX * widthScale, effectPosY * heightScale));
 
                         Vector2 mouse = new Vector2();
                         mouse.X = ((((float)mouseData.CursorPosition.X) * widthScale) / (float)windowWidth);
