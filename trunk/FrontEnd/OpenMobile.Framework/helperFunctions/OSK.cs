@@ -114,7 +114,8 @@ namespace OpenMobile.helperFunctions
                 OMLabel lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_HelpText");
                 if (lbl != null)
                 {
-                    lbl.Text = HelpText;
+                    if (String.IsNullOrWhiteSpace(Text))
+                        lbl.Text = HelpText;
                     oskData.HelpText = HelpText;
                 }
                 lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_Header");

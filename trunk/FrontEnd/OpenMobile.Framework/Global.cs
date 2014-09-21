@@ -2811,10 +2811,45 @@ namespace OpenMobile
         /// Rating 0-5.  -1 for not set.
         /// </summary>
         public int Rating = -1;
+
         /// <summary>
         /// Optional - The cover art for the selected media
         /// </summary>
-        public OImage coverArt;
+        public OImage coverArt
+        {
+            get
+            {
+                if (_coverArt == null && CoverArtBytes != null)
+                    this._coverArt = GetCoverArt(CoverArtBytes);
+                return this._coverArt;
+            }
+            set
+            {
+                if (this._coverArt != value)
+                {
+                    this._coverArt = value;
+                }
+            }
+        }
+        private OImage _coverArt;
+
+        /// <summary>
+        /// The bytes of the cover art image
+        /// </summary>
+        public byte[] CoverArtBytes;
+        private OImage GetCoverArt(byte[] bytes)
+        {
+            try
+            {
+                MemoryStream m = new MemoryStream(bytes);
+                return OImage.FromStream(m);
+            }
+            catch (OutOfMemoryException)
+            {
+                return null;
+            }
+        }
+
         /// <summary>
         /// Source Type
         /// </summary>

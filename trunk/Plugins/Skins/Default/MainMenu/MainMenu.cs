@@ -84,6 +84,9 @@ namespace OpenMobile
 
                 OMButton[] MainMenuButtons = new OMButton[9];
 
+                Size buttonSize = new Size(325, 125);
+                Point buttonSpacing = new Point(10,20);
+
                 for (int i = 0; i < MainMenuButtons.Length; i++)
                 {
                     string Name = String.Format("MainMenu.{0}.MainMenu{1}", screen.ToString(), (i + 1));
@@ -98,17 +101,17 @@ namespace OpenMobile
                         case 1:
                         case 4:
                         case 7:
-                            Left = 353;
+                            Left = 338;
                             corners = GraphicCorners.All;
                             break;
                         case 2:
                         case 5:
                         case 8:
-                            Left = 701;
+                            Left = 676;
                             corners = GraphicCorners.Left;
                             break;
                         default:
-                            Left = 0;
+                            Left = -1;
                             corners = GraphicCorners.Right;
                             break;
                     }
@@ -123,15 +126,15 @@ namespace OpenMobile
                         case 3:
                         case 4:
                         case 5:
-                            Top = 228;
+                            Top = OM.Host.ClientArea_Init.Center.Y - (buttonSize.Height / 2);
                             break;
                         case 6:
                         case 7:
                         case 8:
-                            Top = 368;
+                            Top = OM.Host.ClientArea_Init.Center.Y + (buttonSize.Height / 2) + buttonSpacing.Y;
                             break;
                         default:
-                            Top = 84;
+                            Top = OM.Host.ClientArea_Init.Center.Y - (buttonSize.Height / 2) - buttonSize.Height - buttonSpacing.Y;
                             break;
                     }
 
@@ -139,7 +142,7 @@ namespace OpenMobile
 
                     //MainMenuButtons[i] = DefaultControls.GetButton(Name, Left, Top, 300, 120, "", Text);
                     //MainMenuButtons[i] = OMButton.PreConfigLayout_BasicStyle(Name, Left, Top, 300, 120, GraphicCorners.All, "", Text);
-                    MainMenuButtons[i] = OMButton.PreConfigLayout_CleanStyle(Name, Left, Top, 300, 100, corners: corners, text: Text);
+                    MainMenuButtons[i] = OMButton.PreConfigLayout_CleanStyle(Name, Left, Top, buttonSize.Width, buttonSize.Height, corners: corners, text: Text);
                     MainMenuButtons[i].OnHoldClick += new userInteraction(OnHoldClick);
                     MainMenuButtons[i].Tag = settings.getSetting(this, String.Format("{0}.Plugin", Name));
                     MainMenuButtons[i].OnClick += new userInteraction(MainMenu_OnClick);

@@ -104,7 +104,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// list acceleration
         /// </summary>
-        protected int thrown;
+        protected float thrown;
         /// <summary>
         /// text ofset
         /// </summary>
@@ -125,6 +125,8 @@ namespace OpenMobile.Controls
         /// list style
         /// </summary>
         protected eListStyle style;
+        protected bool _ThrowRun = true;
+        protected SmoothAnimator Animation = new SmoothAnimator();
 
         /// <summary>
         /// List items
@@ -177,6 +179,25 @@ namespace OpenMobile.Controls
                 background = value;
             }
         }
+
+        /// <summary>
+        /// The color of the scrollbar
+        /// </summary>
+        public Color ScrollbarColor
+        {
+            get
+            {
+                return this._ScrollbarColor;
+            }
+            set
+            {
+                if (this._ScrollbarColor != value)
+                {
+                    this._ScrollbarColor = value;
+                }
+            }
+        }
+        private Color _ScrollbarColor = Color.White;        
 
         /// <summary>
         /// The color of the separator
@@ -576,12 +597,12 @@ namespace OpenMobile.Controls
 
         private void declare()
         {
-            // Set default selection color (this is set to a darker shade of the current focus color)
-            Color tmpColor = BuiltInComponents.SystemSettings.SkinFocusColor;
-            selectedItemColor1 = Color.FromArgb(tmpColor.A,
-                (tmpColor.R == 255 ? tmpColor.R - 139 : tmpColor.R),
-                (tmpColor.G == 255 ? tmpColor.G - 139 : tmpColor.G),
-                (tmpColor.B == 255 ? tmpColor.B - 139 : tmpColor.B));
+            //// Set default selection color (this is set to a darker shade of the current focus color)
+            //Color tmpColor = BuiltInComponents.SystemSettings.SkinFocusColor;
+            //selectedItemColor1 = Color.FromArgb(tmpColor.A,
+            //    (tmpColor.R == 255 ? tmpColor.R - 139 : tmpColor.R),
+            //    (tmpColor.G == 255 ? tmpColor.G - 139 : tmpColor.G),
+            //    (tmpColor.B == 255 ? tmpColor.B - 139 : tmpColor.B));
 
             throwtmr = new System.Timers.Timer(50);
             throwtmr.Elapsed += new ElapsedEventHandler(throwtmr_Elapsed);
@@ -604,16 +625,18 @@ namespace OpenMobile.Controls
         }
         void throwtmr_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (thrown == 0)
+            if (thrown <= 0)
             {
                 throwtmr.Enabled = false;
+                Raise_OnScrollEnd();
                 return;
             }
+            Raise_OnScrolling();
             if (thrown > 0)
-                thrown -= 1;
+                thrown -= 0.65f;
             else
-                thrown += 1;
-            moved += thrown;
+                thrown += 0.65f;
+            moved += (int)thrown;
             raiseUpdate(false);
         }
         /// <summary>
@@ -739,8 +762,8 @@ namespace OpenMobile.Controls
                     {
                         if (listViewItemOffset == 0)
                             listViewItemOffset = listItemHeight;
-                        else
-                            listItemHeight = (listItemHeight > listViewItemOffset) ? listItemHeight : listViewItemOffset;
+                        //else
+                        //    listItemHeight = (listItemHeight > listViewItemOffset) ? listItemHeight : listViewItemOffset;
                     }
                     count = (this.Height / listItemHeight);
                     int imgSze = 4;
@@ -933,12 +956,12 @@ namespace OpenMobile.Controls
                             if (listViewItemOffset == 0)
                                 continue;
                             if ((items.Count > i) && (items[i].RefreshGraphic)) //rare thread collision
-                                g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - imgSze, _RenderingValue_Alpha);
+                                g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - 5, _RenderingValue_Alpha);
                         }
 
                         //draw separator?
                         if (_SeparatorColor != Color.Transparent && !_SeparatorColor.IsEmpty && (i < items.Count - 1))
-                            g.DrawLine(new Pen(Color.FromArgb((int)base.GetAlphaValue255(_SeparatorColor.A), _SeparatorColor), _SeparatorSize), new Point(rect.Left, rect.Bottom - 2), new Point(rect.Right, rect.Bottom - 2));
+                            g.DrawLine(new Pen(Color.FromArgb((int)base.GetAlphaValue255(_SeparatorColor.A), _SeparatorColor), _SeparatorSize), new Point(rect.Left, rect.Bottom), new Point(rect.Right, rect.Bottom));
 
                     }
                     g.Clip = r; //Reset the clip size for the rest of the controls
@@ -966,9 +989,9 @@ namespace OpenMobile.Controls
                     {
                         float nheight = height * ((float)height) / (listItemHeight * items.Count);
                         float ntop = top + height * ((float)-moved) / (listItemHeight * items.Count);
-                        g.FillRoundRectangle(new Brush(_color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
+                        using (Brush b = new Brush(_ScrollbarColor))
+                            g.FillRoundRectangle(b, left + width - 5, (int)ntop, 10, (int)nheight, 6);
                     }
-
                 }
                 catch 
                 {
@@ -978,6 +1001,10 @@ namespace OpenMobile.Controls
             }
 
             base.RenderFinish(g, e);
+
+            // Keep refreshing if throwing
+            if (throwtmr.Enabled)
+                base.Refresh();
         }
         /*
         public override void Render(Graphics.Graphics g, renderingParams e)
@@ -1271,7 +1298,10 @@ namespace OpenMobile.Controls
         void IThrow.MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation, PointF CursorSpeed)
         {
             if (thrown != 0)
+            {
+                Raise_OnScrollStart();
                 throwtmr.Enabled = true;
+            }
         }
 
         void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
@@ -1292,18 +1322,156 @@ namespace OpenMobile.Controls
 
         #endregion
 
+        /// <summary>
+        /// Gets the index of the centered visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetCenterVisibleIndex()
+        {
+            if (count == 0)
+                return 0;
+            return listStart + (count / 2);
+        }
+
+        /// <summary>
+        /// Gets the index of the topmost visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetTopVisibleIndex()
+        {
+            if (count == 0)
+                return 0;
+            return listStart;
+        }
+
+        /// <summary>
+        /// Gets the index of the bottommost visible item
+        /// </summary>
+        /// <returns></returns>
+        public int GetBottomVisibleIndex()
+        {
+            if (count == 0)
+                return 0;
+            return listStart + count;
+        }
+
+        public void ScrollToIndex(int index, bool animate, float animationSpeed, float animationMinTime = 250f, float animationMaxTime = 1000f)
+        {
+            // Cancel any ongoing scrolling
+            ScrollCancel();
+
+            Raise_OnScrollStart();
+
+            if (animationSpeed == 0)
+                animationSpeed = 1.0f;
+
+            if (animate)
+            {
+                #region Animate scrolling
+
+                lock (Animation)
+                {
+                    float StepSize = 1;
+                    // Calculate distance from current location to control's location
+
+                    int centerIndex = listStart + (count / 2);
+
+                    int Distance_Start = (index - centerIndex) * listItemHeight;
+                    int Distance_Current = Distance_Start;
+
+                    // Calculate animation speed, this is based on the total distance to move but is limited to a max time and a min time
+                    float maxTimeMS = animationMaxTime;
+                    float minTimeMS = animationMinTime;
+                    float TravelDistance = System.Math.Abs(Distance_Current);
+                    float TravelSpeedMS = TravelDistance / animationSpeed;
+                    if (TravelSpeedMS > maxTimeMS)
+                        animationSpeed = TravelDistance / maxTimeMS;
+                    if (TravelSpeedMS < minTimeMS)
+                        animationSpeed = TravelDistance / minTimeMS;
+
+                    Animation.Speed = 1f * animationSpeed;
+                    float AnimationValue = 0;
+                    _ThrowRun = true;
+
+                    Animation.Animate(delegate(int AnimationStep, float AnimationStepF, double AnimationDurationMS)
+                    {
+                        // Cancel animation
+                        if (Distance_Current == 0 | !_ThrowRun)
+                            return false;
+
+                        // Calculate animation value
+                        AnimationValue += AnimationStepF;
+
+                        // Animation step large enough?
+                        if (AnimationValue > StepSize)
+                        {
+                            AnimationStep = (int)AnimationValue;
+                            AnimationValue -= AnimationStep;
+
+                            if (Distance_Current > 0)
+                            {
+                                moved -= AnimationStep;
+                                Distance_Current -= AnimationStep;
+                                if (Distance_Current < 0)
+                                    Distance_Current = 0;
+                            }
+                            else if (Distance_Current < 0)
+                            {
+                                moved += AnimationStep;
+                                Distance_Current += AnimationStep;
+                                if (Distance_Current > 0)
+                                    Distance_Current = 0;
+                            }
+                        }
+
+                        Raise_OnScrolling();
+
+                        Refresh();
+
+                        //System.Threading.Thread.Sleep(500);
+                        return true;
+                    });
+
+                }
+                Refresh();
+
+                #endregion
+            }
+            else
+            {
+                // Calculate distance from current location to control's location
+                int centerIndex = listStart + (count / 2);
+                int Distance_Start = (index - centerIndex) * listItemHeight;
+                moved -= Distance_Start;
+
+                Raise_OnScrolling();
+
+                Refresh();
+            }
+            Raise_OnScrollEnd();
+        }
+
+        /// <summary>
+        /// Cancels any ongoing scrolling
+        /// </summary>
+        public void ScrollCancel()
+        {
+            _ThrowRun = false;
+            throwtmr.Enabled = false;
+        }
+
         #region IMouse Members
         /// <summary>
         /// The mouse has been moved
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="e"></param>
-        /// <param name="WidthScale"></param>
-        /// <param name="HeightScale"></param>
+        /// <param name="StartLocation"></param>
+        /// <param name="TotalDistance"></param>
+        /// <param name="RelativeDistance"></param>
         public virtual void MouseMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
             if (listItemHeight > 0) //<-Just in case
-                //Highlight((((int)(e.Y / HeightScale) - top - (moved % listItemHeight)) / listItemHeight) + listStart);
                 Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
         }
 
@@ -1466,5 +1634,63 @@ namespace OpenMobile.Controls
             _RefreshGraphic = true;
             Refresh();
         }
+
+        #region Events
+
+        #region OnScrollStart
+
+        /// <summary>
+        /// Event that's raised when starting to scroll
+        /// </summary>
+        public event userInteraction OnScrollStart;
+        private void Raise_OnScrollStart()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null)
+                return;
+
+            if (OnScrollStart != null)
+                OnScrollStart(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
+
+        #region OnScrolling
+
+        /// <summary>
+        /// Event that's raised while scrolling the list
+        /// </summary>
+        public event userInteraction OnScrolling;
+        private void Raise_OnScrolling()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null)
+                return;
+
+            if (OnScrolling != null)
+                OnScrolling(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
+
+        #region OnScrollEnd
+
+        /// <summary>
+        /// Event that's raised when scroll has ended
+        /// </summary>
+        public event userInteraction OnScrollEnd;
+        private void Raise_OnScrollEnd()
+        {
+            // Cancel event if no parent is present
+            if (this.parent == null)
+                return;
+
+            if (OnScrollEnd != null)
+                OnScrollEnd(this, this.parent.ActiveScreen);
+        }
+
+        #endregion
+
+        #endregion
     }
 }

@@ -247,13 +247,13 @@ namespace OpenMobile.Controls
             if (backColor1 != null)
                 gd.BackgroundColor1 = (Color)backColor1;
             else
-                gd.BackgroundColor1 = Color.FromArgb(200,Color.Black);
+                gd.BackgroundColor1 = Color.FromArgb(225,Color.Black);
             if (backColor2 != null)
                 gd.BackgroundColor2 = (Color)backColor2;
             if (borderColor != null)
                 gd.BorderColor = (Color)borderColor;
             else
-                gd.BorderColor = Color.FromArgb(125, Color.White);
+                gd.BorderColor = Color.FromArgb(100, Color.White);
             gd.Width = btn.Width;
             gd.Height = btn.Height;
             if (cornerRadius != null)
@@ -285,6 +285,7 @@ namespace OpenMobile.Controls
             //gd.ImageType = OpenMobile.helperFunctions.Graphics.ButtonGraphic.ImageTypes.ButtonForegroundFocused;
             //btn.checkedImage = new imageItem(OpenMobile.helperFunctions.Graphics.ButtonGraphic.GetImage(gd));
             btn.checkedImage = btn.DownImage;
+
             if (opacity != null)
                 gd.Opacity = opacity;
             else

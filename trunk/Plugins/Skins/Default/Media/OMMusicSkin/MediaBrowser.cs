@@ -27,6 +27,8 @@ using OpenMobile.Controls;
 using OpenMobile.Graphics;
 using OpenMobile.Media;
 using OpenMobile.helperFunctions;
+using OpenMobile.helperFunctions.Forms;
+using OpenMobile.helperFunctions.MenuObjects;
 using System.Drawing.Drawing2D;
 
 namespace OMMusicSkin
@@ -46,9 +48,13 @@ namespace OMMusicSkin
         }
 
         private StoredData.ScreenInstanceData ScreenSpecificData = new StoredData.ScreenInstanceData();
+        private OMMusicSkin _MainPlugin;
+        private OMListItem.subItemFormat _MediaListSubItemFormat = new OMListItem.subItemFormat();
 
-        public OMPanel Initialize()
+        public OMPanel Initialize(OMMusicSkin mainPlugin)
         {
+            _MainPlugin = mainPlugin;
+
             ScreenSpecificData.SetProperty("ListMode", ListModes.Song);
             ScreenSpecificData.SetProperty("ArtistFilter", "");
             ScreenSpecificData.SetProperty("AlbumFilter", "");
@@ -64,6 +70,33 @@ namespace OMMusicSkin
             shapeBackground.Left = OM.Host.ClientArea_Init.Center.X - shapeBackground.Region.Center.X;
             panel.addControl(shapeBackground);
 
+
+            OMList lstMedia = new OMList("lstMedia", shapeBackground.Region.Left + 10, shapeBackground.Region.Top + 10, shapeBackground.Region.Width - 80, shapeBackground.Region.Height - 20);
+            lstMedia.ListStyle = eListStyle.MultiList;
+            lstMedia.Color = BuiltInComponents.SystemSettings.SkinTextColor;
+            lstMedia.ScrollbarColor = Color.FromArgb(120, Color.White);
+            lstMedia.SeparatorColor = Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor);
+            lstMedia.ItemColor1 = Color.Transparent;  //Color.FromArgb(58, 58, 58);//Color.FromArgb(0, 0, 66);
+            lstMedia.ItemColor2 = Color.Transparent;  //Color.FromArgb(58, 58, 58);//Color.FromArgb(0, 0, 10);
+            lstMedia.SelectedItemColor1 = Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor);
+            lstMedia.SelectedItemColor2 = Color.FromArgb(100, BuiltInComponents.SystemSettings.SkinFocusColor);
+            //lstMedia.SelectedItemColor1 = Color.Red;
+            lstMedia.HighlightColor = Color.White;
+            lstMedia.Font = new Font(Font.GenericSansSerif, 26F);
+            lstMedia.Scrollbars = true;
+            lstMedia.TextAlignment = Alignment.TopLeft;
+            lstMedia.ListItemOffset = 85;
+            lstMedia.OnClick += new userInteraction(lstMedia_OnClick);
+            lstMedia.OnHoldClick += new userInteraction(lstMedia_OnHoldClick);
+            lstMedia.OnScrollStart += new userInteraction(lstMedia_OnScrollStart);
+            lstMedia.OnScrolling += new userInteraction(lstMedia_OnScrolled);
+            lstMedia.OnScrollEnd += new userInteraction(lstMedia_OnScrollEnd);
+            panel.addControl(lstMedia);
+
+            _MediaListSubItemFormat.color = Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinTextColor);
+            _MediaListSubItemFormat.textAlignment = Alignment.BottomLeft;
+
+            /*
             // Media list
             OMObjectList2 lstMedia = new OMObjectList2("lstMedia", shapeBackground.Region.Left + 10, shapeBackground.Region.Top + 10, shapeBackground.Region.Width - 80, shapeBackground.Region.Height - 20);
             lstMedia.OnSelectedIndexChanged += new OMObjectList2.IndexChangedDelegate(lstMedia_OnSelectedIndexChanged);
@@ -290,6 +323,7 @@ namespace OMMusicSkin
             lstMedia.ItemBase = ItemBase;
 
             #endregion
+            */
 
             OMLabel lblMediaListItemCount = new OMLabel("lblMediaListItemCount", lstMedia.Region.Right, shapeBackground.Region.Top+5, 60, 20);
             lblMediaListItemCount.Color = Color.FromArgb(128, Color.White);
@@ -373,6 +407,227 @@ namespace OMMusicSkin
             return panel;
         }
 
+        void lstMedia_OnHoldClick(OMControl sender, int screen)
+        {
+            OMList lst = sender as OMList;
+            switch (MediaList_ListMode_Get(screen))
+            {
+                case ListModes.Song:
+                case ListModes.Artist:
+                case ListModes.Album:
+                case ListModes.Genre:
+                    {
+                        #region Menu popup
+
+                        // Popup menu
+                        MenuPopup PopupMenu = new MenuPopup("Item menu", MenuPopup.ReturnTypes.Tag);
+
+                        // Popup menu items
+                        OMListItem ListItem1 = new OMListItem("New playlist", "mnuItemAddToNewPlaylist" as object);
+                        ListItem1.image = OM.Host.getSkinImage("AIcons|5-content-new").image;
+                        PopupMenu.AddMenuItem(ListItem1);
+
+                        OMListItem ListItem2 = new OMListItem("Enqueue", "mnuItemEnqueue" as object);
+                        ListItem2.image = OM.Host.getSkinImage("AIcons|9-av-add-to-queue").image;
+                        PopupMenu.AddMenuItem(ListItem2);
+
+                        OMListItem ListItem3 = new OMListItem("Play now", "mnuItemPlayNow" as object);
+                        ListItem3.image = OM.Host.getSkinImage("AIcons|9-av-play").image;
+                        PopupMenu.AddMenuItem(ListItem3);
+
+                        OMListItem ListItem4 = new OMListItem("Play next", "mnuItemPlayNext" as object);
+                        ListItem4.image = OM.Host.getSkinImage("AIcons|9-av-next").image;
+                        PopupMenu.AddMenuItem(ListItem4);
+
+                        #endregion
+
+                        PlayList2 playlist = null;
+
+                        mediaInfo selectedMediaItem = null;
+                        if (lst.SelectedItem != null)
+                            selectedMediaItem = lst.SelectedItem.tag as mediaInfo;
+
+                        switch ((string)PopupMenu.ShowMenu(screen))
+                        {
+                            case "mnuItemAddToNewPlaylist":
+                                {
+                                    string newPlaylistName = OSK.ShowDefaultOSK(screen, selectedMediaItem.Artist, "Playlist name", "Enter playlist name", OSKInputTypes.Keypad, false);
+                                    playlist = new PlayList2(newPlaylistName);
+                                }
+                                break;
+
+                            case "mnuItemEnqueue":
+                                {
+                                }
+                                break;
+
+                            case "mnuItemPlayNow":
+                                {
+                                }
+                                break;
+
+                            case "mnuItemPlayNext":
+                                {
+                                }
+                                break;
+                        }
+
+                        if (playlist != null)
+                        {
+                            // Add items to new playlist
+                            switch (MediaList_ListMode_Get(screen))
+                            {
+                                case ListModes.Song:
+                                    {   // Add single song to playlist
+                                        if (selectedMediaItem != null)
+                                        {
+                                            playlist.Add(selectedMediaItem);
+                                        }
+                                    }
+                                    break;
+                                case ListModes.Artist:
+                                    {
+                                        // Add all songs from artist
+                                        if (selectedMediaItem != null)
+                                        {
+                                            playlist.AddRange(SearchSongs(artistFilter: selectedMediaItem.Artist));
+                                        }
+                                    }
+                                    break;
+                                case ListModes.Album:
+                                    break;
+                                case ListModes.Genre:
+                                    break;
+                                case ListModes.Playlist:
+                                    break;
+                                case ListModes.PlaylistItems:
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            playlist.Save();
+                        }
+                        MediaList_Search(sender.Parent, screen);
+                    }
+                    break;
+                case ListModes.Playlist:
+                    {
+                        string playlistName = lst.SelectedItem.tag as string;
+                        if (String.IsNullOrEmpty(playlistName))
+                            return;
+                        string playlistDisplayName = PlayList2.GetDisplayName(playlistName);
+
+                        #region Menu popup
+
+                        // Popup menu
+                        MenuPopup PopupMenu = new MenuPopup("Playlist menu", MenuPopup.ReturnTypes.Tag);
+
+                        // Popup menu items
+                        OMListItem ListItem1 = new OMListItem("New", "mnuItemNew" as object);
+                        ListItem1.image = OImage.FromFont(50, 50, "+", new Font(Font.Arial, 40F), eTextFormat.Outline, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinTextColor);
+                        PopupMenu.AddMenuItem(ListItem1);
+
+                        OMListItem ListItem2 = new OMListItem("Remove", "mnuItemRemove" as object);
+                        ListItem2.image = OImage.FromWebdingsFont(50, 50, "r", BuiltInComponents.SystemSettings.SkinTextColor);
+                        PopupMenu.AddMenuItem(ListItem2);
+
+                        #endregion
+
+                        switch ((string)PopupMenu.ShowMenu(screen))
+                        {
+                            case "mnuItemNew":
+                                {   // Add new empty playlist
+                                    string newPlaylistName = OSK.ShowDefaultOSK(screen, "", "Playlist name", "Enter playlist name", OSKInputTypes.Keypad, false);
+                                    PlayList2 newPlaylist = new PlayList2(newPlaylistName);
+                                    newPlaylist.Save();
+                                    MediaList_Search(sender.Parent, screen);
+                                }
+                                break;
+
+                            case "mnuItemRemove":
+                                {
+                                    dialog dialog = new dialog(_MainPlugin.pluginName, sender.Parent.Name);
+                                    dialog.Header = "Delete playlist?";
+                                    dialog.Text = String.Format("Are you sure you want to delete the playlist '{0}'?", playlistDisplayName);
+                                    dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Question;
+                                    dialog.Button = OpenMobile.helperFunctions.Forms.buttons.Yes |
+                                                        OpenMobile.helperFunctions.Forms.buttons.No;
+
+                                    if (dialog.ShowMsgBox(screen) == buttons.Yes)
+                                    {   // Delete playlist
+                                        if (db != null)
+                                            db.removePlaylist(playlistName);
+
+                                        MediaList_Search(sender.Parent, screen);
+                                    }
+
+                                }
+                                break;
+                        }
+
+                    }
+                    break;
+                case ListModes.PlaylistItems:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+
+        void lstMedia_OnClick(OMControl sender, int screen)
+        {
+            OMList lst = sender as OMList;
+            switch (MediaList_ListMode_Get(screen))
+            {
+                case ListModes.Song:
+                    break;
+                case ListModes.Artist:
+                    {
+                        mediaInfo media = lst.SelectedItem.tag as mediaInfo;
+                        if (media == null)
+                            return;
+                        MediaList_ListMode_Set(ListModes.Album, screen, sender.Parent);
+                        MediaList_SongFilter_Set("", media.Artist, "", "", "", screen);
+                        MediaList_Search(sender.Parent, screen);
+                    }
+                    break;
+                case ListModes.Album:
+                    {
+                        mediaInfo media = lst.SelectedItem.tag as mediaInfo;
+                        if (media == null)
+                            return;
+                        MediaList_ListMode_Set(ListModes.Song, screen, sender.Parent);
+                        MediaList_SongFilter_Set("", media.Artist, media.Album, "", "", screen);
+                        MediaList_Search(sender.Parent, screen);
+                    }
+                    break;
+                case ListModes.Genre:
+                    {
+                        mediaInfo media = lst.SelectedItem.tag as mediaInfo;
+                        if (media == null)
+                            return;
+                        MediaList_ListMode_Set(ListModes.Album, screen, sender.Parent);
+                        MediaList_SongFilter_Set("", "", "", media.Genre, "", screen);
+                        MediaList_Search(sender.Parent, screen);
+                    }
+                    break;
+                case ListModes.Playlist:
+                    {
+                        string playlistName = lst.SelectedItem.tag as string;
+                        if (String.IsNullOrEmpty(playlistName))
+                            return;
+                        MediaList_ListMode_Set(ListModes.PlaylistItems, screen, sender.Parent);
+                        //MediaList_SongFilter_Set("", "", "", "", playlistName, screen);
+                        MediaList_FillFromPlaylist(sender.Parent, screen, playlistName);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
         void lstMedia_OnSelectedIndexChangedHold(OMObjectList2 sender, int screen)
         {
             switch (MediaList_ListMode_Get(screen))
@@ -386,6 +641,49 @@ namespace OMMusicSkin
                 case ListModes.Genre:
                     break;
                 case ListModes.Playlist:
+                    {
+                        #region Menu popup
+
+                        // Popup menu
+                        MenuPopup PopupMenu = new MenuPopup("Playlist menu", MenuPopup.ReturnTypes.Tag);
+
+                        // Popup menu items
+                        OMListItem ListItem1 = new OMListItem("New", "mnuItemNew" as object);
+                        ListItem1.image = OImage.FromFont(50, 50, "+", new Font(Font.Arial, 40F), eTextFormat.Outline, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinTextColor);
+                        PopupMenu.AddMenuItem(ListItem1);
+
+                        OMListItem ListItem2 = new OMListItem("Remove", "mnuItemRemove" as object);
+                        ListItem2.image = OImage.FromWebdingsFont(50, 50, "r", BuiltInComponents.SystemSettings.SkinTextColor);
+                        PopupMenu.AddMenuItem(ListItem2);
+
+                        #endregion
+
+                        switch ((string)PopupMenu.ShowMenu(screen))
+                        {
+                            case "mnuItemNew":
+                                {
+                                }
+                                break;
+
+                            case "mnuItemRemove":
+                                {
+                                     dialog dialog = new dialog(_MainPlugin.pluginName, sender.Parent.Name);
+                                    dialog.Header = "Delete playlist?";
+                                    dialog.Text = String.Format("Are you sure you want to delete the playlist ''?");
+                                    dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Question;
+                                    dialog.Button = OpenMobile.helperFunctions.Forms.buttons.Yes |
+                                                        OpenMobile.helperFunctions.Forms.buttons.No;
+
+                                    if (dialog.ShowMsgBox(screen) == buttons.Yes)
+                                    {   // Delete playlist
+
+                                    }
+
+                                }
+                                break;
+                        }
+
+                    }
                     break;
                 case ListModes.PlaylistItems:
                     break;
@@ -410,20 +708,14 @@ namespace OMMusicSkin
 
         void lstMedia_OnScrolled(OMControl sender, int screen)
         {
-            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
             OMLabel lblList_Info = sender.Parent[screen, "lblList_Info"] as OMLabel;
 
             try
             {
                 // Update index letter to show list progress
-                if (lst.RenderOrder.Count > 0)
-                {
-                    OMLabel lblItem = lst.Items[lst.RenderOrder[0]]["lblListItemHeader"] as OMLabel;
-                    if (lblItem != null)
-                    {
-                        lblList_Info.Text = lblItem.Text.Substring(0, 1);
-                    }
-                }
+                if (lst.Items.Count > 0)
+                    lblList_Info.Text = lst.Items[lst.GetTopVisibleIndex()].text.Substring(0, 1);
             }
             catch
             {   // Mask errors
@@ -544,13 +836,32 @@ namespace OMMusicSkin
 
         #region MediaList Searching
 
+        private List<mediaInfo> SearchSongs(string songFilter = "", string artistFilter = "", string albumFilter = "", string genreFilter = "")
+        {
+            List<mediaInfo> mediaList = new List<mediaInfo>();
+            if (db == null) return mediaList;
+
+            db.beginGetSongs(songFilter: String.Format("*{0}*", songFilter), artistFilter: String.Format("*{0}*", artistFilter), albumFilter: String.Format("*{0}*", albumFilter), genreFilter: String.Format("*{0}*", genreFilter), sortBy: eMediaField.Title);
+            mediaInfo info = db.getNextMedia();
+            while (info != null)
+            {
+                mediaList.Add(info);
+                info = db.getNextMedia();
+            }
+
+            return mediaList;
+        }
+
         void MediaList_SearchSongs(OMPanel panel, int screen)
         {
             if (db == null) return;
 
-            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            //OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = panel[screen, "lstMedia"] as OMList;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            OMLabel lblItemCount = panel[screen, "lblMediaListItemCount"] as OMLabel;
+            lblItemCount.Text = "";
             if (txt.Tag == null || !(txt.Tag is int))
                 txt.Tag = 0;
             int id = (int)txt.Tag;
@@ -566,9 +877,19 @@ namespace OMMusicSkin
                 {
                     if ((int)txt.Tag != id)
                         return;
-                    lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    lst.Add(new OMListItem(info.Name, info.Artist, info.coverArt, _MediaListSubItemFormat, info));
+                    //lst.AddItemFromItemBase(ControlDirections.Down, info);
+
                     info = db.getNextMedia();
                 }
+
+                // Update item count text
+                lblItemCount.Text = lst.Items.Count.ToString();
+
+                //var items = db.getSongs(songFilter: String.Format("*{0}*", txt.Text), artistFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "ArtistFilter")), albumFilter: String.Format("*{0}*", ScreenSpecificData.GetProperty<string>(screen, "AlbumFilter")), sortBy: eMediaField.Title);
+                //foreach (var item in items)
+                //    //lst.AddItemFromItemBase(ControlDirections.Down, item);
+                //    lst.Add(new OMListItem(item.Name, item.Artist, item.coverArt, _MediaListSubItemFormat));
             }
         }
 
@@ -576,9 +897,12 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            //OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = panel[screen, "lstMedia"] as OMList;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            OMLabel lblItemCount = panel[screen, "lblMediaListItemCount"] as OMLabel;
+            lblItemCount.Text = "";
             if (txt.Tag == null || !(txt.Tag is int))
                 txt.Tag = 0;
             int id = (int)txt.Tag;
@@ -594,9 +918,14 @@ namespace OMMusicSkin
                 {
                     if ((int)txt.Tag != id)
                         return;
-                    lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    //lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    //lst.Add(new OMListItem(info.Artist));
+                    lst.Add(new OMListItem(info.Artist, info.Name, info.coverArt, _MediaListSubItemFormat, info));
+
                     info = db.getNextMedia();
                 }
+                // Update item count text
+                lblItemCount.Text = lst.Items.Count.ToString();
             }
         }
 
@@ -604,9 +933,12 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            //OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = panel[screen, "lstMedia"] as OMList;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            OMLabel lblItemCount = panel[screen, "lblMediaListItemCount"] as OMLabel;
+            lblItemCount.Text = "";
             if (txt.Tag == null || !(txt.Tag is int))
                 txt.Tag = 0;
             int id = (int)txt.Tag;
@@ -624,9 +956,13 @@ namespace OMMusicSkin
                 {
                     if ((int)txt.Tag != id)
                         return;
-                    lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    //lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    lst.Add(new OMListItem(info.Artist, info.Name, info.coverArt, _MediaListSubItemFormat, info));
+
                     info = db.getNextMedia();
                 }
+                // Update item count text
+                lblItemCount.Text = lst.Items.Count.ToString();
             }
         }
 
@@ -634,9 +970,12 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            //OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = panel[screen, "lstMedia"] as OMList;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            OMLabel lblItemCount = panel[screen, "lblMediaListItemCount"] as OMLabel;
+            lblItemCount.Text = "";
             if (txt.Tag == null || !(txt.Tag is int))
                 txt.Tag = 0;
             int id = (int)txt.Tag;
@@ -652,9 +991,13 @@ namespace OMMusicSkin
                 {
                     if ((int)txt.Tag != id)
                         return;
-                    lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    //lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    lst.Add(new OMListItem(info.Name, "", info.coverArt, _MediaListSubItemFormat, info));
+
                     info = db.getNextMedia();
                 }
+                // Update item count text
+                lblItemCount.Text = lst.Items.Count.ToString();
             }
         }
 
@@ -662,9 +1005,12 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            //OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = panel[screen, "lstMedia"] as OMList;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            OMLabel lblItemCount = panel[screen, "lblMediaListItemCount"] as OMLabel;
+            lblItemCount.Text = "";
             if (txt.Tag == null || !(txt.Tag is int))
                 txt.Tag = 0;
             int id = (int)txt.Tag;
@@ -679,8 +1025,18 @@ namespace OMMusicSkin
                 foreach (var playlistName in playlistNames)
                 {
                     string playlistDisplayName = PlayList2.GetDisplayName(playlistName);
-                    lst.AddItemFromItemBase(ControlDirections.Down, new object[] { playlistName, null, playlistDisplayName, "", "" });
+                    int playlistCount = db.getPlayListCount(playlistName);
+                    string countInfo = String.Format("Contains {0} items", playlistCount);
+                    if (playlistCount == 1)
+                        countInfo = "Contains 1 item";
+                    else if (playlistCount == 0)
+                        countInfo = "Empty list";
+                    //lst.AddItemFromItemBase(ControlDirections.Down, new object[] { playlistName, null, playlistDisplayName, "", "" });
+
+                    lst.Add(new OMListItem(playlistDisplayName, countInfo, OM.Host.getSkinImage("AIcons|4-collections-collection").image, _MediaListSubItemFormat, playlistName));
                 }
+                // Update item count text
+                lblItemCount.Text = lst.Items.Count.ToString();
             }
         }
 
@@ -688,9 +1044,12 @@ namespace OMMusicSkin
         {
             if (db == null) return;
 
-            OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            //OMObjectList2 lst = panel[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = panel[screen, "lstMedia"] as OMList;
             OMLabel lbl = panel[screen, "lblMediaFilterInfo"] as OMLabel;
             OMTextBox txt = panel[screen, "txtMediaFilter"] as OMTextBox;
+            OMLabel lblItemCount = panel[screen, "lblMediaListItemCount"] as OMLabel;
+            lblItemCount.Text = "";
             if (txt.Tag == null || !(txt.Tag is int))
                 txt.Tag = 0;
             int id = (int)txt.Tag;
@@ -706,9 +1065,13 @@ namespace OMMusicSkin
                 {
                     if ((int)txt.Tag != id)
                         return;
-                    lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    //lst.AddItemFromItemBase(ControlDirections.Down, info);
+                    lst.Add(new OMListItem(info.Artist, info.Name, info.coverArt, _MediaListSubItemFormat, info));
+
                     info = db.getNextMedia();
                 }
+                // Update item count text
+                lblItemCount.Text = lst.Items.Count.ToString();
             }
         }
 
@@ -896,12 +1259,12 @@ namespace OMMusicSkin
 
         void btnList_ScrollUp_OnClick(OMControl sender, int screen)
         {
-            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
-            lst.ScrollToIndex(lst.GetCenterVisibleIndex() - 1, true, 25f);
+            OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
+            lst.ScrollToIndex(lst.GetCenterVisibleIndex() - 1, true, 1f);
         }
         void btnList_ScrollUp_OnHoldClick(OMControl sender, int screen)
         {
-            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
             OpenMobile.Threading.SafeThread.Asynchronous(() => { lst.ScrollToIndex(0, true, 100f, 10000f); });
             while (sender.Mode == eModeType.Clicked)
                 System.Threading.Thread.Sleep(100);
@@ -909,12 +1272,12 @@ namespace OMMusicSkin
         }
         void btnList_ScrollDown_OnClick(OMControl sender, int screen)
         {
-            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
-            lst.ScrollToIndex(lst.GetCenterVisibleIndex() + 1, true, 25f);
+            OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
+            lst.ScrollToIndex(lst.GetCenterVisibleIndex() + 1, true, 1f);
         }
         void btnList_ScrollDown_OnHoldClick(OMControl sender, int screen)
         {
-            OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
+            OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
             OpenMobile.Threading.SafeThread.Asynchronous(() => { lst.ScrollToIndex(lst.Items.Count - 1, true, 100f, 10000f); });
             while (sender.Mode == eModeType.Clicked)
                 System.Threading.Thread.Sleep(100);

@@ -627,12 +627,14 @@ namespace OpenMobile.Controls
             // Unselect currently selected item
             //Item_Select(-1);
 
+            int index = GetItemIndexFromPoint(e.Location);
+
             // Highlight item under mouse
-            Item_Highlight(GetItemIndexFromPoint(e.Location));
+            Item_Highlight(index);
 
             // Enable hold detection
             tmrClickHold.Enabled = true;
-            tmrClickHold.Tag = e.Location;
+            tmrClickHold.Tag = this;
         }
 
         public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance, ClickTypes clickType)
@@ -653,7 +655,10 @@ namespace OpenMobile.Controls
         {
             // Disable timer to prevent multiple hits
             tmrClickHold.Enabled = false;
-            Item_Select(GetItemIndexFromPoint((Point)tmrClickHold.Tag), true);
+
+            OMObjectList2 listObject = (OMObjectList2)tmrClickHold.Tag;
+            listObject.Item_Select(listObject.HighlightedItemIndex, true);
+            //Item_Select((int)tmrClickHold.Tag, true);
         }
 
         #endregion

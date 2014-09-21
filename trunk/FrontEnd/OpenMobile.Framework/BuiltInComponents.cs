@@ -762,8 +762,69 @@ namespace OpenMobile
                 BuiltInComponents.Host.DataHandler.AddDataSource(new DataSource("OM", "Location", "Favorite", "Home", 0, DataSource.DataTypes.raw, DataProvider, "Home location as set by the user"));
 
 
+                // Commands
+                Host.CommandHandler.AddCommand(new Command("OM", "OpenMobile", "Quit", "", CommandExecutor, 0, false, "Quits OM"));
+                Host.CommandHandler.AddCommand(new Command("OM", "System", "Sleep", "", CommandExecutor, 0, false, "Put's the computer to sleep"));
+                Host.CommandHandler.AddCommand(new Command("OM", "System", "Hibernate", "", CommandExecutor, 0, false, "Hibernates the computer"));
+                Host.CommandHandler.AddCommand(new Command("OM", "System", "Shutdown", "", CommandExecutor, 0, false, "Shutdowns the computer"));
+                Host.CommandHandler.AddCommand(new Command("OM", "System", "Restart", "", CommandExecutor, 0, false, "Restarts the computer"));
+                Host.CommandHandler.AddCommand(new Command("OM", "OpenMobile", "Reload", "", CommandExecutor, 0, false, "Reloads OM"));
+                Host.CommandHandler.AddCommand(true, new Command("OM", "OpenMobile", "Minimize", "", CommandExecutor, 0, false, "Minimizes OM"));
+                Host.CommandHandler.AddCommand(true, new Command("OM", "OpenMobile", "Fullscreen", "Toggle", CommandExecutor, 0, false, "Toggles fullscreen and windowed mode"));
+
             }
 
+            static private object CommandExecutor(Command command, object[] param, out bool result)
+            {
+                switch (command.FullNameWithoutScreen)
+                {
+                    case "OpenMobile.Quit":
+                        Host.execute(eFunction.closeProgram);
+                        result = true;
+                        return null;
+
+                    case "System.Sleep":
+                        Host.execute(eFunction.standby);
+                        result = true;
+                        return null;
+
+                    case "System.Hibernate":
+                        Host.execute(eFunction.hibernate);
+                        result = true;
+                        return null;
+
+                    case "System.Shutdown":
+                        Host.execute(eFunction.shutdown);
+                        result = true;
+                        return null;
+
+                    case "System.Restart":
+                        Host.execute(eFunction.restart);
+                        result = true;
+                        return null;
+
+                    case "OpenMobile.Reload":
+                        Host.execute(eFunction.restartProgram);
+                        result = true;
+                        return null;
+
+                    case "OpenMobile.Minimize":
+                        Host.execute(eFunction.minimize, command.Screen);
+                        result = true;
+                        return null;
+
+                    case "OpenMobile.Fullscreen.Toggle":
+                        Host.execute(eFunction.ToggleFullscreen, command.Screen);
+                        result = true;
+                        return null;
+
+                    default:
+                        break;
+                }
+
+                result = false;
+                return null;
+            }
 
 
             static private System.Diagnostics.PerformanceCounter cpuCounter;

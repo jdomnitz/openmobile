@@ -174,7 +174,7 @@ namespace OMMusicSkin
                 PanelManager.QueuePanel("NowPlaying", InitializePanel_NowPlaying);
                 //PanelManager.QueuePanel("PlaylistEditor", InitializePanel_PlaylistEditor);
                 //PanelManager.loadPanel(InitializePanel_PlaylistEditor());
-                PanelManager.loadPanel(new MediaBrowser().Initialize());
+                PanelManager.loadPanel(new MediaBrowser().Initialize(this));
 
                 //System.Threading.Thread t = new System.Threading.Thread(CreateAndLoadPanel_NowPlaying);
 

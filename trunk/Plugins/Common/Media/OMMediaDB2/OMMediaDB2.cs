@@ -32,6 +32,7 @@ using OpenMobile.helperFunctions;
 using OpenMobile.helperFunctions.SQLite;
 using OpenMobile.Media;
 using OpenMobile.Plugin;
+using Dapper;
 
 namespace OMMediaDB2
 {
@@ -551,6 +552,7 @@ namespace OMMediaDB2
         private string DB_GetMediaInfoSQLBase(DBObjectTypes objectType)
         {
             return String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArt FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType='{0}' ", (int)objectType);
+            //return String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type FROM tblMediaInfo WHERE ObjectType='{0}' ", (int)objectType);
         }
 
         private List<OImage> DB_GetCoversForArtist(string artist, int limit)
@@ -1151,6 +1153,85 @@ namespace OMMediaDB2
             return _DBReader != null;
         }
 
+        public IEnumerable<mediaInfo> getSongs(string songFilter = "", string artistFilter = "", string albumFilter = "", string genreFilter = "", string lyricsFilter = "", int minRating = -1, bool covers = true, eMediaField sortBy = eMediaField.Album)
+        {
+            if (!DB_ConnectAndOpen())
+                return new List<mediaInfo>();
+
+            string SQL = String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArt AS CoverArtBytes FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType='{0}' ", (int)DBObjectTypes.IndexedItem);
+
+            if (!String.IsNullOrEmpty(songFilter))
+                SQL += " AND Name LIKE @Name";
+            if (!String.IsNullOrEmpty(artistFilter))
+                SQL += " AND Artist LIKE @Artist";
+            if (!String.IsNullOrEmpty(albumFilter))
+                SQL += " AND Album LIKE @Album";
+            if (!String.IsNullOrEmpty(genreFilter))
+                SQL += " AND Genre LIKE @Genre";
+            if (!String.IsNullOrEmpty(lyricsFilter))
+                SQL += " AND Lyrics LIKE @Lyrics";
+            if (minRating >= 0)
+                SQL += " AND Rating > @Rating";
+
+            #region OrderBy
+
+            switch (sortBy)
+            {
+                case eMediaField.None:
+                    break;
+                case eMediaField.Title:
+                    SQL += " ORDER BY Name";
+                    break;
+                case eMediaField.Artist:
+                    SQL += " ORDER BY Artist, Album, TrackNumber";
+                    break;
+                case eMediaField.Album:
+                    SQL += " ORDER BY Album, TrackNumber";
+                    break;
+                case eMediaField.URL:
+                    SQL += " ORDER BY Location";
+                    break;
+                case eMediaField.Rating:
+                    SQL += " ORDER BY Rating";
+                    break;
+                case eMediaField.Lyrics:
+                    SQL += " ORDER BY Lyrics";
+                    break;
+                case eMediaField.Genre:
+                    SQL += " ORDER BY Genre";
+                    break;
+                case eMediaField.Track:
+                    SQL += " ORDER BY TrackNumber";
+                    break;
+                default:
+                    break;
+            }
+
+            #endregion
+
+
+            //SQLiteCommand cmd = new SQLiteCommand(SQL, _DBConnection);
+            //cmd.Parameters.AddWithValue("@Name", songFilter.Replace('*', '%'));
+            //cmd.Parameters.AddWithValue("@Artist", artistFilter.Replace('*', '%'));
+            //cmd.Parameters.AddWithValue("@Album", albumFilter.Replace('*', '%'));
+            //cmd.Parameters.AddWithValue("@Genre", genreFilter.Replace('*', '%'));
+            //cmd.Parameters.AddWithValue("@Lyrics", lyricsFilter.Replace('*', '%'));
+            //cmd.Parameters.AddWithValue("@Rating", minRating);
+
+            var dbData = _DBConnection.Query<mediaInfo>(SQL, 
+                new { 
+                    Name = songFilter.Replace('*', '%'),
+                    Artist = artistFilter.Replace('*', '%'),
+                    Album = albumFilter.Replace('*', '%'),
+                    Genre = genreFilter.Replace('*', '%'),
+                    Lyrics = lyricsFilter.Replace('*', '%'),
+                    Rating = minRating
+                });
+
+            return dbData;
+        }
+
+
         public bool beginGetSongs(string songFilter = "", string artistFilter = "", string albumFilter = "", string genreFilter = "", string lyricsFilter = "", int minRating = -1, bool covers = true, eMediaField sortBy = eMediaField.Album)
         {
             if (!DB_ConnectAndOpen())
@@ -1360,6 +1441,11 @@ namespace OMMediaDB2
         public bool removePlaylist(string name)
         {
             return DB_DeletePlaylist(name);
+        }
+
+        public int getPlayListCount(string playlistName)
+        {
+            return DB_GetPlayListItemCount(playlistName);
         }
 
         public List<string> listPlaylists()
