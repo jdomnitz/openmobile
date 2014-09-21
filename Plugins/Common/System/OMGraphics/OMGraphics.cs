@@ -713,7 +713,7 @@ namespace OMGraphics
 
                                                     #region Draw outer border
 
-                                                    using (Pen p = new System.Drawing.Pen(borderColor, 1.5f))
+                                                    using (Pen p = new System.Drawing.Pen(borderColor, 1f))
                                                     {
                                                         p.Alignment = PenAlignment.Inset;
                                                         g.DrawPath(p, gp);

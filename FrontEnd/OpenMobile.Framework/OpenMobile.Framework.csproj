@@ -108,6 +108,7 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animator.cs" />
@@ -120,6 +121,8 @@
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
     <Compile Include="Controls\ControlLayout.cs" />
+    <Compile Include="Controls\OMContainer2.cs" />
+    <Compile Include="Controls\OMObjectList3.cs" />
     <Compile Include="Controls\EventArgs.cs" />
     <Compile Include="Controls\OMMouseHandler.cs" />
     <Compile Include="Controls\OMObjectList2.cs" />
@@ -336,7 +339,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

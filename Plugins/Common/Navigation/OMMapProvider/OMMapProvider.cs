@@ -991,52 +991,57 @@ namespace OMMapProvider
         object locker = 1;
         void Map_Initialize(int s, int mapWidth, int mapHeight)
         {
-            lock (locker)
+            //if (RuntimePolicyHelper.LegacyV2RuntimeEnabledSuccessfully)
             {
-                int screen = s;
-                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Map initializing for screen {0} started", screen));
-                _Map[screen] = new GMapImageRender(mapWidth, mapHeight);
-                _Map[screen].Tag = screen;
-                _Map[screen].Position = new PointLatLng(OM.Host.CurrentLocation.Latitude, OM.Host.CurrentLocation.Longitude);
-                _Map[screen].MinZoom = 1;
-                _Map[screen].MaxZoom = 17;
-                //MainMap.Zoom = 1;
-                //MainMap.Position = new PointLatLng(0, 0);
-                _Map[screen].MapProvider = _Map_CurrentProvider;
-                _Map[screen].Manager.Mode = _Map_AccessMode;
-                _Map[screen].OnImageUpdated += new GMapImageUpdatedDelegate(Map_OnImageUpdated);
-                _Map[screen].OnImageAssigned += new GMapImageUpdatedDelegate(Map_OnImageAssigned);
-                _Map[screen].Overlays.Add(_Map_Overlay_Routes[screen]);
-                _Map[screen].Overlays.Add(_Map_Overlay_Polygons[screen]);
-                _Map[screen].Overlays.Add(_Map_Overlay_Objects[screen]);
-                _Map[screen].Overlays.Add(_Map_Overlay[screen]);
-                if (_Map_Overlay_Objects[screen].Markers.Count > 0)
-                    _Map[screen].ZoomAndCenterMarkers(null);
-                //MainMap.EmptyMapBackground = System.Drawing.Color.Transparent;
-                //MainMap.EmptyTileColor = 
-                _Map[screen].EmptyTileText = "Missing images on this level";
-                _Map[screen].EmptyTileBorders.Color = BuiltInComponents.SystemSettings.SkinTextColor.ToSystemColor();
-                _Map[screen].OnTileLoadStart += new TileLoadStart(Map_OnTileLoadStart);
-                _Map[screen].OnTileLoadComplete += new TileLoadComplete(Map_OnTileLoadComplete);
+                lock (locker)
+                {
+                    int screen = s;
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Map initializing for screen {0} started", screen));
 
-                // set current marker
-                _Map_Marker_CurrentPosition[screen] = new GMarkerGoogle(ConvertOMLocationToLatLng(OM.Host.CurrentLocation), GMarkerGoogleType.blue_small);
-                _Map_Marker_CurrentPosition[screen].IsHitTestVisible = false;
-                _Map_Overlay[screen].Markers.Add(_Map_Marker_CurrentPosition[screen]);
+                    _Map[screen] = new GMapImageRender(mapWidth, mapHeight);
+                    //_Map[screen].NegativeMode = true;
+                    _Map[screen].Tag = screen;
+                    _Map[screen].Position = new PointLatLng(OM.Host.CurrentLocation.Latitude, OM.Host.CurrentLocation.Longitude);
+                    _Map[screen].MinZoom = 1;
+                    _Map[screen].MaxZoom = 17;
+                    //MainMap.Zoom = 1;
+                    //MainMap.Position = new PointLatLng(0, 0);
+                    _Map[screen].MapProvider = _Map_CurrentProvider;
+                    _Map[screen].Manager.Mode = _Map_AccessMode;
+                    _Map[screen].OnImageUpdated += new GMapImageUpdatedDelegate(Map_OnImageUpdated);
+                    _Map[screen].OnImageAssigned += new GMapImageUpdatedDelegate(Map_OnImageAssigned);
+                    _Map[screen].Overlays.Add(_Map_Overlay_Routes[screen]);
+                    _Map[screen].Overlays.Add(_Map_Overlay_Polygons[screen]);
+                    _Map[screen].Overlays.Add(_Map_Overlay_Objects[screen]);
+                    _Map[screen].Overlays.Add(_Map_Overlay[screen]);
+                    if (_Map_Overlay_Objects[screen].Markers.Count > 0)
+                        _Map[screen].ZoomAndCenterMarkers(null);
+                    //MainMap.EmptyMapBackground = System.Drawing.Color.Transparent;
+                    //MainMap.EmptyTileColor = 
+                    _Map[screen].EmptyTileText = "Missing images on this level";
+                    _Map[screen].EmptyTileBorders.Color = BuiltInComponents.SystemSettings.SkinTextColor.ToSystemColor();
+                    _Map[screen].OnTileLoadStart += new TileLoadStart(Map_OnTileLoadStart);
+                    _Map[screen].OnTileLoadComplete += new TileLoadComplete(Map_OnTileLoadComplete);
 
-                _Map_Marker_HomePosition[screen] = new GMarkerGoogle(ConvertOMLocationToLatLng(BuiltInComponents.SystemSettings.Location_Home), GMarkerGoogleType.green_pushpin);
-                //markerHomePosition.IsHitTestVisible = false;
-                _Map_Marker_HomePosition[screen].ToolTipText = "Home\r\nAs set in settings";
-                _Map_Marker_HomePosition[screen].ToolTipMode = MarkerTooltipMode.OnMouseOver;
-                _Map_Overlay_Objects[screen].Markers.Add(_Map_Marker_HomePosition[screen]);
+                    // set current marker
+                    _Map_Marker_CurrentPosition[screen] = new GMarkerGoogle(ConvertOMLocationToLatLng(OM.Host.CurrentLocation), GMarkerGoogleType.blue_small);
+                    _Map_Marker_CurrentPosition[screen].IsHitTestVisible = false;
+                    _Map_Overlay[screen].Markers.Add(_Map_Marker_CurrentPosition[screen]);
 
-                _Map[screen].Position = _Map_Marker_CurrentPosition[screen].Position;
-                _Map[screen].Zoom = CalculateZoomLevel(screen);
+                    _Map_Marker_HomePosition[screen] = new GMarkerGoogle(ConvertOMLocationToLatLng(BuiltInComponents.SystemSettings.Location_Home), GMarkerGoogleType.green_pushpin);
+                    //markerHomePosition.IsHitTestVisible = false;
+                    _Map_Marker_HomePosition[screen].ToolTipText = "Home\r\nAs set in settings";
+                    _Map_Marker_HomePosition[screen].ToolTipMode = MarkerTooltipMode.OnMouseOver;
+                    _Map_Overlay_Objects[screen].Markers.Add(_Map_Marker_HomePosition[screen]);
 
-                // Host events
-                OM.Host.OnNavigationEvent += new NavigationEvent(Host_OnNavigationEvent);
+                    _Map[screen].Position = _Map_Marker_CurrentPosition[screen].Position;
+                    _Map[screen].Zoom = CalculateZoomLevel(screen);
 
-                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Map initializing for screen {0} completed", screen));
+                    // Host events
+                    OM.Host.OnNavigationEvent += new NavigationEvent(Host_OnNavigationEvent);
+
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Map initializing for screen {0} completed", screen));
+                }
             }
         }
 

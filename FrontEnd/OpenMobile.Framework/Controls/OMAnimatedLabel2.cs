@@ -2397,14 +2397,20 @@ namespace OpenMobile.Controls
 
         private void Animation_Cancel()
         {
-            // Cancel thread
-            if (_Animation_Thread != null)
+            try
             {
-                _Animation_Cancel = true;
+                // Cancel thread
+                if (_Animation_Thread != null)
+                {
+                    _Animation_Cancel = true;
 
-                // Wake thread up (in case it's sleeping)
-                if (!_Animation_Running)
-                    _Animation_Thread_Run.Set();
+                    // Wake thread up (in case it's sleeping)
+                    if (!_Animation_Running)
+                        _Animation_Thread_Run.Set();
+                }
+            }
+            catch
+            {
             }
         }
 

@@ -71,12 +71,27 @@ namespace OpenMobile.Plugin
         /// <returns></returns>
         bool beginGetAlbums(string artistFilter = "", string albumFilter = "", string genreFilter = "", bool covers = true);
         /// <summary>
-        /// List all songs
+        /// List all songs async
         /// </summary>
         /// <param name="covers"></param>
         /// <param name="sortBy"></param>
         /// <returns></returns>
         bool beginGetSongs(string songFilter = "", string artistFilter = "", string albumFilter = "", string genreFilter = "", string lyricsFilter = "", int minRating = -1, bool covers = true, eMediaField sortBy = eMediaField.Artist);
+
+        /// <summary>
+        /// Lists all songs
+        /// </summary>
+        /// <param name="songFilter"></param>
+        /// <param name="artistFilter"></param>
+        /// <param name="albumFilter"></param>
+        /// <param name="genreFilter"></param>
+        /// <param name="lyricsFilter"></param>
+        /// <param name="minRating"></param>
+        /// <param name="covers"></param>
+        /// <param name="sortBy"></param>
+        /// <returns></returns>
+        IEnumerable<mediaInfo> getSongs(string songFilter = "", string artistFilter = "", string albumFilter = "", string genreFilter = "", string lyricsFilter = "", int minRating = -1, bool covers = true, eMediaField sortBy = eMediaField.Album);
+
         /// <summary>
         /// List available Genres
         /// </summary>
@@ -184,6 +199,13 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <returns></returns>
         List<string> listPlaylists();
+
+        /// <summary>
+        /// Returns the amount of items contained in a playlist
+        /// </summary>
+        /// <param name="playListName"></param>
+        /// <returns></returns>
+        int getPlayListCount(string playlistName);
 
         /// <summary>
         /// Sets a media setting

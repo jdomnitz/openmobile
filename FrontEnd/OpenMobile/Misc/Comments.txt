@@ -1,0 +1,3 @@
+﻿Input events:
+	Mouse -> Move, Down, Up
+	Touch -> Down, Move, Up

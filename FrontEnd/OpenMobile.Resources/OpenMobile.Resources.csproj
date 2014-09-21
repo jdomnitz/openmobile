@@ -254,6 +254,9 @@
     <Content Include="Skins\Default\AIcons\3-rating-important.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Skins\Default\AIcons\4-collections-collection.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Skins\Default\AIcons\4-collections-labels.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -297,6 +300,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Skins\Default\AIcons\7-location-web-site.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Skins\Default\AIcons\9-av-add-to-queue.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Skins\Default\AIcons\9-av-download.png">

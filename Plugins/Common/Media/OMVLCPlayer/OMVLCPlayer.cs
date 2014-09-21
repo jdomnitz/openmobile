@@ -1599,7 +1599,7 @@ namespace OMVLCPlayer
             _Disposing = true;
             try
             {
-                lock (_ZonePlayer)
+                //lock (_ZonePlayer)
                 {
                     //SavePlayerStates();
 

@@ -199,7 +199,7 @@ namespace OpenMobile.helperFunctions.MenuObjects
         /// Initializes the menu popup class
         /// </summary>
         /// <param name="Header"></param>
-        public MenuPopup(string Header, ReturnTypes ReturnType)
+        public MenuPopup(string Header, ReturnTypes ReturnType = ReturnTypes.Index)
         {
             this.Header = Header;
             this.ReturnType = ReturnType;

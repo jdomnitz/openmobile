@@ -137,6 +137,15 @@ namespace OpenMobile
         private static OpenTK.Input.KeyboardState[] _KeyboardStates_Tmp;
         private static OpenTK.Input.KeyboardState _KeyboardState_Stored;
 
+        private enum EventTypes
+        {
+            Unknown,
+            Move,
+            Down,
+            Up
+        }
+        private static EventTypes _PreviousEventType = EventTypes.Unknown;
+        private static int _LastReport = -1;
         private static void Thread_InputHandler()
         {
             _MouseStates = new OpenTK.Input.MouseState[OM.Host.ScreenCount];
@@ -184,21 +193,37 @@ namespace OpenMobile
                                     // Mouse move event
                                     if (clientPoint != lastMousePoint[i])
                                     {
+                                        //if (_LastReport != 0)
+                                        //    System.Diagnostics.Debug.WriteLine("Raised InputRouter.MouseMove");
+                                        _LastReport = 0;
                                         MouseMoveEventArgs eOM = new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton);
                                         Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
+                                        _PreviousEventType = EventTypes.Move;
                                     }
                                     // Mouse button events
                                     if (mouseButton != lastMouseButton[i])
                                     {
+                                        //Core.RenderingWindows[i].RenderingWindow_MouseMove(i, new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton));
+                                        _LastReport = 1;
                                         if (mouseButton != MouseButton.None)
                                         {   // Mouse down event
+                                            if (_PreviousEventType != EventTypes.Move)
+                                            {
+                                                //System.Diagnostics.Debug.WriteLine("Forced InputRouter.MouseMove");
+                                                Core.RenderingWindows[i].RenderingWindow_MouseMove(i, new MouseMoveEventArgs(clientPoint.X, clientPoint.Y, 0, 0, mouseButton));
+                                            }
+
+                                            //System.Diagnostics.Debug.WriteLine("Raised InputRouter.MouseDown");
                                             MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, true);
                                             Core.RenderingWindows[i].RenderingWindow_MouseDown(i, eOM);
+                                            _PreviousEventType = EventTypes.Down;
                                         }
                                         else
                                         {   // Mouse up event
+                                            //System.Diagnostics.Debug.WriteLine("Raised InputRouter.MouseUp");
                                             MouseButtonEventArgs eOM = new MouseButtonEventArgs(clientPoint.X, clientPoint.Y, mouseButton, false);
                                             Core.RenderingWindows[i].RenderingWindow_MouseUp(i, eOM);
+                                            _PreviousEventType = EventTypes.Up;
                                         }
                                     }
 
@@ -208,82 +233,6 @@ namespace OpenMobile
                             }
                         }
                     }
-
-
-                    //OpenTK.Input.KeyboardState keyboardState = OpenTK.Input.Keyboard.GetState();
-
-                    //// Check if any screens are using default keyboard mapping (Standard)
-                    //for (int i = 0; i < OM.Host.ScreenCount; i++)
-                    //{
-                    //    if (_Mice_MappedIndex[i] == -1)
-                    //    {
-                    //        if (Core.RenderingWindows[i] != null && !Core.RenderingWindows[i].IsDisposed)
-                    //        {
-                    //            if (Core.RenderingWindows[i].Focused)
-                    //            {
-                    //                // Did something change at the keyboard?
-                    //                if (keyboardState != _KeyboardState_Stored)
-                    //                {   // Yes
-                    //                    keyboardState.
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //}
-                    //_KeyboardState_Stored = keyboardState;
-
-
-                    //Point mouseCursorMoveDistance = new Point(
-                    //    System.Math.Abs(mouseCursorState.X - _MouseCursorState_Stored.X),
-                    //    System.Math.Abs(mouseCursorState.Y - _MouseCursorState_Stored.Y));
-
-                    //_MouseStates_Tmp_Main = OpenTK.Input.Mouse.GetState();
-                    //for (int i = 0; i < _MouseStates_Tmp.Length; i++)
-                    //{
-                    //    _MouseStates_Tmp[i] = OpenTK.Input.Mouse.GetState(i);
-                    //    _KeyboardStates_Tmp[i] = OpenTK.Input.Keyboard.GetState(i);
-
-                    //    if (_MouseStates_Tmp[i].X != 0 && mouseCursorMoveDistance.X != 0)
-                    //    {
-                    //        _Mouse_ScaleValues[i].X = (float)System.Math.Abs(_MouseStates_Tmp[i].X) / (float)mouseCursorMoveDistance.X;
-                    //        Console.WriteLine(String.Format("_Mouse_ScaleValues[{0}].X = {1}", i, _Mouse_ScaleValues[i].X));
-                    //    }
-
-                    //    if (_MouseStates_Tmp[i].Y != 0 && mouseCursorMoveDistance.Y != 0)
-                    //    {
-                    //        _Mouse_ScaleValues[i].Y = (float)System.Math.Abs(_MouseStates_Tmp[i].Y) / (float)mouseCursorMoveDistance.Y;
-                    //        Console.WriteLine(String.Format("_Mouse_ScaleValues[{0}].Y = {1}", i, _Mouse_ScaleValues[i].Y));
-                    //    }
-                    //}
-
-                    //for (int i = 0; i < _MouseStates.Length; i++)
-                    //{
-                    //    _MouseStates[i] = OpenTK.Input.Mouse.GetState(_Mice_MappedIndex[i]);
-
-                    //    if (_MouseStates_Stored[i] != null && _MouseStates[i] != _MouseStates_Stored[i])
-                    //    {   // Process events
-
-                    //        if (!_MousePoint_Initial[i].HasValue)
-                    //            _MousePoint_Initial[i] = new Point(_MouseStates[i].X, _MouseStates[i].Y);
-
-                    //        IdleDetection_Restart(i);
-
-                    //        // Check for mouse moved
-                    //        if (_MouseStates[i].X != _MouseStates_Stored[i].X || _MouseStates[i].Y != _MouseStates_Stored[i].Y)
-                    //        {   // Mouse was moved, send move events
-                    //            MouseMoveEventArgs eOM = new MouseMoveEventArgs(
-                    //                _MousePoint_Initial[i].Value.X + _MouseStates[i].X,
-                    //                _MousePoint_Initial[i].Value.Y + _MouseStates[i].Y, 
-                    //                0, 
-                    //                0,
-                    //                 OpenMobile.Input.Mouse.GetMouseButtons(_MouseStates[i]));
-                    //            Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
-                    //        }
-                    //    }
-                    //    _MouseStates_Stored[i] = _MouseStates[i];
-                    //}
-
-                    //_MouseCursorState_Stored = mouseCursorState;
                     Thread.Sleep(0);
                 }
                 catch

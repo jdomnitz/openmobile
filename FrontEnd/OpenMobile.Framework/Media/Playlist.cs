@@ -1355,6 +1355,17 @@ namespace OpenMobile.Media
             this.OnPropertyChanged("Items");
             Raise_OnList_Items_ItemInserted(_Items.Count - 1);
         }
+
+        /// <summary>
+        /// Adds multiple items to the playlist
+        /// </summary>
+        /// <param name="items"></param>
+        public void AddRange(IEnumerable<mediaInfo> items)
+        {
+            foreach (var item in items)
+                Add(item);
+        }
+
         /// <summary>
         /// Adds a new media item to the playlist if it's not already in the list
         /// </summary>
