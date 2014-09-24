@@ -1,5 +1,8 @@
-﻿
-
+﻿20140924
+	+ : Added startup argument to control which graphical engine OM uses. Usage: 
+		for V1 graphics: -Graphics=V1 
+		for V2 graphics: -Graphics=V2
+		for ES Graphics: -Graphics=ES
 
 20140804
 	~ : Fixed a bug in shader code that caused shaders to be rendered at the wrong place
