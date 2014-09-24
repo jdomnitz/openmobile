@@ -46,11 +46,13 @@ Imports OpenMobile.Threading
 Imports OpenMobile.helperFunctions
 
 Imports Sharpduino.EasyFirmata
+Imports Sharpduino.ArduinoUno
 
 Namespace OMDSArduino
 
     Public Class ArduinoIO
         Inherits Sharpduino.Pin
+
         Dim myName As String = ""
         Dim myTitle As String = ""
         Dim myScript As String = ""
@@ -94,9 +96,13 @@ Namespace OMDSArduino
             End Set
         End Property
 
+        Public Sub New()
+            ' Do nothing
+        End Sub
+
     End Class
 
-    Public Class OMDSArduino
+    Public NotInheritable Class OMDSArduino
         Inherits BasePluginCode
         Implements IDataSource
 
@@ -127,12 +133,13 @@ Namespace OMDSArduino
         Private firmata_version_minor As Integer = 0
         Private firmware_version_name As String = "Arduino"
         Private initialized As Boolean = False
+        Private connected As Boolean = False
         Private settingz As Settings
         Private MaxWait As Int16 = 300
         Private SerialPort1 As System.IO.Ports.SerialPort
 
         Private m_ComPort As Integer = 0
-        Private s_ComPort As String = "COM3"
+        Private s_ComPort As String = ""
         Private s_Board As String = "8"
         Private m_Board As Integer = 8
         Private m_Baud As Integer = 57600
@@ -143,12 +150,18 @@ Namespace OMDSArduino
 
         Private shutdown As Boolean = False
         Private toggle As Boolean = False
+        Private max_retries As Int16 = 10
 
         'Private Port As Sharpduino.SerialProviders.ComPortProvider
-        Private Arduino As Sharpduino.ArduinoUno
+        Private WithEvents Arduino As Sharpduino.ArduinoUno
         Private thepin As Sharpduino.Pin
         Private Firmata As Sharpduino.EasyFirmata
+        Private Port As Sharpduino.SerialProviders.ComPortProvider
         Private mypins(78) As ArduinoIO
+
+        Public Event lostArduino()
+
+        Private myNotification As Notification = New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, "OMDSArduino", "")
 
         Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
@@ -156,7 +169,7 @@ Namespace OMDSArduino
 
         Public Sub New()
 
-            MyBase.New("OMDSArduino", OM.Host.getPluginImage(Of OMDSArduino)("Images|Icon-Arduino"), 0.1, "Arduino Interface", "John Mullan", "jmullan99@gmail.com")
+            MyBase.New("OMDSArduino", OM.Host.getSkinImage("Icons|Icon-Arduino"), 0.1, "Arduino Interface", "John Mullan", "jmullan99@gmail.com")
 
         End Sub
 
@@ -165,6 +178,8 @@ Namespace OMDSArduino
             Dim m_Settings As New OpenMobile.Plugin.Settings("Arduino Connector")
 
             theHost = host
+
+            theHost.UIHandler.AddNotification(myNotification)
 
             m_Verbose = True
 
@@ -178,13 +193,30 @@ Namespace OMDSArduino
 
         End Function
 
+        Private Sub pin_changed()
+
+        End Sub
+
         Private Sub BackgroundLoad()
+
+            ' Create the datasource object other plugins can subscribe to
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Connected", DataSource.DataTypes.binary, "Is Arduino connected"), False)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Pins", DataSource.DataTypes.raw, "Arduino Pin Data"), Nothing)
 
             OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, "Settings.Verbose", m_Verbose)
             m_Verbose = OpenMobile.helperFunctions.StoredData.Get(Me, "Settings.Verbose")
 
             OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, "Settings.ComPort", s_ComPort)
             s_ComPort = OpenMobile.helperFunctions.StoredData.Get(Me, "Settings.ComPort")
+
+            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, "Settings.ComBaud", m_Baud)
+            m_Baud = OpenMobile.helperFunctions.StoredData.Get(Me, "Settings.ComBaud")
+
+            If String.IsNullOrEmpty(s_ComPort) Then
+                myNotification.Text = "No COM port defined."
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino", "No COM port defined.")
+                Exit Sub
+            End If
 
             If m_Verbose Then
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Waiting for settings load...")
@@ -197,42 +229,21 @@ Namespace OMDSArduino
             End If
 
             If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Resuming...")
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "...Continuing...")
             End If
 
-            theHost.UIHandler.RemoveAllMyNotifications(Me)
-            theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Waiting to contact Arduino..."))
+            myNotification.Text = "Waiting to contact Arduino..."
 
-            If Not String.IsNullOrEmpty(s_ComPort) Then
-                If m_Verbose Then
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Waiting for serial access.")
-                End If
-                helperFunctions.SerialAccess.GetAccess(Me)
-                If m_Verbose Then
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Serial access granted.")
-                End If
+            Me.connect()
 
-                ' Retry this a couple times if it fails
-                Arduino = New Sharpduino.ArduinoUno(s_ComPort)
+            If Not Arduino Is Nothing Then
 
-                Dim mCounter As Int16 = 500
-                Do While mCounter > 0
-                    If Arduino.IsInitialized Then
-                        Exit Do
-                    End If
-                    System.Threading.Thread.Sleep(50)
-                    mCounter = mCounter - 1
-                Loop
-
-                If m_Verbose Then
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Arduino contacted.")
-                End If
-                helperFunctions.SerialAccess.ReleaseAccess(Me)
-                If m_Verbose Then
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Releasing serial access.")
-                End If
                 If Arduino.IsInitialized Then
+
                     ' Do something here
+                    connected = True
+                    theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Connected", connected)
+
                     Try
                         If m_Verbose Then
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
@@ -244,12 +255,16 @@ Namespace OMDSArduino
                             mypins(x) = New ArduinoIO
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                             mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Value: {0}", mypins(x).CurrentValue))
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Mode: {0}", mypins(x).CurrentMode))
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Value: {0}", mypins(x).CurrentValue))
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Mode: {0}", mypins(x).CurrentMode))
+                            End If
                             mypins(x).Capabilities = Arduino.GetPins(x).Capabilities
                             ' Extract capabilities
                             For Each pair As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In mypins(x).Capabilities
-                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Capability: {0}", pair.Key))
+                                If m_Verbose Then
+                                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Capability: {0}", pair.Key))
+                                End If
                                 If pair.Key = Sharpduino.Constants.PinModes.Analog Then
                                     mypins(x).Name = String.Format("A{0}", x)
                                     imageName = "gauge"
@@ -259,35 +274,205 @@ Namespace OMDSArduino
                                 mypins(x).Name = String.Format("D{0}", x)
                                 imageName = "led_off"
                             End If
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Name: {0}", mypins(x).Name))
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Name: {0}", mypins(x).Name))
+                            End If
                             mypins(x).Title = mypins(x).Name
                             mypins(x).Script = ""
                             mypins(x).Button = New OMButton("IOButton" & mypins(x).Name, 0, 0, 140, 140)
                             mypins(x).Button.Image = theHost.getPluginImage(Me, "Images|" + imageName)
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
+                            End If
                         Next
-                        mCounter = 0
+                        'mCounter = 0
+                        theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
                     End Try
                 End If
-            End If
 
-            theHost.UIHandler.RemoveAllMyNotifications(Me)
-
-            If Not Arduino Is Nothing Then
-                If Arduino.IsInitialized Then
-                    theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Arduino connected."))
-                    m_timer.Start()
-                Else
-                    theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "Cannot contact Arduino."))
-                End If
-            Else
-                theHost.UIHandler.AddNotification(New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, Me.pluginName, "No Arduino found."))
             End If
 
         End Sub
 
+        Private Sub myNotification_clickAction(notification As Notification, screen As Integer, ByRef cancel As Boolean)
+            ' Not currently used
+            cancel = False
+        End Sub
+
+        Private Sub myNotification_clearAction(notification As Notification, screen As Integer, ByRef cancel As Boolean)
+            ' Not currently used
+            cancel = False
+        End Sub
+
+        ' Checking for connect/disconnect of the device
+        Private Sub m_Host_OnSystemEvent(ByVal efunc As eFunction, args() As Object) Handles theHost.OnSystemEvent
+
+            ' Currently the Arduino doesn't seem to trigger a USBDeviceAdded (even though we connect via USB serial)
+
+            Dim x As Int16 = 0
+
+            ' If there was a USB device connected, see if we can contact it as an ARDUINO
+            If efunc.Equals(eFunction.USBDeviceAdded) Then
+                ' A USB device was added
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB device added"))
+                End If
+                If args(0) = "PORT" Then
+                    ' A serial port was added
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB Port device added"))
+                    End If
+                    If Arduino Is Nothing Then
+                        ' We currently do not have an active ARDUINO connection
+                        'OpenMobile.Threading.SafeThread.Asynchronous(AddressOf BackgroundLoad, theHost)
+                    End If
+                End If
+            End If
+
+            If efunc.Equals(eFunction.USBDeviceRemoved) Then
+                x = x
+            End If
+
+        End Sub
+
+        Public Sub connect()
+            ' Attempt to connect to Arduino by scanning ports
+
+            If Not Arduino Is Nothing Then
+                ' no sense connecting if we already are
+                Exit Sub
+            End If
+
+            Dim access_granted As Boolean = False
+            Dim initialized As Boolean = False
+            Dim available_ports() As String = System.IO.Ports.SerialPort.GetPortNames
+            Array.Sort(available_ports)
+
+            If available_ports.Count = 0 Then
+                ' There are no com ports
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found no comm ports."))
+                Exit Sub
+            End If
+
+            myNotification.Text = "Waiting to contact Arduino..."
+
+            If Not String.IsNullOrEmpty(s_ComPort) Then
+                ' Settings specified a com port, try it
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Attempting contact on {0}.", s_ComPort))
+                End If
+                probe_port(s_ComPort)
+            End If
+            If Arduino Is Nothing Then
+                ' Still no arduino, so scan available ports
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Scanning available serial ports."))
+                End If
+                ' Loop thru each port name and see if we find a display
+                For x = 0 To UBound(available_ports)
+                    probe_port(available_ports(x))
+                    ' We can check m_Open or m_Connected or m_moduleType
+                    If Not Arduino Is Nothing Then
+                        ' Looks like a port was found with an LCD
+                        s_ComPort = available_ports(x)
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connected to Arduino on {0}", s_ComPort))
+                        End If
+                        Exit For
+                    End If
+                Next
+            End If
+
+            If Arduino Is Nothing Then
+                ' Did not find Arduino
+                myNotification.Text = "Arduino not found."
+            Else
+                ' Arduino found
+                myNotification.Text = String.Format("Connected to Arduino on {0}.", s_ComPort)
+            End If
+
+        End Sub
+
+        Public Sub probe_port(ByVal portname As String)
+            ' Attemp to contact to Arduino
+
+            Dim access_granted As Boolean = False
+            Dim initialized As Boolean = False
+
+            If Not Arduino Is Nothing Then
+                ' no sense connecting if we already are
+                Exit Sub
+            End If
+
+            If String.IsNullOrEmpty(s_ComPort) Then
+                ' Need a port value to continue
+                Exit Sub
+            End If
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Waiting for serial access.")
+            End If
+
+            ' Try a few times to see if we get serial access
+            For x = 1 To max_retries
+                myNotification.Text = String.Format("Requesting serial lock, attempt #{0}.", x)
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMDSArduino.BackgroundLoad() - Requesting serial lock, attempt #{0}.", x))
+                End If
+                access_granted = helperFunctions.SerialAccess.GetAccess(Me)
+                If access_granted Then
+                    Exit For
+                End If
+            Next
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMDSArduino.BackgroundLoad() - Serial access: {0}.", IIf(access_granted, "granted", "denied")))
+            End If
+
+            If Not access_granted Then
+                Exit Sub
+            End If
+
+            ' We have serial access lock
+            Try
+                'Port = New Sharpduino.SerialProviders.ComPortProvider(s_ComPort, m_Baud)
+                'Firmata = New Sharpduino.EasyFirmata(Port)
+                Arduino = New Sharpduino.ArduinoUno(s_ComPort)
+                Do While Not Arduino.IsInitialized
+                    System.Threading.Thread.Sleep(50)
+                Loop
+                ' See if we can get a version report
+            Catch ex As Exception
+                myNotification.Text = String.Format("Error: {0}", ex.Message)
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Error, "OMDSArduino.BackgroundLoad()", String.Format("Error: {0}", ex.Message))
+                If Not Arduino Is Nothing Then
+                    Arduino.Dispose()
+                    Arduino = Nothing
+                End If
+            Finally
+                helperFunctions.SerialAccess.ReleaseAccess(Me)
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Serial access lock released.")
+                End If
+            End Try
+
+        End Sub
+
+        Public Sub lost_arduino()
+            ' Call this when we have an issue with ARDUINO
+
+            myNotification.Text = "Lost connection with Arduino"
+
+            connected = False
+            theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Connected", connected)
+
+            Arduino = Nothing
+
+            RaiseEvent lostArduino()
+
+        End Sub
         Public Overrides Function loadSettings() As Settings
 
             If m_Verbose Then
@@ -348,9 +533,14 @@ Namespace OMDSArduino
                 vRef = Val(m_Settings.getSetting(Me, "Settings.VRef"))
             End If
 
+            ReDim Preserve available_ports(UBound(available_ports) + 1)
+            available_ports(UBound(available_ports)) = s_ComPort
+
             ' Build a list of available ports
             COMOptions.AddRange(available_ports)
+            COMOptions.Sort()
             COMValues.AddRange(available_ports)
+            COMValues.Sort()
 
             If COMOptions.Count = 0 Then
                 ' No available com ports
@@ -445,13 +635,7 @@ Namespace OMDSArduino
             Select Case settings.Name
                 Case "Settings.ComPort" ' If com port changed, try to connect
                     s_ComPort = settings.Value
-                    If Not String.IsNullOrEmpty(s_ComPort) Then
-                        If Not Arduino Is Nothing Then
-                            Arduino.Dispose()
-                            Arduino = Nothing
-                        End If
-                        Arduino = New Sharpduino.ArduinoUno(s_ComPort)
-                    End If
+                    ' New to reload/restart the plugin
                 Case "Settings.Verbose" ' Debug logging mode
                     m_Verbose = settings.Value
             End Select
@@ -461,14 +645,19 @@ Namespace OMDSArduino
         Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
 
             If Not Arduino Is Nothing Then
-                If Arduino.IsInitialized Then
-                    If toggle = True Then
-                        toggle = False
-                    Else
-                        toggle = True
+                Try
+                    If Arduino.IsInitialized Then
+                        If toggle = True Then
+                            toggle = False
+                        Else
+                            toggle = True
+                        End If
                     End If
-                End If
-                Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
+                    Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
+                Catch ex As Exception
+                    ' Problem with ARDUINO 
+                    lost_arduino()
+                End Try
             End If
 
         End Sub
@@ -484,18 +673,44 @@ Namespace OMDSArduino
             End Select
         End Sub
 
-        Private Sub thehost_OnSystemEvent(ByVal func As OpenMobile.eFunction, ByVal args As Object) Handles theHost.OnSystemEvent
+        Private Sub thehost_OnSystemEvent(ByVal efunc As OpenMobile.eFunction, ByVal args As Object) Handles theHost.OnSystemEvent
 
-            If func.Equals(eFunction.closeProgram) Or func.Equals(eFunction.CloseProgramPreview) Then
+            If efunc.Equals(eFunction.closeProgram) Or efunc.Equals(eFunction.CloseProgramPreview) Then
                 ' OM Exiting?
                 If Not Arduino Is Nothing Then
                     If Arduino.IsInitialized Then
-                        If m_Verbose Then
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.onSystemEvent()", String.Format("Program closing."))
-                        End If
-                        ' Reset the Arduino end dispose
-                        Arduino.Dispose()
+                        Try
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.onSystemEvent()", String.Format("Program closing."))
+                            End If
+                            ' Reset the Arduino end dispose
+                            Arduino.Dispose()
+                        Catch ex As Exception
+                            ' Problem with ARDUINO
+                            lost_arduino()
+                        End Try
                     End If
+                End If
+            End If
+
+            ' If there was a USB device connected, see if we can contact it as an LCD
+            If efunc.Equals(eFunction.USBDeviceAdded) Then
+                ' A USB device was added
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB device added"))
+                End If
+                If args(0) = "PORT" Then
+                    ' A serial port was added
+                End If
+            End If
+
+            If efunc.Equals(eFunction.USBDeviceRemoved) Then
+                ' Was it a serial port?
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("USB device removed"))
+                End If
+                If args(0) = "PORT" Then
+                    ' A serial port was removed
                 End If
             End If
 
@@ -574,7 +789,7 @@ Namespace OMDSArduino
 
         Public Overrides ReadOnly Property pluginIcon() As imageItem
             Get
-                Return OM.Host.getPluginImage(Me, "Images|Icon-Arduino")
+                Return OM.Host.getPluginImage(Me, "Icon-Arduino")
             End Get
         End Property
 
@@ -605,7 +820,9 @@ Namespace OMDSArduino
             Try
                 Arduino.Dispose()
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.Dispose()", ex.Message)
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.Dispose()", "No object to dispose - " + ex.Message)
+                End If
             End Try
 
         End Sub
