@@ -299,7 +299,7 @@ namespace OMRadio
 
         public imageItem pluginIcon
         {
-            get { return imageItem.NONE; }
+            get { return OM.Host.getSkinImage("Icons|Icon-Radio"); }
         }
 
         public bool incomingMessage(string message, string source)
@@ -334,6 +334,15 @@ namespace OMRadio
                     StationListSource = StationListSources.Live;
                 }
 
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "Frequency", DataSource.DataTypes.text, "Radio tuned frequency"), "");
+                //theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "Signal", DataSource.DataTypes.raw, "Radio signal strength"), "");
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "StationName", DataSource.DataTypes.text, "RDS Station Name"), "");
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "StationText", DataSource.DataTypes.text, "RDS Text"), "");
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "Status", DataSource.DataTypes.text, "Radio status"), "");
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "Genre", DataSource.DataTypes.text, "Station Genre"), "");
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "Band", DataSource.DataTypes.text, "Tuned band"), "");
+                theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Radio", "Data", "HD", DataSource.DataTypes.raw, "Is radio in HD mode"), 0);
+
                 /*
                 if (string.IsNullOrEmpty(setting.getSetting(this, "Radio.DefaultTunedContentSource")))
                 {
@@ -350,60 +359,42 @@ namespace OMRadio
 
             #region Buttons 
 
-            //OMButton Button_Source = new OMButton("Button_Source", 10, 80, 150, 70);
-            OMButton Button_Source = OMButton.PreConfigLayout_BasicStyle("Button_Source", 10, 80, 150, 87, GraphicCorners.Top, "", "Source");
-            //Button_Source.Name = "Button_Source";
-            //Button_Source.Opacity = OpacityButtons;
-            //Button_Source.Image = theHost.getSkinImage("Full");
-            //Button_Source.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            int vgap = 5;
+
+            OMButton Button_Source = OMButton.PreConfigLayout_CleanStyle("Button_Source", 10, 80, 150, 80);
+            Button_Source.Text = "Source";
             Button_Source.OnClick += new userInteraction(Button_Source_OnClick);
-            //Button_Source.Transition = eButtonTransition.None;
-            //Button_Source.Text = "Source";
             panelMain.addControl(Button_Source);
 
-            //OMButton Button_RadioBand = new OMButton("Button_Band", 10, Button_Source.Top + Button_Source.Height + 10, 150, 70);
-            OMButton Button_RadioBand = OMButton.PreConfigLayout_BasicStyle("Button_Band", Button_Source.Region.Left, Button_Source.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.None, "", "Band");
-            //Button_RadioBand.Name = "Button_Band";
-            //Button_RadioBand.Opacity = OpacityButtons;
-            //Button_RadioBand.Image = theHost.getSkinImage("Full");
-            //Button_RadioBand.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            OMButton Button_RadioBand = OMButton.PreConfigLayout_CleanStyle("Button_Band", Button_Source.Region.Left, Button_Source.Region.Bottom + vgap, Button_Source.Region.Width, Button_Source.Region.Height);
+            Button_RadioBand.Text = "Band";
             Button_RadioBand.OnClick += new userInteraction(Button_RadioBand_OnClick);
-            //Button_RadioBand.Transition = eButtonTransition.None;
-            //Button_RadioBand.Text = "Band";
             panelMain.addControl(Button_RadioBand);
 
-            //OMButton Button_RadioScan = new OMButton("Button_RadioScan", 10, Button_RadioBand.Top + Button_RadioBand.Height + 10, 150, 70);
-            OMButton Button_RadioScan = OMButton.PreConfigLayout_BasicStyle("Button_RadioScan", Button_Source.Region.Left, Button_RadioBand.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.None, "", "Seek >>");
-            //Button_RadioScan.Name = "Button_RadioScan";
-            //Button_RadioScan.Opacity = OpacityButtons;
-            //Button_RadioScan.Image = theHost.getSkinImage("Full");
-            //Button_RadioScan.FocusImage = theHost.getSkinImage("Full.Highlighted");
-            Button_RadioScan.OnClick += new userInteraction(Button_RadioAutoScan_OnClick);
-            Button_RadioScan.OnLongClick += new userInteraction(Button_RadioAutoScan_OnLongClick);
-            //Button_RadioScan.Transition = eButtonTransition.None;
-            //Button_RadioScan.Text = "Seek >>";
-            panelMain.addControl(Button_RadioScan);
+            OMButton Button_RadioScanUP = OMButton.PreConfigLayout_CleanStyle("Button_RadioScanUP", Button_Source.Region.Left, Button_RadioBand.Region.Bottom + vgap, Button_Source.Region.Width, Button_Source.Region.Height);
+            Button_RadioScanUP.Text = "Scan UP";
+            Button_RadioScanUP.OnClick += new userInteraction(Button_RadioAutoScan_OnClick);
+            //Button_RadioScanUP.OnLongClick += new userInteraction(Button_RadioAutoScan_OnLongClick);
+            Button_RadioScanUP.OnHoldClick += new userInteraction(Button_RadioAutoScan_OnLongClick);
+            Button_RadioScanUP.Visible = true;
+            panelMain.addControl(Button_RadioScanUP);
 
-            //OMButton Button_ChannelListSource = new OMButton("Button_ChannelListSource", 10, Button_RadioScan.Top + Button_RadioScan.Height + 10, 150, 70);
-            OMButton Button_ChannelListSource = OMButton.PreConfigLayout_BasicStyle("Button_ChannelListSource", Button_Source.Region.Left, Button_RadioScan.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.None, "", "List\nsource");
-            //Button_ChannelListSource.Name = "Button_ChannelListSource";
-            //Button_ChannelListSource.Opacity = OpacityButtons;
-            //Button_ChannelListSource.Image = theHost.getSkinImage("Full");
-            //Button_ChannelListSource.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            OMButton Button_RadioScanDN = OMButton.PreConfigLayout_CleanStyle("Button_RadioScanDN", Button_Source.Region.Left, Button_RadioBand.Region.Bottom + vgap, Button_Source.Region.Width, Button_Source.Region.Height);
+            Button_RadioScanDN.Text = "Scan DN";
+            Button_RadioScanDN.OnClick += new userInteraction(Button_RadioAutoScan_OnClick);
+            //Button_RadioScanDN.OnLongClick += new userInteraction(Button_RadioAutoScan_OnLongClick);
+            Button_RadioScanDN.OnHoldClick += new userInteraction(Button_RadioAutoScan_OnLongClick);
+            Button_RadioScanDN.Visible = false;
+            panelMain.addControl(Button_RadioScanDN);
+
+            OMButton Button_ChannelListSource = OMButton.PreConfigLayout_CleanStyle("Button_ChannelListSource", Button_Source.Region.Left, Button_RadioScanUP.Region.Bottom + vgap, Button_Source.Region.Width, Button_Source.Region.Height);
+            Button_ChannelListSource.Text = "List\nsource";
             Button_ChannelListSource.OnClick += new userInteraction(Button_ChannelListSource_OnClick);
-            //Button_ChannelListSource.Transition = eButtonTransition.None;
-            //Button_ChannelListSource.Text = "List\nsource";
             panelMain.addControl(Button_ChannelListSource);
 
-            //OMButton Button_TuneTo = new OMButton("Button_TuneTo", 10, Button_ChannelListSource.Top + Button_ChannelListSource.Height + 10, 150, 70);
-            OMButton Button_TuneTo = OMButton.PreConfigLayout_BasicStyle("Button_TuneTo", Button_Source.Region.Left, Button_ChannelListSource.Region.Bottom - 1, Button_Source.Region.Width, Button_Source.Region.Height, GraphicCorners.Bottom, "", "Direct\nTune");
-            //Button_TuneTo.Name = "Button_TuneTo";
-            //Button_TuneTo.Opacity = OpacityButtons;
-            //Button_TuneTo.Image = theHost.getSkinImage("Full");
-            //Button_TuneTo.FocusImage = theHost.getSkinImage("Full.Highlighted");
+            OMButton Button_TuneTo = OMButton.PreConfigLayout_CleanStyle("Button_TuneTo", Button_Source.Region.Left, Button_ChannelListSource.Region.Bottom + vgap, Button_Source.Region.Width, Button_Source.Region.Height);
+            Button_TuneTo.Text = "Direct\nTune";
             Button_TuneTo.OnClick += new userInteraction(Button_TuneTo_OnClick);
-            //Button_TuneTo.Transition = eButtonTransition.None;
-            //Button_TuneTo.Text = "Direct\nTune";
             panelMain.addControl(Button_TuneTo);
             #endregion
 
@@ -631,22 +622,22 @@ namespace OMRadio
             Label_Info.Text = "";
             panelMessageBox.addControl(Label_Info);
 
-            OMButton Button_Yes = new OMButton("MessageBox_Button_Yes", Shape_Border2.Left + Shape_Border2.Width - 320, Shape_Border2.Top + Shape_Border2.Height - 80, 150, 70);
-            Button_Yes.Name = "MessageBox_Button_Yes";
+            OMButton Button_Yes = OMButton.PreConfigLayout_CleanStyle("MessageBox_Button_Yes", Shape_Border2.Left + Shape_Border2.Width - 320, Shape_Border2.Top + Shape_Border2.Height - 80, 150, 70);
+            //OMButton Button_Yes = new OMButton("MessageBox_Button_Yes", Shape_Border2.Left + Shape_Border2.Width - 320, Shape_Border2.Top + Shape_Border2.Height - 80, 150, 70);
             Button_Yes.Image = theHost.getSkinImage("Full");
             Button_Yes.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Button_Yes.OnClick += new userInteraction(Button_Yes_OnClick);
             Button_Yes.Transition = eButtonTransition.None;
-            Button_Yes.Text = "Yes";
+            //Button_Yes.Text = "Yes";
             panelMessageBox.addControl(Button_Yes);
 
-            OMButton Button_No = new OMButton("MessageBox_Button_No", Button_Yes.Left + Button_Yes.Width + 10, Button_Yes.Top, Button_Yes.Width, Button_Yes.Height);
-            Button_No.Name = "MessageBox_Button_No";
+            OMButton Button_No = OMButton.PreConfigLayout_CleanStyle("MessageBox_Button_No", Button_Yes.Left + Button_Yes.Width + 10, Button_Yes.Top, Button_Yes.Width, Button_Yes.Height);
+            //OMButton Button_No = new OMButton("MessageBox_Button_No", Button_Yes.Left + Button_Yes.Width + 10, Button_Yes.Top, Button_Yes.Width, Button_Yes.Height);
             Button_No.Image = theHost.getSkinImage("Full");
             Button_No.FocusImage = theHost.getSkinImage("Full.Highlighted");
             Button_No.OnClick += new userInteraction(Button_No_OnClick);
             Button_No.Transition = eButtonTransition.None;
-            Button_No.Text = "No";
+            //Button_No.Text = "No";
             panelMessageBox.addControl(Button_No);
 
             #endregion
@@ -852,15 +843,15 @@ namespace OMRadio
             //theHost.execute(eFunction.scanBand, screen.ToString());
             //theHost.execute(eFunction.scanForward, screen.ToString());
 
-            OMPanel panelMain = ((OMPanel)manager[screen, "Radio"]);
-            OMButton button = ((OMButton)manager[screen]["Button_RadioScan"]);
+            //OMPanel panelMain = ((OMPanel)manager[screen, "Radio"]);
+            //OMButton button = ((OMButton)manager[screen]["Button_RadioScan"]);
 
-            switch (button.Text)
+            switch (sender.Name)
             {
-                case "Seek >>":
+                case "Button_RadioScanUP":
                     theHost.execute(eFunction.scanForward, screen.ToString());
                     break;
-                case "<< Seek":
+                case "Button_RadioScanDN":
                     theHost.execute(eFunction.scanBackward, screen.ToString());
                     break;
             }
@@ -871,16 +862,19 @@ namespace OMRadio
         {
 
             OMPanel panelMain = ((OMPanel)manager[screen, "Radio"]);
-            OMButton button = panelMain["Button_RadioScan"] as OMButton;
+            OMButton buttonUP = panelMain["Button_RadioScanUP"] as OMButton;
+            OMButton buttonDN = panelMain["Button_RadioScanDN"] as OMButton;
 
-            switch (button.Text)
+            switch (sender.Name)
             {
-                case "<< Seek":
-                    button.Text = "Seek >>";
+                case "Button_RadioScanDN":
+                    buttonDN.Visible = false;
+                    buttonUP.Visible = true;
                     theHost.execute(eFunction.scanForward, screen.ToString());
                     break;
-                case "Seek >>":
-                    button.Text = "<< Seek";
+                case "Button_RadioScanUP":
+                    buttonDN.Visible = true;
+                    buttonUP.Visible = false;
                     theHost.execute(eFunction.scanBackward, screen.ToString());
                     break;
             }
@@ -898,6 +892,25 @@ namespace OMRadio
         void theHost_OnMediaEvent(eFunction function, Zone zone, string arg)
         {
 
+            tunedContentInfo info = theHost.getData(eGetData.GetTunedContentInfo, "", 0.ToString()) as tunedContentInfo;
+            mediaInfo mediaInfo = theHost.getPlayingMedia(0);
+
+            try
+            {
+                // Push current datasource data
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.Frequency", mediaInfo.Name, true);
+                //BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.Signal", mediaInfo.Signal, true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.StationName", mediaInfo.Album, true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.StationText", mediaInfo.Artist, true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.Status", info.status.ToString(), true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.Genre", info.currentStation.stationGenre, true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.Band", info.band.ToString(), true);
+                BuiltInComponents.Host.DataHandler.PushDataSourceValue(this.pluginName + ";Radio.Data.HD", info.currentStation.HD, true);
+            }
+            catch
+            {
+            }
+            
             if ((function == eFunction.Play)||(function==eFunction.tunerDataUpdated))
             {
                 UpdateStationInfo(zone);
@@ -1217,6 +1230,7 @@ namespace OMRadio
                 }
             }
         }
+
         private void SaveToPresets(int instance, stationInfo Station)
         {
             lock (Presets)
