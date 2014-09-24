@@ -82,13 +82,14 @@ Namespace OMLCD
         Private m_baud_rate As Integer = DEFAULT_BAUD_RATE  'Tracks selected baud rate
         Private m_comm_port As String = DEFAULT_COM_PORT    'Tracks selected comm port
         Private m_open As Boolean = False                   'Tracks if comm port open
-        Private m_moduleType As Integer = 0                 'Tracks module type
+        Private m_moduleType As Integer = -1                'Tracks module type
+        Private m_moduleVer As Integer = 0                  'Tracks module version
+        Private m_CustomerData As String = ""               'Data save to and read from module
         Private m_lastRequest As Queue = New Queue          'Tracks data requests made to device
         ' 1=Model 2=Version
         Private m_Verbose As Boolean = False
         Private m_autoscroll As Boolean = False
         Private m_linewrap As Boolean = False
-        Private m_moduleVer As Integer = 0                  'Tracks module version
         Private m_receivedData As Integer = 0               'Received Data
         Private m_display As Boolean = True                 'Tracks display state (on/off)
         Private m_lcd_brightness As Integer = 126           'Tracks LCD Backlight Brightness
@@ -103,7 +104,7 @@ Namespace OMLCD
         Private mKeyNameAssigned As String = ""
         Private m_cell_size As Integer
         Private lock_timeout As Integer = 10000              'Max milliseconds to wait for serial port lock
-        Private query_response_time As Integer = 1000        'Milliseconds to wait for query response from LCD
+        Private query_response_time As Integer = 450        'Milliseconds to wait for query response from LCD
 
         Private who_called As OpenMobile.Plugin.IBasePlugin
 
@@ -137,6 +138,7 @@ Namespace OMLCD
             PlaceLargeNumber = &H23
             PlaceVertBar = &H3D
             PollKeyPress = &H26
+            ReadCustomerData = &H35
             ReadModuleType = &H37
             ReadVersionNumber = &H36
             Remember = &H93
@@ -153,6 +155,7 @@ Namespace OMLCD
             SetKeypadBrightness = &H9C
             UnderLineCursosOff = &H4B
             UnderLineCursosOn = &H4A
+            WriteCustomerData = &H34
 
         End Enum
 
@@ -482,6 +485,7 @@ Namespace OMLCD
 
             m_Verbose = verbose
             who_called = caller
+            m_moduleType = -1
 
             ' If there is already a port opened, close it
             If Not Me.SerialPort1 Is Nothing Then
@@ -510,7 +514,7 @@ Namespace OMLCD
                     theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Attempting to connect to last known port: {0}", m_comm_port))
                 End If
                 probe_port(m_comm_port, m_baud_rate)
-                If m_moduleType = 0 Then
+                If m_moduleType = -1 Then
                     If m_Verbose Then
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Previous port didn't work, switching to auto......"))
                     End If
@@ -520,7 +524,7 @@ Namespace OMLCD
             End If
 
             ' If module type is = 0, we have no matrix orbital
-            If m_moduleType <> 0 Then
+            If m_moduleType <> -1 Then
                 RaiseEvent Connected()
             Else
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found no {0} device.", driver_name))
@@ -532,10 +536,15 @@ Namespace OMLCD
         Private Sub probe_port(ByVal portname As String, Optional ByVal baudrate As Int16 = DEFAULT_BAUD_RATE)
             ' Try to connect to portname
 
-            ' Wait our turn access serial ports
+            ' Wait our turn to access serial ports
             Dim access_granted As Boolean = False
 
-            access_granted = helperFunctions.SerialAccess.GetAccess(who_called)
+            For x = 1 To 5
+                access_granted = helperFunctions.SerialAccess.GetAccess(who_called)
+                If access_granted Then
+                    Exit For
+                End If
+            Next
 
             If m_Verbose Then
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Serial access: {0}.", IIf(access_granted, "granted", "denied")))
@@ -545,7 +554,8 @@ Namespace OMLCD
                 Exit Sub
             End If
 
-            Dim startTime As DateTime
+            Dim startTime1 As DateTime ' Wait loop for module type
+            Dim startTime2 As DateTime ' Wait loop for module version
             Dim elapsedTime As TimeSpan
 
             Me.SerialPort1 = New System.IO.Ports.SerialPort
@@ -572,37 +582,50 @@ Namespace OMLCD
                     theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Opened {0}...", portname))
                     m_lastRequest.Enqueue("1")
                     ' Send command to get module type
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Querying for model code..."))
                     Me.SerialPort1.Write({254, Commands.ReadModuleType}, 0, 2)
                     ' Start Counting
-                    startTime = Now()
+                    startTime1 = Now()
                     Dim FoundDevice As Device = Devices.Find(Function(c) c.ID = m_moduleType)
                     ' Wait 500 ms to see if we get a response
                     Do While True
-                        If m_moduleType <> 0 Then
+                        If m_moduleType <> -1 Then
                             ' We got a response to our query
                             FoundDevice = Devices.Find(Function(c) c.ID = m_moduleType)
                             If String.IsNullOrEmpty(FoundDevice.Model) Then
                                 ' It was not a supported module code
                                 ' Move on to next port
-                                m_moduleType = 0
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Unsupported Model response: {0}", m_moduleType))
+                                m_moduleType = -1
                                 Exit Do
                             End If
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Model response: {0}", m_moduleType))
-                            m_lastRequest.Enqueue("2")
-                            ' Ask for a firmware version code
-                            Me.SerialPort1.Write({254, Commands.ReadVersionNumber}, 0, 2)
+                            ' Ask for a version code
+                            'm_lastRequest.Enqueue("2")
+                            'Me.SerialPort1.Write({254, Commands.ReadVersionNumber}, 0, 2)
+                            m_CustomerData = ""
+                            Me.SerialPort1.Write({254, Commands.WriteCustomerData, 97, 98, 97, 98, 97, 98, 97, 98, 97, 98, 97, 98, 97, 98, 97, 98}, 0, 18)
+                            m_lastRequest.Enqueue("3")
+                            Me.SerialPort1.Write({254, Commands.ReadCustomerData}, 0, 2)
                             ' Start counting
-                            startTime = Now()
+                            startTime2 = Now()
                             ' Wait for a response
                             Do While True
-                                If m_moduleVer <> 0 Then
-                                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Version response: {0}", m_moduleVer))
+                                If m_CustomerData = "abababababababab" Then
+                                    ' We must be talking to the display
+                                    If m_Verbose Then
+                                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "Read/Write test: Passed.")
+                                    End If
                                     Exit Do
                                 End If
+                                'If m_moduleVer <> 0 Then
+                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Version response: {0}", m_moduleVer))
+                                'Exit Do
+                                'End If
                                 ' No version code yet.  If we waited too long, get outta here
-                                elapsedTime = Now().Subtract(startTime)
+                                elapsedTime = Now().Subtract(startTime2)
                                 If elapsedTime.Milliseconds > query_response_time Then
-                                    ' No version code, but it's not important
+                                    ' No validation code
                                     Exit Do
                                 End If
                                 ' Adds a little pause between loops
@@ -612,7 +635,7 @@ Namespace OMLCD
                         End If
                         ' We did not get a module code yet
                         ' If we waited too long for this port to responsd then get outta here
-                        elapsedTime = Now().Subtract(startTime)
+                        elapsedTime = Now().Subtract(startTime1)
                         If elapsedTime.Milliseconds > query_response_time Then
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Timeout. No response from {0}", portname))
@@ -622,7 +645,11 @@ Namespace OMLCD
                         ' Adds a little pause between loops
                         System.Threading.Thread.Sleep(50)
                     Loop
-                    If m_moduleType <> 0 Then
+                    If m_moduleType = -1 Then
+                        Me.SerialPort1.Close()
+                    ElseIf m_CustomerData <> "abababababababab" Then
+                        Me.SerialPort1.Close()
+                    Else
                         m_comm_port = portname
                         m_open = True
                         m_connected = True
@@ -631,8 +658,6 @@ Namespace OMLCD
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Display type: {0}", Me.GetModuleStyle))
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("{0} Rows by {1} Cols", Me.GetModuleRows, Me.GetModuleCols))
                         End If
-                    Else
-                        Me.SerialPort1.Close()
                     End If
                 Else
                     If m_Verbose Then
@@ -675,8 +700,9 @@ Namespace OMLCD
                 For x = 0 To UBound(available_ports)
                     probe_port(available_ports(x))
                     ' We can check m_Open or m_Connected or m_moduleType
-                    If m_moduleType <> 0 Then
+                    If m_moduleType <> -1 Then
                         ' Looks like a port was found with an LCD
+                        m_comm_port = available_ports(x)
                         Exit For
                     End If
                 Next
@@ -767,7 +793,10 @@ Namespace OMLCD
                 End If
             Catch ex As Exception
                 ' Likely the OS already closed the serial port object on us
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Error closing serial port object: {0}", ex.Message))
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Error closing serial port object: {0}...", ex.Message))
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "...is OS closing?")
+                End If
             End Try
             RaiseEvent CommLost()
 
@@ -785,8 +814,8 @@ Namespace OMLCD
             Try
 
                 Dim m_request As String = ""
-                If m_lastRequest.Count <> 0 Then
-                    m_request = m_lastRequest.Dequeue
+                If m_lastRequest.Count > 0 Then
+                    m_request = m_lastRequest.Peek()
                 End If
 
                 Do While SerialPort1.BytesToRead > 0
@@ -802,11 +831,21 @@ Namespace OMLCD
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Received response {0} to request type {1}.", inputData, m_request))
                             End If
                             m_moduleType = inputData
+                            m_lastRequest.Dequeue()
                         Case "2" ' Version request
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Received response {0} to request type {1}.", inputData, m_request))
                             End If
                             m_moduleVer = inputData
+                            m_lastRequest.Dequeue()
+                        Case "3" ' Version request
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Received response {0} to request type {1}.", inputData, m_request))
+                            End If
+                            m_CustomerData = m_CustomerData + Chr(inputData)
+                            If Len(m_CustomerData) = 16 Then
+                                m_lastRequest.Dequeue()
+                            End If
                         Case Else
                             ' We did not ask for data
                             If inputData > &H40 And inputData < &H49 Then
@@ -837,6 +876,8 @@ Namespace OMLCD
         Public Sub Close() Implements iLCDInterface.Close
 
             Try
+                Me.ResetGPOStates()
+                Me.ShowStartupScreen()
                 Me.SerialPort1.Close()
                 Me.SerialPort1.Dispose()
                 Me.SerialPort1 = Nothing
@@ -931,6 +972,13 @@ Namespace OMLCD
             Catch ex As Exception
                 disconnected()
             End Try
+
+        End Sub
+        Public Sub ResetGPOStates()
+
+            For x = 0 To GetModuleGPOs - 1
+                SetGPOState(x, 0)
+            Next
 
         End Sub
         Public Sub SetGPOState(ByVal GPO As Byte, ByVal state As Boolean) Implements iLCDInterface.SetGPOState
