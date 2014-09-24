@@ -164,34 +164,31 @@ Namespace OMFuel
 
             'theHost.DebugMsg("OMFuel - BackgroundLoad()", "Complete. Requesting data refresh...")
 
-            ' Do we have a HOME location saved?
-            Dim xZip As String = "", xCountry As String = "", xCity As String = "", xState As String = "", mFilter As String = ""
             Dim sysHome As OpenMobile.Location
             sysHome = BuiltInComponents.SystemSettings.Location_Home
 
+            StoredData.SetDefaultValue(Me, "FAVS.homeZip", sysHome.Zip)
+            StoredData.SetDefaultValue(Me, "FAVS.homeCity", sysHome.City)
+            StoredData.SetDefaultValue(Me, "FAVS.homeState", sysHome.State)
+            StoredData.SetDefaultValue(Me, "FAVS.homeCountry", sysHome.Country)
+
+            Dim xZip As String = "", xCountry As String = "", xCity As String = "", xState As String = "", mFilter As String = ""
+            ' For testing only
+            'xZip = StoredData.Delete(Me, "FAVS.homeZip")
+            'xCity = StoredData.Delete(Me, "FAVS.homeCity")
+            'xState = StoredData.Delete(Me, "FAVS.homeState")
+            'xCountry = StoredData.Delete(Me, "FAVS.homeCountry")
+
+            ' Fetch home favorite
             xZip = StoredData.Get(Me, "FAVS.homeZip")
             xCity = StoredData.Get(Me, "FAVS.homeCity")
             xState = StoredData.Get(Me, "FAVS.homeState")
             xCountry = StoredData.Get(Me, "FAVS.homeCountry")
 
-            ' If there is currently no HOME saved, try to set one from SYSTEM home location
-            If String.IsNullOrEmpty(xZip) Then
-                ' No home location saved, check system setting
-                If Not sysHome.IsEmpty Then
-                    ' Save SYSTEM home to our HOME
-                    xZip = sysHome.Zip
-                    xCity = sysHome.City
-                    xState = sysHome.State
-                    xCountry = sysHome.Country
-                End If
-            Else
-                ' There is a saved HOME location
-            End If
-
             ' If other systems are not ready, we don't get the initial load of data
             '  so we'll just wait a couple of seconds. We "could" block panel_enter if
             '  background loading is not complete.
-            System.Threading.Thread.Sleep(3000)
+            System.Threading.Thread.Sleep(2000)
 
             ' Find if there was a last searched filter
             Try
@@ -708,19 +705,19 @@ Namespace OMFuel
             Dim cityBox As OMTextBox = fPanel("favCity")
 
             Dim myLoc As OpenMobile.Location = New OpenMobile.Location
+            Dim xAddress As String, xZip As String, xCity As String, xState As String, xCountry As String
 
             If String.IsNullOrEmpty(zipBox.Text) Then
                 myLoc.Keyword = cityBox.Text
             Else
-                myLoc.Keyword = zipBox.Text.Replace(" ", "")
-                myLoc.Keyword = zipBox.Text
+                xZip = zipBox.Text.Replace(" ", "")
+                myLoc.Keyword = xZip
             End If
             'myLoc.Keyword = "44.1627579, -77.38323"
             myLoc = theHost.CommandHandler.ExecuteCommand("Map.Lookup.Location", myLoc)
 
-            Dim xZip As String, xCity As String, xState As String, xCountry As String
-            xZip = myLoc.Zip.Replace(" ", "")
-            xZip = myLoc.Zip
+            xAddress = myLoc.Address
+            'xZip = myLoc.Zip
             xCity = myLoc.City
             xState = myLoc.State
             xCountry = myLoc.Country
