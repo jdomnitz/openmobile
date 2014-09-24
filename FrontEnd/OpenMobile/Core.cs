@@ -668,20 +668,6 @@ namespace OpenMobile
                     }
                 }
 
-                // Specific graphics engine
-                else if (arg.ToLower().StartsWith("-graphics=") == true)
-                {
-                    if (arg.Length >= 15)
-                    {
-                        try
-                        {
-                            theHost.StartupScreen = int.Parse(arg.Substring(15));
-                        }
-                        catch (ArgumentException) { break; }
-                    }
-                }
-
-                
                 // Specific size is given (-ScreenSize=1000x600)
                 else if (arg.ToLower().StartsWith("-screensize=") == true)
                 {
@@ -692,8 +678,6 @@ namespace OpenMobile
                     }
                     catch (ArgumentException) { break; }
                 }
-
-
             }
 
             #endregion
