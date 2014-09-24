@@ -43,6 +43,7 @@ namespace OpenMobile
         public static List<IBasePlugin> pluginCollectionDisabled = new List<IBasePlugin>();
         public static bool exitTransition = true;
         public static OpenTK.GameWindowFlags Fullscreen;
+        public static StartupArguments StartupArgs;
 
         /// <summary>
         /// The maximum allowed time for a plugin to use for initialization
@@ -621,6 +622,8 @@ namespace OpenMobile
 
             #region Process startup arguments
 
+            StartupArgs = new StartupArguments(Environment.GetCommandLineArgs());
+
             Size InitialScreenSize = new Size(800, 480);
 
             foreach (string arg in Environment.GetCommandLineArgs())
@@ -640,6 +643,7 @@ namespace OpenMobile
                 {
                     Fullscreen = OpenTK.GameWindowFlags.Fullscreen;
                 }
+
 
                 // Override current skin to use
                 else if (arg.ToLower().StartsWith("-skinpath=") == true)
@@ -663,6 +667,20 @@ namespace OpenMobile
                         catch (ArgumentException) { break; }
                     }
                 }
+
+                // Specific graphics engine
+                else if (arg.ToLower().StartsWith("-graphics=") == true)
+                {
+                    if (arg.Length >= 15)
+                    {
+                        try
+                        {
+                            theHost.StartupScreen = int.Parse(arg.Substring(15));
+                        }
+                        catch (ArgumentException) { break; }
+                    }
+                }
+
                 
                 // Specific size is given (-ScreenSize=1000x600)
                 else if (arg.ToLower().StartsWith("-screensize=") == true)

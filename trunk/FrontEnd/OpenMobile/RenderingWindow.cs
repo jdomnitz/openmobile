@@ -314,7 +314,7 @@ namespace OpenMobile
         protected override void OnLoad(EventArgs e)
         {
             InitializeRendering();
-            g.Initialize(this, _MouseData);
+            g.Initialize(this, _MouseData, Core.StartupArgs.RequestedGraphicEngine);
             if (_Screen == 0)
             {
                 if ((Graphics.Graphics.Renderer == "GDI Generic") || (Graphics.Graphics.Renderer == "Software Rasterizer"))

@@ -154,6 +154,17 @@ namespace OpenMobile.Graphics
         public Point CursorPosition = new Point();
     }
 
+    /// <summary>
+    /// The available graphic engines for OM
+    /// </summary>
+    public enum eGraphicEngines
+    {
+        Unspecified,
+        V1,
+        V2,
+        ES
+    }
+
     public sealed class Graphics
     {
         static bool v2;
@@ -1031,7 +1042,7 @@ namespace OpenMobile.Graphics
         /// <summary>
         /// Initializes the graphics engine (Selects the proper rendering methods to use)
         /// </summary>
-        public void Initialize(OpenTK.GameWindow targetWindow, MouseData mouseData)
+        public void Initialize(OpenTK.GameWindow targetWindow, MouseData mouseData, eGraphicEngines graphicEngine)
         {
             #if LINUX
             if (OpenTK.Configuration.RunningOnAndroid)
@@ -1044,20 +1055,40 @@ namespace OpenMobile.Graphics
             else
             #endif
             {
-                version = GL.GetString(StringName.Version);
-                if (version.Length < 3)
-                    v2 = false;
-                else if (version[0] >= '2') //2.0 or higher
-                    v2 = true;
-                else if (version.Substring(0, 3) == "1.5") //1.5 with npots support
-                {
-                    string[] extensions = GL.GetString(StringName.Extensions).Split(new char[] { ' ' });
-                    v2 = (Array.Exists(extensions, t => t == "GL_ARB_texture_non_power_of_two"));
+                if (graphicEngine == eGraphicEngines.Unspecified)
+                {   // No specific engine is given
+                    version = GL.GetString(StringName.Version);
+                    if (version.Length < 3)
+                        v2 = false;
+                    else if (version[0] >= '2') //2.0 or higher
+                        v2 = true;
+                    else if (version.Substring(0, 3) == "1.5") //1.5 with npots support
+                    {
+                        string[] extensions = GL.GetString(StringName.Extensions).Split(new char[] { ' ' });
+                        v2 = (Array.Exists(extensions, t => t == "GL_ARB_texture_non_power_of_two"));
+                    }
+                    if (v2)
+                        implementation = new V2Graphics(screen, targetWindow, mouseData);
+                    else
+                        implementation = new V1Graphics(screen);
                 }
-                if (v2)
-                    implementation = new V2Graphics(screen, targetWindow, mouseData);
                 else
-                    implementation = new V1Graphics(screen);
+                {   // A specific engine is requested
+                    switch (graphicEngine)
+                    {
+                        case eGraphicEngines.V1:
+                            implementation = new V1Graphics(screen);
+                            break;
+                        case eGraphicEngines.V2:
+                            implementation = new V2Graphics(screen, targetWindow, mouseData);
+                            break;
+                        case eGraphicEngines.ES:
+                            implementation = new ESGraphics(screen);
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 renderer = GL.GetString(StringName.Renderer);
             }
             if (OpenTK.Configuration.RunningOnWindows)
