@@ -135,18 +135,20 @@ Namespace OMArduino
                     Next
 
                 Case "OMDSArduino.Arduino.Pins"
+                    ' Data must have been updated.  Only happens for INPUT pins
                     For x = 0 To theHost.ScreenCount - 1
                         mPanel = PanelManager(x, "OMArduino")
                         mypins = sensor.Value
                         For Each pin In mypins
+                            ' Process any defined script here
+                            ' pin.Script - Process the script
                             If Not mPanel Is Nothing Then
-                                ' Here we process the PIN data as necessary
+                                ' Here we process the PIN data as necessary for display
                                 'pin.Name
                                 'pin.CurrentValue
                                 'pin.CurrentMode
                                 'pin.Capabilities
-                                'pin.Button
-                                'pin.Script
+                                'pin.Button = OM.Button definition
                                 'pin.Title
                             End If
                         Next
