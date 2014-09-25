@@ -140,6 +140,7 @@ Namespace OMArduino
                         mPanel = PanelManager(x, "OMArduino")
                         mypins = sensor.Value
                         For Each pin In mypins
+                            ' load user settings into this mypins object
                             ' Process any defined script here
                             ' pin.Script - Process the script
                             If Not mPanel Is Nothing Then
@@ -148,8 +149,11 @@ Namespace OMArduino
                                 'pin.CurrentValue
                                 'pin.CurrentMode
                                 'pin.Capabilities
-                                'pin.Button = OM.Button definition
+                                'pin.Container = OM.Container definition (use like a live tile)
                                 'pin.Title
+                                'pin.Descr
+                                'place the controls on the panel
+                                ' refresh the panel
                             End If
                         Next
                     Next
@@ -163,6 +167,8 @@ Namespace OMArduino
             If manager Is Nothing Then
                 Return Nothing
             End If
+
+            ' Create a container, calculate the spread of the pin on-screen objects
 
             Return manager(screen, name)
 
