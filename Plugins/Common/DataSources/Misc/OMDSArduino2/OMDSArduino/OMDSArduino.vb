@@ -56,19 +56,27 @@ Namespace OMDSArduino
         Dim myName As String = ""
         Dim myTitle As String = ""
         Dim myScript As String = ""
-        Dim myButton As OMButton
+        Dim myDescr As String = ""
+        Dim myContainer As OMContainer
 
+        '''<summary>
+        '''The Program assigned name for the pin
+        '''</summary>
         Public Property Name As String
-            ' Pin Name
+            ' Program assigned Name
             Get
                 Return myName
             End Get
-            Set(value As String)
+            Friend Set(value As String)
                 myName = value
             End Set
         End Property
 
+        '''<summary>
+        '''User assigned name for the pin
+        '''</summary>
         Public Property Title As String
+            ' Pin User Supplied Name
             Get
                 Return myTitle
             End Get
@@ -77,6 +85,21 @@ Namespace OMDSArduino
             End Set
         End Property
 
+        '''<summary>
+        '''User assigned description for the I/O pin
+        '''</summary>
+        Public Property Descr As String
+            Get
+                Return myDescr
+            End Get
+            Set(value As String)
+                myDescr = value
+            End Set
+        End Property
+
+        '''<summary>
+        '''User assigned script
+        '''</summary>
         Public Property Script As String
             Get
                 Return myScript
@@ -86,13 +109,16 @@ Namespace OMDSArduino
             End Set
         End Property
 
-        Public Property Button As OMButton
+        '''<summary>
+        '''Program generated container for on-panel display
+        '''</summary>
+        Public Property Container As OMContainer
             ' The button definition to use on the panel for the I/O line
             Get
-                Return myButton
+                Return myContainer
             End Get
-            Set(value As OMButton)
-                myButton = value
+            Set(value As OMContainer)
+                myContainer = value
             End Set
         End Property
 
@@ -207,7 +233,6 @@ Namespace OMDSArduino
 
             ' theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
 
-
         End Sub
 
         Private Sub BackgroundLoad()
@@ -262,6 +287,8 @@ Namespace OMDSArduino
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
                         End If
                         Dim imageName As String = ""
+                        Dim theImage As OMImage
+                        Dim theLabel As OMLabel
                         For x = 0 To Arduino.GetPins.Count - 1
                             ' Build the I/O pin objects
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("Pin {0} definition", x))
@@ -280,11 +307,13 @@ Namespace OMDSArduino
                                 End If
                                 If pair.Key = Sharpduino.Constants.PinModes.Analog Then
                                     mypins(x).Name = String.Format("A{0}", x)
+                                    mypins(x).Descr = String.Format("Analog #{0}", x)
                                     imageName = "gauge"
                                 End If
                             Next
                             If String.IsNullOrEmpty(mypins(x).Name) Then
                                 mypins(x).Name = String.Format("D{0}", x)
+                                mypins(x).Descr = String.Format("Digital #{0}", x)
                                 imageName = "led_off"
                             End If
                             If m_Verbose Then
@@ -292,8 +321,16 @@ Namespace OMDSArduino
                             End If
                             mypins(x).Title = mypins(x).Name
                             mypins(x).Script = ""
-                            mypins(x).Button = New OMButton("IOButton" & mypins(x).Name, 0, 0, 140, 140)
-                            mypins(x).Button.Image = theHost.getPluginImage(Me, "Images|" + imageName)
+                            ' Make on-screen objects to be attached to the pins
+                            ' Use container type
+                            mypins(x).Container = New OMContainer("IOContainer_" & mypins(x).Name, 0, 0, 140, 140)
+                            theImage = New OMImage("IOImage_" & mypins(x).Name, 2, 2, 138, 138, theHost.getPluginImage(Me, "Images|" + imageName))
+                            theImage.Visible = True
+                            mypins(x).Container.addControlRelative(theImage) ' Main image for the pin
+                            theLabel = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
+                            theLabel.Visible = True
+                            mypins(x).Container.addControlRelative(theLabel) ' Label to show pin name (preset with default)
+                            mypins(x).Container.Visible = True
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
                             End If
