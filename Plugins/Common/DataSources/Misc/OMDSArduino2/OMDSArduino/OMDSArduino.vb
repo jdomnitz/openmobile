@@ -195,6 +195,19 @@ Namespace OMDSArduino
 
         Private Sub pin_changed()
 
+            ' Just a place holder.  We need a way to know when data has changed
+            ' Use a timer to compare current PIN data to saved PIN data
+            ' Update the PIN array and push datasource if any items have been updated
+
+            ' reset flag
+            ' Loop through mypins() for inputs, get names, fetch current data
+            ' Set flag if different
+            ' Loop
+            ' flag is set, push datasource
+
+            ' theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
+
+
         End Sub
 
         Private Sub BackgroundLoad()
