@@ -163,6 +163,7 @@ Namespace OMDSArduino
         Private settingz As Settings
         Private MaxWait As Int16 = 300
         Private SerialPort1 As System.IO.Ports.SerialPort
+        Dim theImage As OMImage
 
         Private m_ComPort As Integer = 0
         Private s_ComPort As String = ""
@@ -189,7 +190,7 @@ Namespace OMDSArduino
 
         Private myNotification As Notification = New Notification(Me, Me.pluginName(), Me.pluginIcon.image, Me.pluginIcon.image, "OMDSArduino", "")
 
-        Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
+        'Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
         Private WithEvents m_timer As New Timers.Timer(500)
 
@@ -260,11 +261,11 @@ Namespace OMDSArduino
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Waiting for settings load...")
             End If
 
-            If (waitHandle.WaitOne(10000) = False) Then
-                ' We wait here up to 10 seconds to make sure settings have been loaded
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Halted!  LoadSettings did not complete")
-                Exit Sub
-            End If
+            'If (waitHandle.WaitOne(10000) = False) Then
+            '' We wait here up to 10 seconds to make sure settings have been loaded
+            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Halted!  LoadSettings did not complete")
+            'Exit Sub
+            'End If
 
             If m_Verbose Then
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "...Continuing...")
@@ -287,8 +288,9 @@ Namespace OMDSArduino
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
                         End If
                         Dim imageName As String = ""
-                        Dim theImage As OMImage
+                        'Dim theImage As OMImage
                         Dim theLabel As OMLabel
+                        Dim theContainer As OMContainer = New OMContainer("IOContainer_X", 0, 0, 140, 140)
                         For x = 0 To Arduino.GetPins.Count - 1
                             ' Build the I/O pin objects
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("Pin {0} definition", x))
@@ -323,14 +325,16 @@ Namespace OMDSArduino
                             mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
                             ' Use container type
-                            mypins(x).Container = New OMContainer("IOContainer_" & mypins(x).Name, 0, 0, 140, 140)
+                            theContainer.ClearControls()
+                            theContainer.Name = "IOContainer_" & mypins(x).Name
                             theImage = New OMImage("IOImage_" & mypins(x).Name, 2, 2, 138, 138, theHost.getPluginImage(Me, "Images|" + imageName))
                             theImage.Visible = True
-                            mypins(x).Container.addControlRelative(theImage) ' Main image for the pin
                             theLabel = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
                             theLabel.Visible = True
-                            mypins(x).Container.addControlRelative(theLabel) ' Label to show pin name (preset with default)
-                            mypins(x).Container.Visible = True
+                            'theContainer.addControlRelative(theImage)
+                            'theContainer.addControlRelative(theLabel)
+                            theContainer.Visible = True
+                            mypins(x).Container = theContainer  ' Main image for the pin
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
                             End If
@@ -670,7 +674,7 @@ Namespace OMDSArduino
             pValues.Add("5")
             pValues.Add("6")
 
-            waitHandle.Set()
+            'waitHandle.Set()
             AddHandler settingz.OnSettingChanged, AddressOf mySettings_OnSettingChanged
 
             'Settings collections are automatically laid out by the framework
