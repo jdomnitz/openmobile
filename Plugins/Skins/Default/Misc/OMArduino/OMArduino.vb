@@ -42,6 +42,7 @@ Imports OpenMobile.Framework
 Imports OpenMobile.Graphics
 Imports OpenMobile.helperFunctions
 Imports OpenMobile.Plugin
+Imports OMDSArduino.OMDSArduino.ArduinoIO
 
 'Imports Sharpduino.EasyFirmata
 
@@ -111,7 +112,9 @@ Namespace OMArduino
 
             manager.loadPanel(omArduinopanel, True)
 
+            System.Threading.Thread.Sleep(2000)
             theHost.DataHandler.SubscribeToDataSource("OMDSArduino.Arduino.Connected", AddressOf Subscription_Updated)
+            theHost.DataHandler.SubscribeToDataSource("OMDSArduino.Arduino.Pins", AddressOf Subscription_Updated)
 
             initialized = True
 
@@ -136,27 +139,33 @@ Namespace OMArduino
 
                 Case "OMDSArduino.Arduino.Pins"
                     ' Data must have been updated.  Only happens for INPUT pins
-                    For x = 0 To theHost.ScreenCount - 1
-                        mPanel = PanelManager(x, "OMArduino")
-                        mypins = sensor.Value
-                        For Each pin In mypins
-                            ' load user settings into this mypins object
-                            ' Process any defined script here
-                            ' pin.Script - Process the script
-                            If Not mPanel Is Nothing Then
-                                ' Here we process the PIN data as necessary for display
-                                'pin.Name
-                                'pin.CurrentValue
-                                'pin.CurrentMode
-                                'pin.Capabilities
-                                'pin.Container = OM.Container definition (use like a live tile)
-                                'pin.Title
-                                'pin.Descr
-                                'place the controls on the panel
-                                ' refresh the panel
-                            End If
+                    mypins = sensor.Value
+                    If Not mypins Is Nothing Then
+                        For x = 0 To theHost.ScreenCount - 1
+                            mPanel = PanelManager(x, "OMArduino")
+                            For Each pin In mypins
+                                ' load user settings into this mypins object
+                                ' Process any defined script here
+                                ' pin.Script - Process the script
+                                If Not mPanel Is Nothing Then
+                                    ' Here we process the PIN data as necessary for display
+                                    'pin.Name
+                                    'pin.CurrentValue
+                                    'pin.CurrentMode
+                                    'pin.Capabilities
+                                    'pin.Container = OM.Container definition (use like a live tile)
+                                    'pin.Title
+                                    'pin.Descr
+                                    'place the controls on the panel
+                                    ' refresh the panel
+                                End If
+                            Next
                         Next
-                    Next
+                    Else
+                        If m_Verbose Then
+                            theHost.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "No PIN data received.")
+                        End If
+                    End If
 
             End Select
 
