@@ -67,7 +67,12 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Placement is absolute on the screen
         /// </summary>
-        Absolute = 5
+        Absolute = 5,
+
+        /// <summary>
+        /// Centered horizontally
+        /// </summary>
+        CenterVertically = 6
 
     }
 
@@ -216,6 +221,18 @@ namespace OpenMobile.Controls
             {
                 _ItemSize = value;
             }
+        }
+
+        /// <summary>
+        /// Controls the visibility for the controls contained in this group
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="screen"></param>
+        /// <param name="visible"></param>
+        public void SetVisible(OMPanel panel, int screen, bool visible)
+        {
+            foreach (var control in this)
+                panel[screen, control.Name].Visible = visible;
         }
 
     }
