@@ -1186,5 +1186,70 @@ namespace OpenMobile.Controls
             return absolutePoint - this.Region.Location;
         }
 
+        /// <summary>
+        /// Place control in center of other control
+        /// </summary>
+        /// <param name="control"></param>
+        public void PlaceInCenterOfControl(OMControl control)
+        {
+            this.Left = control.Region.Center.X - (this.Width / 2);
+            this.Top = control.Region.Center.Y - (this.Height / 2);
+        }
+
+        /// <summary>
+        /// Places this control relative to another control
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="direction"></param>
+        public void PlaceRelativeToControl(OMControl control, ControlDirections direction)
+        {
+            switch (direction)
+            {
+                case ControlDirections.None:
+                    return;
+                case ControlDirections.Down:
+                    this.Left = control.Left;
+                    this.Top = control.Region.Bottom;
+                    return;
+                case ControlDirections.Up:
+                    this.Left = control.Left;
+                    this.Top = control.Region.Top - this.Height;
+                    return;
+                case ControlDirections.Right:
+                    this.Left = control.Region.Right;
+                    this.Top = control.Top;
+                    return;
+                case ControlDirections.Left:
+                    this.Left = control.Region.Left - this.Width;
+                    this.Top = control.Top;
+                    return;
+                case ControlDirections.CenterHorizontally:
+                    this.Left = control.Region.Center.X - (this.Width / 2);
+                    //this.Top = control.Region.Center.Y - (this.Height / 2);
+                    return;
+                case ControlDirections.RelativeToParent:
+                    this.Left = control.Left + this.Left;
+                    this.Top = control.Top + this.Top;
+                    return;
+                case ControlDirections.Absolute:
+                    return;
+                case ControlDirections.CenterVertically:
+                    //this.Left = control.Region.Center.X - (this.Width / 2);
+                    this.Top = control.Region.Center.Y - (this.Height / 2);
+                    return;
+                default:
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// Sets the size of this control to the same as another control
+        /// </summary>
+        /// <param name="control"></param>
+        public void SetSize_SameAsControl(OMControl control)
+        {
+            this.Width = control.Width;
+            this.Height = control.Height;
+        }
     }
 }

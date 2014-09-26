@@ -144,6 +144,16 @@ namespace OpenMobile.Controls
             addControlGroup(new Point(left, top), cg);
         }
 
+        /// <summary>
+        /// Adds all controls from a controlgroup to a panel relative to another control
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="cg"></param>
+        public void addControlGroup(OMControl control, ControlGroup cg)
+        {
+            addControlGroup(new Point(control.Left, control.Top), cg);
+        }
         private OMControl _LastAddedControl = null;
 
         /// <summary>
