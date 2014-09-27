@@ -288,11 +288,10 @@ Namespace OMDSArduino
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
                         End If
                         Dim imageName As String = ""
-                        'Dim theImage As OMImage
-                        Dim theLabel As OMLabel
-                        Dim theContainer As OMContainer = New OMContainer("IOContainer_X", 0, 0, 140, 140)
                         For x = 0 To Arduino.GetPins.Count - 1
                             ' Build the I/O pin objects
+                            Dim theImage As OMImage
+                            Dim theLabel As OMLabel
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("Pin {0} definition", x))
                             mypins(x) = New ArduinoIO
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
@@ -325,14 +324,13 @@ Namespace OMDSArduino
                             mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
                             ' Use container type
-                            theContainer.ClearControls()
-                            theContainer.Name = "IOContainer_" & mypins(x).Name
+                            Dim theContainer As OMContainer = New OMContainer("IOContainer_" & mypins(x).Name, 0, 0, 140, 140)
                             theImage = New OMImage("IOImage_" & mypins(x).Name, 2, 2, 138, 138, theHost.getPluginImage(Me, "Images|" + imageName))
                             theImage.Visible = True
                             theLabel = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
                             theLabel.Visible = True
-                            'theContainer.addControlRelative(theImage)
-                            'theContainer.addControlRelative(theLabel)
+                            theContainer.addControlRelative(theImage)
+                            theContainer.addControlRelative(theLabel)
                             theContainer.Visible = True
                             mypins(x).Container = theContainer  ' Main image for the pin
                             If m_Verbose Then
