@@ -57,7 +57,8 @@ Namespace OMDSArduino
         Dim myTitle As String = ""
         Dim myScript As String = ""
         Dim myDescr As String = ""
-        Dim myContainer As OMContainer
+        Dim myImage As OMImage
+        Dim myLabel As OMLabel
 
         '''<summary>
         '''The Program assigned name for the pin
@@ -112,13 +113,26 @@ Namespace OMDSArduino
         '''<summary>
         '''Program generated container for on-panel display
         '''</summary>
-        Public Property Container As OMContainer
+        Public Property Label As OMLabel
             ' The button definition to use on the panel for the I/O line
             Get
-                Return myContainer
+                Return myLabel
             End Get
-            Set(value As OMContainer)
-                myContainer = value
+            Set(value As OMLabel)
+                myLabel = value
+            End Set
+        End Property
+
+        '''<summary>
+        '''Program generated container for on-panel display
+        '''</summary>
+        Public Property Image As OMImage
+            ' The button definition to use on the panel for the I/O line
+            Get
+                Return myImage
+            End Get
+            Set(value As OMImage)
+                myImage = value
             End Set
         End Property
 
@@ -163,7 +177,6 @@ Namespace OMDSArduino
         Private settingz As Settings
         Private MaxWait As Int16 = 300
         Private SerialPort1 As System.IO.Ports.SerialPort
-        Dim theImage As OMImage
 
         Private m_ComPort As Integer = 0
         Private s_ComPort As String = ""
@@ -185,6 +198,9 @@ Namespace OMDSArduino
         Private Firmata As Sharpduino.EasyFirmata
         Private Port As Sharpduino.SerialProviders.ComPortProvider
         Private mypins(78) As ArduinoIO
+        Private theContainer As OMContainer
+        Private theImage As OMImage
+        Private theLabel As OMLabel
 
         Public Event lostArduino()
 
@@ -290,8 +306,6 @@ Namespace OMDSArduino
                         Dim imageName As String = ""
                         For x = 0 To Arduino.GetPins.Count - 1
                             ' Build the I/O pin objects
-                            Dim theImage As OMImage
-                            Dim theLabel As OMLabel
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("Pin {0} definition", x))
                             mypins(x) = New ArduinoIO
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
@@ -323,16 +337,11 @@ Namespace OMDSArduino
                             mypins(x).Title = mypins(x).Name
                             mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
-                            ' Use container type
-                            Dim theContainer As OMContainer = New OMContainer("IOContainer_" & mypins(x).Name, 0, 0, 140, 140)
-                            theImage = New OMImage("IOImage_" & mypins(x).Name, 2, 2, 138, 138, theHost.getPluginImage(Me, "Images|" + imageName))
-                            theImage.Visible = True
-                            theLabel = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
-                            theLabel.Visible = True
-                            theContainer.addControlRelative(theImage)
-                            theContainer.addControlRelative(theLabel)
-                            theContainer.Visible = True
-                            mypins(x).Container = theContainer  ' Main image for the pin
+                            mypins(x).Image = New OMImage("IOImage_" & mypins(x).Name, 2, 2, 138, 138)
+                            'mypins(x).Container.controls("IOImage_" & mypins(x).Name).image = theHost.getPluginImage(Me, "Images|" + imageName), ))
+                            mypins(x).Image.Visible = True
+                            mypins(x).Label = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
+                            mypins(x).Label.Visible = True
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
                             End If
