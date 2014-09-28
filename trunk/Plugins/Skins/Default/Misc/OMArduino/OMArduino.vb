@@ -153,10 +153,13 @@ Namespace OMArduino
                                     'pin.CurrentValue
                                     'pin.CurrentMode
                                     'pin.Capabilities
-                                    'pin.Container = OM.Container definition (use like a live tile)
+                                    'pin.Image
+                                    'pin.Label
                                     'pin.Title
                                     'pin.Descr
-                                    'place the controls on the panel
+                                    'build a PIN container, 
+                                    ' add the other objects to the container
+                                    ' place the controls on the panel
                                     ' refresh the panel
                                 End If
                             Next
