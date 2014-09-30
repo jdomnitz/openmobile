@@ -51,19 +51,15 @@ Namespace OMArduino
     Public NotInheritable Class OMArduino
         Inherits HighLevelCode
 
-        Private WithEvents theHost As IPluginHost
         Private m_Verbose As Boolean = False
         Private bannerStyle As Integer = 0
         Private message As String = ""
         Private PopUpMenuStrip As ButtonStrip
         Private initialized As Boolean = False
 
-        Private manager As ScreenManager
         Private thepin As Sharpduino.Pin
 
         Private mypins(78) As OMDSArduino.OMDSArduino.ArduinoIO
-
-        Dim myBanner As InfoBanner = New InfoBanner(bannerStyle, "Please wait...", 5000)
 
         Public Sub New()
 
@@ -75,8 +71,6 @@ Namespace OMArduino
 
             'host.DebugMsg("OMFuel - initialize()", "Initializing...")
 
-            theHost = host
-
             initialized = False
 
             OpenMobile.Threading.SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
@@ -87,9 +81,7 @@ Namespace OMArduino
 
         Private Sub BackgroundLoad()
 
-            'theHost.DebugMsg("OMFuel - BackgroundLoad()", "Continuing in background...")
-
-            manager = New ScreenManager(Me)
+            'om.host.DebugMsg("OMFuel - BackgroundLoad()", "Continuing in background...")
 
             ' Build the main panel
             Dim omArduinopanel As New OMPanel("OMArduino", "OMArduino")
@@ -98,7 +90,7 @@ Namespace OMArduino
 
             ' Subscribe to the various things we wish to monitor on the panel
 
-            Dim text1lbl As New OMLabel("_Text1Lbl", theHost.ClientArea(0).Left + 100, theHost.ClientArea(0).Top + 50, 350, 75)
+            Dim text1lbl As New OMLabel("_Text1Lbl", OM.Host.ClientArea(0).Left + 100, OM.Host.ClientArea(0).Top + 50, 350, 75)
             text1lbl.Text = "Arduino connected:"
             text1lbl.Visible = True
             text1lbl.FontSize = 24
@@ -110,11 +102,19 @@ Namespace OMArduino
             text2lbl.DataSource = "OMDSArduino;OMDSArduino.Arduino.Connected"
             omArduinopanel.addControl(text2lbl)
 
-            manager.loadPanel(omArduinopanel, True)
+            PanelManager.loadPanel(omArduinopanel, True)
 
             System.Threading.Thread.Sleep(2000)
-            theHost.DataHandler.SubscribeToDataSource("OMDSArduino.Arduino.Connected", AddressOf Subscription_Updated)
-            theHost.DataHandler.SubscribeToDataSource("OMDSArduino.Arduino.Pins", AddressOf Subscription_Updated)
+            If Not OM.Host.DataHandler.SubscribeToDataSource("OMDSArduino.Arduino.Connected", AddressOf Subscription_Updated) Then
+                If m_Verbose Then
+                    OM.Host.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "Could not subscribe to OMDSArduino.Arduino.Connected")
+                End If
+            End If
+            If Not OM.Host.DataHandler.SubscribeToDataSource("OMDSArduino.Arduino.Pins", AddressOf Subscription_Updated) Then
+                If m_Verbose Then
+                    OM.Host.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "Could not subscribe to OMDSArduino.Arduino.Pins")
+                End If
+            End If
 
             initialized = True
 
@@ -122,7 +122,7 @@ Namespace OMArduino
 
         Private Sub Subscription_Updated(ByVal sensor As OpenMobile.Data.DataSource)
 
-            'theHost.DebugMsg("OMArduino - Subscription_Updated()", sensor.FullName)
+            'om.host.DebugMsg("OMArduino - Subscription_Updated()", sensor.FullName)
 
             Dim mPanel As OMPanel
 
@@ -130,7 +130,7 @@ Namespace OMArduino
 
                 Case "OMDSArduino.Arduino.Connected"
                     ' The fuel price list has been updated
-                    For x = 0 To theHost.ScreenCount - 1
+                    For x = 0 To OM.Host.ScreenCount - 1
                         mPanel = PanelManager(x, "OMArduino")
                         If Not mPanel Is Nothing Then
                             mPanel.Controls("text2lbl").DataSource_Refresh()
@@ -141,8 +141,7 @@ Namespace OMArduino
                     ' Data must have been updated.  Only happens for INPUT pins
                     mypins = sensor.Value
                     If Not mypins Is Nothing Then
-                        For x = 0 To theHost.ScreenCount - 1
-                            System.Threading.Thread.Sleep(5000)
+                        For x = 0 To OM.Host.ScreenCount - 1
                             If PanelManager.IsPanelLoaded(x, "OMArduino") Then
                                 mPanel = PanelManager(x, "OMArduino")
                                 If Not mPanel Is Nothing Then
@@ -183,25 +182,13 @@ Namespace OMArduino
                         Next
                     Else
                         If m_Verbose Then
-                            theHost.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "No PIN data received.")
+                            OM.Host.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "No PIN data received.")
                         End If
                     End If
 
             End Select
 
         End Sub
-
-        Public Overrides Function loadPanel(ByVal name As String, ByVal screen As Integer) As OpenMobile.Controls.OMPanel
-
-            If manager Is Nothing Then
-                Return Nothing
-            End If
-
-            ' Create a container, calculate the spread of the pin on-screen objects
-
-            Return manager(screen, name)
-
-        End Function
 
         Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
 
@@ -229,44 +216,28 @@ Namespace OMArduino
 
         Public Sub panel_leave(ByVal sender As OMPanel, ByVal screen As Integer)
 
-            theHost.UIHandler.InfoBanner_Hide(screen)
-            'theHost.UIHandler.PopUpMenu.ClearButtonStrip(screen)
+            OM.Host.UIHandler.InfoBanner_Hide(screen)
+            'om.host.UIHandler.PopUpMenu.ClearButtonStrip(screen)
             PopUpMenuStrip = Nothing
 
         End Sub
 
         Public Sub panel_enter(ByVal sender As OMPanel, ByVal screen As Integer)
 
-            'theHost.DebugMsg("OMFuel - panel_enter()", "")
+            'om.host.DebugMsg("OMFuel - panel_enter()", "")
 
             ' loads up the popup with items
 
             PopUpMenuStrip = New ButtonStrip(Me.pluginName, "OMArduino", "PopUpMenuStrip")
 
             If m_Verbose Then
-                theHost.DebugMsg("OMArduino - panel_enter()", "....")
+                OM.Host.DebugMsg("OMArduino - panel_enter()", "....")
             End If
 
-            'theHost.UIHandler.PopUpMenu.SetButtonStrip(PopUpMenuStrip)
+            'om.host.UIHandler.PopUpMenu.SetButtonStrip(PopUpMenuStrip)
             sender.PopUpMenu = PopUpMenuStrip
 
         End Sub
-
-        Public Overrides ReadOnly Property authorEmail As String
-            Get
-                Return "jmullan99@gmail.com"
-            End Get
-        End Property
-
-        Public Overrides ReadOnly Property authorName As String
-            Get
-                Return "John Mullan"
-            End Get
-        End Property
-
-        Public Overrides Function incomingMessage(ByVal message As String, ByVal source As String) As Boolean
-            Return False
-        End Function
 
     End Class
 
