@@ -320,14 +320,14 @@ Namespace OMDSArduino
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                             mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
                             If m_Verbose Then
-                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Value: {0}", mypins(x).CurrentValue))
-                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Mode: {0}", mypins(x).CurrentMode))
+                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Value: {0}", mypins(x).CurrentValue))
+                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Mode: {0}", mypins(x).CurrentMode))
                             End If
                             mypins(x).Capabilities = Arduino.GetPins(x).Capabilities
                             ' Extract capabilities
                             For Each pair As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In mypins(x).Capabilities
                                 If m_Verbose Then
-                                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Capability: {0}", pair.Key))
+                                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Capability: {0}", pair.Key))
                                 End If
                                 If pair.Key = Sharpduino.Constants.PinModes.Analog Then
                                     mypins(x).Name = String.Format("A{0}", x)
@@ -341,7 +341,7 @@ Namespace OMDSArduino
                                 imageName = "led_off"
                             End If
                             If m_Verbose Then
-                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Name: {0}", mypins(x).Name))
+                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Name: {0}", mypins(x).Name))
                             End If
                             mypins(x).Title = mypins(x).Name
                             mypins(x).Script = ""
@@ -352,10 +352,13 @@ Namespace OMDSArduino
                             mypins(x).Label = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
                             mypins(x).Label.Visible = True
                             If m_Verbose Then
-                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
+                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
                             End If
                         Next
                         'mCounter = 0
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Pushing PIN info....")
+                        End If
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
