@@ -291,6 +291,15 @@ Namespace OMDSArduino
 
             Me.connect()
 
+            load_pin_info()
+
+            m_timer.Enabled = True
+            m_timer.Start()
+
+        End Sub
+
+        Private Sub load_pin_info()
+
             If Not Arduino Is Nothing Then
 
                 If Arduino.IsInitialized Then
@@ -715,6 +724,7 @@ Namespace OMDSArduino
                         End If
                     End If
                     Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
+                    load_pin_info()
                 Catch ex As Exception
                     ' Problem with ARDUINO 
                     lost_arduino()
