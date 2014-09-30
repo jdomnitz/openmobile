@@ -127,6 +127,7 @@ namespace OpenMobile.Controls
         protected eListStyle style;
         protected bool _ThrowRun = true;
         protected SmoothAnimator Animation = new SmoothAnimator();
+        protected Timer _tmrListScroll = new Timer(10);
 
         /// <summary>
         /// List items
@@ -607,7 +608,10 @@ namespace OpenMobile.Controls
             throwtmr = new System.Timers.Timer(50);
             throwtmr.Elapsed += new ElapsedEventHandler(throwtmr_Elapsed);
             items = new List<OMListItem>();
+            _tmrListScroll = new Timer(1);
+            _tmrListScroll.Elapsed += new ElapsedEventHandler(_tmrListScroll_Elapsed);
         }
+
         private bool clickSelect;
         /// <summary>
         /// Click only fires when an already selected item is clicked
@@ -1292,32 +1296,32 @@ namespace OpenMobile.Controls
 
         void IThrow.MouseThrowStart(int screen, Point StartLocation, PointF CursorSpeed, PointF scaleFactors, ref bool Cancel)
         {
-            thrown = 0;
+            //thrown = 0;
         }
 
         void IThrow.MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation, PointF CursorSpeed)
         {
-            if (thrown != 0)
-            {
-                Raise_OnScrollStart();
-                throwtmr.Enabled = true;
-            }
+            //if (thrown != 0)
+            //{
+            //    Raise_OnScrollStart();
+            //    throwtmr.Enabled = true;
+            //}
         }
 
         void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
         {
-            throwtmr.Enabled = false;
-            thrown = 0;
-            if (System.Math.Abs(RelativeDistance.Y) > 3)
-                thrown = RelativeDistance.Y;
-            moved += RelativeDistance.Y;
-            if (System.Math.Abs(TotalDistance.Y) > 3)
-            {
-                if (selectedIndex >= 0)
-                    items[selectedIndex].RefreshGraphic = true; 
-                selectedIndex = -1;
-                raiseUpdate(false);
-            }
+            //throwtmr.Enabled = false;
+            //thrown = 0;
+            //if (System.Math.Abs(RelativeDistance.Y) > 3)
+            //    thrown = RelativeDistance.Y;
+            //moved += RelativeDistance.Y;
+            //if (System.Math.Abs(TotalDistance.Y) > 3)
+            //{
+            //    if (selectedIndex >= 0)
+            //        items[selectedIndex].RefreshGraphic = true; 
+            //    selectedIndex = -1;
+            //    raiseUpdate(false);
+            //}
         }
 
         #endregion
@@ -1471,8 +1475,28 @@ namespace OpenMobile.Controls
         /// <param name="RelativeDistance"></param>
         public virtual void MouseMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
-            if (listItemHeight > 0) //<-Just in case
-                Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
+            //if (listItemHeight > 0) //<-Just in case
+            //    Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
+
+            if (TotalDistance.Y > 5)
+            {
+                _tmrListScroll.Enabled = true;
+                _ListScrollStepSize = TotalDistance.Y / 10;
+                //System.Diagnostics.Debug.WriteLine("Mouse move up, TotalDistance: {0}", TotalDistance);
+            }
+            else if (TotalDistance.Y < -5)
+            {
+                _tmrListScroll.Enabled = true;
+                _ListScrollStepSize = TotalDistance.Y / 10;
+                //System.Diagnostics.Debug.WriteLine("Mouse move down, TotalDistance: {0}", TotalDistance);
+            }
+        }
+
+        protected int _ListScrollStepSize = 1;
+        void _tmrListScroll_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            moved += _ListScrollStepSize;
+            base.Refresh();
         }
 
         /// <summary>
@@ -1535,7 +1559,9 @@ namespace OpenMobile.Controls
                     SafeThread.Asynchronous(delegate() { HighlightedIndexChanged(this, this.containingScreen()); }, null);
             }
         }
+
         private int lastSelected = -1;
+
         /// <summary>
         /// The mouse has been pressed
         /// </summary>
@@ -1545,6 +1571,7 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public virtual void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation)
         {
+            System.Diagnostics.Debug.WriteLine("Mouse move, StartLocation: {0}", StartLocation);
             throwtmr.Enabled = false;
             lastSelected = selectedIndex;
             focused = true;
@@ -1563,7 +1590,8 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public virtual void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
-            //
+            _tmrListScroll.Enabled = false;
+            System.Diagnostics.Debug.WriteLine("Mouse up, TotalDistance: {0}", TotalDistance);
         }
 
         #endregion

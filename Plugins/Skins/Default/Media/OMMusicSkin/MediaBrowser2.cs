@@ -96,8 +96,9 @@ namespace OMMusicSkin
                     175, 
                     125,
                     corners: GraphicCorners.Right,
-                    //borderColor: Color.Transparent,
-                    text: "Artist"
+                    //borderColor: Color.Transparent,                    
+                    text: "  Artists",
+                    iconImg: OM.Host.getSkinImage("AIcons|6-social-cc-bcc").image
                 );
             btnListFilter_Artist.OnClick += new userInteraction(btnListFilter_Artist_OnClick);
             panel.addControl(btnListFilter_Artist);
@@ -143,7 +144,9 @@ namespace OMMusicSkin
                     125,
                     corners: GraphicCorners.Left,
                 //borderColor: Color.Transparent,
-                    text: "Right 1"
+                    text: "  Play",
+                    iconImg: OM.Host.getSkinImage("AIcons|9-av-play").image
+                    
                 );
             panel.addControl(btnRight1);
 
@@ -156,7 +159,8 @@ namespace OMMusicSkin
                     btnListFilter_Artist.Height,
                     corners: GraphicCorners.Left,
                 //borderColor: Color.Transparent,
-                    text: "Right 2"
+                    text: "  Add",
+                    iconImg: OM.Host.getSkinImage("AIcons|9-av-add-to-queue").image
                 );
             panel.addControl(btnRight2, ControlDirections.Down, 0, 20);
 
@@ -169,8 +173,9 @@ namespace OMMusicSkin
                     btnListFilter_Artist.Height,
                     corners: GraphicCorners.Left,
                 //borderColor: Color.Transparent,
-                    text: "Right 3"
-                );
+                    text: "  Playlist",
+                    iconImg: OM.Host.getSkinImage("AIcons|4-collections-view-as-list").image
+               );
             panel.addControl(btnRight3, ControlDirections.Down, 0, 20);
 
             #endregion
