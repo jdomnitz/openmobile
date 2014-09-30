@@ -142,27 +142,44 @@ Namespace OMArduino
                     mypins = sensor.Value
                     If Not mypins Is Nothing Then
                         For x = 0 To theHost.ScreenCount - 1
-                            mPanel = PanelManager(x, "OMArduino")
-                            For Each pin In mypins
-                                ' load user settings into this mypins object
-                                ' Process any defined script here
-                                ' pin.Script - Process the script
+                            System.Threading.Thread.Sleep(5000)
+                            If PanelManager.IsPanelLoaded(x, "OMArduino") Then
+                                mPanel = PanelManager(x, "OMArduino")
                                 If Not mPanel Is Nothing Then
-                                    ' Here we process the PIN data as necessary for display
-                                    'pin.Name
-                                    'pin.CurrentValue
-                                    'pin.CurrentMode
-                                    'pin.Capabilities
-                                    'pin.Image
-                                    'pin.Label
-                                    'pin.Title
-                                    'pin.Descr
-                                    'build a PIN container, 
-                                    ' add the other objects to the container
-                                    ' place the controls on the panel
-                                    ' refresh the panel
+                                    For Each pin In mypins
+                                        ' load user settings into this mypins object
+                                        ' Process any defined script here
+                                        ' pin.Script - Process the script
+                                        ' Here we process the PIN data as necessary for display
+                                        'pin.Name
+                                        'pin.CurrentValue
+                                        'pin.CurrentMode
+                                        'pin.Capabilities
+                                        'pin.Image
+                                        'pin.Label
+                                        'pin.Title
+                                        'pin.Descr
+                                        'build a PIN container, 
+                                        ' add the other objects to the container
+                                        ' place the controls on the panel
+                                        ' refresh the panel
+                                        If Not mPanel.Controls(pin.Name) Is Nothing Then
+                                            ' Replace contents of current on-screen control
+                                            mPanel.Refresh()
+                                        Else
+                                            ' Add new control to the screen
+                                            Dim myContainer As OMContainer = New OMContainer(pin.Name, 10, 10, 140, 140)
+                                            myContainer.addControlRelative(pin.Image)
+                                            myContainer.addControlRelative(pin.Label)
+                                            mPanel.addControl(myContainer)
+                                            mPanel.Refresh()
+                                        End If
+                                    Next
                                 End If
-                            Next
+                            Else
+                                ' Our panel is not loaded
+                                x = x
+                            End If
                         Next
                     Else
                         If m_Verbose Then
