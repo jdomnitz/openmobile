@@ -90,7 +90,7 @@ Namespace OMArduino
 
             ' Subscribe to the various things we wish to monitor on the panel
 
-            Dim text1lbl As New OMLabel("_Text1Lbl", OM.Host.ClientArea(0).Left + 100, OM.Host.ClientArea(0).Top + 50, 350, 75)
+            Dim text1lbl As New OMLabel("_Text1Lbl", OM.Host.ClientArea(0).Left + 100, OM.Host.ClientArea(0).Top + 350, 350, 75)
             text1lbl.Text = "Arduino connected:"
             text1lbl.Visible = True
             text1lbl.FontSize = 24
@@ -99,7 +99,7 @@ Namespace OMArduino
             Dim text2lbl As New OMLabel("_Text2Lbl", text1lbl.Left + text1lbl.Width + 10, text1lbl.Top, 100, 75)
             text2lbl.Visible = True
             text2lbl.FontSize = 24
-            text2lbl.DataSource = "OMDSArduino;OMDSArduino.Arduino.Connected"
+            text2lbl.DataSource = "OMDSArduino.Arduino.Connected"
             omArduinopanel.addControl(text2lbl)
 
             PanelManager.loadPanel(omArduinopanel, True)
@@ -126,17 +126,11 @@ Namespace OMArduino
             'om.host.DebugMsg("OMArduino - Subscription_Updated()", sensor.FullName)
 
             Dim mPanel As OMPanel
+            Dim mContainer As OMContainer
+
+            'If Not initialized Then Exit Sub
 
             Select Case sensor.FullName
-
-                Case "OMDSArduino.Arduino.Connected"
-                    ' The fuel price list has been updated
-                    For x = 0 To OM.Host.ScreenCount - 1
-                        mPanel = PanelManager(x, "OMArduino")
-                        If Not mPanel Is Nothing Then
-                            mPanel.Controls("text2lbl").DataSource_Refresh()
-                        End If
-                    Next
 
                 Case "OMDSArduino.Arduino.Pins"
                     ' Data must have been updated.  Only happens for INPUT pins
@@ -146,6 +140,7 @@ Namespace OMArduino
                             If PanelManager.IsPanelLoaded(x, "OMArduino") Then
                                 mPanel = PanelManager(x, "OMArduino")
                                 If Not mPanel Is Nothing Then
+                                    Dim z As Integer = 0
                                     For Each pin In mypins
                                         ' load user settings into this mypins object
                                         ' Process any defined script here
@@ -163,15 +158,20 @@ Namespace OMArduino
                                         ' add the other objects to the container
                                         ' place the controls on the panel
                                         ' refresh the panel
-                                        If Not mPanel.Controls(pin.Name) Is Nothing Then
-                                            ' Replace contents of current on-screen control
-                                            mPanel.Refresh()
-                                        Else
+                                        mContainer = mPanel.Find(pin.Name)
+                                        If mContainer Is Nothing Then
                                             ' Add new control to the screen
-                                            Dim myContainer As OMContainer = New OMContainer(pin.Name, 10, 10, 140, 140)
+                                            Dim myContainer As OMContainer = New OMContainer(pin.Name, 10 + (z * 140), 10, 140, 140)
+                                            pin.Image.Visible = True
                                             myContainer.addControlRelative(pin.Image)
-                                            myContainer.addControlRelative(pin.Label)
+                                            pin.Label.Visible = True
+                                            pin.Label.BackgroundColor = Color.Transparent
+                                            myContainer.addControl(pin.Label)
                                             mPanel.addControl(myContainer)
+                                            mPanel.Refresh()
+                                            z = z + 1
+                                        Else
+                                            ' Replace contents of current on-screen control
                                             mPanel.Refresh()
                                         End If
                                     Next
