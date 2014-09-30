@@ -166,7 +166,7 @@ Namespace OMArduino
                                             myContainer.addControlRelative(pin.Image)
                                             pin.Label.Visible = True
                                             pin.Label.BackgroundColor = Color.Transparent
-                                            myContainer.addControl(pin.Label)
+                                            myContainer.addControlRelative(pin.Label)
                                             mPanel.addControl(myContainer)
                                             mPanel.Refresh()
                                             z = z + 1
