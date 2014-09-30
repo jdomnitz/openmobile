@@ -115,6 +115,7 @@ Namespace OMArduino
                     OM.Host.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "Could not subscribe to OMDSArduino.Arduino.Pins")
                 End If
             End If
+            mypins = TryCast(OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Pins").Value, Array)
 
             initialized = True
 
