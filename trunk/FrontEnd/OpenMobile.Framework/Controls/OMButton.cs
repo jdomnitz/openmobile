@@ -262,6 +262,8 @@ namespace OpenMobile.Controls
                 gd.CornersRadiusAppliesTo = (GraphicCorners)corners;
             if (icon != null)
                 gd.Icon = icon;
+            if (iconImg != null)
+                gd.IconImage = iconImg;
 
             // Default font data            
             Font f = OpenMobile.Graphics.Font.OpenMobileDefault;
