@@ -356,6 +356,7 @@ Namespace OMDSArduino
                             End If
                         Next
                         'mCounter = 0
+                        System.Threading.Thread.Sleep(5000)
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
