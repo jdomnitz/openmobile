@@ -313,9 +313,9 @@ Namespace OMDSArduino
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
                         End If
                         Dim imageName As String = ""
+                        Dim pin_info As String = ""
                         For x = 0 To Arduino.GetPins.Count - 1
                             ' Build the I/O pin objects
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("Pin {0} definition", x))
                             mypins(x) = New ArduinoIO
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                             mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
@@ -347,18 +347,15 @@ Namespace OMDSArduino
                             mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
                             mypins(x).Image = New OMImage("IOImage_" & mypins(x).Name, 2, 2, 138, 138)
-                            'mypins(x).Container.controls("IOImage_" & mypins(x).Name).image = theHost.getPluginImage(Me, "Images|" + imageName), ))
                             mypins(x).Image.Visible = True
                             mypins(x).Label = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
                             mypins(x).Label.Visible = True
                             If m_Verbose Then
-                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Image: {0}", imageName))
+                                pin_info = String.Format("Pin {0}> Name:{1} Descr:{2} Label:{3}, Image:{4}", x, mypins(x).Name, mypins(x).Title, mypins(x).Label, imageName)
+                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
                             End If
                         Next
                         'mCounter = 0
-                        If m_Verbose Then
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Pushing PIN info....")
-                        End If
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
