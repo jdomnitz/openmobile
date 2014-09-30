@@ -37,14 +37,15 @@ namespace OMNetworking
             networkingPanel.addControl(networkList);
 
             OMButton wifiRefresh = OMButton.PreConfigLayout_BasicStyle("wifiRefresh", networkList.Left  + (networkList.Width / 4), networkList.Top + networkList.Height + 12, (networkList.Width / 4) * 2, 80, GraphicCorners.All);
+			wifiRefresh.OnClick += new userInteraction(wifiRefresh_OnClick);
             wifiRefresh.Text = "Scan";
             networkingPanel.addControl(wifiRefresh);
 
             //WinWifi
 
 
-            //base.PanelManager.loadPanel(networkingPanel, true);
-            base.PanelManager.loadSharedPanel(networkingPanel, true);
+            base.PanelManager.loadPanel(networkingPanel, true);
+            //base.PanelManager.loadSharedPanel(networkingPanel, true);
 
             OM.Host.DataHandler.SubscribeToDataSource("WinWifi;Networking.WiFi.StatusChange", Subscription_Updated);
             OM.Host.DataHandler.SubscribeToDataSource("WinWifi;Networking.WiFi.Networks", Subscription_Updated);
@@ -56,78 +57,59 @@ namespace OMNetworking
         {
             if (sensor.Value == null)
                 return;
-            OMList networkList = (OMList)base.PanelManager[0, "networkingPanel"]["networkList"];
+			for (int j = 0; j < OM.Host.ScreenCount; j++) {
+				OMList networkList = (OMList)base.PanelManager [0, "networkingPanel"] ["networkList"];
 
-            if (sensor.NameLevel3 == "StatusChange")
-            {
-                string[] sensorSplit = sensor.Value.ToString().Split('.');
-                for (int i = 0; i < networkList.Count; i++)
-                {
-                    if (networkList[i].text.Contains(sensorSplit[0]))
-                    {
-                        if (sensorSplit[1] == "Connecting")
-                        {
-                            if (!networkList[i].subItem.Contains("( Connecting )" + " - " + sensorSplit[2]))
-                                networkList[i].subItem = "( Connecting )";
-                        }
-                        else if (sensorSplit[1] == "Connected")
-                        {
-                            if (!networkList[i].subItem.Contains("( Click To Disconnect )" + " - " + sensorSplit[2]))
-                                networkList[i].subItem = "( Click To Disconnect )" + " - " + sensorSplit[2];
-                        }
-                        else if (sensorSplit[1] == "NotConnected")
-                        {
-                            if (!networkList[i].subItem.Contains("( Connecting )" + " - " + sensorSplit[2]))
-                                networkList[i].subItem = "( Connecting )" + " - " + sensorSplit[2];
-                        }
-                        else if (sensorSplit[1] == "Disonnected")
-                        {
-                            if (!networkList[i].subItem.Contains("( Click To Connect )" + " - " + sensorSplit[2]))
-                                networkList[i].subItem = "( Click To Connect )" + " - " + sensorSplit[2];
-                        }
-                    }
-                }
-            }
-            else
-            {
-                List<Dictionary<string, object>> results = (List<Dictionary<string, object>>)sensor.Value;
-                for (int i = 0; i < results.Count; i++)
-                {
-                    if (networkList.Items.Count <= i)
-                    {
-                        //add
-                        networkList.Add(new OMListItem(String.Format("{0} ( {1} )", results[i]["NetworkName"].ToString(), results[i]["ConnectionType"].ToString()), "", ((imageItem)results[i]["SignalImage"]).image, new OMListItem.subItemFormat(), results[i]["UID"]));
-                        networkList[networkList.Count - 1].subitemFormat.font = new Font(networkList.Font);
+				if (sensor.NameLevel3 == "StatusChange") {
+					string[] sensorSplit = sensor.Value.ToString ().Split ('.');
+					for (int i = 0; i < networkList.Count; i++) {
+						if (networkList [i].text.Contains (sensorSplit [0])) {
+							if (sensorSplit [1] == "Connecting") {
+								if (!networkList [i].subItem.Contains ("( Connecting )" + " - " + sensorSplit [2]))
+									networkList [i].subItem = "( Connecting )";
+							} else if (sensorSplit [1] == "Connected") {
+								if (!networkList [i].subItem.Contains ("( Click To Disconnect )" + " - " + sensorSplit [2]))
+									networkList [i].subItem = "( Click To Disconnect )" + " - " + sensorSplit [2];
+							} else if (sensorSplit [1] == "NotConnected") {
+								if (!networkList [i].subItem.Contains ("( Connecting )" + " - " + sensorSplit [2]))
+									networkList [i].subItem = "( Connecting )" + " - " + sensorSplit [2];
+							} else if (sensorSplit [1] == "Disonnected") {
+								if (!networkList [i].subItem.Contains ("( Click To Connect )" + " - " + sensorSplit [2]))
+									networkList [i].subItem = "( Click To Connect )" + " - " + sensorSplit [2];
+							}
+						}
+					}
+				} else {
+					List<Dictionary<string, object>> results = (List<Dictionary<string, object>>)sensor.Value;
+					for (int i = 0; i < results.Count; i++) {
+						if (networkList.Items.Count <= i) {
+							//add
+							networkList.Add (new OMListItem (String.Format ("{0} ( {1} )", results [i] ["NetworkName"].ToString (), results [i] ["ConnectionType"].ToString ()), "", ((imageItem)results [i] ["SignalImage"]).image, new OMListItem.subItemFormat (), results [i] ["UID"]));
+							networkList [networkList.Count - 1].subitemFormat.font = new Font (networkList.Font);
 
-                    }
-                    else
-                    {
-                        //change
-                        networkList[i].text = String.Format("{0} ( {1} )", results[i]["NetworkName"].ToString(), results[i]["ConnectionType"].ToString());
-                        networkList[i].image = ((imageItem)results[i]["SignalImage"]).image;
-                        networkList[i].tag = results[i]["UID"];
-                    }
-                    if (results[i]["IsConnected"].ToString() == "True")
-                    {
-                        if (!networkList[i].subItem.Contains("( Click To Disconnect )" + " - " + results[i]["InterfaceConnectedName"]))
-                            networkList[i].subItem = "( Click To Disconnect )" + " - " + results[i]["InterfaceConnectedName"];
-                    }
-                    else
-                    {
-                        if (!networkList[i].subItem.Contains("( Click To Connect )"))
-                            networkList[i].subItem = "( Click To Connect )";
-                    }
-                }
-                if (networkList.Items.Count > results.Count)
-                {
-                    //remove the rest
-                    for (int i = results.Count; i < networkList.Count; i++)
-                    {
-                        networkList.Items.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
+						} else {
+							//change
+							networkList [i].text = String.Format ("{0} ( {1} )", results [i] ["NetworkName"].ToString (), results [i] ["ConnectionType"].ToString ());
+							networkList [i].image = ((imageItem)results [i] ["SignalImage"]).image;
+							networkList [i].tag = results [i] ["UID"];
+						}
+						if (results [i] ["IsConnected"].ToString () == "True") {
+							if (!networkList [i].subItem.Contains ("( Click To Disconnect )" + " - " + results [i] ["InterfaceConnectedName"]))
+								networkList [i].subItem = "( Click To Disconnect )" + " - " + results [i] ["InterfaceConnectedName"];
+						} else {
+							if (!networkList [i].subItem.Contains ("( Click To Connect )"))
+								networkList [i].subItem = "( Click To Connect )";
+						}
+					}
+					if (networkList.Items.Count > results.Count) {
+						//remove the rest
+						for (int i = results.Count; i < networkList.Count; i++) {
+							networkList.Items.RemoveAt (i);
+							i--;
+						}
+					}
+				}
+			}
         }
 
         void networkList_OnClick(OMControl sender, int screen)
@@ -146,5 +128,11 @@ namespace OMNetworking
                 OM.Host.CommandHandler.ExecuteCommand("Networking.WiFi.Disconnect", new object[] { networkList.SelectedItem.tag.ToString() });
             }
         }
+
+		void wifiRefresh_OnClick(OMControl sender, int screen)
+		{
+			OM.Host.CommandHandler.ExecuteCommand("Networking.WiFi.Refresh", new object[] { });
+		}
+
     }
 }
