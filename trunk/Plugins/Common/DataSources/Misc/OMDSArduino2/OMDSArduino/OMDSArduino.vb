@@ -208,7 +208,7 @@ Namespace OMDSArduino
 
         'Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
-        Private WithEvents m_timer As New Timers.Timer(500)
+        Private WithEvents m_timer As New Timers.Timer(2000)
 
         Public Sub New()
 
@@ -291,10 +291,31 @@ Namespace OMDSArduino
 
             Me.connect()
 
-            load_pin_info()
+            'load_pin_info()
 
             m_timer.Enabled = True
             m_timer.Start()
+
+        End Sub
+
+        Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
+
+            If Not Arduino Is Nothing Then
+                Try
+                    If Arduino.IsInitialized Then
+                        If toggle = True Then
+                            toggle = False
+                        Else
+                            toggle = True
+                        End If
+                    End If
+                    Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
+                    load_pin_info()
+                Catch ex As Exception
+                    ' Problem with ARDUINO 
+                    lost_arduino()
+                End Try
+            End If
 
         End Sub
 
@@ -310,7 +331,7 @@ Namespace OMDSArduino
 
                     Try
                         If m_Verbose Then
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
+                            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
                         End If
                         Dim imageName As String = ""
                         Dim pin_info As String = ""
@@ -352,11 +373,10 @@ Namespace OMDSArduino
                             mypins(x).Label.Visible = True
                             If m_Verbose Then
                                 pin_info = String.Format("Pin {0}> Name:{1} Descr:{2} Label:{3}, Image:{4}", x, mypins(x).Name, mypins(x).Title, mypins(x).Label, imageName)
-                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
                             End If
                         Next
                         'mCounter = 0
-                        System.Threading.Thread.Sleep(5000)
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
@@ -710,27 +730,6 @@ Namespace OMDSArduino
                 Case "Settings.Verbose" ' Debug logging mode
                     m_Verbose = settings.Value
             End Select
-
-        End Sub
-
-        Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
-
-            If Not Arduino Is Nothing Then
-                Try
-                    If Arduino.IsInitialized Then
-                        If toggle = True Then
-                            toggle = False
-                        Else
-                            toggle = True
-                        End If
-                    End If
-                    Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
-                    load_pin_info()
-                Catch ex As Exception
-                    ' Problem with ARDUINO 
-                    lost_arduino()
-                End Try
-            End If
 
         End Sub
 
