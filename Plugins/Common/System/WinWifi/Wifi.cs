@@ -424,7 +424,7 @@ namespace WinWifi
                 theHost = host;
 
                 //commands
-                OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Networking", "WiFi", "Refresh", RefreshWifi, 2, false, "Refreshes the interfaces and networks"));
+                OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Networking", "WiFi", "Refresh", RefreshWifi, 0, false, "Refreshes the interfaces and networks"));
                 OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Networking", "WiFi", "Connect", ConnectToWiFi, 2, false, "Connect to the specified wifi network: param={int screen, string UID}"));
                 OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Networking", "WiFi", "Disconnect", DisconnectFromWiFi, 0, false, "Disconnects from wifi or the specified wifi network(s): OPTIONAL param={string UID, string UID, string UID...}"));
 
