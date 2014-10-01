@@ -58,7 +58,7 @@ namespace OMNetworking
             if (sensor.Value == null)
                 return;
 			for (int j = 0; j < OM.Host.ScreenCount; j++) {
-				OMList networkList = (OMList)base.PanelManager [0, "networkingPanel"] ["networkList"];
+				OMList networkList = (OMList)base.PanelManager [j, "networkingPanel"] ["networkList"];
 
 				if (sensor.NameLevel3 == "StatusChange") {
 					string[] sensorSplit = sensor.Value.ToString ().Split ('.');
