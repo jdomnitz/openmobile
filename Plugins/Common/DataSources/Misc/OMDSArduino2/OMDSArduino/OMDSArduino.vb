@@ -208,7 +208,9 @@ Namespace OMDSArduino
 
         'Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
-        Private WithEvents m_timer As New Timers.Timer(2000)
+
+        Private WithEvents m_timer As New Timers.Timer(250) ' Fetch pin info this often
+        Private WithEvents m_toggle_timer As New Timers.Timer(500) ' Test toggle LED this often
 
         Public Sub New()
 
@@ -293,30 +295,6 @@ Namespace OMDSArduino
 
             'load_pin_info()
 
-            m_timer.Enabled = True
-            m_timer.Start()
-
-        End Sub
-
-        Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
-
-            If Not Arduino Is Nothing Then
-                Try
-                    If Arduino.IsInitialized Then
-                        If toggle = True Then
-                            toggle = False
-                        Else
-                            toggle = True
-                        End If
-                    End If
-                    Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
-                    load_pin_info()
-                Catch ex As Exception
-                    ' Problem with ARDUINO 
-                    lost_arduino()
-                End Try
-            End If
-
         End Sub
 
         Private Sub load_pin_info()
@@ -326,8 +304,6 @@ Namespace OMDSArduino
                 If Arduino.IsInitialized Then
 
                     ' Do something here
-                    connected = True
-                    theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Connected", connected)
 
                     Try
                         If m_Verbose Then
@@ -338,6 +314,14 @@ Namespace OMDSArduino
                         For x = 0 To Arduino.GetPins.Count - 1
                             ' Build the I/O pin objects
                             mypins(x) = New ArduinoIO
+                            If x = 13 Then
+                                If Not String.IsNullOrEmpty(mypins(x).CurrentValue) Then
+                                    If mypins(x).CurrentValue <> Arduino.GetPins(x).CurrentValue Then
+                                        'Data has changed
+                                        x = x
+                                    End If
+                                End If
+                            End If
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                             mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
                             If m_Verbose Then
@@ -347,9 +331,6 @@ Namespace OMDSArduino
                             mypins(x).Capabilities = Arduino.GetPins(x).Capabilities
                             ' Extract capabilities
                             For Each pair As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In mypins(x).Capabilities
-                                If m_Verbose Then
-                                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Capability: {0}", pair.Key))
-                                End If
                                 If pair.Key = Sharpduino.Constants.PinModes.Analog Then
                                     mypins(x).Name = String.Format("A{0}", x)
                                     mypins(x).Descr = String.Format("Analog #{0}", x)
@@ -359,25 +340,28 @@ Namespace OMDSArduino
                             If String.IsNullOrEmpty(mypins(x).Name) Then
                                 mypins(x).Name = String.Format("D{0}", x)
                                 mypins(x).Descr = String.Format("Digital #{0}", x)
-                                imageName = "led_off"
+                                If mypins(x).CurrentValue = 0 Then
+                                    imageName = "led_off"
+                                Else
+                                    imageName = "led_red"
+                                End If
                             End If
-                            If m_Verbose Then
-                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Name: {0}", mypins(x).Name))
-                            End If
+
                             mypins(x).Title = mypins(x).Name
                             mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
-                            mypins(x).Image = New OMImage("IOImage_" & mypins(x).Name, 2, 2, 138, 138)
+                            mypins(x).Image = New OMImage("IOImage_" & mypins(x).Name, 0, 0, 100, 100)
+                            mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|" & imageName)
                             mypins(x).Image.Visible = True
-                            mypins(x).Label = New OMLabel("IOLabel_" & mypins(x).Name, 2, 120, 138, 138, mypins(x).Name)
+                            mypins(x).Label = New OMLabel("IOLabel_" & mypins(x).Name, 0, 0, 100, 20, mypins(x).Name)
                             mypins(x).Label.Visible = True
                             If m_Verbose Then
                                 pin_info = String.Format("Pin {0}> Name:{1} Descr:{2} Label:{3}, Image:{4}", x, mypins(x).Name, mypins(x).Title, mypins(x).Label, imageName)
-                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
+                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
                             End If
                         Next
                         'mCounter = 0
-                        theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
+                        theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
                     End Try
@@ -481,6 +465,12 @@ Namespace OMDSArduino
                 myNotification.Text = "Arduino not found."
             Else
                 ' Arduino found
+                connected = True
+                m_timer.Enabled = True
+                m_timer.Start()
+                m_toggle_timer.Enabled = True
+                m_toggle_timer.Start()
+                theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Connected", connected)
                 myNotification.Text = String.Format("Connected to Arduino on {0}.", s_ComPort)
             End If
 
@@ -548,6 +538,34 @@ Namespace OMDSArduino
                     theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Serial access lock released.")
                 End If
             End Try
+
+        End Sub
+
+        Private Sub toggle_timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_toggle_timer.Elapsed
+
+            If Not Arduino Is Nothing Then
+                Try
+                    If Arduino.IsInitialized Then
+                        If toggle = True Then
+                            toggle = False
+                        Else
+                            toggle = True
+                        End If
+                        Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
+                    End If
+                Catch ex As Exception
+                    ' Problem with ARDUINO 
+                    lost_arduino()
+                End Try
+            End If
+
+        End Sub
+
+        Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
+
+            m_timer.Stop()
+            load_pin_info()
+            m_timer.Start()
 
         End Sub
 
