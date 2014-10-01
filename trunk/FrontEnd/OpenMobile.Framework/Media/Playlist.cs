@@ -1367,10 +1367,20 @@ namespace OpenMobile.Media
         }
 
         /// <summary>
+        /// Adds multiple items to the playlist if it's not already in the list
+        /// </summary>
+        /// <param name="items"></param>
+        public void AddRangeDistinct(IEnumerable<mediaInfo> items)
+        {
+            foreach (var item in items)
+                AddDistinct(item);
+        }
+        /// <summary>
         /// Adds a new media item to the playlist if it's not already in the list
         /// </summary>
         /// <param name="item"></param>
-        public void AddDistinct(mediaInfo item)
+        /// <returns>Returns true if item was added</returns>
+        public bool AddDistinct(mediaInfo item)
         {
             // Only add item if not already present in items
             if (_Items.Find(x => x.Location == item.Location) == null)
@@ -1379,7 +1389,9 @@ namespace OpenMobile.Media
                 GenerateQueue();
                 this.OnPropertyChanged("Items");
                 Raise_OnList_Items_ItemInserted(_Items.Count - 1);
+                return true;
             }
+            return false;
         }
 
         /// <summary>
@@ -1441,7 +1453,7 @@ namespace OpenMobile.Media
                 // Fill queue starting from the first free position in the queue
                 for (int i = 0; i < addCount; i++)
                 {
-                    if (_Random)
+                    if (_Random && _Items.Count > 1)
                     {
                         // Find a random items that's not already in the history
                         int newIndex = OpenMobile.Framework.Math.Calculation.RandomNumber(0, _Items.Count - 1);
@@ -1454,10 +1466,31 @@ namespace OpenMobile.Media
                     else
                     {   // Add to queue
                         if (_Queue.Count > 0)
-                            _Queue.AddLast(_Queue.Last.Value + 1);
+                        {
+                            var index = _Queue.Last.Value;
+                            if (index < 0)
+                                index = 0;
+                            if (index >= _Items.Count)
+                                index = _Items.Count - 2;
+                            _Queue.AddLast(index + 1);
+                        }
                         else
-                            if (_Items.Count > _CurrentIndex + 1)
+                        {
+                            if (_Items.Count == 1)
+                            {
+                                _CurrentIndex = 0;
+                                _Queue.AddLast(_CurrentIndex);
+                            }
+                            else
+                            {
+                                if (_CurrentIndex < 0)
+                                    _CurrentIndex = 0;
+                                if (_CurrentIndex >= _Items.Count)
+                                    _CurrentIndex = _Items.Count - 2;
+                                //if (_Items.Count > _CurrentIndex + 1)
                                 _Queue.AddLast(_CurrentIndex + 1);
+                            }
+                        }
                     }
                 }
             }
@@ -1480,10 +1513,20 @@ namespace OpenMobile.Media
 
                 int nextIndex = _Queue.First.Value;
 
+                if (nextIndex < 0)
+                    nextIndex = _Items.Count - 1;
+                if (nextIndex >= _Items.Count)
+                    nextIndex = 0;
+
                 // Remove item from queue
                 _Queue.RemoveFirst();
 
                 bool historyItemRemoved = false;
+
+                //if (_CurrentIndex < 0)
+                //    _CurrentIndex = 0;
+                //if (_CurrentIndex >= _Items.Count)
+                //    _CurrentIndex = _Items.Count - 1;
 
                 // Add item to history
                 _History.AddLast(_CurrentIndex);
@@ -1523,14 +1566,22 @@ namespace OpenMobile.Media
                 // Move back trough history
                 int nextIndex = _History.Last.Value;
 
+                if (_CurrentIndex < 0)
+                    _CurrentIndex = 0;
+                if (_CurrentIndex >= _Items.Count)
+                    _CurrentIndex = _Items.Count - 1;
+
                 // Remove item from history
                 _History.RemoveLast();
 
-                // Push item back to queue
-                _Queue.AddFirst(_CurrentIndex);                               
+                if (nextIndex >= 0 && nextIndex < _Items.Count)
+                {
+                    // Push item back to queue
+                    _Queue.AddFirst(_CurrentIndex);
 
-                // Go to next item in queue
-                CurrentIndex = nextIndex;
+                    // Go to next item in queue
+                    CurrentIndex = nextIndex;
+                }
 
                 GenerateQueue(false);
 
