@@ -1400,6 +1400,9 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public bool addControl(ControlGroup cg, ControlDirections direction)
         {
+            if (this.parent == null)
+                throw new Exception("OMContainer must be added to a panel before controls can be added to the OMContainer");
+
             lock (_Controls)
             {
                 if (cg == null)

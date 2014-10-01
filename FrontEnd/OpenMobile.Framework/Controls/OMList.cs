@@ -727,6 +727,29 @@ namespace OpenMobile.Controls
             get { return scrollbars; }
             set { scrollbars = value; }
         }
+
+        /// <summary>
+        /// Have we scrolled to the bottom of the list
+        /// </summary>
+        public bool ScrolledToBottomOfList
+        {
+            get
+            {
+                return moved <= Height - (items.Count * listItemHeight);
+            }
+        }
+
+        /// <summary>
+        /// Have we scrolled to the top of the list
+        /// </summary>
+        public bool ScrolledToTopOfList
+        {
+            get
+            {
+                return moved >= 0;
+            }
+        }
+
         int count;
         /// <summary>
         /// Draws the control
@@ -1010,175 +1033,6 @@ namespace OpenMobile.Controls
             if (throwtmr.Enabled)
                 base.Refresh();
         }
-        /*
-        public override void Render(Graphics.Graphics g, renderingParams e)
-        {
-            lock (g)
-            {
-                if ((width == 0) || (height == 0))
-                    return;
-                float tmp = 1;
-                if (this.Mode == eModeType.transitioningIn)
-                    tmp = e.globalTransitionIn;
-                else if ((this.Mode == eModeType.transitioningOut) || (this.Mode == eModeType.ClickedAndTransitioningOut))
-                    tmp = e.globalTransitionOut;
-                Rectangle r = g.Clip; //Save the drawing size
-                g.Clip = this.toRegion(); //But only draw out control
-                if (background != Color.Transparent)
-                    g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * background.A), background)), Left + 1, Top + 1, Width - 2, Height - 2);
-
-                int minListHeight = (int)(Graphics.Graphics.MeasureString("A", Font).Height + 0.5); //Round up
-                if (((style == eListStyle.MultiList) || (style == eListStyle.MultiListText)) && (items.Count > 0) && (items[0].subitemFormat != null))
-                    minListHeight += (int)(Graphics.Graphics.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
-                if (listItemHeight < minListHeight)
-                    listItemHeight = minListHeight;
-                if (selectQueued == true)
-                    Select(selectedIndex);
-
-                if (((int)style & 1) == 1) //Is it an image list
-                {
-                    if (listViewItemOffset == 0)
-                        listViewItemOffset = listItemHeight;
-                    else
-                        listItemHeight = (listItemHeight > listViewItemOffset) ? listItemHeight : listViewItemOffset;
-                }
-                count = (this.Height / listItemHeight);
-                int imgSze = 4;
-                if ((moved > 0) || (items.Count * listItemHeight < Height)) //List start below top
-                {
-                    moved = 0;
-                    thrown = 0;
-                }
-                else if (((items.Count * listItemHeight) > Height) && (moved < Height - (items.Count * listItemHeight))) //Top of the list
-                {
-                    moved = Height - (items.Count * listItemHeight);
-                    thrown = 0;
-                }
-                listStart = -(moved / listItemHeight);
-
-
-                for (int i = listStart; i <= (count + listStart + 1); i++)
-                {
-                    if ((width == 0) || (height == 0) || (listItemHeight == 0)) //Failsafe -> 1/100 chance that the width changes during rendering
-                        return;
-                    Rectangle rect = new Rectangle(Left, Top + (moved % listItemHeight) + ((i - listStart) * listItemHeight), this.Width, listItemHeight);
-                    switch (style)
-                    {
-                        case eListStyle.RoundedImageList:
-                        case eListStyle.RoundedTextList:
-                            if ((selectedIndex == i) && (focused))
-                                g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect, 10);
-                            else
-                                g.FillRoundRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect, 10);
-                            break;
-                        case eListStyle.TextList:
-                        case eListStyle.ImageList:
-                            if ((selectedIndex == i) && (focused))
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1), Color.FromArgb((int)(tmp * selectedItemColor2.A), selectedItemColor2), Gradient.Vertical), rect);
-                            else
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1), Color.FromArgb((int)(tmp * itemColor2.A), itemColor2), Gradient.Vertical), rect);
-                            break;
-                        case eListStyle.TransparentImageList:
-                        case eListStyle.TransparentTextList:
-                            if ((selectedIndex == i) && (focused))
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect);
-                            break;
-                        case eListStyle.DroidStyleImage:
-                        case eListStyle.DroidStyleText:
-                            imgSze = 6;
-                            if ((selectedIndex == i) && (focused))
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A * 0.6), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 2);
-                            else
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height - 2);
-                            break;
-                        case eListStyle.MultiList:
-                        case eListStyle.MultiListText:
-                            if (i > 0)
-                            {
-                                int t = ((rect.Top % 2) == 0) ? 1 : 0;
-                                g.DrawLine(new Pen(Color.FromArgb((int)(tmp * background.A), background), 2F), rect.Left, rect.Top - t, rect.Left + rect.Width, rect.Top - t);
-                            }
-                            if ((selectedIndex == i) && (focused))
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * selectedItemColor1.A), selectedItemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);
-                            else
-                                g.FillRectangle(new Brush(Color.FromArgb((int)(tmp * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);
-                            break;
-                    }
-                    if ((i < items.Count) && (i >= 0))
-                    {
-                        using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
-                        {
-                            if ((ListStyle == eListStyle.MultiList) || (ListStyle == eListStyle.MultiListText))
-                            {
-                                if (items[i].subitemFormat != null)
-                                {
-                                    if ((selectedIndex == i) && (focused))
-                                    {
-                                        if (items[i].textTex == null)
-                                            items[i].textTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, highlightColor, highlightColor);
-                                        g.DrawImage(items[i].textTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                        if (items[i].subitemTex == null)
-                                            items[i].subitemTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
-                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                    }
-                                    else
-                                    {
-                                        if (items[i].textTex == null)
-                                            items[i].textTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this.textFormat, this.textAlignment, color, color);
-                                        g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                        if (items[i].subitemTex == null)
-                                            items[i].subitemTex = g.GenerateTextTexture(0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
-                                        g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, tmp);
-                                    }
-                                }
-                                else
-                                {
-                                    if ((i < items.Count) && (items[i].textTex == null))
-                                    {
-                                        if (targetWidth == 0)
-                                            targetWidth = width;
-                                        if (targetHeight == 0)
-                                            targetHeight = listItemHeight;
-                                        if ((selectedIndex == i) && (focused))
-                                            items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
-                                        else
-                                            items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
-                                    }
-                                    g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, tmp);
-                                }
-                            }
-                            else
-                            {
-                                if ((i < items.Count) && (items[i].textTex == null))
-                                {
-                                    if (targetWidth == 0)
-                                        targetWidth = width;
-                                    if (targetHeight == 0)
-                                        targetHeight = listItemHeight;
-                                    if ((selectedIndex == i) && (focused))
-                                        items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, highlightColor, highlightColor);
-                                    else
-                                        items[i].textTex = g.GenerateTextTexture(0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, font, textFormat, textAlignment, color, color);
-                                }
-                                g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, tmp);
-                            }
-                        }
-                        if (listViewItemOffset == 0)
-                            continue;
-                        if ((items.Count > i) && (items[i].image != null)) //rare thread collision
-                            g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - imgSze, tmp);
-                    }
-                }
-                g.Clip = r; //Reset the clip size for the rest of the controls
-                if ((scrollbars) && (count < items.Count))
-                {
-                    float nheight = height * ((float)height) / (listItemHeight * items.Count);
-                    float ntop = top + height * ((float)-moved) / (listItemHeight * items.Count);
-                    g.FillRoundRectangle(new Brush(color), left + width - 5, (int)ntop, 10, (int)nheight, 6);
-                }
-            }
-        }
-        */
 
         #region ICloneable Members
         /// <summary>
@@ -1475,20 +1329,30 @@ namespace OpenMobile.Controls
         /// <param name="RelativeDistance"></param>
         public virtual void MouseMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
-            //if (listItemHeight > 0) //<-Just in case
-            //    Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
+            if (listItemHeight > 0) //<-Just in case
+                Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
 
             if (TotalDistance.Y > 5)
             {
-                _tmrListScroll.Enabled = true;
+                if (!ScrolledToTopOfList)
+                {
+                    _tmrListScroll.Enabled = true;
+                    Raise_OnScrollStart();
+                    Highlight(-1);
+                    Select(-1);
+                }
                 _ListScrollStepSize = TotalDistance.Y / 10;
-                //System.Diagnostics.Debug.WriteLine("Mouse move up, TotalDistance: {0}", TotalDistance);
             }
             else if (TotalDistance.Y < -5)
             {
-                _tmrListScroll.Enabled = true;
+                if (!ScrolledToBottomOfList)
+                {
+                    _tmrListScroll.Enabled = true;
+                    Raise_OnScrollStart();
+                    Highlight(-1);
+                    Select(-1);
+                }
                 _ListScrollStepSize = TotalDistance.Y / 10;
-                //System.Diagnostics.Debug.WriteLine("Mouse move down, TotalDistance: {0}", TotalDistance);
             }
         }
 
@@ -1496,6 +1360,16 @@ namespace OpenMobile.Controls
         void _tmrListScroll_Elapsed(object sender, ElapsedEventArgs e)
         {
             moved += _ListScrollStepSize;
+
+            Raise_OnScrolling();
+
+            // Disable timer if we have scrolled to the end
+            if (ScrolledToBottomOfList || ScrolledToTopOfList)
+            {
+                _tmrListScroll.Enabled = false;
+                Raise_OnScrollEnd();
+            }
+
             base.Refresh();
         }
 
@@ -1571,7 +1445,6 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public virtual void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation)
         {
-            System.Diagnostics.Debug.WriteLine("Mouse move, StartLocation: {0}", StartLocation);
             throwtmr.Enabled = false;
             lastSelected = selectedIndex;
             focused = true;
@@ -1591,7 +1464,6 @@ namespace OpenMobile.Controls
         public virtual void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
             _tmrListScroll.Enabled = false;
-            System.Diagnostics.Debug.WriteLine("Mouse up, TotalDistance: {0}", TotalDistance);
         }
 
         #endregion

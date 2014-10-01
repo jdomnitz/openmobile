@@ -44,13 +44,19 @@ namespace OMMusicSkin
             Song
         }
 
+        private enum ListHoldBehavior
+        {
+            Play,
+            Enqueue
+        }
+
         private HighLevelCode _MainPlugin;
         private OMListItem.subItemFormat _MediaListSubItemFormat = new OMListItem.subItemFormat();
         private IMediaDatabase _DB = null;
         private IEnumerable<mediaInfo> _DBItems;
         private ControlGroup _cgProgress;
         private ListState[] _ListState = new ListState[OM.Host.ScreenCount];
-        
+        private ListHoldBehavior[] _ListHoldBehavior = new ListHoldBehavior[OM.Host.ScreenCount];        
 
         public OMPanel Initialize(HighLevelCode mainPlugin)
         {
@@ -59,12 +65,21 @@ namespace OMMusicSkin
             // Create a new panel
             OMPanel panel = new OMPanel("MusicBrowser", "Music > Music browser", OM.Host.getSkinImage("AIcons|4-collections-view-as-list"));
 
-            OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientArea_Init.Left + 190, OM.Host.ClientArea_Init.Top + 25, OM.Host.ClientArea_Init.Width - 380, OM.Host.ClientArea_Init.Height - 50,
+            OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height,
                 new ShapeData(shapes.Rectangle, Color.FromArgb(140, Color.Black), Color.Transparent, 0));
             //shapeBackground.Left = OM.Host.ClientArea_Init.Center.X - shapeBackground.Region.Center.X;
             panel.addControl(shapeBackground);
 
-            OMList lstMedia = new OMList("lstMedia", shapeBackground.Left, shapeBackground.Top, shapeBackground.Width, shapeBackground.Height);
+            //OMBasicShape shapeListBackground = new OMBasicShape("shapeListBackground", OM.Host.ClientArea_Init.Left + 190, OM.Host.ClientArea_Init.Top + 25, OM.Host.ClientArea_Init.Width - 380, OM.Host.ClientArea_Init.Height - 50,
+            //    new ShapeData(shapes.Rectangle, Color.FromArgb(140, Color.Black), Color.Transparent, 0));
+            ////shapeBackground.Left = OM.Host.ClientArea_Init.Center.X - shapeBackground.Region.Center.X;
+            //panel.addControl(shapeListBackground);
+
+            // List subitem format
+            _MediaListSubItemFormat.color = Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinTextColor);
+            _MediaListSubItemFormat.textAlignment = Alignment.BottomLeft;
+
+            OMList lstMedia = new OMList("lstMedia", OM.Host.ClientArea_Init.Left + 190, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width - 380, OM.Host.ClientArea_Init.Height);
             lstMedia.ListStyle = eListStyle.MultiList;
             lstMedia.Color = BuiltInComponents.SystemSettings.SkinTextColor;
             lstMedia.ScrollbarColor = Color.FromArgb(120, Color.White);
@@ -80,11 +95,21 @@ namespace OMMusicSkin
             lstMedia.TextAlignment = Alignment.TopLeft;
             lstMedia.ListItemOffset = 85;
             lstMedia.OnClick += new userInteraction(lstMedia_OnClick);
-            //lstMedia.OnHoldClick += new userInteraction(lstMedia_OnHoldClick);
-            //lstMedia.OnScrollStart += new userInteraction(lstMedia_OnScrollStart);
-            //lstMedia.OnScrolling += new userInteraction(lstMedia_OnScrolled);
-            //lstMedia.OnScrollEnd += new userInteraction(lstMedia_OnScrollEnd);
+            lstMedia.OnHoldClick += new userInteraction(lstMedia_OnHoldClick);
+            lstMedia.OnScrollStart += new userInteraction(lstMedia_OnScrollStart);
+            lstMedia.OnScrolling += new userInteraction(lstMedia_OnScrolling);
+            lstMedia.OnScrollEnd += new userInteraction(lstMedia_OnScrollEnd);
             panel.addControl(lstMedia);
+
+            OMLabel lblList_Info = new OMLabel("lblList_Info", lstMedia.Region.Left, lstMedia.Region.Top, lstMedia.Region.Width, lstMedia.Region.Height);
+            lblList_Info.NoUserInteraction = true;
+            lblList_Info.Text = "";
+            lblList_Info.TextAlignment = Alignment.CenterCenter;
+            lblList_Info.FontSize = 300;
+            lblList_Info.Opacity = 75;
+            lblList_Info.Visible = false;
+            panel.addControl(lblList_Info);
+
 
             #region Left side buttons
 
@@ -147,9 +172,9 @@ namespace OMMusicSkin
                     corners: GraphicCorners.Left,
                 //borderColor: Color.Transparent,
                     text: "  Play",
-                    iconImg: OM.Host.getSkinImage("AIcons|9-av-play").image
-                    
+                    iconImg: OM.Host.getSkinImage("AIcons|9-av-play").image                    
                 );
+            btnRight1.OnClick += new userInteraction(btnRight1_OnClick);
             panel.addControl(btnRight1);
 
             OMButton btnRight2 = OMButton.PreConfigLayout_CleanStyle
@@ -164,6 +189,7 @@ namespace OMMusicSkin
                     text: "  Add",
                     iconImg: OM.Host.getSkinImage("AIcons|9-av-add-to-queue").image
                 );
+            btnRight2.OnClick += new userInteraction(btnRight2_OnClick);
             panel.addControl(btnRight2, ControlDirections.Down, 0, 20);
 
             OMButton btnRight3 = OMButton.PreConfigLayout_CleanStyle
@@ -178,6 +204,7 @@ namespace OMMusicSkin
                     text: "  Playlist",
                     iconImg: OM.Host.getSkinImage("AIcons|4-collections-view-as-list").image
                );
+            btnRight3.OnClick += new userInteraction(btnRight3_OnClick);
             panel.addControl(btnRight3, ControlDirections.Down, 0, 20);
 
             #endregion
@@ -204,12 +231,175 @@ namespace OMMusicSkin
 
             #endregion
 
+            // Create the buttonstrip popup
+            ButtonStrip PopUpMenuStrip = new ButtonStrip(_MainPlugin.pluginName, panel.Name, "PopUpMenuStrip_Playlist");
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ClearPlaylist", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-view-as-list"), "Clear playlist", true, OnClick: mnuItem_ClearPlaylist_OnClick));
+            panel.PopUpMenu = PopUpMenuStrip;
+
+            // Panel events
             panel.Entering += panel_Entering;
 
-            _MediaListSubItemFormat.color = Color.FromArgb(128, BuiltInComponents.SystemSettings.SkinTextColor);
-            _MediaListSubItemFormat.textAlignment = Alignment.BottomLeft;
 
             return panel;
+        }
+
+        void lstMedia_OnHoldClick(OMControl sender, int screen)
+        {
+            // Get current playlist
+            PlayList2 playlist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
+
+            // Get selected list item
+            OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
+            if (lst == null)
+                return;
+
+            // Error handling
+            if (lst.SelectedItem == null)
+                return;
+
+            // Get currently selected item
+            mediaInfo selectedMediaItem = lst.SelectedItem.tag as mediaInfo;
+            if (selectedMediaItem == null)
+                return;
+
+            // Add currently selected items to the playlist and start to play it
+            switch (_ListState[screen])
+            {
+                case ListState.Artist:
+                    {
+                        switch (_ListHoldBehavior[screen])
+                        {
+                            case ListHoldBehavior.Play:
+                                {
+                                    var items = GetArtistSongs(selectedMediaItem.Artist);
+                                    playlist.AddRangeDistinct(items);
+                                    playlist.CurrentItem = items.First();
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                }
+                                break;
+                            case ListHoldBehavior.Enqueue:
+                                 {
+                                    var items = GetArtistSongs(selectedMediaItem.Artist);
+                                    playlist.AddRangeDistinct(items);
+                                    OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner( InfoBanner.Styles.AnimatedBanner, "Artist enqueued", 5));
+                                }
+                               break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                case ListState.Album:
+                    {
+                        switch (_ListHoldBehavior[screen])
+                        {
+                            case ListHoldBehavior.Play:
+                                {
+                                    var items = GetAlbumSongs(selectedMediaItem.Artist, selectedMediaItem.Album);
+                                    playlist.AddRangeDistinct(items);
+                                    playlist.CurrentItem = items.First();
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                }
+                                break;
+                            case ListHoldBehavior.Enqueue:
+                                 {
+                                    var items = GetAlbumSongs(selectedMediaItem.Artist, selectedMediaItem.Album);
+                                    playlist.AddRangeDistinct(items);
+                                    OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Album enqueued", 5));
+                                 }
+                               break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                case ListState.Song:
+                    {
+                        switch (_ListHoldBehavior[screen])
+                        {
+                            case ListHoldBehavior.Play:
+                                {
+                                    playlist.AddDistinct(selectedMediaItem);
+                                    playlist.CurrentItem = selectedMediaItem;
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                }
+                                break;
+                            case ListHoldBehavior.Enqueue:
+                                {
+                                    playlist.AddDistinct(selectedMediaItem);
+                                    OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Song enqueued", 5));
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void mnuItem_ClearPlaylist_OnClick(OMControl sender, int screen)
+        {
+            // Get current playlist
+            PlayList2 playlist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
+            playlist.Clear();
+        }
+
+        void btnRight1_OnClick(OMControl sender, int screen)
+        {
+            List_SetHoldBehaviour(sender.Parent, screen, ListHoldBehavior.Play);
+        }
+
+        void btnRight2_OnClick(OMControl sender, int screen)
+        {
+            List_SetHoldBehaviour(sender.Parent, screen, ListHoldBehavior.Enqueue);
+        }
+
+        void btnRight3_OnClick(OMControl sender, int screen)
+        {
+        }
+
+        void lstMedia_OnScrollEnd(OMControl sender, int screen)
+        {
+            OMLabel lblList_Info = sender.Parent[screen, "lblList_Info"] as OMLabel;
+            if (lblList_Info != null)
+                lblList_Info.Visible = false;
+        }
+
+        void lstMedia_OnScrollStart(OMControl sender, int screen)
+        {
+            OMLabel lblList_Info = sender.Parent[screen, "lblList_Info"] as OMLabel;
+            if (lblList_Info != null)
+                lblList_Info.Visible = true;
+        }
+
+        void lstMedia_OnScrolling(OMControl sender, int screen)
+        {
+            OMList lst = sender as OMList;
+            if (lst == null)
+                return;
+
+            OMLabel lblList_Info = sender.Parent[screen, "lblList_Info"] as OMLabel;
+            if (lblList_Info != null)
+            {
+                try
+                {
+                    // Update index letter to show list progress
+                    if (lst.Items.Count > 0)
+                    {
+                        var text = lst.Items[lst.GetTopVisibleIndex()].text;
+                        if (!String.IsNullOrWhiteSpace(text))
+                            lblList_Info.Text = text.Substring(0, 1);
+                        else
+                            lblList_Info.Text = "";
+                    }
+                }
+                catch
+                {   // Mask errors
+                }
+            }           
         }
 
         void btnListFilter_Song_OnClick(OMControl sender, int screen)
@@ -304,6 +494,34 @@ namespace OMMusicSkin
 
         }
 
+        private void List_SetHoldBehaviour(OMPanel panel, int screen, ListHoldBehavior listHoldBehavior)
+        {
+            _ListHoldBehavior[screen] = listHoldBehavior;
+
+            OMButton btnRight1 = panel[screen, "btnRight1"] as OMButton;
+            OMButton btnRight2 = panel[screen, "btnRight2"] as OMButton;
+            OMButton btnRight3 = panel[screen, "btnRight3"] as OMButton;
+
+            if (btnRight1 == null || btnRight2 == null || btnRight3 == null)
+                return;
+
+            switch (listHoldBehavior)
+            {
+                case ListHoldBehavior.Play:
+                    btnRight1.Checked = true;
+                    btnRight2.Checked = false;
+                    btnRight3.Checked = false;
+                    break;
+                case ListHoldBehavior.Enqueue:
+                    btnRight1.Checked = false;
+                    btnRight2.Checked = true;
+                    btnRight3.Checked = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void List_ShowAlbums(OMPanel panel, int screen)
         {
             OMList lst = panel[screen, "lstMedia"] as OMList;
@@ -315,7 +533,7 @@ namespace OMMusicSkin
                     {
                         covers = item.Select(x=>x.coverArt),
                         album = item.First()
-                    });
+                    }).OrderBy(x=>x.album.Album);
 
                 foreach (var item in items)
                 {
@@ -330,7 +548,8 @@ namespace OMMusicSkin
             if (lst != null)
             {
                 lst.Clear();
-                var items = _DBItems.Distinct().OrderBy(x => x.Artist).ThenBy(x => x.Album).ThenBy(x => x.Name);
+                //var items = _DBItems.Distinct().OrderBy(x => x.Artist).ThenBy(x => x.Album).ThenBy(x => x.Name);
+                var items = _DBItems.Distinct().OrderBy(x => x.Name);
                 foreach (var item in items)
                     lst.Add(new OMListItem(item.Name, item.Artist, item.coverArt, _MediaListSubItemFormat, item));
             }
@@ -342,7 +561,8 @@ namespace OMMusicSkin
             if (lst != null)
             {
                 lst.Clear();
-                var items = _DBItems.Where(x=>x.Artist == artist).OrderBy(x => x.Artist).ThenBy(x => x.Album).ThenBy(x => x.Name);
+                //var items = _DBItems.Where(x=>x.Artist == artist).OrderBy(x => x.Artist).ThenBy(x => x.Album).ThenBy(x => x.Name);
+                var items = _DBItems.Where(x => x.Artist == artist).OrderBy(x => x.Name);
                 foreach (var item in items)
                     lst.Add(new OMListItem(item.Name, item.Artist, item.coverArt, _MediaListSubItemFormat, item));
             }
@@ -371,7 +591,7 @@ namespace OMMusicSkin
                     {
                         albums = item.Select(x => x).First(),
                         album = album
-                    });
+                    }).OrderBy(x=>x.album);
 
                 foreach (var item in items)
                 {
@@ -393,7 +613,7 @@ namespace OMMusicSkin
                         albumCount = item.GroupBy(x => x.Album).Count(),
                         covers = item.GroupBy(x => x.Album).Select(x=>x.First()).Select(x=>x.coverArt),
                         artist = artist
-                    });
+                    }).OrderBy(x=>x.artist);
 
                 foreach (var item in items)
                 {
@@ -408,6 +628,15 @@ namespace OMMusicSkin
                     lst.Add(new OMListItem(item.artist, artistInfo, coverArtMosaic, _MediaListSubItemFormat, item.albums.First()));
                 }
             }
+        }
+
+        private IEnumerable<mediaInfo> GetAlbumSongs(string artist, string album)
+        {
+            return _DBItems.Where(x => x.Artist == artist && x.Album == album);
+        }
+        private IEnumerable<mediaInfo> GetArtistSongs(string artist)
+        {
+            return _DBItems.Where(x => x.Artist == artist);
         }
 
     }
