@@ -210,7 +210,7 @@ Namespace OMDSArduino
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
 
         Private WithEvents m_timer As New Timers.Timer(250) ' Fetch pin info this often
-        Private WithEvents m_toggle_timer As New Timers.Timer(500) ' Test toggle LED this often
+        Private WithEvents m_toggle_timer As New Timers.Timer(2000) ' Test toggle LED this often
 
         Public Sub New()
 
@@ -259,6 +259,7 @@ Namespace OMDSArduino
             ' Create the datasource object other plugins can subscribe to
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Connected", DataSource.DataTypes.binary, "Is Arduino connected"), False)
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Pins", DataSource.DataTypes.raw, "Arduino Pin Data"), Nothing)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Count", DataSource.DataTypes.raw, "Arduino Pin Count"), 0)
 
             OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, "Settings.Verbose", m_Verbose)
             m_Verbose = OpenMobile.helperFunctions.StoredData.Get(Me, "Settings.Verbose")
@@ -311,17 +312,11 @@ Namespace OMDSArduino
                         End If
                         Dim imageName As String = ""
                         Dim pin_info As String = ""
-                        For x = 0 To Arduino.GetPins.Count - 1
+                        Dim pin_count As Integer = Arduino.GetPins.Count
+                        theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Count", pin_count, True)
+                        For x = 0 To pin_count - 1
                             ' Build the I/O pin objects
                             mypins(x) = New ArduinoIO
-                            If x = 13 Then
-                                If Not String.IsNullOrEmpty(mypins(x).CurrentValue) Then
-                                    If mypins(x).CurrentValue <> Arduino.GetPins(x).CurrentValue Then
-                                        'Data has changed
-                                        x = x
-                                    End If
-                                End If
-                            End If
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                             mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
                             If m_Verbose Then
