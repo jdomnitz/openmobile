@@ -7,7 +7,7 @@
     </ProductVersion>
     <SchemaVersion>
     </SchemaVersion>
-    <ProjectGuid>{CBC7810E-9F80-4FAA-8EEA-8CBC1A6A6F4E}</ProjectGuid>
+    <ProjectGuid>{471DC026-801A-415A-8C76-90FED380200A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>OMArduino</RootNamespace>
     <AssemblyName>OMArduino</AssemblyName>
