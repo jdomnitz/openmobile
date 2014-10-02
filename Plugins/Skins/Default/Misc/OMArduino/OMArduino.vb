@@ -56,6 +56,7 @@ Namespace OMArduino
         Private message As String = ""
         Private PopUpMenuStrip As ButtonStrip
         Private initialized As Boolean = False
+        Private loop_count As Integer = 0
 
         Private thepin As Sharpduino.Pin
 
@@ -137,6 +138,9 @@ Namespace OMArduino
             'If Not initialized Then Exit Sub
 
             Select Case sensor.FullName
+
+                Case "OMDSArduino.Arduino.Connected"
+                    ' Nothing here for now
 
                 Case "OMDSArduino.Arduino.Pins"
                     ' Data must have been updated.  Only happens for INPUT pins
