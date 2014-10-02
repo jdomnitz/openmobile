@@ -311,6 +311,7 @@ Namespace OMDSArduino
                         Dim imageName As String = ""
                         Dim pin_info As String = ""
                         Dim pin_count As Integer = Arduino.GetPins.Count
+                        Dim z As Boolean = True
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Count", pin_count, True)
                         For x = 0 To pin_count - 1
                             ' Build the I/O pin objects
@@ -335,7 +336,6 @@ Namespace OMDSArduino
                                     imageName = "led_red"
                                 End If
                             End If
-
                             mypins(x).Title = mypins(x).Name
                             mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
