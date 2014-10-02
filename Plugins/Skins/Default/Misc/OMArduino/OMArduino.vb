@@ -90,14 +90,14 @@ Namespace OMArduino
 
             ' Subscribe to the various things we wish to monitor on the panel
 
-            Dim text1lbl As New OMLabel("_Text1Lbl", OM.Host.ClientArea(0).Left + 120, OM.Host.ClientArea(0).Top + 410, 400, 75)
+            Dim text1lbl As New OMLabel("_text1lbl", OM.Host.ClientArea(0).Left + 120, OM.Host.ClientArea(0).Top + 410, 400, 75)
             text1lbl.Text = "Arduino connected:"
             text1lbl.TextAlignment = Alignment.CenterRight
             text1lbl.Visible = True
             text1lbl.FontSize = 24
             omArduinopanel.addControl(text1lbl)
 
-            Dim text2lbl As New OMLabel("_Text2Lbl", text1lbl.Left + text1lbl.Width + 5, text1lbl.Top, 100, 75)
+            Dim text2lbl As New OMLabel("_text2lbl", text1lbl.Left + text1lbl.Width + 5, text1lbl.Top, 125, 75)
             text2lbl.Visible = True
             text2lbl.TextAlignment = Alignment.CenterLeft
             text2lbl.FontSize = 24
@@ -131,6 +131,8 @@ Namespace OMArduino
             'Dim mContainer As OMContainer
             Dim mImage As OMImage
             Dim mLabel As OMLabel
+            Dim pincount As Integer = 0
+            Dim status As OMLabel
 
             'If Not initialized Then Exit Sub
 
@@ -140,10 +142,13 @@ Namespace OMArduino
                     ' Data must have been updated.  Only happens for INPUT pins
                     mypins = sensor.Value
                     If Not mypins Is Nothing Then
+                        pincount = OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Count").Value
                         For x = 0 To OM.Host.ScreenCount - 1
                             If PanelManager.IsPanelLoaded(x, "OMArduino") Then
                                 mPanel = PanelManager(x, "OMArduino")
                                 If Not mPanel Is Nothing Then
+                                    status = mPanel.Find("_text2lbl")
+                                    status.Text = String.Format("Yes {0}", pincount)
                                     Dim x_start As Integer = 30     ' starting LEFT position
                                     Dim x_inc As Integer = 140      ' LEFT increment
                                     Dim x_left As Integer = 0       ' Current LEFT value
@@ -151,10 +156,11 @@ Namespace OMArduino
                                     Dim y_inc As Integer = 130      ' TOP increment
                                     Dim y_top As Integer = 0        ' Current TOP value
                                     Dim z As Integer = 0            ' Loop counter
+                                    Dim a1 As String = ""
                                     For Each pin In mypins
-                                        ' load user settings into this mypins object
+                                        ' load user settings into this mypins object (maybe?)
                                         ' Process any defined script here
-                                        ' pin.Script - Process the script
+                                        'pin.Script - Process the script
                                         ' Here we process the PIN data as necessary for display
                                         'pin.Name
                                         'pin.CurrentValue
@@ -164,42 +170,45 @@ Namespace OMArduino
                                         'pin.Label
                                         'pin.Title
                                         'pin.Descr
-                                        mImage = mPanel.Find(String.Format("{0}_Image", pin.Name))
-                                        mLabel = mPanel.Find(String.Format("{0}_Label", pin.Name))
-                                        If mImage Is Nothing Then
-                                            ' Add new control to the screen
-                                            ' Dim myContainer As OMContainer = New OMContainer(pin.Name, 10 + (z * 140), 10, 140, 140)
-                                            pin.Image.Name = String.Format("{0}_Image", pin.Name)
-                                            pin.Image.Left = OM.Host.ClientArea(0).Left + x_start + x_left
-                                            pin.Image.Top = OM.Host.ClientArea(0).Top + y_start + y_top
-                                            pin.Image.Visible = True
-                                            'myContainer.addControlRelative(pin.Image)
-                                            pin.Label.Name = String.Format("{0}_Label", pin.Name)
-                                            pin.Label.Left = OM.Host.ClientArea(0).Left + x_start + x_left
-                                            pin.Label.Top = OM.Host.ClientArea(0).Top + y_start + y_top + 102
-                                            pin.Label.Visible = True
-                                            pin.Label.BackgroundColor = Color.Transparent
-                                            'myContainer.addControlRelative(pin.Label)
-                                            mPanel.addControl(pin.Image)
-                                            mPanel.addControl(pin.Label)
-                                            mPanel.Refresh()
-                                            x_left = x_left + x_inc
-                                            If x_left > 900 Then
-                                                x_left = 0
-                                                y_top = y_top + y_inc
-                                                If y_top > 700 Then
-                                                    ' we're out of space
+                                        If Not pin Is Nothing Then
+                                            a1 = String.Format("{0}_Image", pin.Name)
+                                            mImage = mPanel.Find(a1)
+                                            a1 = String.Format("{0}_Label", pin.Name)
+                                            mLabel = mPanel.Find(a1)
+                                            If mImage Is Nothing Then
+                                                ' Add new control to the screen
+                                                ' Dim myContainer As OMContainer = New OMContainer(pin.Name, 10 + (z * 140), 10, 140, 140)
+                                                pin.Image.Name = String.Format("{0}_Image", pin.Name)
+                                                pin.Image.Left = OM.Host.ClientArea(0).Left + x_start + x_left
+                                                pin.Image.Top = OM.Host.ClientArea(0).Top + y_start + y_top
+                                                pin.Image.Visible = True
+                                                'myContainer.addControlRelative(pin.Image)
+                                                pin.Label.Name = String.Format("{0}_Label", pin.Name)
+                                                pin.Label.Left = OM.Host.ClientArea(0).Left + x_start + x_left
+                                                pin.Label.Top = OM.Host.ClientArea(0).Top + y_start + y_top + 102
+                                                pin.Label.Visible = True
+                                                pin.Label.BackgroundColor = Color.Transparent
+                                                'myContainer.addControlRelative(pin.Label)
+                                                mPanel.addControl(pin.Image)
+                                                mPanel.addControl(pin.Label)
+                                                x_left = x_left + x_inc
+                                                If x_left > (OM.Host.ClientArea(0).Right - x_inc) Then
+                                                    x_left = 0
+                                                    y_top = y_top + y_inc
+                                                    If y_top > (OM.Host.ClientArea(0).Bottom - y_inc) Then
+                                                        ' we're out of space
+                                                    End If
                                                 End If
+                                                z += 1
+                                            Else
+                                                ' Replace contents of current on-screen control
+                                                mImage = pin.Image
+                                                mLabel = pin.Label
+                                                mLabel.Text = pin.Name & "!"
                                             End If
-                                            z += 1
-                                        Else
-                                            ' Replace contents of current on-screen control
-                                            mImage = pin.Image
-                                            mLabel = pin.Label
-                                            mLabel.Text = pin.CurrentValue
-                                            mPanel.Refresh()
                                         End If
                                     Next
+                                    mPanel.Refresh()
                                 End If
                             Else
                                 ' Our panel is not loaded
