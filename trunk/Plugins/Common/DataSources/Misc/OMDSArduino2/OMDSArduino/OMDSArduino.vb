@@ -339,10 +339,10 @@ Namespace OMDSArduino
                             mypins(x).Title = mypins(x).Name
                             mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
-                            mypins(x).Image = New OMImage("IOImage_" & mypins(x).Name, 0, 0, 100, 100)
+                            mypins(x).Image = New OMImage(String.Format("{0}_Image", mypins(x).Name), 0, 0, 100, 100)
                             mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|" & imageName)
                             mypins(x).Image.Visible = True
-                            mypins(x).Label = New OMLabel("IOLabel_" & mypins(x).Name, 0, 0, 100, 20, mypins(x).Name)
+                            mypins(x).Label = New OMLabel(String.Format("{0}_Label", mypins(x).Name), 0, 0, 100, 20, mypins(x).Name)
                             mypins(x).Label.Visible = True
                             If m_Verbose Then
                                 pin_info = String.Format("Pin {0}> Name:{1} Descr:{2} Label:{3}, Image:{4}", x, mypins(x).Name, mypins(x).Title, mypins(x).Label, imageName)
