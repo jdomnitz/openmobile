@@ -209,8 +209,8 @@ Namespace OMDSArduino
         'Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
 
-        Private WithEvents m_timer As New Timers.Timer(250) ' Fetch pin info this often
-        Private WithEvents m_toggle_timer As New Timers.Timer(2000) ' Test toggle LED this often
+        Private WithEvents m_timer As New Timers.Timer(500) ' Fetch pin info this often
+        Private WithEvents m_toggle_timer As New Timers.Timer(500) ' Test toggle LED this often
 
         Public Sub New()
 
@@ -294,8 +294,6 @@ Namespace OMDSArduino
 
             Me.connect()
 
-            'load_pin_info()
-
         End Sub
 
         Private Sub load_pin_info()
@@ -319,10 +317,6 @@ Namespace OMDSArduino
                             mypins(x) = New ArduinoIO
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                             mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
-                            If m_Verbose Then
-                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Value: {0}", mypins(x).CurrentValue))
-                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("+Mode: {0}", mypins(x).CurrentMode))
-                            End If
                             mypins(x).Capabilities = Arduino.GetPins(x).Capabilities
                             ' Extract capabilities
                             For Each pair As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In mypins(x).Capabilities
@@ -355,7 +349,6 @@ Namespace OMDSArduino
                                 'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
                             End If
                         Next
-                        'mCounter = 0
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
@@ -538,6 +531,9 @@ Namespace OMDSArduino
 
         Private Sub toggle_timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_toggle_timer.Elapsed
 
+            m_toggle_timer.Enabled = False
+            m_toggle_timer.Stop()
+
             If Not Arduino Is Nothing Then
                 Try
                     If Arduino.IsInitialized Then
@@ -554,13 +550,16 @@ Namespace OMDSArduino
                 End Try
             End If
 
+            m_toggle_timer.Enabled = True
+            m_toggle_timer.Start()
+
         End Sub
 
         Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
 
-            m_timer.Stop()
+            m_timer.Enabled = False
             load_pin_info()
-            m_timer.Start()
+            m_timer.Enabled = True
 
         End Sub
 
