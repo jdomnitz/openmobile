@@ -58,7 +58,7 @@ Namespace OMArduino
         Private initialized As Boolean = False
         Private loop_count As Integer = 0
 
-        Private thepin As Sharpduino.Pin
+        Private pin As OMDSArduino.OMDSArduino.ArduinoIO
 
         Private mypins(78) As OMDSArduino.OMDSArduino.ArduinoIO
 
@@ -161,7 +161,7 @@ Namespace OMArduino
                                     Dim y_top As Integer = 0        ' Current TOP value
                                     Dim z As Integer = 0            ' Loop counter
                                     Dim a1 As String = ""
-                                    For Each pin In mypins
+                                    For z = 0 To OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Count").Value - 1
                                         ' load user settings into this mypins object (maybe?)
                                         ' Process any defined script here
                                         'pin.Script - Process the script
@@ -174,6 +174,7 @@ Namespace OMArduino
                                         'pin.Label
                                         'pin.Title
                                         'pin.Descr
+                                        pin = mypins(z)
                                         If Not pin Is Nothing Then
                                             a1 = String.Format("{0}_Image", pin.Name)
                                             mImage = mPanel.Find(a1)
