@@ -186,6 +186,7 @@ Namespace OMDSArduino
         Private m_Baud As Integer = 57600
         Private vRef As Single = 5.0
         Private useI2C As Boolean = False                   ' True=Automatically set A4/A5 pin mode to I2C
+        Private sample_rate As Integer = 100                ' Firmata pin sampling rate
 
         Private m_Verbose As Boolean = False
 
@@ -210,8 +211,8 @@ Namespace OMDSArduino
         'Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
 
-        Private WithEvents m_timer As New Timers.Timer(250) ' Fetch pin info this often
-        Private WithEvents m_toggle_timer As New Timers.Timer(500) ' Test toggle LED this often
+        Private WithEvents m_timer As New Timers.Timer(100) ' Fetch pin info this often
+        Private WithEvents m_toggle_timer As New Timers.Timer(1000) ' Test toggle LED this often
 
         Public Sub New()
 
@@ -223,11 +224,11 @@ Namespace OMDSArduino
 
             Dim m_Settings As New OpenMobile.Plugin.Settings("Arduino Connector")
 
+            loadSettings()
+
             theHost = host
 
             theHost.UIHandler.AddNotification(myNotification)
-
-            m_Verbose = True
 
             If m_Verbose Then
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.initialize()", "Initializing...")
@@ -239,28 +240,15 @@ Namespace OMDSArduino
 
         End Function
 
-        Private Sub pin_changed()
-
-            ' Just a place holder.  We need a way to know when data has changed
-            ' Use a timer to compare current PIN data to saved PIN data
-            ' Update the PIN array and push datasource if any items have been updated
-
-            ' reset flag
-            ' Loop through mypins() for inputs, get names, fetch current data
-            ' Set flag if different
-            ' Loop
-            ' flag is set, push datasource
-
-            ' theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins)
-
-        End Sub
-
         Private Sub BackgroundLoad()
 
             ' Create the datasource object other plugins can subscribe to
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Connected", DataSource.DataTypes.binary, "Is Arduino connected"), False)
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Pins", DataSource.DataTypes.raw, "Arduino Pin Data"), Nothing)
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Count", DataSource.DataTypes.raw, "Arduino Pin Count"), 0)
+
+            OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, "Settings.Sample_Rate", sample_rate)
+            sample_rate = OpenMobile.helperFunctions.StoredData.Get(Me, "Settings.Sample_Rate")
 
             OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, "Settings.Verbose", m_Verbose)
             m_Verbose = OpenMobile.helperFunctions.StoredData.Get(Me, "Settings.Verbose")
@@ -277,26 +265,20 @@ Namespace OMDSArduino
                 Exit Sub
             End If
 
+            myNotification.Text = "Begin attempts to contact Arduino..."
             If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Waiting for settings load...")
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Begin attempts to contact Arduino...")
             End If
-
-            'If (waitHandle.WaitOne(10000) = False) Then
-            '' We wait here up to 10 seconds to make sure settings have been loaded
-            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Halted!  LoadSettings did not complete")
-            'Exit Sub
-            'End If
-
-            If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "...Continuing...")
-            End If
-
-            myNotification.Text = "Waiting to contact Arduino..."
 
             Me.connect()
 
         End Sub
 
+        Private Sub setup_arduino()
+
+            Arduino.SetSamplingInterval(sample_rate)
+
+        End Sub
         Private Sub load_pin_info()
 
             If Not Arduino Is Nothing Then
@@ -306,8 +288,9 @@ Namespace OMDSArduino
                     ' Do something here
 
                     Try
+                        ' Get pin info
                         If m_Verbose Then
-                            'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Getting pin info...")
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.load_pin_info()", "Getting pin info...")
                         End If
                         Dim imageName As String = ""
                         Dim pin_info As String = ""
@@ -352,9 +335,75 @@ Namespace OMDSArduino
                             End If
                         Next
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
+                        m_timer.Enabled = True
+                        m_timer.Start()
+                        m_toggle_timer.Enabled = True
+                        m_toggle_timer.Start()
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
                     End Try
+                End If
+
+            End If
+
+        End Sub
+
+        Private Sub get_pin_values()
+
+            Dim z As Integer = 0
+            Dim y As Integer = 0
+
+            If Not Arduino Is Nothing Then
+
+                If Arduino.IsInitialized Then
+
+                    Dim pin_count As Integer = Arduino.GetPins.Count
+
+                    For x = 0 To pin_count - 1
+                        ' Update the I/O pin objects
+                        Try
+                            mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
+                            Select Case mypins(x).CurrentMode
+
+                            End Select
+                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Analog Then
+                                mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|gauge")
+                            End If
+                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.I2C Then
+                                ' What type of graphic?
+                            End If
+                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.PWM Then
+                                ' Dial?
+                            End If
+                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Servo Then
+                                ' What type of graphic?
+                            End If
+                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Shift Then
+                                ' What type of graphic?
+                            End If
+                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Output Then
+                                ' Off image / On image
+                                If mypins(x).CurrentValue = 0 Then
+                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_off")
+                                Else
+                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_red")
+                                End If
+                            End If
+                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Input Then
+                                ' Off image / On image
+                                If mypins(x).CurrentValue = 0 Then
+                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_blue")
+                                Else
+                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_red")
+                                End If
+                            End If
+                        Catch
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMDSArduino.BackgroundLoad()", "Error grabbing pin value {0}", mypins(x).Name))
+                        End Try
+                    Next
+
+                    theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
+
                 End If
 
             End If
@@ -421,15 +470,16 @@ Namespace OMDSArduino
                 Exit Sub
             End If
 
-            myNotification.Text = "Waiting to contact Arduino..."
+            myNotification.Text = "Searching...."
 
             If Not String.IsNullOrEmpty(s_ComPort) Then
                 ' Settings specified a com port, try it
                 If m_Verbose Then
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Attempting contact on {0}.", s_ComPort))
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Attempting contact on last known port {0}.", s_ComPort))
                 End If
                 probe_port(s_ComPort)
             End If
+
             If Arduino Is Nothing Then
                 ' Still no arduino, so scan available ports
                 If m_Verbose Then
@@ -442,9 +492,6 @@ Namespace OMDSArduino
                     If Not Arduino Is Nothing Then
                         ' Looks like a port was found with an LCD
                         s_ComPort = available_ports(x)
-                        If m_Verbose Then
-                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connected to Arduino on {0}", s_ComPort))
-                        End If
                         Exit For
                     End If
                 Next
@@ -453,15 +500,24 @@ Namespace OMDSArduino
             If Arduino Is Nothing Then
                 ' Did not find Arduino
                 myNotification.Text = "Arduino not found."
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Warning, "Arduino not found.")
+                End If
             Else
                 ' Arduino found
                 connected = True
-                m_timer.Enabled = True
-                m_timer.Start()
-                m_toggle_timer.Enabled = True
-                m_toggle_timer.Start()
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connected to Arduino on {0}", s_ComPort))
+                End If
                 theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Connected", connected)
                 myNotification.Text = String.Format("Connected to Arduino on {0}.", s_ComPort)
+                ' Wait for Arduino to be initialized
+                System.Threading.Thread.Sleep(500)
+                ' Grab all the pin info from the Arduino
+                If Not Arduino.IsInitialized Then
+                    ' Problem here
+                End If
+                load_pin_info()
             End If
 
         End Sub
@@ -514,7 +570,9 @@ Namespace OMDSArduino
                 Do While Not Arduino.IsInitialized
                     System.Threading.Thread.Sleep(50)
                 Loop
-                ' See if we can get a version report
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", "Arduino contacted.")
+                End If
             Catch ex As Exception
                 myNotification.Text = String.Format("Error: {0}", ex.Message)
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Error, "OMDSArduino.BackgroundLoad()", String.Format("Error: {0}", ex.Message))
@@ -560,7 +618,7 @@ Namespace OMDSArduino
         Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
 
             m_timer.Enabled = False
-            load_pin_info()
+            get_pin_values()
             m_timer.Enabled = True
 
         End Sub
@@ -624,11 +682,11 @@ Namespace OMDSArduino
                 m_Baud = Val(m_Settings.getSetting(Me, "Settings.Baud"))
             End If
 
-            If String.IsNullOrEmpty(m_Settings.getSetting(Me, "Settings.Board")) Then
+            If String.IsNullOrEmpty(m_Settings.getSetting(Me, "Settings.Sample_Rate")) Then
                 ' The board setting does not exist
-                m_Settings.setSetting(Me, "Settings.Board", s_Board)
+                m_Settings.setSetting(Me, "Settings.Sample_Rate", sample_rate.ToString)
             Else
-                s_Board = m_Settings.getSetting(Me, "Settings.Board")
+                sample_rate = Val(m_Settings.getSetting(Me, "Settings.Sample_rate"))
             End If
 
             If String.IsNullOrEmpty(m_Settings.getSetting(Me, "Settings.VRef")) Then
@@ -637,6 +695,8 @@ Namespace OMDSArduino
             Else
                 vRef = Val(m_Settings.getSetting(Me, "Settings.VRef"))
             End If
+
+            settingz.Add(New Setting(SettingTypes.MultiChoice, "Settings.Verbose", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
 
             ReDim Preserve available_ports(UBound(available_ports) + 1)
             available_ports(UBound(available_ports)) = s_ComPort
@@ -682,6 +742,14 @@ Namespace OMDSArduino
             BAUDValues.AddRange({"9600", "14400", "19200", "38400", "57600", "115200"})
             settingz.Add(New Setting(SettingTypes.MultiChoice, "Settings.Baud", "Baud", "Baud Rate", BAUDOptions, BAUDValues, "57600"))
 
+            ' Add setting for sample rate
+            If String.IsNullOrEmpty(m_Settings.getSetting(Me, "Settings.Sample_Rate")) Then
+                m_Settings.setSetting(Me, "Settings.Sample_Rate", sample_rate)
+            Else
+                vRef = Val(m_Settings.getSetting(Me, "Settings.Sample_Rate"))
+            End If
+            settingz.Add(New Setting(SettingTypes.Text, "Settings.Sample_Rate", "Rate", "Sampling Rate", vRef.ToString))
+
             ' Add setting for reference voltage
             If String.IsNullOrEmpty(m_Settings.getSetting(Me, "Settings.VRef")) Then
                 m_Settings.setSetting(Me, "Settings.VRef", vRef)
@@ -702,8 +770,6 @@ Namespace OMDSArduino
             End If
             temp = IIf(useI2C, "1", "0")
             settingz.Add(New Setting(SettingTypes.MultiChoice, "Settings.UseI2C", "I2C?", "Use I2C?", YNOptions, YNValues, temp))
-
-            settingz.Add(New Setting(SettingTypes.MultiChoice, "Settings.Verbose", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
 
             ' Add settings to define analog sensor type
             sTypes.AddRange({"Raw", "DegreesC", "Degrees", "Percent", "Meters", "Kilometers", "Volts", "Amps", "Kph", "GS", "PSI", "RPM", "Bytes", "BPS", "Binary"})
