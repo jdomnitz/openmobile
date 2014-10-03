@@ -194,19 +194,26 @@ Namespace OMArduino
                                             ' Refresh the stuff in the container
                                             mImage = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Image", pin.Name))
                                             If Not mImage Is Nothing Then
+                                                mImage = pin.Image
                                                 If pin.Name = "D13" Then
                                                     x = x
                                                 End If
-                                                mImage = pin.Image
-                                                mImage.Refresh()
+                                                mIndex = myContainer.Controls.FindIndex(Function(a) a.Name = String.Format("{0}_Image", pin.Name))
                                             End If
                                             mLabel = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Label", pin.Name))
                                             If Not mLabel Is Nothing Then
                                                 mLabel = pin.Label
+                                                If pin.Name = "D13" Then
+                                                    If pin.CurrentValue = 0 Then
+                                                        mLabel.Text = "OFF"
+                                                    Else
+                                                        mLabel.Text = "ON"
+                                                    End If
+                                                End If
                                                 mLabel.Refresh()
                                             End If
                                             myContainer.Refresh()
-                                            End If
+                                        End If
                                     Next
                                     mPanel.Refresh()
                                 Else
