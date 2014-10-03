@@ -210,7 +210,7 @@ Namespace OMDSArduino
         'Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
 
-        Private WithEvents m_timer As New Timers.Timer(500) ' Fetch pin info this often
+        Private WithEvents m_timer As New Timers.Timer(250) ' Fetch pin info this often
         Private WithEvents m_toggle_timer As New Timers.Timer(500) ' Test toggle LED this often
 
         Public Sub New()
