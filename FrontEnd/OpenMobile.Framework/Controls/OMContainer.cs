@@ -1411,7 +1411,7 @@ namespace OpenMobile.Controls
                 // Save reference to direction
                 cg.PlacementDirection = direction;
 
-                // Shift all other controls to accomodate the inserted control
+                // Shift all other controls to accommodate the inserted control
                 switch (direction)
                 {
                     case ControlDirections.None:
