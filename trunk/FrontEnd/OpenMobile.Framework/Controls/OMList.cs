@@ -1341,7 +1341,7 @@ namespace OpenMobile.Controls
                     Highlight(-1);
                     Select(-1);
                 }
-                _ListScrollStepSize = TotalDistance.Y / 10;
+                _ListScrollStepSize = TotalDistance.Y / 7;
             }
             else if (TotalDistance.Y < -5)
             {
@@ -1352,7 +1352,7 @@ namespace OpenMobile.Controls
                     Highlight(-1);
                     Select(-1);
                 }
-                _ListScrollStepSize = TotalDistance.Y / 10;
+                _ListScrollStepSize = TotalDistance.Y / 7;
             }
         }
 

@@ -1102,8 +1102,9 @@ namespace OpenMobile.helperFunctions.Graphics
         /// <param name="count"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
+        /// <param name="sizeLimit"></param>
         /// <returns></returns>
-        static public List<Rectangle> GetRectangles(int count, int width, int height)
+        static public List<Rectangle> GetRectangles(int count, int width, int height, int sizeLimit = 100)
         {
             List<Rectangle> rects = new List<Rectangle>();
 
@@ -1112,12 +1113,13 @@ namespace OpenMobile.helperFunctions.Graphics
             bool direction = true;
             while (rects.Count < count)
             {
-                rects.AddRange(SplitRectangle(rects[rects.Count - 1], direction));
-                rects.RemoveAt(rects.Count - 3);
+                var rectangles = SplitRectangle(rects[rects.Count - 1], direction);
+                rects.RemoveAt(rects.Count - 1);
+                rects.AddRange(rectangles);
                 direction = !direction;
                 if (rects.Count >= count)
                     break;
-                if (rects[rects.Count - 1].Width < 2 || rects[rects.Count - 1].Height < 2)
+                if (rects[rects.Count - 1].Width < sizeLimit || rects[rects.Count - 1].Height < sizeLimit)
                     break;
             }
             return rects;
@@ -1133,7 +1135,8 @@ namespace OpenMobile.helperFunctions.Graphics
                 rects.Add(new Rectangle(rect.Left, rect.Top + rect.Height / 2, rect.Width, rect.Height / 2));
             }
             else
-            {
+            {   // horizontal
+
                 rects.Add(new Rectangle(rect.Left, rect.Top, rect.Width / 2, rect.Height));
                 rects.Add(new Rectangle(rect.Left + rect.Width / 2, rect.Top, rect.Width / 2, rect.Height));
             }

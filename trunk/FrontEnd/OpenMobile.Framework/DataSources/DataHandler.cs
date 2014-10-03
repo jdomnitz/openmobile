@@ -698,7 +698,7 @@ namespace OpenMobile.Data
         /// <returns></returns>
         public bool PushDataSourceValue(string name, object value, bool forcedUpdate=false)
         {
-            // Ensure we don't prosess empty data
+            // Ensure we don't process empty data
             if (String.IsNullOrEmpty(name))
                 return false;
 
