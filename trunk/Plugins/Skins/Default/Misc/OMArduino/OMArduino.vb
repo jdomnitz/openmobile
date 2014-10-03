@@ -176,20 +176,11 @@ Namespace OMArduino
                                         myContainer = mPanel.Find(pin.Name)
                                         If myContainer Is Nothing Then
                                             ' Create a container for this pin
-                                            myContainer = New OMContainer(pin.Name, OM.Host.ClientArea(0).Left + x_start + x_left, OM.Host.ClientArea(0).Top + y_start + y_top, 140, 140)
+                                            myContainer = New OMContainer(pin.Name, OM.Host.ClientArea(0).Left + x_start + x_left, OM.Host.ClientArea(0).Top + y_start + y_top, 130, 130)
                                             myContainer.ScrollBar_Horizontal_Enabled = False
                                             myContainer.ScrollBar_Vertical_Enabled = False
                                             mPanel.addControl(myContainer)
-                                            pin.Image.Name = String.Format("{0}_Image", pin.Name)
-                                            pin.Image.Left = 0
-                                            pin.Image.Top = 0
-                                            pin.Image.Visible = True
                                             myContainer.addControl(pin.Image)
-                                            pin.Label.Name = String.Format("{0}_Label", pin.Name)
-                                            pin.Label.Left = 0
-                                            pin.Label.Top = 100
-                                            pin.Label.Visible = True
-                                            pin.Label.BackgroundColor = Color.Transparent
                                             myContainer.addControl(pin.Label)
                                             x_left = x_left + x_inc
                                             If x_left > (OM.Host.ClientArea(0).Right - x_inc) Then
@@ -201,13 +192,25 @@ Namespace OMArduino
                                             End If
                                         Else
                                             ' Refresh the stuff in the container
-                                            mImage = myContainer.Controls(String.Format("{0}_Image", pin.Name))
-                                            mImage.Image = pin.Image.Image
-                                            mLabel = myContainer.Controls(String.Format("{0}_Label", pin.Name))
-                                            mLabel.Text = pin.Name
-                                        End If
+                                            mImage = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Image", pin.Name))
+                                            If Not mImage Is Nothing Then
+                                                If pin.Name = "D13" Then
+                                                    x = x
+                                                End If
+                                                mImage = pin.Image
+                                                mImage.Refresh()
+                                            End If
+                                            mLabel = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Label", pin.Name))
+                                            If Not mLabel Is Nothing Then
+                                                mLabel = pin.Label
+                                                mLabel.Refresh()
+                                            End If
+                                            myContainer.Refresh()
+                                            End If
                                     Next
                                     mPanel.Refresh()
+                                Else
+                                    ' no panel?
                                 End If
                             End If
                         Next

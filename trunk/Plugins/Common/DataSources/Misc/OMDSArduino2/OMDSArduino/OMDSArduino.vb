@@ -41,6 +41,7 @@ Imports OpenMobile
 Imports OpenMobile.Controls
 Imports OpenMobile.Data
 Imports OpenMobile.Framework
+Imports OpenMobile.Graphics
 Imports OpenMobile.Plugin
 Imports OpenMobile.Threading
 Imports OpenMobile.helperFunctions
@@ -342,8 +343,9 @@ Namespace OMDSArduino
                             mypins(x).Image = New OMImage(String.Format("{0}_Image", mypins(x).Name), 0, 0, 100, 100)
                             mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|" & imageName)
                             mypins(x).Image.Visible = True
-                            mypins(x).Label = New OMLabel(String.Format("{0}_Label", mypins(x).Name), 0, 0, 100, 20, mypins(x).Name)
+                            mypins(x).Label = New OMLabel(String.Format("{0}_Label", mypins(x).Name), 0, 101, 100, 30, mypins(x).Name)
                             mypins(x).Label.Visible = True
+                            mypins(x).Label.BackgroundColor = Color.Transparent
                             If m_Verbose Then
                                 pin_info = String.Format("Pin {0}> Name:{1} Descr:{2} Label:{3}, Image:{4}", x, mypins(x).Name, mypins(x).Title, mypins(x).Label, imageName)
                                 'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
