@@ -1935,6 +1935,9 @@ namespace OpenMobile
                     container.Height = theHost.ClientArea[screen].Height;
             }
 
+            // Inform UI handler that popupmenu is about to be shown
+            ((IObjectShowing)OM.Host.UIHandler.PopUpMenu).Showing(container, screen);
+
             // Show popup menu
             PopUpMenu.Visible = true;
 

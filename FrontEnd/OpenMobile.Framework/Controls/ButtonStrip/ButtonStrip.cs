@@ -543,7 +543,7 @@ namespace OpenMobile.Controls
     /// <summary>
     /// A buttonstrip
     /// </summary>
-    public class ButtonStrip : INotifyPropertyChanged, ICloneable
+    public class ButtonStrip : INotifyPropertyChanged, ICloneable, IObjectShowing
     {
         /// <summary>
         /// A buttonStrip item list
@@ -887,6 +887,30 @@ namespace OpenMobile.Controls
                 handler(this, screen, index);
         }
 
+
+        public delegate void MenuEventHandler(ButtonStrip sender, int screen, OMContainer menuContainer);
+
+        /// <summary>
+        /// Raised right before this menu is shown
+        /// </summary>
+        public event MenuEventHandler OnShowing;
+        private void Raise_OnShowing(int screen, OMControl menuContainer)
+        {
+            //List<ControlGroup> menuControls = new List<ControlGroup>();
+
+            //foreach (var button in this.Buttons)
+            //{
+            //    ControlGroup buttonControls = new ControlGroup();
+            //    foreach (var control in button)
+            //        buttonControls.Add(panel[screen, control.Name]);
+            //    menuControls.Add(buttonControls);
+            //}
+
+            MenuEventHandler handler = OnShowing;
+            if (handler != null)
+                handler(this, screen, (OMContainer)menuContainer);
+        }
+
         #endregion
 
         #region Constructors
@@ -970,12 +994,21 @@ namespace OpenMobile.Controls
         }
 
         #endregion
+
+        #region IShowing
+
+        void IObjectShowing.Showing(OMControl control, int screen)
+        {
+            Raise_OnShowing(screen, control);
+        }
+
+        #endregion
     }
 
     /// <summary>
     /// A container for buttonstrips
     /// </summary>
-    public class ButtonStripContainer
+    public class ButtonStripContainer: IObjectShowing
     {
         #region Properties
 
@@ -1455,6 +1488,16 @@ namespace OpenMobile.Controls
         }
 
         #endregion
+
+        /// <summary>
+        /// Raises the OnShowing event
+        /// </summary>
+        /// <param name="screen"></param>
+        void IObjectShowing.Showing(OMControl control, int screen)
+        {
+            if (_ButtonStrip[screen] != null)
+                ((IObjectShowing)_ButtonStrip[screen]).Showing(control, screen);
+        }
     }
 
 }

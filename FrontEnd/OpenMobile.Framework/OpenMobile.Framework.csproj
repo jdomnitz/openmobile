@@ -121,6 +121,7 @@
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
     <Compile Include="Controls\ControlLayout.cs" />
+    <Compile Include="Controls\IShowing.cs" />
     <Compile Include="Controls\OMContainer2.cs" />
     <Compile Include="Controls\OMObjectList3.cs" />
     <Compile Include="Controls\EventArgs.cs" />
@@ -339,7 +340,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

@@ -1131,11 +1131,39 @@ namespace OpenMobile.helperFunctions.Graphics
 
             if (directionVertical)
             {
+                //// Calculate size of items
+                //var availableHeight = rect.Height;
+                //SizeF size = new SizeF(availableHeight, availableHeight);
+
+                //// Calculate horizontal count
+                //var count = rect.Width / size.Width;
+
+                //// Add items
+                //for (int i = 0; i < count; i++)
+                //{
+                //    Rectangle newRect = new Rectangle(rect.Left, rect.Top + (size.Width * i), size.Width, size.Height);
+                //    rects.Add(newRect);
+                //}
+
                 rects.Add(new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height / 2));
                 rects.Add(new Rectangle(rect.Left, rect.Top + rect.Height / 2, rect.Width, rect.Height / 2));
             }
             else
             {   // horizontal
+
+                //// Calculate size of items
+                //var availableHeight = rect.Height;
+                //SizeF size = new SizeF(availableHeight, availableHeight);
+                
+                //// Calculate horizontal count
+                //var count = rect.Width / size.Width;
+
+                //// Add items
+                //for (int i = 0; i < count; i++)
+                //{
+                //    Rectangle newRect = new Rectangle(rect.Left + (size.Width * i), rect.Top, size.Width, size.Height);
+                //    rects.Add(newRect);
+                //}
 
                 rects.Add(new Rectangle(rect.Left, rect.Top, rect.Width / 2, rect.Height));
                 rects.Add(new Rectangle(rect.Left + rect.Width / 2, rect.Top, rect.Width / 2, rect.Height));
