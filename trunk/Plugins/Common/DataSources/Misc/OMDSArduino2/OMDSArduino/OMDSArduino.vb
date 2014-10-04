@@ -837,7 +837,8 @@ Namespace OMDSArduino
                 If Not Arduino Is Nothing Then
                     If Arduino.IsInitialized Then
                         ' Reset the Arduino pins to default (doesn't seem to work)
-                        Firmata.SendMessage(Of Sharpduino.Messages.Send.ResetMessage)(New Sharpduino.Messages.Send.ResetMessage)
+                        'Firmata.SendMessage(Of Sharpduino.Messages.Send.ResetMessage)(New Sharpduino.Messages.Send.ResetMessage())\
+                        Arduino.Reset()
                         Try
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.onSystemEvent()", String.Format("Program closing."))
