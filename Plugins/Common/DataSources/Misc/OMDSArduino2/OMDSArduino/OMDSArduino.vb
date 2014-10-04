@@ -334,6 +334,11 @@ Namespace OMDSArduino
                                 'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
                             End If
                         Next
+                        ' If user has specified stuff for the pins, we should load them now
+                        '   Custom Images
+                        '   Custom Name
+                        '   Script
+                        ' Push the new pin array
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
                         m_timer.Enabled = True
                         m_timer.Start()
@@ -828,16 +833,23 @@ Namespace OMDSArduino
 
             If efunc.Equals(eFunction.closeProgram) Or efunc.Equals(eFunction.CloseProgramPreview) Then
                 ' OM Exiting?
+
                 If Not Arduino Is Nothing Then
                     If Arduino.IsInitialized Then
+                        ' Reset the Arduino pins to default (doesn't seem to work)
+                        Firmata.SendMessage(Of Sharpduino.Messages.Send.ResetMessage)(New Sharpduino.Messages.Send.ResetMessage)
                         Try
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.onSystemEvent()", String.Format("Program closing."))
                             End If
-                            ' Reset the Arduino end dispose
+                            System.Threading.Thread.Sleep(500)
+                            'Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, False)
                             Arduino.Dispose()
                         Catch ex As Exception
                             ' Problem with ARDUINO
+                            If m_Verbose Then
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.onSystemEvent()", String.Format("Error message: {0}.", ex.Message))
+                            End If
                             lost_arduino()
                         End Try
                     End If
@@ -866,17 +878,6 @@ Namespace OMDSArduino
             End If
 
         End Sub
-
-        Private Function GetSetting(ByVal Name As String, ByVal DefaultValue As String) As String
-
-            Using Settings As New OpenMobile.Data.PluginSettings
-                If String.IsNullOrEmpty(Settings.getSetting(Me, Name)) Then
-                    Settings.setSetting(Me, Name, DefaultValue)
-                End If
-                Return Settings.getSetting(Me, Name)
-            End Using
-
-        End Function
 
         Private Function make_bits(ByVal data As Byte) As String
 
@@ -969,92 +970,14 @@ Namespace OMDSArduino
 
         Public Overrides Sub Dispose()
             Try
+                Firmata.SendMessage(New Sharpduino.Messages.Send.ResetMessage)
+                System.Threading.Thread.Sleep(300)
                 Arduino.Dispose()
             Catch ex As Exception
                 If m_Verbose Then
                     theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.Dispose()", "No object to dispose - " + ex.Message)
                 End If
             End Try
-
-        End Sub
-
-        Private Sub m_SysexMessageReady(ByVal theMessage As Array, ByVal theBytes As Integer)
-            ' There is a SYSEX message from Firmata that is ready for us to use
-            ' What do we do here then?
-
-            Dim character As Byte = 0
-            Dim lastSYSEXmessage As String = ""
-            Dim lastI2Crecieved As String = ""
-            Dim msgtxt As String = ""
-            Dim adrtxt As String = ""
-            Dim statxt As String = ""
-            Dim tempx As String = ""
-            Dim msgType As Byte = 0
-            Dim theAddress As Byte = 0
-
-            msgType = theMessage(0)
-
-            Select Case msgType
-
-                Case Is = PIN_STATE_RESPONSE ' Answer to PIN_STATE_QUERY
-                    ' Message has 4 data bytes
-
-                Case Is = ANALOG_MAPPING_RESPONSE ' reply with mapping info
-
-                Case Is = CAPABILITY_RESPONSE ' Reply with supported modes and resolution
-
-                Case Is = SHIFT_DATA ' bitstream from a shift register
-
-                Case Is = REPORT_FIRMWARE  ' Incoming Firmware Version
-                    ' Two+ bytes should show up: MAJOR, MINOR and NAME text
-                    '  save to public variables
-                    firmware_version_major = theMessage(1)
-                    firmware_version_minor = theMessage(2)
-                    firmware_version_subver = theMessage(3)
-                    'statusmsg = "REPORT_FIRMWARE: " + Trim(Str(firmware_version_major)) + "." + Trim(Str(firmware_version_minor)) + "." + Trim(Str(firmware_version_subver))
-                    newstatus = True
-                Case Is = I2C_REPLY       ' There was an I2C reply
-                    ' Build a text message
-                    ' The Reply will have the first byte as the address being read from
-                    ' The next 1 or 2 bytes depends on the register address size
-                    '   1 byte if normal, 2 bytes if extended.
-                    '   The software will need to know how big it was
-                    ' We accomplish this by starting from sysexBytesRead - (bytes requested * 2)
-                    ' We know none of this during this
-                    theAddress = theMessage(1)
-                    For x = 3 To theBytes - 1 Step 2
-                        character = theMessage(x) + (theMessage(x + 1) << 7)
-                        tempx = tempx + character.ToString + " "
-                        lastI2Crecieved = lastI2Crecieved + Chr(character)
-                    Next
-                    statusmsg = "I2C_REPLY from " + Trim(Str(theAddress)) + ": " & lastI2Crecieved
-                    newstatus = True
-                Case Is = STRING_DATA   ' There is a string message
-                    ' Build a text message
-                    ' 2-byte character should be a NULL so skip it
-                    For x = 1 To theBytes - 1 Step 2
-                        character = theMessage(x)
-                        character = character + (theMessage(x + 1) << 7)
-                        lastSYSEXmessage = lastSYSEXmessage & Chr(character) '& " (" & make_bits(character) & ") "
-                    Next
-                    Select Case lastSYSEXmessage
-                        Case Is = "I2C Write OK"
-
-                        Case Is = "Sampling interval"
-
-                        Case Else
-                            For x = 1 To theBytes - 1 Step 2
-                                character = theMessage(x)
-                                character = character + (theMessage(x + 1) << 7)
-                                If x = 1 Then
-                                    adrtxt = " from " & character.ToString
-                                Else
-                                    msgtxt = msgtxt & make_bits(character) & " "
-                                End If
-                            Next
-
-                    End Select
-            End Select
 
         End Sub
 
