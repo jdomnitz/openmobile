@@ -243,6 +243,7 @@ namespace OMMusicSkin
             return panel;
         }
 
+
         void lstMedia_OnHoldClick(OMControl sender, int screen)
         {
             // Get current playlist

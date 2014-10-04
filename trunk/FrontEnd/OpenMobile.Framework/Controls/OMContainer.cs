@@ -1300,7 +1300,7 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return _Controls.Find(p => p.Contains(name));
+                return _Controls.Find(p => p[name] != null);
             }
         }
           
