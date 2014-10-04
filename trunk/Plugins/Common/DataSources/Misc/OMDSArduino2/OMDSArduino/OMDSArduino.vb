@@ -831,18 +831,17 @@ Namespace OMDSArduino
 
         Private Sub thehost_OnSystemEvent(ByVal efunc As OpenMobile.eFunction, ByVal args As Object) Handles theHost.OnSystemEvent
 
-            If efunc.Equals(eFunction.closeProgram) Or efunc.Equals(eFunction.CloseProgramPreview) Then
+            If efunc.Equals(eFunction.closeProgram) Then
                 ' OM Exiting?
 
                 If Not Arduino Is Nothing Then
                     If Arduino.IsInitialized Then
-                        ' Reset the Arduino pins to default (doesn't seem to work)
-                        'Firmata.SendMessage(Of Sharpduino.Messages.Send.ResetMessage)(New Sharpduino.Messages.Send.ResetMessage())\
-                        Arduino.Reset()
                         Try
                             If m_Verbose Then
                                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.onSystemEvent()", String.Format("Program closing."))
                             End If
+                            ' Reset the Arduino pins to default (doesn't seem to work)
+                            Arduino.Reset()
                             System.Threading.Thread.Sleep(500)
                             'Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, False)
                             Arduino.Dispose()
