@@ -108,7 +108,9 @@
     <Content Include="Icon-Arduino.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Sharpduino.dll" />
+    <Content Include="Sharpduino.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\" />
