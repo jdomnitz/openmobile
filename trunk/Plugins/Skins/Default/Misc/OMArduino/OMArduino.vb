@@ -142,7 +142,7 @@ Namespace OMArduino
                     ' Nothing here for now
 
                 Case "OMDSArduino.Arduino.Pins"
-                    ' Data must have been updated.  Only happens for INPUT pins
+                    ' Data must have been updated if subscription was updated.
                     mypins = sensor.Value
                     If Not mypins Is Nothing Then
                         pincount = OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Count").Value
@@ -161,14 +161,8 @@ Namespace OMArduino
                                     Dim z As Integer = 0            ' Loop counter
                                     Dim a1 As String = ""
                                     For z = 0 To pincount - 1
-                                        'pin.Name
-                                        'pin.CurrentValue
-                                        'pin.CurrentMode
-                                        'pin.Capabilities
-                                        'pin.Image
-                                        'pin.Label
-                                        'pin.Title
-                                        'pin.Descr
+                                        'pin.Name, pin.CurrentValue, pin.CurrentMode, pin.Capabilities
+                                        'pin.Image, pin.Label, pin.Title, pin.Descr
                                         pin = mypins(z)
                                         Dim mImage As OMImage = pin.Image
                                         Dim mLabel As OMLabel = pin.Label
@@ -191,17 +185,23 @@ Namespace OMArduino
                                                 End If
                                             End If
                                         Else
-                                            ' Refresh the stuff in the container
-                                            mImage = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Image", pin.Name))
-                                            If Not mImage Is Nothing Then
-                                                If mImage.Image <> pin.Image.Image Then
-                                                    mImage.Image = pin.Image.Image
+                                            If pin.Changed Then
+                                                ' Refresh the stuff in the container
+                                                mImage = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Image", pin.Name))
+                                                If Not mImage Is Nothing Then
+                                                    If mImage.Image <> pin.Image.Image Then
+                                                        mImage.Image = pin.Image.Image
+                                                    End If
                                                 End If
-                                            End If
-                                            mLabel = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Label", pin.Name))
-                                            If Not mLabel Is Nothing Then
-                                                If mLabel.Text <> pin.Label.Text Then
-                                                    mLabel.Text = pin.Label.Text
+                                                mLabel = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Label", pin.Name))
+                                                If Not mLabel Is Nothing Then
+                                                    If mLabel.Text <> pin.Label.Text Then
+                                                        mLabel.Text = pin.Label.Text
+                                                    End If
+                                                End If
+                                                If Not String.IsNullOrEmpty(pin.Script) Then
+                                                    ' Perform any other actions here (scripting?)
+                                                    run_scripts(pin)
                                                 End If
                                             End If
                                         End If
@@ -222,6 +222,15 @@ Namespace OMArduino
 
         End Sub
 
+        Private Sub run_scripts(pin As OMDSArduino.OMDSArduino.ArduinoIO)
+            ' Runs a script attached to a pin
+
+            Dim script As String = pin.Script
+
+            ' Parse the script and process
+
+
+        End Sub
         Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
 
             Dim mySettings As New Settings(Me.pluginName & " Settings")
