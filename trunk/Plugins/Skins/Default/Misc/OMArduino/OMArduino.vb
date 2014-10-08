@@ -42,7 +42,7 @@ Imports OpenMobile.Framework
 Imports OpenMobile.Graphics
 Imports OpenMobile.helperFunctions
 Imports OpenMobile.Plugin
-Imports OMDSArduino.OMDSArduino.ArduinoIO
+'Imports OMDSArduino.OMDSArduino.ArduinoIO
 
 'Imports Sharpduino.EasyFirmata
 
