@@ -439,7 +439,7 @@ namespace OMMusicSkin
 
             #endregion
 
-            // Create the buttonstrip popup
+            // Create the button strip popup
             ButtonStrip PopUpMenuStrip = new ButtonStrip(_MainPlugin.pluginName, panel.Name, "PopUpMenuStrip_Playlist");
             PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModePlay", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|9-av-play"), "List hold: Play now", true, OnClick: mnuItem_ListHoldModePlay_OnClick));
             PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModeEnqueue", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|9-av-add-to-queue"), "List hold: Enqueue", true, OnClick: mnuItem_ListHoldModeEnqueue_OnClick));
@@ -511,6 +511,8 @@ namespace OMMusicSkin
             PlayList2 playlist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
             playlist.Clear();
 
+            OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Current playlist cleared", 5));
+
             OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
         }
 
@@ -540,6 +542,8 @@ namespace OMMusicSkin
             {
                 case ListHoldBehavior.Play:
                     {
+                        #region ListHoldMode: Play
+
                         switch (MediaList_ListMode_Get(screen))
                         {
                             case ListModes.Song:
@@ -566,6 +570,12 @@ namespace OMMusicSkin
                                 }
                                 break;
                             case ListModes.Genre:
+                                {
+                                    var items = GetGenreSongs(selectedMediaItem.Genre);
+                                    currentPlaylist.AddRangeDistinct(items);
+                                    currentPlaylist.CurrentItem = items.First();
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                }
                                 break;
                             case ListModes.Playlist:
                                 break;
@@ -574,10 +584,14 @@ namespace OMMusicSkin
                             default:
                                 break;
                         }
+
+                        #endregion
                     }
                     break;
                 case ListHoldBehavior.Enqueue:
                     {
+                        #region ListHoldMode: Enqueue
+
                         switch (MediaList_ListMode_Get(screen))
                         {
                             case ListModes.Song:
@@ -609,6 +623,8 @@ namespace OMMusicSkin
                             default:
                                 break;
                         }
+
+                        #endregion
                     }
                     break;
                 case ListHoldBehavior.Menu:
@@ -1084,7 +1100,7 @@ namespace OMMusicSkin
             if (lst != null)
             {
                 lst.Clear();
-                var items = _DBItems.Distinct()
+                var items = _DBItems
                     .Where(x =>
                     {
                         if (x == null || String.IsNullOrWhiteSpace(x.Name))
@@ -1102,7 +1118,7 @@ namespace OMMusicSkin
                             {
                                 if (String.IsNullOrWhiteSpace(x.Album))
                                     return false;
-                                if (x.Album != null && !x.Album.ToLower().Contains(filterValue.ToLower()))
+                                if (x.Album != null && !x.Album.ToLower().Equals(filterValue.ToLower()))
                                     return false;
                             }
                         }
@@ -1113,7 +1129,7 @@ namespace OMMusicSkin
                             {
                                 if (String.IsNullOrWhiteSpace(x.Artist))
                                     return false;
-                                if (x.Artist != null && !x.Artist.ToLower().Contains(filterValue.ToLower()))
+                                if (x.Artist != null && !x.Artist.ToLower().Equals(filterValue.ToLower()))
                                     return false;
                             }
                         }
@@ -1124,7 +1140,7 @@ namespace OMMusicSkin
                             {
                                 if (String.IsNullOrWhiteSpace(x.Genre))
                                     return false;
-                                if (x.Genre != null && !x.Genre.ToLower().Contains(filterValue.ToLower()))
+                                if (x.Genre != null && !x.Genre.ToLower().Equals(filterValue.ToLower()))
                                     return false;
                             }
                         }
@@ -1179,7 +1195,7 @@ namespace OMMusicSkin
                                 {
                                     if (String.IsNullOrWhiteSpace(x.Album))
                                         return false;
-                                    if (x.Album != null && !x.Album.ToLower().Contains(filterValue.ToLower()))
+                                    if (x.Album != null && !x.Album.ToLower().Equals(filterValue.ToLower()))
                                         return false;
                                 }
                             }
@@ -1190,7 +1206,7 @@ namespace OMMusicSkin
                                 {
                                     if (String.IsNullOrWhiteSpace(x.Genre))
                                         return false;
-                                    if (x.Genre != null && !x.Genre.ToLower().Contains(filterValue.ToLower()))
+                                    if (x.Genre != null && !x.Genre.ToLower().Equals(filterValue.ToLower()))
                                         return false;
                                 }
                             }
@@ -1262,7 +1278,7 @@ namespace OMMusicSkin
                                 if (String.IsNullOrWhiteSpace(x.Artist))
                                     return false;
 
-                                if (x.Artist != null && !x.Artist.ToLower().Contains(filterValue.ToLower()))
+                                if (x.Artist != null && !x.Artist.ToLower().Equals(filterValue.ToLower()))
                                     return false;
                             }
                         }
@@ -1274,7 +1290,7 @@ namespace OMMusicSkin
                                 if (String.IsNullOrWhiteSpace(x.Genre))
                                     return false;
 
-                                if (x.Genre != null && !x.Genre.ToLower().Contains(filterValue.ToLower()))
+                                if (x.Genre != null && !x.Genre.ToLower().Equals(filterValue.ToLower()))
                                     return false;
                             }
                         }
@@ -1332,7 +1348,7 @@ namespace OMMusicSkin
                             var filterValue = ScreenSpecificData.GetProperty<string>(screen, "ArtistFilter");
                             if (!String.IsNullOrWhiteSpace(filterValue))
                             {
-                                if (!x.Artist.ToLower().Contains(filterValue.ToLower()))
+                                if (!x.Artist.ToLower().Equals(filterValue.ToLower()))
                                     return false;
                             }
                         }
@@ -1341,26 +1357,40 @@ namespace OMMusicSkin
                             var filterValue = ScreenSpecificData.GetProperty<string>(screen, "AlbumFilter");
                             if (!String.IsNullOrWhiteSpace(filterValue))
                             {
-                                if (!x.Album.ToLower().Contains(filterValue.ToLower()))
+                                if (!x.Album.ToLower().Equals(filterValue.ToLower()))
                                     return false;
                             }
                         }
 
                         return true;
                     })
+                    .Distinct()
                     .GroupBy(x => x.Genre.ToLower(), (genre, item) =>
                     new
                     {
-                        covers = item.Select(x => x.coverArt),
+                        covers = item.GroupBy(x => x.Album, (album, albumItem) => 
+                            new
+                            {
+                                cover = albumItem.First().coverArt
+                            }),
                         genre = item.First().Genre,
-                        item = item.First()
+                        item = item.First(),
+                        count = item.GroupBy(x=>x.Album).Count()
                     }).OrderBy(x => x.genre);
 
                 _ListUpdate_Cancel = false;
                 foreach (var item in items)
                 {
-                    var coverArtMosaic = OpenMobile.helperFunctions.Graphics.Images.CreateMosaic(item.covers.ToList(), 200, 200);
-                    lst.Add(new OMListItem(item.genre, String.Empty, coverArtMosaic, _MediaListSubItemFormat, item.item));
+                    string artistInfo = "";
+                    if (item.count == 0)
+                        artistInfo = "No albums";
+                    else if (item.count == 1)
+                        artistInfo = String.Format("{0} album", item.count);
+                    else
+                        artistInfo = String.Format("{0} albums", item.count);
+
+                    var coverArtMosaic = OpenMobile.helperFunctions.Graphics.Images.CreateMosaic(item.covers.Select(x=>x.cover).ToList(), 200, 200);
+                    lst.Add(new OMListItem(item.genre, artistInfo, coverArtMosaic, _MediaListSubItemFormat, item.item));
 
                     // Cancel if requested
                     if (_ListUpdate_Cancel)
@@ -1671,13 +1701,17 @@ namespace OMMusicSkin
 
         #endregion
 
+        private IEnumerable<mediaInfo> GetGenreSongs(string genre)
+        {
+            return _DBItems.Where(x => x != null && x.Genre != null && x.Genre.ToLower() == genre.ToLower());
+        }
         private IEnumerable<mediaInfo> GetAlbumSongs(string artist, string album)
         {
-            return _DBItems.Where(x => x.Artist == artist && x.Album == album);
+            return _DBItems.Where(x => x != null && x.Artist != null && x.Album != null && x.Artist.ToLower() == artist.ToLower() && x.Album.ToLower() == album.ToLower());
         }
         private IEnumerable<mediaInfo> GetArtistSongs(string artist)
         {
-            return _DBItems.Where(x => x.Artist == artist);
+            return _DBItems.Where(x => x != null && x.Artist != null && x.Artist.ToLower() == artist.ToLower());
         }
 
     }
