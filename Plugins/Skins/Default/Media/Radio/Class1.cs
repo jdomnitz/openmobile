@@ -223,6 +223,7 @@ namespace OMRadio
             }
         }
 
+
         public Settings loadSettings()
         {
 
@@ -887,6 +888,20 @@ namespace OMRadio
             theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "ListView");
             theHost.execute(eFunction.ExecuteTransition, screen.ToString(), eGlobalTransition.None.ToString());
             ((OMButton)sender).Transition = eButtonTransition.None;
+        }
+
+        void theHost_OnSystemEvent(eFunction function, Zone zone, object args)
+        {
+
+            if (function == eFunction.MediaProviderChanged)
+            {
+                // If provider is not us, stop playing radio
+            }
+            else if (function == eFunction.MediaProviderInfoChanged )
+            {
+                // If provider is not us, stop playing radio
+            }
+
         }
 
         void theHost_OnMediaEvent(eFunction function, Zone zone, string arg)
