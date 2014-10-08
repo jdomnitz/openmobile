@@ -58,6 +58,7 @@ Namespace OMDSArduino
         Dim myTitle As String = ""
         Dim myScript As String = ""
         Dim myDescr As String = ""
+        Dim myChanged As Boolean = False
         Dim myImage As OMImage
         Dim myLabel As OMLabel
 
@@ -71,6 +72,19 @@ Namespace OMDSArduino
             End Get
             Friend Set(value As String)
                 myName = value
+            End Set
+        End Property
+
+        '''<summary>
+        '''Is current PIN value changed?
+        '''</summary>
+        Public Property Changed As Boolean
+            ' Pin User Supplied Name
+            Get
+                Return myChanged
+            End Get
+            Set(value As Boolean)
+                myTitle = myChanged
             End Set
         End Property
 
@@ -247,6 +261,10 @@ Namespace OMDSArduino
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Pins", DataSource.DataTypes.raw, "Arduino Pin Data"), Nothing)
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, Me.pluginName, "Arduino", "Count", DataSource.DataTypes.raw, "Arduino Pin Count"), 0)
 
+            ' Create commands
+            theHost.CommandHandler.AddCommand(New Command(Me, "OMDSArduino", "Pins", "Execute", AddressOf CommandExecutor, 3, True, "Perform action on pin. Parameters: PIN, ACTION, VALUE"))
+            theHost.CommandHandler.AddCommand(New Command(Me, "OMDSArduino", "Arduino", "Execute", AddressOf CommandExecutor, 2, True, "Perform action on Arduino: ACTION, VALUE"))
+
             OpenMobile.helperFunctions.StoredData.SetDefaultValue(Me, "Settings.Sample_Rate", sample_rate)
             sample_rate = OpenMobile.helperFunctions.StoredData.Get(Me, "Settings.Sample_Rate")
 
@@ -279,6 +297,41 @@ Namespace OMDSArduino
             Arduino.SetSamplingInterval(sample_rate)
 
         End Sub
+
+        Public Function CommandExecutor(ByVal command As Command, ByVal param() As Object, ByRef result As Boolean) As Object
+            ' Process commands
+
+            Dim Pin As String
+            Dim Action As String
+            Dim Value As Object
+
+            If m_Verbose Then
+                theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Processing command {0}.", command.FullName))
+            End If
+
+            Select Case command.NameLevel2
+
+                Case "Pins"
+                    ' Perform pin related function
+                    ' Example: D13=OUTPUT D13=OFF
+                    If param Is Nothing Then
+                        Pin = param(0)
+                        Action = param(1)
+                        Value = param(2)
+                        ' Perform action
+                    End If
+                Case "Arduino"
+                    ' Perform arduino related function
+                    If param Is Nothing Then
+                        Action = param(0)
+                        Value = param(1)
+                        ' Perform action
+                    End If
+            End Select
+
+
+        End Function
+
         Private Sub load_pin_info()
 
             If Not Arduino Is Nothing Then
@@ -363,51 +416,59 @@ Namespace OMDSArduino
                 If Arduino.IsInitialized Then
 
                     Dim pin_count As Integer = Arduino.GetPins.Count
+                    Dim pins_changed As Boolean = False
 
                     For x = 0 To pin_count - 1
                         ' Update the I/O pin objects
                         Try
-                            mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
-                            Select Case mypins(x).CurrentMode
 
+                            If Arduino.GetPins(x).CurrentValue <> mypins(x).CurrentValue Then
+                                pins_changed = True
+                                mypins(x).Changed = True
+                            Else
+                                mypins(x).Changed = False
+                            End If
+
+                            mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
+
+                            Select Case mypins(x).CurrentMode
+                                Case Sharpduino.Constants.PinModes.Analog
+                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|gauge")
+                                Case Sharpduino.Constants.PinModes.I2C
+                                    ' What type of graphic?
+                                Case Sharpduino.Constants.PinModes.PWM
+                                    ' Dial?
+                                Case Sharpduino.Constants.PinModes.Servo
+                                    ' What type of graphic?
+                                Case Sharpduino.Constants.PinModes.Shift
+                                    ' What type of graphic?
+                                Case Sharpduino.Constants.PinModes.Output
+                                    ' Output LOW / HI image
+                                    If mypins(x).CurrentValue = 0 Then
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_off")
+                                    Else
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_red")
+                                    End If
+                                Case Sharpduino.Constants.PinModes.Input
+                                    ' Input LOW / HI image
+                                    If mypins(x).CurrentValue = 0 Then
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_blue")
+                                    Else
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_red")
+                                    End If
                             End Select
-                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Analog Then
-                                mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|gauge")
-                            End If
-                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.I2C Then
-                                ' What type of graphic?
-                            End If
-                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.PWM Then
-                                ' Dial?
-                            End If
-                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Servo Then
-                                ' What type of graphic?
-                            End If
-                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Shift Then
-                                ' What type of graphic?
-                            End If
-                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Output Then
-                                ' Off image / On image
-                                If mypins(x).CurrentValue = 0 Then
-                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_off")
-                                Else
-                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_red")
-                                End If
-                            End If
-                            If mypins(x).CurrentMode = Sharpduino.Constants.PinModes.Input Then
-                                ' Off image / On image
-                                If mypins(x).CurrentValue = 0 Then
-                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_blue")
-                                Else
-                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_red")
-                                End If
-                            End If
+
                         Catch
+
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMDSArduino.BackgroundLoad()", "Error grabbing pin value {0}", mypins(x).Name))
+
                         End Try
                     Next
 
-                    theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
+                    If pins_changed Then
+                        ' one or more pins have changed, publish it
+                        theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
+                    End If
 
                 End If
 
