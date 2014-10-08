@@ -151,6 +151,7 @@ namespace OMMusicSkin
                 PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_NowPlaying", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|6-social-person"), "Now playing", true, cmdOnClick: "Screen{:S:}.Panel.Goto.OMMusicSkin.NowPlaying"));
                 PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_OpenURL", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Stream"), "Open URL", true, mnuItem_OpenURL_OnClick, null, null));
                 PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ShuffleToggle", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|9-av-shuffle"), "Toggle shuffle", false, mnuItem_ShuffleToggle_OnClick, null, null));
+                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_Playlist", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-view-as-list"), "Playlist", true, cmdOnClick: "Screen{:S:}.Panel.Goto.OMMusicSkin.PlaylistSkin"));
                 panel.PopUpMenu = PopUpMenuStrip;
 
                 // Connect panel events
@@ -176,6 +177,7 @@ namespace OMMusicSkin
                 //PanelManager.loadPanel(InitializePanel_PlaylistEditor());
                 PanelManager.loadPanel(new MediaBrowser().Initialize(this));
                 PanelManager.loadPanel(new MediaBrowser2().Initialize(this));
+                PanelManager.loadPanel(new PlayListSkin().Initialize(this));
 
                 //System.Threading.Thread t = new System.Threading.Thread(CreateAndLoadPanel_NowPlaying);
 
@@ -673,31 +675,31 @@ namespace OMMusicSkin
 
             if (playlist != null)
             {
-                if (!playlist.HasItems)
-                {
-                    if (db != null)
-                    {
-                        // Initialize list with items
-                        db.beginGetSongs("", "", "", "", "", -1, true, eMediaField.Album);
-                        //db.beginGetArtists(true);
-                        //db.beginGetAlbums(true);
-                        List<mediaInfo> mediaList = new List<mediaInfo>();
-                        while (true)
-                        {
-                            mediaInfo info = db.getNextMedia();
-                            if (info != null)
-                                mediaList.Add(info);
-                            else
-                                break;
-                        }
-                        db.endSearch();
-                        db.Dispose();
+                //if (!playlist.HasItems)
+                //{
+                //    if (db != null)
+                //    {
+                //        // Initialize list with items
+                //        db.beginGetSongs("", "", "", "", "", -1, true, eMediaField.Album);
+                //        //db.beginGetArtists(true);
+                //        //db.beginGetAlbums(true);
+                //        List<mediaInfo> mediaList = new List<mediaInfo>();
+                //        while (true)
+                //        {
+                //            mediaInfo info = db.getNextMedia();
+                //            if (info != null)
+                //                mediaList.Add(info);
+                //            else
+                //                break;
+                //        }
+                //        db.endSearch();
+                //        db.Dispose();
 
-                        // Add items to current playlist
-                        foreach (mediaInfo m in mediaList)
-                            playlist.Add(m);
-                    }
-                }
+                //        // Add items to current playlist
+                //        foreach (mediaInfo m in mediaList)
+                //            playlist.Add(m);
+                //    }
+                //}
                 OMMediaFlow lstImgFlow = sender[screen, "lst_ViewPlaylist_ImgFlow"] as OMMediaFlow;
                 lstImgFlow.PlayListSource = playlist;
             }

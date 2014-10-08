@@ -70,6 +70,7 @@
     <Compile Include="MediaBrowser.cs" />
     <Compile Include="MediaBrowser2.cs" />
     <Compile Include="OMMusicSkin.cs" />
+    <Compile Include="PlayListSkin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
