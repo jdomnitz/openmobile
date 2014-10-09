@@ -2545,44 +2545,6 @@ namespace OpenMobile.Media
         private string _Name;
 
         /// <summary>
-        /// The playlist queue
-        /// </summary>
-        public LinkedList<int> Queue
-        {
-            get
-            {
-                return this._Queue;
-            }
-            set
-            {
-                if (this._Queue != value)
-                {
-                    this._Queue = value;
-                }
-            }
-        }
-        private LinkedList<int> _Queue = new LinkedList<int>();
-
-        /// <summary>
-        /// The history for the playlist
-        /// </summary>
-        public LinkedList<int> History
-        {
-            get
-            {
-                return this._History;
-            }
-            set
-            {
-                if (this._History != value)
-                {
-                    this._History = value;
-                }
-            }
-        }
-        private LinkedList<int> _History = new LinkedList<int>();
-
-        /// <summary>
         /// The items in the buffers. Index 0 to BufferSize is history, index at BufferSize is current item, index BufferSize+1 to (BufferSize * 2 + 1) is queue
         /// </summary>
         public BindingList<mediaInfo> BufferItems
@@ -2609,7 +2571,7 @@ namespace OpenMobile.Media
         {
             get
             {
-                return this._CurrentIndex;
+                return this.BufferItems_CurrentItemIndex;
             }
             set
             {

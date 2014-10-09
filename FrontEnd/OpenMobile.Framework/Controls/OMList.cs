@@ -56,7 +56,7 @@ namespace OpenMobile.Controls
         /// <summary>
         /// the internal list of items
         /// </summary>
-        protected List<OMListItem> items;
+        protected List<OMListItem> _Items;
         
         [System.NonSerialized]
         System.Timers.Timer throwtmr;
@@ -136,12 +136,12 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return items;
+                return _Items;
             }
             set
             {
                 Clear();
-                items = value;
+                _Items = value;
             }
         }
 
@@ -260,14 +260,14 @@ namespace OpenMobile.Controls
         {
             lock (this)
             {
-                if ((index < -1) || (index >= items.Count))
+                if ((index < -1) || (index >= _Items.Count))
                     return;
-                if ((selectedIndex >= 0) && (selectedIndex < items.Count))
+                if ((selectedIndex >= 0) && (selectedIndex < _Items.Count))
                     //items[selectedIndex].textTex = null;
-                    items[selectedIndex].RefreshGraphic = true;
+                    _Items[selectedIndex].RefreshGraphic = true;
                 if (index >= 0)
                     //items[index].textTex = null;
-                    items[index].RefreshGraphic = true;
+                    _Items[index].RefreshGraphic = true;
 
                 selectedIndex = index;
                 if (!selectFollowsHighlight)    // this is already done in the highlight function if selectFollowsHighilight is true
@@ -300,7 +300,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public void Sort()
         {
-            items.Sort();
+            _Items.Sort();
         }
 
         /// <summary>
@@ -323,7 +323,7 @@ namespace OpenMobile.Controls
         /// </summary>
         public void Clear()
         {
-            items.Clear();
+            _Items.Clear();
             moved = 0;
             Select(-1);
         }
@@ -376,9 +376,9 @@ namespace OpenMobile.Controls
         {
             get
             {
-                if ((index < (items.Count)) && (index >= 0))
+                if ((index < (_Items.Count)) && (index >= 0))
                 {
-                    return items[index];
+                    return _Items[index];
                 }
                 else
                 {
@@ -387,7 +387,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                items[index] = value;
+                _Items[index] = value;
             }
         }
 
@@ -398,7 +398,7 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return items.Count;
+                return _Items.Count;
             }
         }
         /// <summary>
@@ -415,6 +415,7 @@ namespace OpenMobile.Controls
                 if (selectedIndex == value)
                     return;
                 Select(value);
+                base.Refresh();
             }
         }
         /// <summary>
@@ -453,7 +454,7 @@ namespace OpenMobile.Controls
         {
             lock (this)
             {
-                OMListItem it = items.Find(i => i.text == item.text);
+                OMListItem it = _Items.Find(i => i.text == item.text);
                 if (it != null)
                 {
                     if (it.image == null)
@@ -466,7 +467,7 @@ namespace OpenMobile.Controls
                 }
                 else
                 {
-                    items.Add(item);
+                    _Items.Add(item);
                 }
                 return true;
             }
@@ -477,7 +478,7 @@ namespace OpenMobile.Controls
         /// <param name="source"></param>
         public void AddRange(List<OMListItem> source)
         {
-            items.AddRange(source);
+            _Items.AddRange(source);
         }
         /// <summary>
         /// Returns the index of the given string
@@ -486,7 +487,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public int indexOf(string item)
         {
-            return items.FindIndex(a => a.text == item);
+            return _Items.FindIndex(a => a.text == item);
         }
         /// <summary>
         /// Add a group of list items
@@ -497,7 +498,7 @@ namespace OpenMobile.Controls
             lock (this)
             {
                 for (int i = 0; i < source.Count; i++)
-                    items.Add(new OMListItem(source[i]));
+                    _Items.Add(new OMListItem(source[i]));
             }
         }
         /// <summary>
@@ -509,7 +510,7 @@ namespace OpenMobile.Controls
             lock (this)
             {
             for (int i = 0; i < source.Length; i++)
-                items.Add(new OMListItem(source[i]));
+                _Items.Add(new OMListItem(source[i]));
             }
         }
         /// <summary>
@@ -520,8 +521,8 @@ namespace OpenMobile.Controls
         {
             lock (this)
             {
-                items.Add(item);
-                if (items.Count < count)
+                _Items.Add(item);
+                if (_Items.Count < count)
                     raiseUpdate(false);
             }
         }
@@ -533,7 +534,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public List<OMListItem> getRange(int index, int count)
         {
-            return items.GetRange(index, count);
+            return _Items.GetRange(index, count);
         }
 
         /// <summary>
@@ -544,8 +545,8 @@ namespace OpenMobile.Controls
         {
             lock (this)
             {
-                items.Add(new OMListItem(item));
-                if (items.Count < count)
+                _Items.Add(new OMListItem(item));
+                if (_Items.Count < count)
                     raiseUpdate(false);
             }
         }
@@ -607,7 +608,7 @@ namespace OpenMobile.Controls
 
             throwtmr = new System.Timers.Timer(50);
             throwtmr.Elapsed += new ElapsedEventHandler(throwtmr_Elapsed);
-            items = new List<OMListItem>();
+            _Items = new List<OMListItem>();
             _tmrListScroll = new Timer(1);
             _tmrListScroll.Elapsed += new ElapsedEventHandler(_tmrListScroll_Elapsed);
         }
@@ -735,7 +736,7 @@ namespace OpenMobile.Controls
         {
             get
             {
-                return moved <= Height - (items.Count * listItemHeight);
+                return moved <= Height - (_Items.Count * listItemHeight);
             }
         }
 
@@ -778,8 +779,8 @@ namespace OpenMobile.Controls
                         g.FillRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * background.A), background)), Left + 1, Top + 1, Width - 2, Height - 2);
 
                     int minListHeight = (int)(Graphics.Graphics.MeasureString("A", Font).Height + 0.5); //Round up
-                    if (((style == eListStyle.MultiList) || (style == eListStyle.MultiListText)) && (items.Count > 0) && (items[0].subitemFormat != null))
-                        minListHeight += (int)(Graphics.Graphics.MeasureString("A", items[0].subitemFormat.font).Height + 0.5);
+                    if (((style == eListStyle.MultiList) || (style == eListStyle.MultiListText)) && (_Items.Count > 0) && (_Items[0].subitemFormat != null))
+                        minListHeight += (int)(Graphics.Graphics.MeasureString("A", _Items[0].subitemFormat.font).Height + 0.5);
                     if (listItemHeight < minListHeight)
                         listItemHeight = minListHeight;
                     if (selectQueued == true)
@@ -794,14 +795,14 @@ namespace OpenMobile.Controls
                     }
                     count = (this.Height / listItemHeight);
                     int imgSze = 4;
-                    if ((moved > 0) || (items.Count * listItemHeight < Height)) //List start below top
+                    if ((moved > 0) || (_Items.Count * listItemHeight < Height)) //List start below top
                     {
                         moved = 0;
                         thrown = 0;
                     }
-                    else if (((items.Count * listItemHeight) > Height) && (moved < Height - (items.Count * listItemHeight))) //Top of the list
+                    else if (((_Items.Count * listItemHeight) > Height) && (moved < Height - (_Items.Count * listItemHeight))) //Top of the list
                     {
-                        moved = Height - (items.Count * listItemHeight);
+                        moved = Height - (_Items.Count * listItemHeight);
                         thrown = 0;
                     }
                     listStart = -(moved / listItemHeight);
@@ -819,7 +820,7 @@ namespace OpenMobile.Controls
                             if (moved < 0)
                                 SoftEdgeTop = true;
 
-                            if (moved > Height - (items.Count * listItemHeight))
+                            if (moved > Height - (_Items.Count * listItemHeight))
                                 SoftEdgeBottom = true;
 
                             if (imgSoftEdgeSides == null || imgSoftEdgeSides.Width != Width || imgSoftEdgeSides.Height != Height)
@@ -921,73 +922,73 @@ namespace OpenMobile.Controls
                                     g.FillRectangle(new Brush(Color.FromArgb((int)(_RenderingValue_Alpha * itemColor1.A), itemColor1)), rect.Left, rect.Top, rect.Width, rect.Height);
                                 break;
                         }
-                        if ((i < items.Count) && (i >= 0))
+                        if ((i < _Items.Count) && (i >= 0))
                         {
                             using (System.Drawing.StringFormat f = new System.Drawing.StringFormat(System.Drawing.StringFormatFlags.NoWrap))
                             {
                                 if ((ListStyle == eListStyle.MultiList) || (ListStyle == eListStyle.MultiListText))
                                 {
-                                    if (items[i].subitemFormat != null)
+                                    if (_Items[i].subitemFormat != null)
                                     {
                                         if ((selectedIndex == i) && (focused))
                                         {
-                                            if (items[i].RefreshGraphic)
-                                                items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this._textFormat, this._textAlignment, highlightColor, highlightColor);
-                                            g.DrawImage(items[i].textTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
-                                            if (items[i].RefreshGraphic)
-                                                items[i].subitemTex = g.GenerateTextTexture(items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.highlightColor, items[i].subitemFormat.highlightColor);
-                                            g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
+                                            if (_Items[i].RefreshGraphic)
+                                                _Items[i].textTex = g.GenerateTextTexture(_Items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, _Items[i].text, this.Font, this._textFormat, this._textAlignment, highlightColor, highlightColor);
+                                            g.DrawImage(_Items[i].textTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
+                                            if (_Items[i].RefreshGraphic)
+                                                _Items[i].subitemTex = g.GenerateTextTexture(_Items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, _Items[i].subItem, _Items[i].subitemFormat.font, _Items[i].subitemFormat.textFormat, _Items[i].subitemFormat.textAlignment, _Items[i].subitemFormat.highlightColor, _Items[i].subitemFormat.highlightColor);
+                                            g.DrawImage(_Items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
                                         }
                                         else
                                         {
-                                            if (items[i].RefreshGraphic)
-                                                items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].text, this.Font, this._textFormat, this._textAlignment, _color, _color);
-                                            g.DrawImage(items[i].textTex, (int)(rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
-                                            if (items[i].RefreshGraphic)
-                                                items[i].subitemTex = g.GenerateTextTexture(items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, items[i].subItem, items[i].subitemFormat.font, items[i].subitemFormat.textFormat, items[i].subitemFormat.textAlignment, items[i].subitemFormat.color, items[i].subitemFormat.color);
-                                            g.DrawImage(items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
+                                            if (_Items[i].RefreshGraphic)
+                                                _Items[i].textTex = g.GenerateTextTexture(_Items[i].textTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, _Items[i].text, this.Font, this._textFormat, this._textAlignment, _color, _color);
+                                            g.DrawImage(_Items[i].textTex, (int)(rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
+                                            if (_Items[i].RefreshGraphic)
+                                                _Items[i].subitemTex = g.GenerateTextTexture(_Items[i].subitemTex, 0, 0, (rect.Width - listViewItemOffset), rect.Height, _Items[i].subItem, _Items[i].subitemFormat.font, _Items[i].subitemFormat.textFormat, _Items[i].subitemFormat.textAlignment, _Items[i].subitemFormat.color, _Items[i].subitemFormat.color);
+                                            g.DrawImage(_Items[i].subitemTex, (rect.Left + listViewItemOffset), rect.Top, (rect.Width - listViewItemOffset), rect.Height, _RenderingValue_Alpha);
                                         }
                                     }
                                     else
                                     {
-                                        if ((i < items.Count) && (items[i].RefreshGraphic))
+                                        if ((i < _Items.Count) && (_Items[i].RefreshGraphic))
                                         {
                                             if (targetWidth == 0)
                                                 targetWidth = width;
                                             if (targetHeight == 0)
                                                 targetHeight = listItemHeight;
                                             if ((selectedIndex == i) && (focused))
-                                                items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, highlightColor, highlightColor);
+                                                _Items[i].textTex = g.GenerateTextTexture(_Items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, _Items[i].text, _font, _textFormat, _textAlignment, highlightColor, highlightColor);
                                             else
-                                                items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, _color, _color);
+                                                _Items[i].textTex = g.GenerateTextTexture(_Items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, _Items[i].text, _font, _textFormat, _textAlignment, _color, _color);
                                         }
-                                        g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, _RenderingValue_Alpha);
+                                        g.DrawImage(_Items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, _RenderingValue_Alpha);
                                     }
                                 }
                                 else
                                 {
-                                    if ((i < items.Count) && (items[i].RefreshGraphic))
+                                    if ((i < _Items.Count) && (_Items[i].RefreshGraphic))
                                     {
                                         if (targetWidth == 0)
                                             targetWidth = width;
                                         if (targetHeight == 0)
                                             targetHeight = listItemHeight;
                                         if ((selectedIndex == i) && (focused))
-                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, highlightColor, highlightColor);
+                                            _Items[i].textTex = g.GenerateTextTexture(_Items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, _Items[i].text, _font, _textFormat, _textAlignment, highlightColor, highlightColor);
                                         else
-                                            items[i].textTex = g.GenerateTextTexture(items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, items[i].text, _font, _textFormat, _textAlignment, _color, _color);
+                                            _Items[i].textTex = g.GenerateTextTexture(_Items[i].textTex, 0, 0, (targetWidth - listViewItemOffset), targetHeight, _Items[i].text, _font, _textFormat, _textAlignment, _color, _color);
                                     }
-                                    g.DrawImage(items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, _RenderingValue_Alpha);
+                                    g.DrawImage(_Items[i].textTex, rect.Left + listViewItemOffset, rect.Top, rect.Width - listViewItemOffset, rect.Height, _RenderingValue_Alpha);
                                 }
                             }
                             if (listViewItemOffset == 0)
                                 continue;
-                            if ((items.Count > i) && (items[i].RefreshGraphic)) //rare thread collision
-                                g.DrawImage(items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - 5, _RenderingValue_Alpha);
+                            if ((_Items.Count > i) && (_Items[i].RefreshGraphic)) //rare thread collision
+                                g.DrawImage(_Items[i].image, rect.Left + 5, rect.Top + 2, rect.Height - 5, rect.Height - 5, _RenderingValue_Alpha);
                         }
 
                         //draw separator?
-                        if (_SeparatorColor != Color.Transparent && !_SeparatorColor.IsEmpty && (i < items.Count - 1))
+                        if (_SeparatorColor != Color.Transparent && !_SeparatorColor.IsEmpty && (i < _Items.Count - 1))
                             g.DrawLine(new Pen(Color.FromArgb((int)base.GetAlphaValue255(_SeparatorColor.A), _SeparatorColor), _SeparatorSize), new Point(rect.Left, rect.Bottom), new Point(rect.Right, rect.Bottom));
 
                     }
@@ -1012,10 +1013,10 @@ namespace OpenMobile.Controls
                     }
 
                     // Draw scrollbar
-                    if ((scrollbars) && (count < items.Count))
+                    if ((scrollbars) && (count < _Items.Count))
                     {
-                        float nheight = height * ((float)height) / (listItemHeight * items.Count);
-                        float ntop = top + height * ((float)-moved) / (listItemHeight * items.Count);
+                        float nheight = height * ((float)height) / (listItemHeight * _Items.Count);
+                        float ntop = top + height * ((float)-moved) / (listItemHeight * _Items.Count);
                         using (Brush b = new Brush(_ScrollbarColor))
                             g.FillRoundRectangle(b, left + width - 5, (int)ntop, 10, (int)nheight, 6);
                     }
@@ -1044,8 +1045,8 @@ namespace OpenMobile.Controls
             OMList ret = (OMList)this.MemberwiseClone();
             ret.parent = parent;
             ret.declare();
-            if (this.items.Count > 0)
-                ret.items.AddRange(this.items.GetRange(0, this.items.Count));
+            if (this._Items.Count > 0)
+                ret._Items.AddRange(this._Items.GetRange(0, this._Items.Count));
             return ret;
         }
 
@@ -1411,14 +1412,19 @@ namespace OpenMobile.Controls
             {
                 return highlightedIndex;
             }
+            set
+            {
+                Highlight(value);
+                base.Refresh();
+            }
         }
 
-        private void Highlight(int index)
+        public void Highlight(int index)
         {
             lock (this)
             {
                 // Deselect if index is out of range
-                if ((index < 0) || (index >= items.Count))
+                if ((index < 0) || (index >= _Items.Count))
                     index = -1;
 
                 // Only trigg if this is actually a new item
@@ -1463,7 +1469,26 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public virtual void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
+            // Was scrolling active?
+            if (_tmrListScroll.Enabled)
+                // Yes, raise event that this ends
+                Raise_OnScrollEnd();
+
             _tmrListScroll.Enabled = false;
+
+            //if (TotalDistance.X < 5 && TotalDistance.Y < 5)
+            //{
+            //    if (listItemHeight > 0) //<-Just in case
+            //        Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
+
+            //    lastSelected = selectedIndex;
+            //    focused = true;
+            //    Select(highlightedIndex, false, screen);
+            //    //if (selectedIndex == lastSelected)
+            //    //    return;
+            //    //if (clickSelect)
+            //    //    mode = eModeType.Scrolling;
+            //}
         }
 
         #endregion
@@ -1480,7 +1505,7 @@ namespace OpenMobile.Controls
         {
             focused = true;
             if (selectedIndex > -1)
-                items[selectedIndex].RefreshGraphic = true; 
+                _Items[selectedIndex].RefreshGraphic = true; 
             if (selectedIndex == -1)
                 Select(0, false, screen);
         }
@@ -1493,7 +1518,7 @@ namespace OpenMobile.Controls
         {
             focused = false;
             if (selectedIndex > -1)
-                items[selectedIndex].RefreshGraphic = true; 
+                _Items[selectedIndex].RefreshGraphic = true; 
         }
 
         #endregion
@@ -1550,7 +1575,7 @@ namespace OpenMobile.Controls
                 return;
 
             if (OnScrollStart != null)
-                OnScrollStart(this, this.parent.ActiveScreen);
+                OnScrollStart((OMList)this.parent[this.parent.ActiveScreen, this.name], this.parent.ActiveScreen);
         }
 
         #endregion
@@ -1568,7 +1593,7 @@ namespace OpenMobile.Controls
                 return;
 
             if (OnScrolling != null)
-                OnScrolling(this, this.parent.ActiveScreen);
+                OnScrolling((OMList)this.parent[this.parent.ActiveScreen, this.name], this.parent.ActiveScreen);
         }
 
         #endregion
@@ -1586,11 +1611,188 @@ namespace OpenMobile.Controls
                 return;
 
             if (OnScrollEnd != null)
-                OnScrollEnd(this, this.parent.ActiveScreen);
+                OnScrollEnd((OMList)this.parent[this.parent.ActiveScreen, this.name], this.parent.ActiveScreen);
         }
 
         #endregion
 
         #endregion
+
+        /// <summary>
+        /// The source of the list items
+        /// </summary>
+        public object ListSource
+        {
+            get
+            {
+                return this._ListSource;
+            }
+            set
+            {
+                if (this._ListSource != value)
+                {
+                    // Unsubscribe from events for current object
+                    if (_ListSource != null)
+                    {
+                        if (typeof(IBindingList).IsInstanceOfType(_ListSource))
+                        {
+                            var listSource = _ListSource as IBindingList;
+
+                            if (listSource_ListChangedEventHandler == null)
+                                listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
+                            listSource.ListChanged -= listSource_ListChangedEventHandler;
+                        }
+                    }
+
+                    // Activate new object
+                    this._ListSource = value;
+
+                    // Subscribe to events of new object
+                    if (typeof(IBindingList).IsInstanceOfType(_ListSource))
+                    {
+                        var listSource = _ListSource as IBindingList;
+
+                        if (listSource_ListChangedEventHandler == null)
+                            listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
+                        listSource.ListChanged += listSource_ListChangedEventHandler;
+                    }
+
+                    // Add items 
+                    if (typeof(System.Collections.IEnumerable).IsInstanceOfType(_ListSource))
+                    {
+                        var listObject = _ListSource as System.Collections.IEnumerable;
+                        foreach (var item in listObject)
+                        {
+                            if (_AssignListItemAction == null)
+                                this.Add(item.ToString());
+                            else
+                                this.Add(_AssignListItemAction(item));
+                        }
+                    }
+                }
+            }
+        }
+        private object _ListSource;
+
+        private ListChangedEventHandler listSource_ListChangedEventHandler;
+        void listSource_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            var listSource = _ListSource as IBindingList;
+
+            switch (e.ListChangedType)
+            {
+                case ListChangedType.ItemAdded:
+                    {
+                        // Create internal list item
+                        OMListItem listItem = null;
+                        if (e.NewIndex >= 0)
+                        {
+                            if (_AssignListItemAction == null)
+                                listItem = new OMListItem(listSource[e.NewIndex].ToString());
+                            else
+                                listItem = _AssignListItemAction(listSource[e.NewIndex]);
+                        }
+                        _Items.Insert(e.NewIndex, listItem);
+
+                        // Redraw control
+                        if (e.NewIndex >= GetTopVisibleIndex() && e.NewIndex <= GetBottomVisibleIndex())
+                            base.Refresh();
+
+                        // Raise list changed event
+                        Raise_OnListChanged(parent.ActiveScreen);
+                    }
+                    break;
+                case ListChangedType.ItemChanged:
+                    {
+                        // Create internal list item
+                        OMListItem listItem = null;
+                        if (e.NewIndex >= 0)
+                        {
+                            if (_AssignListItemAction == null)
+                                listItem = new OMListItem(listSource[e.NewIndex].ToString());
+                            else
+                                listItem = _AssignListItemAction(listSource[e.NewIndex]);
+                        }
+                        _Items[e.NewIndex] = listItem;
+
+                        // Redraw control
+                        if (e.NewIndex >= GetTopVisibleIndex() && e.NewIndex <= GetBottomVisibleIndex())
+                            base.Refresh();
+
+                        // Raise list changed event
+                        Raise_OnListChanged(parent.ActiveScreen);
+                    }
+                    break;
+                case ListChangedType.ItemDeleted:
+                    {
+                        _Items.RemoveAt(e.NewIndex);
+
+                        // Redraw control
+                        if (e.NewIndex >= GetTopVisibleIndex() && e.NewIndex <= GetBottomVisibleIndex())
+                            base.Refresh();
+
+                        // Raise list changed event
+                        Raise_OnListChanged(parent.ActiveScreen);
+                    }
+                    break;
+                case ListChangedType.ItemMoved:
+                    {
+                        var item = _Items[e.OldIndex];
+                        _Items.RemoveAt(e.OldIndex);
+                        _Items.Insert(e.NewIndex, item);
+
+                        // Redraw control
+                        if ((e.NewIndex >= GetTopVisibleIndex() && e.NewIndex <= GetBottomVisibleIndex())
+                            || (e.OldIndex >= GetTopVisibleIndex() && e.OldIndex <= GetBottomVisibleIndex()))
+                            base.Refresh();
+
+                        // Raise list changed event
+                        Raise_OnListChanged(parent.ActiveScreen);
+                    }
+                    break;
+                case ListChangedType.PropertyDescriptorAdded:
+                    break;
+                case ListChangedType.PropertyDescriptorChanged:
+                    break;
+                case ListChangedType.PropertyDescriptorDeleted:
+                    break;
+                case ListChangedType.Reset:
+                    break;
+                default:
+                    break;
+            }
+
+            //// Redraw control
+            //base.Refresh();
+        }
+
+        /// <summary>
+        /// The action to use when assigning an item to the list
+        /// </summary>
+        public Func<object, OMListItem> AssignListItemAction
+        {
+            get
+            {
+                return this._AssignListItemAction;
+            }
+            set
+            {
+                if (this._AssignListItemAction != value)
+                {
+                    this._AssignListItemAction = value;
+                }
+            }
+        }
+        private Func<object, OMListItem> _AssignListItemAction;
+
+        public event IndexChangedDelegate OnListChanged;
+        private void Raise_OnListChanged(int screen)
+        {
+            if (OnListChanged != null)
+            {
+                OnListChanged((OMList)this.parent[screen, this.name], screen);
+            }
+        }
+        
     }
 }
