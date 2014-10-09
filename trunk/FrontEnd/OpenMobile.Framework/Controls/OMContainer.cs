@@ -47,7 +47,7 @@ namespace OpenMobile.Controls
         private bool _ForceUpdateOfControlsInView = false;
 
         /// <summary>
-        /// Scrollpoints is an array of points that the controls will attach to
+        /// Scroll points is an array of points that the controls will attach to
         /// <para>This can be used to position the controls while scrolling</para>
         /// <para>NB! The coordinates are relative to it's parent</para>
         /// </summary>
@@ -2490,21 +2490,33 @@ namespace OpenMobile.Controls
 
         #endregion
 
+        public event userInteraction OnMousePreviewMove;
         public void MousePreviewMove(int screen, MouseMoveEventArgs e, Point StartLocation, Point TotalDistance, Point RelativeDistance)
         {
+            if (OnMousePreviewMove != null)
+                OnMousePreviewMove(this, screen);
         }
 
+        public event userInteraction OnMousePreviewDown;
         public void MousePreviewDown(int screen, MouseButtonEventArgs e, Point StartLocation)
         {
             _ThrowRun = false;
+            if (OnMousePreviewDown != null)
+                OnMousePreviewDown(this, screen);
         }
 
+        public event userInteraction OnMousePreviewUp;
         public void MousePreviewUp(int screen, MouseButtonEventArgs e, Point StartLocation, Point TotalDistance, ClickTypes clickType)
         {
+            if (OnMousePreviewUp != null)
+                OnMousePreviewUp(this, screen);
         }
 
+        public event userInteraction OnMousePreviewClick;
         public void MousePreviewClick(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point location, ClickTypes clickType)
         {
+            if (OnMousePreviewClick != null)
+                OnMousePreviewClick(this, screen);
         }
     }
 }

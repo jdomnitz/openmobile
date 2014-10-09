@@ -1118,9 +1118,12 @@ namespace OpenMobile
                     if (typeof(IMouse).IsInstanceOfType(FocusedControlParent))
                     {
                         OMControl control = FocusedControlParent;
+                        var MouseMoveStartPointCopy = MouseMoveStartPoint;
+                        var CursorDistanceXYTotalCopy = CursorDistanceXYTotal;
+                        var eScaledCopy = eScaled;
                         OpenMobile.Threading.SafeThread.Asynchronous(() =>
                             {
-                                ((IMouse)control).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                                ((IMouse)control).MouseUp(_Screen, eScaledCopy, MouseMoveStartPointCopy, CursorDistanceXYTotalCopy);
                             });
                     }
             }
@@ -1130,9 +1133,12 @@ namespace OpenMobile
                     if (typeof(IMouse).IsInstanceOfType(FocusedControl))
                     {
                         OMControl control = FocusedControl;
+                        var MouseMoveStartPointCopy = MouseMoveStartPoint;
+                        var CursorDistanceXYTotalCopy = CursorDistanceXYTotal;
+                        var eScaledCopy = eScaled;
                         OpenMobile.Threading.SafeThread.Asynchronous(() =>
                              {
-                                 ((IMouse)control).MouseUp(_Screen, eScaled, MouseMoveStartPoint, CursorDistanceXYTotal);
+                                 ((IMouse)control).MouseUp(_Screen, eScaledCopy, MouseMoveStartPointCopy, CursorDistanceXYTotalCopy);
                              });
                     }
             }
@@ -1146,9 +1152,13 @@ namespace OpenMobile
                         if (typeof(IThrow).IsInstanceOfType(FocusedControlParent))
                         {
                             OMControl control = FocusedControlParent;
+                            var MouseMoveStartPointCopy = MouseMoveStartPoint;
+                            var CursorDistanceXYTotalCopy = CursorDistanceXYTotal;
+                            var eScaledLocationCopy = eScaled.Location;
+                            var CursorSpeedCopy = CursorSpeed;
                             OpenMobile.Threading.SafeThread.Asynchronous(() =>
                                 {
-                                    ((IThrow)control).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                                    ((IThrow)control).MouseThrowEnd(_Screen, MouseMoveStartPointCopy, CursorDistanceXYTotalCopy, eScaledLocationCopy, CursorSpeedCopy);
                                 }
                             );
                         }
@@ -1162,9 +1172,13 @@ namespace OpenMobile
                         if (typeof(IThrow).IsInstanceOfType(FocusedControl))
                         {
                             OMControl control = FocusedControl;
+                            var MouseMoveStartPointCopy = MouseMoveStartPoint;
+                            var CursorDistanceXYTotalCopy = CursorDistanceXYTotal;
+                            var eScaledLocationCopy = eScaled.Location;
+                            var CursorSpeedCopy = CursorSpeed;
                             OpenMobile.Threading.SafeThread.Asynchronous(() =>
                                  {
-                                     ((IThrow)control).MouseThrowEnd(_Screen, MouseMoveStartPoint, CursorDistanceXYTotal, eScaled.Location, CursorSpeed);
+                                     ((IThrow)control).MouseThrowEnd(_Screen, MouseMoveStartPointCopy, CursorDistanceXYTotalCopy, eScaledLocationCopy, CursorSpeedCopy);
                                  }
                              );
                        }

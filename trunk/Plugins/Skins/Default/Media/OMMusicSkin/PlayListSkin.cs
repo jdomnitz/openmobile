@@ -69,6 +69,18 @@ namespace OMMusicSkin
             lstMedia.Scrollbars = true;
             lstMedia.TextAlignment = Alignment.TopLeft;
             lstMedia.ListItemOffset = 85;
+            lstMedia.AssignListItemAction = item =>
+                {
+                    if (item is mediaInfo)
+                    {
+                        var mediaItem = item as mediaInfo;
+                        return new OMListItem(mediaItem.Name, mediaItem.Artist, mediaItem.coverArt, _MediaListSubItemFormat, mediaItem);
+                    }
+                    return new OMListItem(item.ToString());
+                };
+            lstMedia.OnListChanged += new OMList.IndexChangedDelegate(lstMedia_OnListChanged);
+            lstMedia.OnScrollStart += new userInteraction(lstMedia_OnScrollStart);
+            lstMedia.OnScrollEnd += new userInteraction(lstMedia_OnScrollEnd);
             panel.addControl(lstMedia);
 
             OMButton btnNext = OMButton.PreConfigLayout_CleanStyle("btnNext", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, 150, 90, text: "Next");
@@ -84,6 +96,21 @@ namespace OMMusicSkin
             panel.Entering += new PanelEvent(panel_Entering);
 
             return panel;
+        }
+
+        void lstMedia_OnScrollEnd(OMControl sender, int screen)
+        {
+            ((OMList)sender).Select(_Playlist.CurrentIndex, false, screen);            
+        }
+
+        void lstMedia_OnScrollStart(OMControl sender, int screen)
+        {
+            
+        }
+
+        void lstMedia_OnListChanged(OMList sender, int screen)
+        {
+            sender.Select(_Playlist.CurrentIndex, false, screen);
         }
 
         void btnNext_OnClick(OMControl sender, int screen)
@@ -112,8 +139,11 @@ namespace OMMusicSkin
 
                 _Playlist.AddRange(_DBItems.Take(30));
 
-                var queue = _Playlist.Queue;
+                var queue = _Playlist.BufferItems;
                 GUI_Refresh(sender, screen);
+
+                var list = sender[screen, "lstMedia"] as OMList;
+                list.ListSource = queue;
             });
         }
 
