@@ -686,8 +686,6 @@ namespace OpenMobile
         }
         protected override void OnWindowStateChanged(EventArgs e)
         {
-            if (this.WindowState == WindowState.Maximized)
-                this.WindowState = WindowState.Fullscreen;
             if ((this.WindowState == WindowState.Fullscreen)) // && (!defaultMouse))
             {
                 base.CursorVisible = false;
@@ -707,6 +705,8 @@ namespace OpenMobile
             }
 
             RenderingWindow_Resize(null, e);
+            if (this.WindowState == WindowState.Maximized)
+                this.WindowState = WindowState.Fullscreen;
         }
 
         void RenderingWindow_Gesture(object sender, OpenMobile.Graphics.TouchEventArgs e)

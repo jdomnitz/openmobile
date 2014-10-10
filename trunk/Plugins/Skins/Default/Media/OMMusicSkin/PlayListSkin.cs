@@ -137,7 +137,8 @@ namespace OMMusicSkin
                     _DBItems = _DB.getSongs();
                 }
 
-                _Playlist.AddRange(_DBItems.Take(30));
+                _Playlist.Shuffle = true;
+                _Playlist.AddRange(_DBItems.Take(100));
 
                 var queue = _Playlist.BufferItems;
                 GUI_Refresh(sender, screen);
