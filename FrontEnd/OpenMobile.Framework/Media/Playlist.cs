@@ -29,6 +29,7 @@ using OpenMobile.Plugin;
 using OpenMobile.Graphics;
 using System.ComponentModel;
 using System.Text;
+using System.Linq;
 
 namespace OpenMobile.Media
 {
@@ -2504,7 +2505,14 @@ namespace OpenMobile.Media
 
     public class Playlist3 : IPlaylistChanged
     {
+        private enum QueueModes
+        {
+            Normal,
+            Shuffle
+        }
+
         private ListChangedEventHandler _ListChangedEventHandler;
+        private QueueModes _QueueMode = QueueModes.Normal;
 
         /// <summary>
         /// The display name of this list
@@ -2562,7 +2570,21 @@ namespace OpenMobile.Media
             }
         }
         private BindingList<mediaInfo> _BufferItems;
-        
+
+        /// <summary>
+        /// Is shuffle (random) mode active
+        /// </summary>
+        public bool Shuffle
+        {
+            get
+            {
+                return _QueueMode == QueueModes.Shuffle;
+            }
+            set
+            {
+                _QueueMode = QueueModes.Shuffle;
+            }
+        }
 
         /// <summary>
         /// The index of the current item
@@ -2571,7 +2593,7 @@ namespace OpenMobile.Media
         {
             get
             {
-                return this.BufferItems_CurrentItemIndex;
+                return this._BufferItems_CurrentItemIndex;
             }
             set
             {
@@ -2593,7 +2615,7 @@ namespace OpenMobile.Media
                 if (_Items.Count == 0)
                     return new mediaInfo();
 
-                return _BufferItems[BufferItems_CurrentItemIndex];
+                return _BufferItems[_BufferItems_CurrentItemIndex];
             }
         }
 
@@ -2675,22 +2697,22 @@ namespace OpenMobile.Media
             {
                 case ListChangedType.ItemAdded:
                     {
-                        GenerateQueue();
+                        GenerateQueue(true);
                     }
                     break;
                 case ListChangedType.ItemChanged:
                     {
-                        GenerateQueue();
+                        GenerateQueue(true);
                     }
                     break;
                 case ListChangedType.ItemDeleted:
                     {
-                        GenerateQueue();
+                        GenerateQueue(true);
                     }
                     break;
                 case ListChangedType.ItemMoved:
                     {
-                        GenerateQueue();
+                        GenerateQueue(true);
                     }
                     break;
                 case ListChangedType.PropertyDescriptorAdded:
@@ -2706,33 +2728,40 @@ namespace OpenMobile.Media
             }
         }
 
-        private int BufferItems_QueueCount
+        private int _BufferItems_QueueCount
         {
             get
             {
-                return (BufferItems_CurrentItemIndex - BufferItems_QueueStartIndex);
+                return (_BufferItems_CurrentItemIndex - _BufferItems_QueueStartIndex);
             }
         }
-        private int BufferItems_QueueStartIndex
+        private int _BufferItems_QueueStartIndex
         {
             get
             {
                 return 0;
             }
         }
-        private int BufferItems_QueueEndIndex
+        private int _BufferItems_QueueEndIndex
         {
             get
             {
-                return BufferItems_CurrentItemIndex - 1;
+                return _BufferItems_CurrentItemIndex - 1;
+            }
+        }
+        private int _BufferItems_QueueMaxCount
+        {
+            get
+            {
+                return _BufferSize;
             }
         }
 
-        private int BufferItems_CurrentItemIndex
+        private int _BufferItems_CurrentItemIndex
         {
             get
             {
-                if (_BufferItems.Count > BufferItems_MaxCount)
+                if (_BufferItems.Count > _BufferItems_MaxCount)
                     return (int)System.Math.Floor((float)_BufferItems.Count / 2.0f);
                 else if (_BufferItems.Count > _BufferSize)
                     return _BufferSize;
@@ -2741,21 +2770,21 @@ namespace OpenMobile.Media
             }
         }
 
-        private int BufferItems_HistoryCount
+        private int _BufferItems_HistoryCount
         {
             get
             {
-                return (BufferItems_HistoryEndIndex - BufferItems_HistoryStartIndex) + 1;
+                return (_BufferItems_HistoryEndIndex - _BufferItems_HistoryStartIndex) + 1;
             }
         }
-        private int BufferItems_HistoryStartIndex
+        private int _BufferItems_HistoryStartIndex
         {
             get
             {
-                return BufferItems_CurrentItemIndex + 1;
+                return _BufferItems_CurrentItemIndex + 1;
             }
         }
-        private int BufferItems_HistoryEndIndex
+        private int _BufferItems_HistoryEndIndex
         {
             get
             {
@@ -2763,7 +2792,7 @@ namespace OpenMobile.Media
             }
         }
 
-        private int BufferItems_MaxCount
+        private int _BufferItems_MaxCount
         {
             get
             {
@@ -2771,13 +2800,13 @@ namespace OpenMobile.Media
             }
         }
 
-        private int Items_CurrentItemIndex
+        private int _Items_CurrentItemIndex
         {
             get
             {
                 try
                 {
-                    return _Items.IndexOf(_BufferItems[BufferItems_CurrentItemIndex]);
+                    return _Items.IndexOf(_BufferItems[_BufferItems_CurrentItemIndex]);
                 }
                 catch
                 {
@@ -2786,49 +2815,208 @@ namespace OpenMobile.Media
             }
         }
 
-        private mediaInfo GetNextQueueItem()
+        private mediaInfo GetNextQueueItem(bool listContentChanged)
         {
             // Next item to add to queue
             if (_BufferItems.Count == 0)
                 return _Items[0];
 
-            var indexOfNextItem = _Items.IndexOf(_BufferItems[0]);
-            indexOfNextItem++;
-            if (indexOfNextItem >= _Items.Count)
-                indexOfNextItem = 0;
+            var indexOfNextItem = 0;
+
+            switch (_QueueMode)
+            {
+                case QueueModes.Normal:
+                    {
+                        indexOfNextItem = _Items.IndexOf(_BufferItems[0]);
+                        indexOfNextItem++;
+                        if (indexOfNextItem >= _Items.Count)
+                            indexOfNextItem = 0;
+                    }
+                    break;
+                case QueueModes.Shuffle:
+                    {
+                        Random rnd = new Random();
+
+                        var unusedItems = _Items.Where(x => !_BufferItems.Any(y => y == x));
+                        if (!unusedItems.Any())
+                            unusedItems = _BufferItems.Select(x=>x);
+
+                        // Return random item
+                        var unusedItemsIndex = rnd.Next(0, unusedItems.Count());
+                        var nextItem = unusedItems.Skip(unusedItemsIndex).First();
+                        return nextItem;
+
+                        //while (_BufferItems.Skip(_BufferItems_QueueStartIndex).Take(_BufferItems_QueueCount).Contains(_Items[indexOfNextItem]))
+                        //while (_BufferItems[_BufferItems.Count - 1] == _Items[indexOfNextItem])
+                        //    indexOfNextItem = rnd.Next(0, _Items.Count);
+
+
+                        //if (listContentChanged)
+                        //{
+                        //    if (_Items.Count <= (_BufferItems.Count * 2))
+                        //        break;
+
+                        //    var queueCount = _BufferItems_QueueCount;
+
+                        //    // Remove current queue items
+                        //    for (int i = _BufferItems_QueueStartIndex; i <= _BufferItems_QueueEndIndex; i++)
+                        //        _BufferItems.RemoveAt(i);
+
+                        //    // Refill list with random items
+                        //    Random rnd = new Random();
+                        //    for (int i = 0; i < queueCount; i++)
+                        //    {
+                        //        indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //        while (_BufferItems.Skip(_BufferItems_QueueStartIndex).Take(_BufferItems_QueueCount).Contains(_Items[indexOfNextItem]))
+                        //            indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //        _BufferItems.Insert(_BufferItems_QueueStartIndex + i, _Items[indexOfNextItem]);
+                        //    }
+                        //    indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //}
+
+                        //if (listContentChanged) // && _Items.Count <= (_BufferItems_QueueMaxCount * 2))
+                        //{
+                        //    var queueCount = _BufferItems_QueueCount;
+
+                        //    // Remove current queue items
+                        //    for (int i = _BufferItems_QueueStartIndex; i <= _BufferItems_QueueEndIndex; i++)
+                        //        _BufferItems.RemoveAt(i);
+
+                        //    // Refill list with random items
+                        //    Random rnd = new Random();
+                        //    if (queueCount > 0)
+                        //    {
+                        //        for (int i = 0; i < queueCount; i++)
+                        //        {
+                        //            if (_Items.Count <= _BufferItems_QueueMaxCount)
+                        //            {
+                        //                indexOfNextItem = rnd.Next(0, _Items.Count);
+                        //                while (_BufferItems[_BufferItems.Count - 1] == _Items[indexOfNextItem])
+                        //                    indexOfNextItem = rnd.Next(0, _Items.Count);
+                        //                _BufferItems.Insert(_BufferItems_QueueStartIndex + i, _Items[indexOfNextItem]);
+                        //            }
+                        //            else
+                        //            {
+                        //                indexOfNextItem = rnd.Next(0, _Items.Count);
+                        //                while (_BufferItems.Skip(_BufferItems_QueueStartIndex).Take(_BufferItems_QueueCount).Contains(_Items[indexOfNextItem]))
+                        //                    indexOfNextItem = rnd.Next(0, _Items.Count);
+                        //                _BufferItems.Insert(_BufferItems_QueueStartIndex + i, _Items[indexOfNextItem]);
+                        //            }
+                        //        }
+                        //    }
+                        //    while (_BufferItems[_BufferItems.Count - 1] == _Items[indexOfNextItem])
+                        //        indexOfNextItem = rnd.Next(0, _Items.Count);
+                        //}
+
+                        //if (_Items.Count <= _BufferItems_QueueMaxCount || _Items.Count <= _BufferItems.Count)
+                        //{
+                        //    var queueCount = _BufferItems_QueueCount;
+
+                        //    // Remove current queue items
+                        //    for (int i = _BufferItems_QueueStartIndex; i <= _BufferItems_QueueEndIndex; i++)
+                        //        _BufferItems.RemoveAt(i);
+
+                        //    // Fill list with random items
+                        //    Random rnd = new Random();
+                        //    for (int i = 0; i < queueCount; i++)
+                        //    {
+                        //        if (_Items.Count <= (_BufferItems_QueueMaxCount * 2))
+                        //        {
+                        //            indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //            while (_BufferItems[_BufferItems.Count - 1] == _Items[indexOfNextItem])
+                        //                indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //            _BufferItems.Insert(_BufferItems_QueueStartIndex + i, _Items[indexOfNextItem]);
+                        //        }
+                        //        else
+                        //        {
+                        //            indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //            while (_BufferItems.Contains(_Items[indexOfNextItem]))
+                        //                indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //            _BufferItems.Insert(_BufferItems_QueueStartIndex + i, _Items[indexOfNextItem]);
+                        //        }
+                        //    }
+                        //    indexOfNextItem = rnd.Next(0, _Items.Count - 1);
+                        //}
+                        //else
+                        //{
+                        //    // Find a valid random index that's not already in the buffer items
+                        //    Random rnd = new Random();
+                        //    indexOfNextItem = rnd.Next(0, _Items.Count);
+                        //    while (_BufferItems.Contains(_Items[indexOfNextItem]))
+                        //        indexOfNextItem = rnd.Next(0, _Items.Count);
+                        //}
+                    }
+                    break;
+                default:
+                    break;
+            }
 
             return _Items[indexOfNextItem];
         }
 
-        private void GenerateQueue()
+
+        private void GenerateQueue(bool listContentChanged)
         {
             if (_Items.Count == 0)
                 return;
 
+            // Shuffle existing items
+            if (listContentChanged && _Items.Count <= (_BufferItems_QueueMaxCount * 2))
+            {
+                try
+                {
+                    var queueCount = _BufferItems_QueueCount;
+
+                    // Remove current queue items
+                    for (int i = 0; i < queueCount; i++)
+                        _BufferItems.RemoveAt(_BufferItems_QueueStartIndex);
+
+                    // Get items not already in buffer
+                    Random rnd = new Random();
+                    var unusedItems = _Items.Where(x => !_BufferItems.Any(y => y == x));
+                    if (!unusedItems.Any())
+                        unusedItems = _BufferItems.Select(x => x);
+
+                    // Refill list with random items
+                    for (int i = 0; i < queueCount; i++)
+                    {
+                        var unusedItemsIndex = rnd.Next(0, unusedItems.Count());
+                        var nextItem = unusedItems.Skip(unusedItemsIndex).First();
+                        _BufferItems.Insert(_BufferItems_QueueStartIndex, nextItem);
+                    }
+                }
+                catch
+                {
+                }
+            }
+
             // Do we need to fill the queue
-            if (BufferItems_QueueCount < _BufferSize)
-                BufferItems_InsertInQueue(GetNextQueueItem());
+            if (_BufferItems_QueueCount < _BufferSize)
+                BufferItems_InsertInQueue(GetNextQueueItem(listContentChanged));
         }
 
         private void BufferItems_InsertInQueue(mediaInfo item)
         {
+            //if (_BufferItems_QueueCount >= _BufferItems_QueueMaxCount)
+            //    return;
+
             _BufferItems.Insert(0, item);
 
             // Limit list size
-            while (_BufferItems.Count > BufferItems_MaxCount)
+            while (_BufferItems.Count > _BufferItems_MaxCount)
                 _BufferItems.RemoveAt(_BufferItems.Count - 1);
         }
 
         public void GotoNextMedia()
         {
             // Push a new item to the queue to move to the next index
-            BufferItems_InsertInQueue(GetNextQueueItem());
+            BufferItems_InsertInQueue(GetNextQueueItem(false));
         }
 
         public void GotoPreviousMedia()
         {
             // Remove the oldest item in queue to go back in history
-            if (BufferItems_HistoryCount > 0)
+            if (_BufferItems_HistoryCount > 0)
                 _BufferItems.RemoveAt(0);
         }
 
