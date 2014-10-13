@@ -47,10 +47,6 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OMDSArduino, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMDSArduino\OMDSArduino.dll</HintPath>
-    </Reference>
     <Reference Include="Sharpduino, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\Sharpduino.dll</HintPath>
