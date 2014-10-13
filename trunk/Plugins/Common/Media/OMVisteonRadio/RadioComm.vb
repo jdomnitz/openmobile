@@ -40,7 +40,7 @@ Public Class RadioComm
     Private m_Fade As Boolean = True
     Private m_verbose As Boolean = False        ' Controls logging of extra info to debug log
     Private m_RouteVolume As Integer = 100
-    Private connect_timeout As Integer = 10     ' Time to wait for connect and powerup of Radio in seconds
+    Private connect_timeout As Integer = 6     ' Time to wait for connect and powerup of Radio in seconds
     Private m_Retries As Integer = 5            ' How many times to have the driver check for a radio
     Private m_Tries As Integer = 0              ' How many tries left to test for a radio
     Private port_index As Integer = -1          ' Which port in the array we are working with
@@ -164,7 +164,7 @@ Public Class RadioComm
                     m_Radio.ComPortString = m_ComPort
                     m_Radio.Open()
                     starttime = Now()
-                    Do While Not m_Radio.IsOpen
+                    Do While Not m_Radio.IsPowered
                         ' wait max time then exit
                         elapsedtime = Now().Subtract(starttime)
                         'm_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Elapsed time: {0}ms.", elapsedtime.Seconds))
@@ -182,7 +182,7 @@ Public Class RadioComm
                             m_CommError = False
                             Exit Do
                         End If
-                        System.Threading.Thread.Sleep(100)
+                        System.Threading.Thread.Sleep(50)
                     Loop
                     If m_verbose Then
                         m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Releasing serial lock.")
@@ -198,7 +198,7 @@ Public Class RadioComm
             Next
         End If
 
-        If m_Radio.IsOpen Then
+        If m_Radio.IsPowered Then
             m_ComPort = m_Radio.ComPortString
             myNotification.Text = String.Format("Found radio on {0}.", m_Radio.ComPortString)
             helperFunctions.StoredData.Set(Me, "OMVisteonRadio.ComPort", m_Radio.ComPortString)
@@ -223,7 +223,7 @@ Public Class RadioComm
                 m_Radio.ComPortString = available_ports(x)
                 m_Radio.Open()
                 starttime = Now()
-                Do While Not m_Radio.IsOpen
+                Do While Not m_Radio.IsPowered
                     ' wait max time then exit
                     elapsedtime = Now().Subtract(starttime)
                     If elapsedtime.Seconds > connect_timeout Then
@@ -237,7 +237,7 @@ Public Class RadioComm
                         m_CommError = False
                         Exit Do
                     End If
-                    System.Threading.Thread.Sleep(100)
+                    System.Threading.Thread.Sleep(50)
                 Loop
                 OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
                 If m_Radio.IsOpen Then
@@ -247,7 +247,7 @@ Public Class RadioComm
             End If
         Next
 
-        If Not m_Radio.IsOpen Then
+        If Not m_Radio.IsPowered Then
             myNotification.Text = "Radio not found."
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - find_radio()", "No radio found on any port.")
