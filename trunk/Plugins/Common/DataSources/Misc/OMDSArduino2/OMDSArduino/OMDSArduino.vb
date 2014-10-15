@@ -252,6 +252,7 @@ Namespace OMDSArduino
 
             Return eLoadStatus.LoadSuccessful
 
+
         End Function
 
         Private Sub BackgroundLoad()
@@ -301,7 +302,7 @@ Namespace OMDSArduino
         Public Function CommandExecutor(ByVal command As Command, ByVal param() As Object, ByRef result As Boolean) As Object
             ' Process commands
 
-            Dim Pin As String
+            Dim Pin As Integer
             Dim Action As String
             Dim Value As Object
 
@@ -314,19 +315,22 @@ Namespace OMDSArduino
                 Case "Pins"
                     ' Perform pin related function
                     ' Example: D13=OUTPUT D13=OFF
-                    If param Is Nothing Then
+                    If Not param Is Nothing Then
                         Pin = param(0)
                         Action = param(1)
                         Value = param(2)
                         ' Perform action
+                        Arduino.SetDO(Pin, Value)
                     End If
+
                 Case "Arduino"
                     ' Perform arduino related function
-                    If param Is Nothing Then
+                    If Not param Is Nothing Then
                         Action = param(0)
                         Value = param(1)
                         ' Perform action
                     End If
+
             End Select
 
 
@@ -656,6 +660,8 @@ Namespace OMDSArduino
         End Sub
 
         Private Sub toggle_timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_toggle_timer.Elapsed
+
+            Exit Sub
 
             m_toggle_timer.Enabled = False
             m_toggle_timer.Stop()

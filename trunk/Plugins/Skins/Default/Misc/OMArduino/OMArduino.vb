@@ -35,6 +35,7 @@
 
 Imports System
 Imports System.Net
+Imports Microsoft.VisualBasic
 Imports OpenMobile
 Imports OpenMobile.Controls
 Imports OpenMobile.Data
@@ -42,6 +43,7 @@ Imports OpenMobile.Framework
 Imports OpenMobile.Graphics
 Imports OpenMobile.helperFunctions
 Imports OpenMobile.Plugin
+Imports System.Collections.Generic
 
 Namespace OMArduino
 
@@ -163,6 +165,7 @@ Namespace OMArduino
                                         pin = mypins(z)
                                         Dim mImage As OMImage = pin.Image
                                         Dim mLabel As OMLabel = pin.Label
+                                        Dim mButton As OMButton = New OMButton(String.Format("{0}Button", pin.Name), 0, 0, 130, 130)
                                         Dim myContainer As OMContainer
                                         myContainer = mPanel.Find(pin.Name)
                                         If myContainer Is Nothing Then
@@ -173,6 +176,11 @@ Namespace OMArduino
                                             mPanel.addControl(myContainer)
                                             myContainer.addControl(pin.Image)
                                             myContainer.addControl(pin.Label)
+                                            mButton.Opacity = 0
+                                            mButton.Tag = z.ToString
+                                            AddHandler mButton.OnClick, AddressOf Button_OnClick
+                                            AddHandler mButton.OnLongClick, AddressOf Button_OnLongClick
+                                            myContainer.addControl(mButton)
                                             x_left = x_left + x_inc
                                             If x_left > (OM.Host.ClientArea(0).Right - x_inc) Then
                                                 x_left = 0
@@ -219,13 +227,68 @@ Namespace OMArduino
 
         End Sub
 
+        Private Sub my_dialog(ByVal sender As OMControl, ByVal screen As Integer, Optional ByVal title As String = "<empty>", Optional ByVal info As String = "")
+
+            Dim myDialog As OpenMobile.helperFunctions.Forms.dialog = New OpenMobile.helperFunctions.Forms.dialog(Me.pluginName, sender.Parent.Name)
+
+            myDialog.Header = title
+            myDialog.Text = String.Format(info, sender.Name, sender.Tag)
+
+            myDialog.Icon = OpenMobile.helperFunctions.Forms.icons.Busy
+            myDialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK
+            myDialog.ShowMsgBox(screen)
+
+        End Sub
+
+        Private Sub Button_OnClick(ByVal sender As OMControl, ByVal screen As Integer)
+            ' I/O pin screen object clicked
+
+            Dim x, y As Integer
+
+            'my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) clicked.", sender.Name, sender.Tag))
+
+            ' grab the required pin
+            x = Val(sender.Tag)
+            pin = mypins(x)
+
+            Select Case pin.CurrentMode
+                Case Sharpduino.Constants.PinModes.Input
+                Case Sharpduino.Constants.PinModes.Output
+                    ' Toggle the OUTPUT
+                    If pin.CurrentValue = 0 Then
+                        y = 1
+                    Else
+                        y = 0
+                    End If
+                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "OUTPUT", y})
+                Case Sharpduino.Constants.PinModes.Analog
+                Case Sharpduino.Constants.PinModes.PWM
+                Case Sharpduino.Constants.PinModes.I2C
+                Case Sharpduino.Constants.PinModes.Servo
+                Case Sharpduino.Constants.PinModes.Shift
+            End Select
+
+        End Sub
+
+        Private Sub Button_OnLongClick(ByVal sender As OMControl, ByVal screen As Integer)
+            ' I/O pin screen object long-clicked
+
+            Dim x As Integer
+
+            my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) long clicked.", sender.Name, sender.Tag))
+
+            ' grab the required pin
+            x = Val(sender.Tag)
+            pin = mypins(x)
+
+        End Sub
+
         Private Sub run_scripts(pin As OMDSArduino.OMDSArduino.ArduinoIO)
             ' Runs a script attached to a pin
 
             Dim script As String = pin.Script
 
             ' Parse the script and process
-
 
         End Sub
         Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
