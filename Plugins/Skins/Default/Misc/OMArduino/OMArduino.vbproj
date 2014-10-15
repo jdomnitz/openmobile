@@ -91,6 +91,11 @@
       <HintPath>..\..\..\..\..\FrontEnd\OpenMobile\bin\Debug\Plugins\OMDSArduino\OMDSArduino.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Sharpduino, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Sharpduino.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -105,6 +110,11 @@
       <Name>OpenMobile.Graphics</Name>
       <Private>False</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Sharpduino.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
