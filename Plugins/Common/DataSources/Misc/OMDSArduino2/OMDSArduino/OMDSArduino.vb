@@ -307,24 +307,43 @@ Namespace OMDSArduino
             Dim Value As Object
 
             If m_Verbose Then
-                theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Processing command {0}.", command.FullName))
+                theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Processing command: {0}.", command.FullName))
             End If
 
             Select Case command.NameLevel2
 
                 Case "Pins"
                     ' Perform pin related function
-                    ' Example: D13=OUTPUT D13=OFF
+                    If m_Verbose Then
+                        theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("PIN command"))
+                    End If
                     If Not param Is Nothing Then
                         Pin = param(0)
                         Action = param(1)
                         Value = param(2)
-                        ' Perform action
-                        Arduino.SetDO(Pin, Value)
+                        If m_Verbose Then
+                            theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Action: {0}", Action))
+                        End If
+                        Select Case Action
+                            Case "SETMODE"
+                                If m_Verbose Then
+                                    theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Mode: {0}", Value))
+                                End If
+                                Arduino.SetPinMode(Pin, Value)
+                                load_pin_info()
+                            Case "SETVALUE"
+                                If m_Verbose Then
+                                    theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Value: {0}", Value))
+                                End If
+                                Arduino.SetDO(Pin, Value)
+                        End Select
                     End If
 
                 Case "Arduino"
                     ' Perform arduino related function
+                    If m_Verbose Then
+                        theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("ARDUINO command"))
+                    End If
                     If Not param Is Nothing Then
                         Action = param(0)
                         Value = param(1)
@@ -357,28 +376,50 @@ Namespace OMDSArduino
                         For x = 0 To pin_count - 1
                             ' Build the I/O pin objects
                             mypins(x) = New ArduinoIO
+                            mypins(x).Script = ""
                             mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                             mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
                             mypins(x).Capabilities = Arduino.GetPins(x).Capabilities
                             ' Extract capabilities
-                            For Each pair As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In mypins(x).Capabilities
-                                If pair.Key = Sharpduino.Constants.PinModes.Analog Then
+                            Select Case mypins(x).CurrentMode
+                                Case Sharpduino.Constants.PinModes.Input
+                                    mypins(x).Name = String.Format("D{0}", x)
+                                    mypins(x).Descr = String.Format("Digital #{0}", x)
+                                    If mypins(x).CurrentValue = 0 Then
+                                        imageName = "led_off"
+                                    Else
+                                        imageName = "led_red"
+                                    End If
+                                Case Sharpduino.Constants.PinModes.Output
+                                    mypins(x).Name = String.Format("D{0}", x)
+                                    mypins(x).Descr = String.Format("Digital #{0}", x)
+                                    If mypins(x).CurrentValue = 0 Then
+                                        imageName = "toggle_off"
+                                    Else
+                                        imageName = "toggle_on"
+                                    End If
+                                Case Sharpduino.Constants.PinModes.Analog
                                     mypins(x).Name = String.Format("A{0}", x)
                                     mypins(x).Descr = String.Format("Analog #{0}", x)
                                     imageName = "gauge"
-                                End If
-                            Next
-                            If String.IsNullOrEmpty(mypins(x).Name) Then
-                                mypins(x).Name = String.Format("D{0}", x)
-                                mypins(x).Descr = String.Format("Digital #{0}", x)
-                                If mypins(x).CurrentValue = 0 Then
-                                    imageName = "led_off"
-                                Else
-                                    imageName = "led_red"
-                                End If
-                            End If
+                                Case Sharpduino.Constants.PinModes.PWM
+                                    mypins(x).Name = String.Format("P{0}", x)
+                                    mypins(x).Descr = String.Format("PWM #{0}", x)
+                                    imageName = "Icon-Arduino"
+                                Case Sharpduino.Constants.PinModes.I2C
+                                    mypins(x).Name = String.Format("I{0}", x)
+                                    mypins(x).Descr = String.Format("I2C #{0}", x)
+                                    imageName = "Icon-Arduino"
+                                Case Sharpduino.Constants.PinModes.Servo
+                                    mypins(x).Name = String.Format("S{0}", x)
+                                    mypins(x).Descr = String.Format("Servo #{0}", x)
+                                    imageName = "Icon-Arduino"
+                                Case Sharpduino.Constants.PinModes.Shift
+                                    mypins(x).Name = String.Format("F{0}", x)
+                                    mypins(x).Descr = String.Format("Shift #{0}", x)
+                                    imageName = "Icon-Arduino"
+                            End Select
                             mypins(x).Title = mypins(x).Name
-                            mypins(x).Script = ""
                             ' Make on-screen objects to be attached to the pins
                             mypins(x).Image = New OMImage(String.Format("{0}_Image", mypins(x).Name), 0, 0, 100, 100)
                             mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|" & imageName)
@@ -438,7 +479,6 @@ Namespace OMDSArduino
                             Select Case mypins(x).CurrentMode
                                 Case Sharpduino.Constants.PinModes.Analog
                                     mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|gauge")
-                                Case Sharpduino.Constants.PinModes.I2C
                                     ' What type of graphic?
                                 Case Sharpduino.Constants.PinModes.PWM
                                     ' Dial?
@@ -449,16 +489,16 @@ Namespace OMDSArduino
                                 Case Sharpduino.Constants.PinModes.Output
                                     ' Output LOW / HI image
                                     If mypins(x).CurrentValue = 0 Then
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_off")
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|toggle_off")
                                     Else
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_red")
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|toggle_on")
                                     End If
                                 Case Sharpduino.Constants.PinModes.Input
                                     ' Input LOW / HI image
                                     If mypins(x).CurrentValue = 0 Then
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_blue")
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_off")
                                     Else
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|button_red")
+                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_red")
                                     End If
                             End Select
 

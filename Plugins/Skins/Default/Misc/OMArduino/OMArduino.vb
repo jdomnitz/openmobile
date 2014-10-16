@@ -83,6 +83,10 @@ Namespace OMArduino
 
             'om.host.DebugMsg("OMFuel - BackgroundLoad()", "Continuing in background...")
 
+            ' Get any saved settings
+            StoredData.SetDefaultValue(Me, "Settings.Verbose", m_Verbose)
+            m_Verbose = StoredData.Get(Me, "Settings.Verbose")
+
             ' Build the main panel
             Dim omArduinopanel As New OMPanel("OMArduino", "OMArduino")
             AddHandler omArduinopanel.Entering, AddressOf panel_enter
@@ -260,7 +264,7 @@ Namespace OMArduino
                     Else
                         y = 0
                     End If
-                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "OUTPUT", y})
+                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETVALUE", y})
                 Case Sharpduino.Constants.PinModes.Analog
                 Case Sharpduino.Constants.PinModes.PWM
                 Case Sharpduino.Constants.PinModes.I2C
@@ -272,14 +276,28 @@ Namespace OMArduino
 
         Private Sub Button_OnLongClick(ByVal sender As OMControl, ByVal screen As Integer)
             ' I/O pin screen object long-clicked
+            ' Manage user specified settings here
 
             Dim x As Integer
 
-            my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) long clicked.", sender.Name, sender.Tag))
+            'my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) long clicked.", sender.Name, sender.Tag))
 
             ' grab the required pin
             x = Val(sender.Tag)
             pin = mypins(x)
+
+            Select Case pin.CurrentMode
+                Case Sharpduino.Constants.PinModes.Input
+                    If m_Verbose Then
+                        OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to OUTPUT"))
+                    End If
+                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETMODE", Sharpduino.Constants.PinModes.Output})
+                Case Sharpduino.Constants.PinModes.Output
+                    If m_Verbose Then
+                        OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to INPUT"))
+                    End If
+                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETMODE", Sharpduino.Constants.PinModes.Input})
+            End Select
 
         End Sub
 
@@ -298,7 +316,7 @@ Namespace OMArduino
             ' Create a handler for settings changes
             AddHandler mySettings.OnSettingChanged, AddressOf mySettings_OnSettingChanged
 
-            mySettings.Add(New Setting(SettingTypes.MultiChoice, Me.pluginName & ";Settings.VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
+            mySettings.Add(New Setting(SettingTypes.MultiChoice, Me.pluginName & ";Settings.Verbose", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
 
             Return mySettings
 
@@ -309,8 +327,9 @@ Namespace OMArduino
             OpenMobile.helperFunctions.StoredData.Set(Me, settings.Name, settings.Value)
 
             Select Case settings.Name
-                Case "VerboseDebug"
+                Case "OMArduino;Settings.Verbose"
                     m_Verbose = settings.Value
+                    StoredData.Set(Me, "Settings.Verbose", m_Verbose)
             End Select
 
         End Sub
