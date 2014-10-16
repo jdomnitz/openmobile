@@ -170,8 +170,6 @@ Namespace OMLCD
 
         Private WithEvents theHost As IPluginHost
 
-        Private settings As Settings
-
         Private m_Key_Timeout As Integer = 10               ' Time to wait for keypress for key assignment in seconds
         Private manager_busy As Boolean = False             ' Prevent multiple concurrent calls on display manager
         Private timer_busy As Boolean = False               ' Prevents subscription updates when page change is due to occur
