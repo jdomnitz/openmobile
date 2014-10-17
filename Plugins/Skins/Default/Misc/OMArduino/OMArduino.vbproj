@@ -84,6 +84,7 @@
     <Compile Include="OMArduino.vb" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Images\" />
     <Folder Include="My Project\" />
   </ItemGroup>
   <ItemGroup>
