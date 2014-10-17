@@ -180,6 +180,8 @@ Namespace OMArduino
                                         mLabel.Visible = True
                                         mLabel.BackgroundColor = Color.Transparent
                                         Dim mButton As OMButton = New OMButton(String.Format("{0}Button", mypins(z).Name), 0, 0, 130, 130)
+                                        AddHandler mButton.OnClick, AddressOf Button_OnClick
+                                        AddHandler mButton.OnHoldClick, AddressOf Button_OnHoldClick
                                         Dim myContainer As OMContainer
                                         Dim theContainer As OMContainer = mPanel.Find(mypins(z).Name)
                                         If theContainer Is Nothing Then
@@ -195,8 +197,6 @@ Namespace OMArduino
                                             myContainer.addControl(mLabel)
                                             mButton.Opacity = 0
                                             mButton.Tag = z.ToString
-                                            AddHandler mButton.OnClick, AddressOf Button_OnClick
-                                            AddHandler mButton.OnHoldClick, AddressOf Button_OnHoldClick
                                             myContainer.addControl(mButton)
                                             x_left = x_left + x_inc
                                             If x_left > (OM.Host.ClientArea(0).Right - x_inc) Then
@@ -208,19 +208,17 @@ Namespace OMArduino
                                             End If
                                         Else
                                             If mypins(z).Changed Then
-                                                If z = 13 Then
-                                                    OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Pin {0} value {1}.", mypins(z).Name, mypins(z).CurrentValue))
+                                                If z < 14 Then
+                                                    z = z
                                                 End If
                                                 ' Refresh the stuff in the container
                                                 theContainer = mPanel.Find(mypins(x).Name)
-                                                mImage = mPanel.Find(String.Format("{0}_Image", mypins(z).Name))
-                                                If Not mImage Is Nothing Then
-                                                    mImage.Image = OM.Host.getPluginImage(Me, String.Format("Images|{0}", mypins(z).ImageFile))
-                                                End If
-                                                mLabel = theContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Label", mypins(z).Name))
-                                                If Not mLabel Is Nothing Then
-                                                    mLabel.Text = mypins(z).LabelText
-                                                End If
+                                                theContainer.ClearControls()
+                                                'mImage.Image = OM.Host.getPluginImage(Me, String.Format("Images|{0}", mypins(z).ImageFile))
+                                                theContainer.addControl(mImage)
+                                                'mLabel.Text = mypins(z).LabelText
+                                                theContainer.addControl(mLabel)
+                                                theContainer.addControl(mButton)
                                                 If Not String.IsNullOrEmpty(mypins(z).Script) Then
                                                     ' Perform any other actions here (scripting?)
                                                     run_scripts(mypins(z))
@@ -229,7 +227,6 @@ Namespace OMArduino
                                             End If
                                         End If
                                     Next ' Pin Loop
-                                    mPanel.Refresh()
                                 Else
                                     ' no panel?
                                 End If
