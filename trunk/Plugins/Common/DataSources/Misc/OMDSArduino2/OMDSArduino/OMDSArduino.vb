@@ -59,8 +59,8 @@ Namespace OMDSArduino
         Dim myScript As String = ""
         Dim myDescr As String = ""
         Dim myChanged As Boolean = False
-        Dim myImage As OMImage
-        Dim myLabel As OMLabel
+        Dim myImageFile As String = ""
+        Dim myLabelText As String = ""
 
         '''<summary>
         '''The Program assigned name for the pin
@@ -84,7 +84,7 @@ Namespace OMDSArduino
                 Return myChanged
             End Get
             Set(value As Boolean)
-                myTitle = myChanged
+                myChanged = value
             End Set
         End Property
 
@@ -128,26 +128,26 @@ Namespace OMDSArduino
         '''<summary>
         '''Program generated container for on-panel display
         '''</summary>
-        Public Property Label As OMLabel
+        Public Property LabelText As String
             ' The button definition to use on the panel for the I/O line
             Get
-                Return myLabel
+                Return myLabelText
             End Get
-            Set(value As OMLabel)
-                myLabel = value
+            Set(value As String)
+                myLabelText = value
             End Set
         End Property
 
         '''<summary>
         '''Program generated container for on-panel display
         '''</summary>
-        Public Property Image As OMImage
+        Public Property ImageFile As String
             ' The button definition to use on the panel for the I/O line
             Get
-                Return myImage
+                Return myImageFile
             End Get
-            Set(value As OMImage)
-                myImage = value
+            Set(value As String)
+                myImageFile = value
             End Set
         End Property
 
@@ -201,6 +201,7 @@ Namespace OMDSArduino
         Private vRef As Single = 5.0
         Private useI2C As Boolean = False                   ' True=Automatically set A4/A5 pin mode to I2C
         Private sample_rate As Integer = 100                ' Firmata pin sampling rate
+        Private refresh_rate As Integer = 150               ' Pin data refresh rate
 
         Private m_Verbose As Boolean = False
 
@@ -225,8 +226,7 @@ Namespace OMDSArduino
         'Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
         Delegate Sub UpdateCtrl(ByVal sender As OMControl, ByVal screen As Integer)
 
-        Private WithEvents m_timer As New Timers.Timer(100) ' Fetch pin info this often
-        Private WithEvents m_toggle_timer As New Timers.Timer(1000) ' Test toggle LED this often
+        Private WithEvents m_timer As New Timers.Timer(refresh_rate) ' Fetch pin info this often
 
         Public Sub New()
 
@@ -237,6 +237,9 @@ Namespace OMDSArduino
         Public Overrides Function initialize(ByVal host As OpenMobile.Plugin.IPluginHost) As eLoadStatus
 
             Dim m_Settings As New OpenMobile.Plugin.Settings("Arduino Connector")
+
+            m_timer.AutoReset = False
+            m_timer.Stop()
 
             loadSettings()
 
@@ -386,62 +389,52 @@ Namespace OMDSArduino
                                     mypins(x).Name = String.Format("D{0}", x)
                                     mypins(x).Descr = String.Format("Digital #{0}", x)
                                     If mypins(x).CurrentValue = 0 Then
-                                        imageName = "led_off"
+                                        mypins(x).ImageFile = "led_off"
                                     Else
-                                        imageName = "led_red"
+                                        mypins(x).ImageFile = "led_red"
                                     End If
                                 Case Sharpduino.Constants.PinModes.Output
                                     mypins(x).Name = String.Format("D{0}", x)
                                     mypins(x).Descr = String.Format("Digital #{0}", x)
                                     If mypins(x).CurrentValue = 0 Then
-                                        imageName = "toggle_off"
+                                        mypins(x).ImageFile = "toggle_off"
                                     Else
-                                        imageName = "toggle_on"
+                                        mypins(x).ImageFile = "toggle_on"
                                     End If
                                 Case Sharpduino.Constants.PinModes.Analog
                                     mypins(x).Name = String.Format("A{0}", x)
                                     mypins(x).Descr = String.Format("Analog #{0}", x)
-                                    imageName = "gauge"
+                                    mypins(x).ImageFile = "gauge"
                                 Case Sharpduino.Constants.PinModes.PWM
                                     mypins(x).Name = String.Format("P{0}", x)
                                     mypins(x).Descr = String.Format("PWM #{0}", x)
-                                    imageName = "Icon-Arduino"
+                                    mypins(x).ImageFile = "Icon-Arduino"
                                 Case Sharpduino.Constants.PinModes.I2C
                                     mypins(x).Name = String.Format("I{0}", x)
                                     mypins(x).Descr = String.Format("I2C #{0}", x)
-                                    imageName = "Icon-Arduino"
+                                    mypins(x).ImageFile = "Icon-Arduino"
                                 Case Sharpduino.Constants.PinModes.Servo
                                     mypins(x).Name = String.Format("S{0}", x)
                                     mypins(x).Descr = String.Format("Servo #{0}", x)
-                                    imageName = "Icon-Arduino"
+                                    mypins(x).ImageFile = "Icon-Arduino"
                                 Case Sharpduino.Constants.PinModes.Shift
                                     mypins(x).Name = String.Format("F{0}", x)
                                     mypins(x).Descr = String.Format("Shift #{0}", x)
-                                    imageName = "Icon-Arduino"
+                                    mypins(x).ImageFile = "Icon-Arduino"
                             End Select
                             mypins(x).Title = mypins(x).Name
-                            ' Make on-screen objects to be attached to the pins
-                            mypins(x).Image = New OMImage(String.Format("{0}_Image", mypins(x).Name), 0, 0, 100, 100)
-                            mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|" & imageName)
-                            mypins(x).Image.Visible = True
-                            mypins(x).Label = New OMLabel(String.Format("{0}_Label", mypins(x).Name), 0, 101, 100, 30, mypins(x).Name)
-                            mypins(x).Label.Visible = True
-                            mypins(x).Label.BackgroundColor = Color.Transparent
+                            mypins(x).LabelText = mypins(x).Name
                             If m_Verbose Then
-                                pin_info = String.Format("Pin {0}> Name:{1} Descr:{2} Label:{3}, Image:{4}", x, mypins(x).Name, mypins(x).Title, mypins(x).Label, imageName)
-                                'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
+                                pin_info = String.Format("Pin {0}> Name:{1} Descr:{2} Label:{3}, Image:{4}", x, mypins(x).Name, mypins(x).Title, mypins(x).LabelText, mypins(x).ImageFile)
+                                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", pin_info)
                             End If
                         Next
-                        ' If user has specified stuff for the pins, we should load them now
-                        '   Custom Images
-                        '   Custom Name
-                        '   Script
+                        If m_Verbose Then
+                            theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("Pins enumerated: {0}", pin_count))
+                        End If
                         ' Push the new pin array
                         theHost.DataHandler.PushDataSourceValue("OMDSArduino;OMDSArduino.Arduino.Pins", mypins, True)
-                        m_timer.Enabled = True
                         m_timer.Start()
-                        m_toggle_timer.Enabled = True
-                        m_toggle_timer.Start()
                     Catch ex As Exception
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.BackgroundLoad()", String.Format("ERROR: {0}", ex.Message))
                     End Try
@@ -455,6 +448,8 @@ Namespace OMDSArduino
 
             Dim z As Integer = 0
             Dim y As Integer = 0
+            Dim p1 As Integer
+            Dim p2 As Integer
 
             If Not Arduino Is Nothing Then
 
@@ -467,9 +462,14 @@ Namespace OMDSArduino
                         ' Update the I/O pin objects
                         Try
 
-                            If Arduino.GetPins(x).CurrentValue <> mypins(x).CurrentValue Then
+                            p1 = Arduino.GetPins(x).CurrentValue
+                            p2 = mypins(x).CurrentValue
+                            If p1 <> p2 Then
                                 pins_changed = True
                                 mypins(x).Changed = True
+                                If x = 13 Then
+                                    x = x
+                                End If
                             Else
                                 mypins(x).Changed = False
                             End If
@@ -478,7 +478,7 @@ Namespace OMDSArduino
 
                             Select Case mypins(x).CurrentMode
                                 Case Sharpduino.Constants.PinModes.Analog
-                                    mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|gauge")
+                                    mypins(x).ImageFile = "gauge"
                                     ' What type of graphic?
                                 Case Sharpduino.Constants.PinModes.PWM
                                     ' Dial?
@@ -489,16 +489,16 @@ Namespace OMDSArduino
                                 Case Sharpduino.Constants.PinModes.Output
                                     ' Output LOW / HI image
                                     If mypins(x).CurrentValue = 0 Then
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|toggle_off")
+                                        mypins(x).ImageFile = "toggle_off"
                                     Else
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|toggle_on")
+                                        mypins(x).ImageFile = "toggle_on"
                                     End If
                                 Case Sharpduino.Constants.PinModes.Input
                                     ' Input LOW / HI image
                                     If mypins(x).CurrentValue = 0 Then
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_off")
+                                        mypins(x).ImageFile = "led_off"
                                     Else
-                                        mypins(x).Image.Image = OM.Host.getPluginImage(Me, "Images|led_red")
+                                        mypins(x).ImageFile = "led_red"
                                     End If
                             End Select
 
@@ -699,39 +699,12 @@ Namespace OMDSArduino
 
         End Sub
 
-        Private Sub toggle_timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_toggle_timer.Elapsed
-
-            Exit Sub
-
-            m_toggle_timer.Enabled = False
-            m_toggle_timer.Stop()
-
-            If Not Arduino Is Nothing Then
-                Try
-                    If Arduino.IsInitialized Then
-                        If toggle = True Then
-                            toggle = False
-                        Else
-                            toggle = True
-                        End If
-                        Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, toggle)
-                    End If
-                Catch ex As Exception
-                    ' Problem with ARDUINO 
-                    lost_arduino()
-                End Try
-            End If
-
-            m_toggle_timer.Enabled = True
-            m_toggle_timer.Start()
-
-        End Sub
-
         Private Sub timer_Elapsed(ByVal sender As Object, ByVal e As System.Timers.ElapsedEventArgs) Handles m_timer.Elapsed
 
-            m_timer.Enabled = False
+            m_timer.Stop()
             get_pin_values()
-            m_timer.Enabled = True
+            m_timer.Interval = refresh_rate
+            m_timer.Start()
 
         End Sub
 

@@ -121,7 +121,6 @@ Namespace OMArduino
                     OM.Host.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "Could not subscribe to OMDSArduino.Arduino.Pins")
                 End If
             End If
-            mypins = TryCast(OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Pins").Value, Array)
 
             initialized = True
 
@@ -146,9 +145,15 @@ Namespace OMArduino
 
                 Case "OMDSArduino.Arduino.Pins"
                     ' Data must have been updated if subscription was updated.
+                    If m_Verbose Then
+                        'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Pin subscription received."))
+                    End If
                     mypins = sensor.Value
                     If Not mypins Is Nothing Then
                         pincount = OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Count").Value
+                        If m_Verbose Then
+                            'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Data for {0} pins available.", pincount))
+                        End If
                         For x = 0 To OM.Host.ScreenCount - 1
                             If PanelManager.IsPanelLoaded(x, "OMArduino") Then
                                 mPanel = PanelManager(x, "OMArduino")
@@ -166,24 +171,32 @@ Namespace OMArduino
                                     For z = 0 To pincount - 1
                                         'pin.Name, pin.CurrentValue, pin.CurrentMode, pin.Capabilities
                                         'pin.Image, pin.Label, pin.Title, pin.Descr
-                                        pin = mypins(z)
-                                        Dim mImage As OMImage = pin.Image
-                                        Dim mLabel As OMLabel = pin.Label
-                                        Dim mButton As OMButton = New OMButton(String.Format("{0}Button", pin.Name), 0, 0, 130, 130)
+                                        'pin = mypins(z)
+                                        Dim mImage As OMImage = New OMImage(String.Format("{0}_Image", mypins(z).Name), 0, 0, 100, 100)
+                                        mImage.Image = OM.Host.getPluginImage(Me, String.Format("Images|{0}", mypins(z).ImageFile))
+                                        mImage.Visible = True
+                                        Dim mLabel As OMLabel = New OMLabel(String.Format("{0}_Label", mypins(z).Name), 0, 101, 100, 30, mypins(z).Name)
+                                        mLabel.Text = mypins(z).LabelText
+                                        mLabel.Visible = True
+                                        mLabel.BackgroundColor = Color.Transparent
+                                        Dim mButton As OMButton = New OMButton(String.Format("{0}Button", mypins(z).Name), 0, 0, 130, 130)
                                         Dim myContainer As OMContainer
-                                        myContainer = mPanel.Find(pin.Name)
-                                        If myContainer Is Nothing Then
+                                        Dim theContainer As OMContainer = mPanel.Find(mypins(z).Name)
+                                        If theContainer Is Nothing Then
                                             ' Create a container for this pin
-                                            myContainer = New OMContainer(pin.Name, OM.Host.ClientArea(0).Left + x_start + x_left, OM.Host.ClientArea(0).Top + y_start + y_top, 130, 130)
+                                            If m_Verbose Then
+                                                'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Creating screen objects for {0} screen {1}.", mypins(z).Name, x))
+                                            End If
+                                            myContainer = New OMContainer(mypins(z).Name, OM.Host.ClientArea(0).Left + x_start + x_left, OM.Host.ClientArea(0).Top + y_start + y_top, 130, 130)
                                             myContainer.ScrollBar_Horizontal_Enabled = False
                                             myContainer.ScrollBar_Vertical_Enabled = False
                                             mPanel.addControl(myContainer)
-                                            myContainer.addControl(pin.Image)
-                                            myContainer.addControl(pin.Label)
+                                            myContainer.addControl(mImage)
+                                            myContainer.addControl(mLabel)
                                             mButton.Opacity = 0
                                             mButton.Tag = z.ToString
                                             AddHandler mButton.OnClick, AddressOf Button_OnClick
-                                            AddHandler mButton.OnLongClick, AddressOf Button_OnLongClick
+                                            AddHandler mButton.OnHoldClick, AddressOf Button_OnHoldClick
                                             myContainer.addControl(mButton)
                                             x_left = x_left + x_inc
                                             If x_left > (OM.Host.ClientArea(0).Right - x_inc) Then
@@ -194,33 +207,34 @@ Namespace OMArduino
                                                 End If
                                             End If
                                         Else
-                                            If pin.Changed Then
+                                            If mypins(z).Changed Then
+                                                If z = 13 Then
+                                                    OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Pin {0} value {1}.", mypins(z).Name, mypins(z).CurrentValue))
+                                                End If
                                                 ' Refresh the stuff in the container
-                                                mImage = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Image", pin.Name))
+                                                theContainer = mPanel.Find(mypins(x).Name)
+                                                mImage = mPanel.Find(String.Format("{0}_Image", mypins(z).Name))
                                                 If Not mImage Is Nothing Then
-                                                    If mImage.Image <> pin.Image.Image Then
-                                                        mImage.Image = pin.Image.Image
-                                                    End If
+                                                    mImage.Image = OM.Host.getPluginImage(Me, String.Format("Images|{0}", mypins(z).ImageFile))
                                                 End If
-                                                mLabel = myContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Label", pin.Name))
+                                                mLabel = theContainer.Controls.Find(Function(a) a.Name = String.Format("{0}_Label", mypins(z).Name))
                                                 If Not mLabel Is Nothing Then
-                                                    If mLabel.Text <> pin.Label.Text Then
-                                                        mLabel.Text = pin.Label.Text
-                                                    End If
+                                                    mLabel.Text = mypins(z).LabelText
                                                 End If
-                                                If Not String.IsNullOrEmpty(pin.Script) Then
+                                                If Not String.IsNullOrEmpty(mypins(z).Script) Then
                                                     ' Perform any other actions here (scripting?)
-                                                    run_scripts(pin)
+                                                    run_scripts(mypins(z))
                                                 End If
+                                                mypins(z).Changed = False
                                             End If
                                         End If
-                                    Next
+                                    Next ' Pin Loop
                                     mPanel.Refresh()
                                 Else
                                     ' no panel?
                                 End If
                             End If
-                        Next
+                        Next ' Screen Loop
                     Else
                         If m_Verbose Then
                             OM.Host.DebugMsg(DebugMessageType.Warning, "OMArduino - Subscription_Updated()", "No PIN data received.")
@@ -274,13 +288,13 @@ Namespace OMArduino
 
         End Sub
 
-        Private Sub Button_OnLongClick(ByVal sender As OMControl, ByVal screen As Integer)
+        Private Sub Button_OnHoldClick(ByVal sender As OMControl, ByVal screen As Integer)
             ' I/O pin screen object long-clicked
             ' Manage user specified settings here
 
             Dim x As Integer
 
-            'my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) long clicked.", sender.Name, sender.Tag))
+            my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) long clicked.", sender.Name, sender.Tag))
 
             ' grab the required pin
             x = Val(sender.Tag)
