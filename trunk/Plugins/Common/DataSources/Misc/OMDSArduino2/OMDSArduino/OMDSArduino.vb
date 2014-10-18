@@ -200,8 +200,8 @@ Namespace OMDSArduino
         Private m_Baud As Integer = 57600
         Private vRef As Single = 5.0
         Private useI2C As Boolean = False                   ' True=Automatically set A4/A5 pin mode to I2C
-        Private sample_rate As Integer = 100                ' Firmata pin sampling rate
-        Private refresh_rate As Integer = 150               ' Pin data refresh rate
+        Private sample_rate As Integer = 100                ' Firmata pin sampling rate msec
+        Private refresh_rate As Integer = 150               ' Pin data refresh rate msec
 
         Private m_Verbose As Boolean = False
 
@@ -318,25 +318,26 @@ Namespace OMDSArduino
                 Case "Pins"
                     ' Perform pin related function
                     If m_Verbose Then
-                        theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("PIN command"))
+                        theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("PIN command"))
                     End If
                     If Not param Is Nothing Then
                         Pin = param(0)
                         Action = param(1)
                         Value = param(2)
                         If m_Verbose Then
-                            theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Action: {0}", Action))
+                            theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Pin: {0}", Pin))
+                            theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Action: {0}", Action))
                         End If
                         Select Case Action
                             Case "SETMODE"
                                 If m_Verbose Then
-                                    theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Mode: {0}", Value))
+                                    theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Mode: {0}", Value))
                                 End If
                                 Arduino.SetPinMode(Pin, Value)
                                 load_pin_info()
                             Case "SETVALUE"
                                 If m_Verbose Then
-                                    theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("Value: {0}", Value))
+                                    theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Value: {0}", Value))
                                 End If
                                 Arduino.SetDO(Pin, Value)
                         End Select
@@ -345,7 +346,7 @@ Namespace OMDSArduino
                 Case "Arduino"
                     ' Perform arduino related function
                     If m_Verbose Then
-                        theHost.DebugMsg("OMDSArduino - CommandExecutor()", String.Format("ARDUINO command"))
+                        theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("ARDUINO command"))
                     End If
                     If Not param Is Nothing Then
                         Action = param(0)
