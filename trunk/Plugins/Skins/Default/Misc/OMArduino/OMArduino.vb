@@ -189,7 +189,7 @@ Namespace OMArduino
                                         mLabel.Text = mypins(z).LabelText
                                         mLabel.Visible = True
                                         mLabel.BackgroundColor = Color.Transparent
-                                        Dim mButton As OMButton = New OMButton(String.Format("{0}Button", mypins(z).Name), 0, 0, 130, 130)
+                                        Dim mButton As OMButton = New OMButton(String.Format("{0}_Button", mypins(z).Name), 0, 0, 130, 130)
                                         mButton.Opacity = 0
                                         mButton.Tag = z.ToString
                                         AddHandler mButton.OnClick, AddressOf Button_OnClick
@@ -223,18 +223,41 @@ Namespace OMArduino
                                                         OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Data changed for {0}.", mypins(z).Name))
                                                     End If
                                                     ' Refresh the stuff in the container
-                                                    'theContainer = mPanel.Find(mypins(x).Name)
                                                     If m_Verbose Then
-                                                        'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Cleaning container {0}.", mypins(z).Name))
+                                                        OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Clearing container {0}.", mypins(z).Name))
                                                     End If
                                                     myContainer.ClearControls()
-                                                    'mImage.Image = OM.Host.getPluginImage(Me, String.Format("Images|{0}", mypins(z).ImageFile))
-                                                    If m_Verbose Then
-                                                        'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Adding image."))
+                                                    If Not myContainer.addControl(mImage) Then
+                                                        If m_Verbose Then
+                                                            OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Error adding image {0} at {1},{2}.", mImage.Name, mImage.Left, mImage.Top))
+                                                        End If
+                                                    Else
+                                                        If m_Verbose Then
+                                                            OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Added image {0} at {1},{2}.", mImage.Name, mImage.Left, mImage.Top))
+                                                        End If
                                                     End If
-                                                    myContainer.addControl(mImage)
-                                                    myContainer.addControl(mLabel)
-                                                    myContainer.addControl(mButton)
+                                                    If Not myContainer.addControl(mLabel) Then
+                                                        If m_Verbose Then
+                                                            OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Error adding label {0} at {1},{2}.", mLabel.Name, mLabel.Left, mLabel.Top))
+                                                        End If
+                                                    Else
+                                                        If m_Verbose Then
+                                                            OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Added label {0} at {1},{2}.", mLabel.Name, mLabel.Left, mLabel.Top))
+                                                        End If
+                                                    End If
+                                                    If Not myContainer.addControl(mButton) Then
+                                                        If m_Verbose Then
+                                                            OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Error adding button {0} at {1},{2}.", mButton.Name, mButton.Left, mButton.Top))
+                                                        End If
+                                                    Else
+                                                        If m_Verbose Then
+                                                            OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Added button {0} at {1},{2}.", mButton.Name, mButton.Left, mButton.Top))
+                                                        End If
+                                                    End If
+                                                    If m_Verbose Then
+                                                        OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Container {0} updated.", mypins(z).Name))
+                                                        OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("{0}.visible: {1}.", mypins(z).Name, myContainer.Visible))
+                                                    End If
                                                     If Not String.IsNullOrEmpty(mypins(z).Script) Then
                                                         ' Perform any other actions here (scripting?)
                                                         run_scripts(mypins(z))
