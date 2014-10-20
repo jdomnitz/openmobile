@@ -188,14 +188,10 @@ Namespace OMArduino
                 pincount = OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Count").Value
 
                 If m_Verbose Then
-                    'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Data for {0} pins available.", pincount))
+                    OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("DS reports {0} pins available.", pincount))
                 End If
 
                 For z = 0 To pincount - 1
-
-                    If m_Verbose Then
-                        OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Data changed for {0}.", mypins(z).Name))
-                    End If
 
                     For x = 0 To OM.Host.ScreenCount - 1
 
@@ -221,6 +217,7 @@ Namespace OMArduino
                             mButton.Tag = z.ToString
                             AddHandler mButton.OnClick, AddressOf Button_OnClick
                             AddHandler mButton.OnHoldClick, AddressOf Button_OnHoldClick
+                            AddHandler mButton.OnLongClick, AddressOf Button_OnLongClick
 
                             ' Create a control group for this pin
                             If m_Verbose Then
@@ -255,66 +252,62 @@ Namespace OMArduino
         Private Sub Update_Screen_Objects(ByVal sensor As OpenMobile.Data.DataSource)
 
             Dim mPanel As OMPanel
-            Dim pincount As Integer = 0     ' Number of pins available
-            Dim z As Integer = 0            ' Loop counter
+            Dim pincount As Integer = 0         ' Number of pins available
+            Dim z As Integer = 0                ' Loop counter
+            Dim DigitalOnly As Boolean = True   ' Eliminates spurious Analog values while we test code
 
             ' Data must have been updated if subscription was updated.
-            If m_Verbose Then
-                'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Pin subscription received."))
-            End If
 
             mypins = sensor.Value
 
             If Not mypins Is Nothing Then
 
                 pincount = OM.Host.DataHandler.GetDataSource("OMDSArduino.Arduino.Count").Value
-                If m_Verbose Then
-                    'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Data for {0} pins available.", pincount))
-                End If
-
 
                 For z = 0 To pincount - 1
 
-                    If z < 14 Then ' Remove for normal operation.  This eliminates spurious Analog pin value changes
+                    If DigitalOnly And z > 13 Then
+                        ' Skips changed analog pin values (used for code testing)
+                        ' Unterminated analog pins produce to many spurious values
+                        Continue For
+                    End If
 
-                        If mypins(z).Changed Then
+                    If mypins(z).Changed Then
 
-                            If m_Verbose Then
-                                OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Data changed for {0}.", mypins(z).Name))
-                            End If
+                        If m_Verbose Then
+                            OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Data changed for {0}.", mypins(z).Name))
+                        End If
 
-                            For x = 0 To OM.Host.ScreenCount - 1
+                        For x = 0 To OM.Host.ScreenCount - 1
 
-                                mPanel = PanelManager(x, "OMArduino")
+                            mPanel = PanelManager(x, "OMArduino")
 
-                                If PanelManager.IsPanelLoaded(x, "OMArduino") Then
+                            If PanelManager.IsPanelLoaded(x, "OMArduino") Then
 
-                                    Dim mImage As OMImage
-                                    Dim mLabel As OMLabel
-                                    Dim myControlLayout As ControlLayout = New ControlLayout(mPanel, String.Format("Pins_{0}", mypins(z).Name))
-                                    ' Update the applicable screen objects
-                                    mImage = myControlLayout(String.Format("Pins_{0}_Image", mypins(z).Name))
-                                    mImage.Image = OM.Host.getPluginImage(Me, String.Format("Images|{0}", mypins(z).ImageFile))
-                                    mLabel = myControlLayout(String.Format("Pins_{0}_Label", mypins(z).Name))
-                                    mLabel.Text = mypins(z).LabelText
-                                    If m_Verbose Then
-                                        OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("ControlGroup {0} updated on screen {1}.", mypins(z).Name, mPanel.ActiveScreen))
-                                    End If
-
+                                Dim mImage As OMImage
+                                Dim mLabel As OMLabel
+                                Dim myControlLayout As ControlLayout = New ControlLayout(mPanel, String.Format("Pins_{0}", mypins(z).Name))
+                                ' Update the applicable screen objects
+                                mImage = myControlLayout(String.Format("Pins_{0}_Image", mypins(z).Name))
+                                mImage.Image = OM.Host.getPluginImage(Me, String.Format("Images|{0}", mypins(z).ImageFile))
+                                mLabel = myControlLayout(String.Format("Pins_{0}_Label", mypins(z).Name))
+                                mLabel.Text = mypins(z).LabelText
+                                If m_Verbose Then
+                                    OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("ControlGroup {0} updated on screen {1}.", mypins(z).Name, mPanel.ActiveScreen))
                                 End If
 
-                            Next ' Screen
-
-                            mypins(z).Changed = False
-
-                            ' Perform any other actions here (scripting?) required if/when pin changed
-                            If Not String.IsNullOrEmpty(mypins(z).Script) Then
-                                run_scripts(mypins(z))
                             End If
 
-                        End If ' Pin changed
+                        Next ' Screen
 
-                    End If ' z < 14
+                        mypins(z).Changed = False
+
+                        ' Perform any other actions here (scripting?) required if/when pin changed
+                        If Not String.IsNullOrEmpty(mypins(z).Script) Then
+                            run_scripts(mypins(z))
+                        End If
+
+                    End If ' Pin changed
 
                 Next ' Pin
 
@@ -365,8 +358,13 @@ Namespace OMArduino
 
         End Sub
 
-        Private Sub Button_OnHoldClick(ByVal sender As OMControl, ByVal screen As Integer)
+        Private Sub Button_OnLongClick(ByVal sender As OMControl, ByVal screen As Integer)
             ' I/O pin screen object long-clicked
+
+        End Sub
+
+        Private Sub Button_OnHoldClick(ByVal sender As OMControl, ByVal screen As Integer)
+            ' I/O pin screen object hold-clicked
             ' Manage user specified settings here
 
             Dim x As Integer
@@ -379,11 +377,13 @@ Namespace OMArduino
 
             Select Case pin.CurrentMode
                 Case Sharpduino.Constants.PinModes.Input
+                    ' Set digital input to digital output
                     If m_Verbose Then
                         OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to OUTPUT"))
                     End If
                     OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETMODE", Sharpduino.Constants.PinModes.Output})
                 Case Sharpduino.Constants.PinModes.Output
+                    ' Set digital output to digital input
                     If m_Verbose Then
                         OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to INPUT"))
                     End If
@@ -407,7 +407,7 @@ Namespace OMArduino
             ' Create a handler for settings changes
             AddHandler mySettings.OnSettingChanged, AddressOf mySettings_OnSettingChanged
 
-            mySettings.Add(New Setting(SettingTypes.MultiChoice, Me.pluginName & ";Settings.Verbose", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
+            mySettings.Add(New Setting(SettingTypes.MultiChoice, Me.pluginName & ";Settings.Verbose", "Verbose Logging", "Creates LOTS of entries", Setting.BooleanList, Setting.BooleanList, m_Verbose))
 
             Return mySettings
 
