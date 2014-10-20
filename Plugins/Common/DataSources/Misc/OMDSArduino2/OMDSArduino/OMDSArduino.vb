@@ -316,32 +316,38 @@ Namespace OMDSArduino
             Select Case command.NameLevel2
 
                 Case "Pins"
+
+                    Select Case command.NameLevel3
+                        Case "Execute"
+                            If m_Verbose Then
+                                theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("PIN command"))
+                            End If
+                            If Not param Is Nothing Then
+                                Pin = param(0)
+                                Action = param(1)
+                                Value = param(2)
+                                If m_Verbose Then
+                                    theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Pin: {0}", Pin))
+                                    theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Action: {0}", Action))
+                                End If
+                                Select Case Action
+                                    Case "SETMODE"
+                                        If m_Verbose Then
+                                            theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Mode: {0}", Value))
+                                        End If
+                                        Arduino.SetPinMode(Pin, Value)
+                                        load_pin_info()
+                                    Case "SETVALUE"
+                                        If m_Verbose Then
+                                            theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Value: {0}", Value))
+                                        End If
+                                        Arduino.SetDO(Pin, Value)
+                                End Select
+                            End If
+                        Case Else
+                            ' Nothing here yet
+                    End Select
                     ' Perform pin related function
-                    If m_Verbose Then
-                        theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("PIN command"))
-                    End If
-                    If Not param Is Nothing Then
-                        Pin = param(0)
-                        Action = param(1)
-                        Value = param(2)
-                        If m_Verbose Then
-                            theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Pin: {0}", Pin))
-                            theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Action: {0}", Action))
-                        End If
-                        Select Case Action
-                            Case "SETMODE"
-                                If m_Verbose Then
-                                    theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Mode: {0}", Value))
-                                End If
-                                Arduino.SetPinMode(Pin, Value)
-                                load_pin_info()
-                            Case "SETVALUE"
-                                If m_Verbose Then
-                                    theHost.DebugMsg(DebugMessageType.Info, "OMDSArduino - CommandExecutor()", String.Format("Value: {0}", Value))
-                                End If
-                                Arduino.SetDO(Pin, Value)
-                        End Select
-                    End If
 
                 Case "Arduino"
                     ' Perform arduino related function
@@ -356,6 +362,7 @@ Namespace OMDSArduino
 
             End Select
 
+            Return True
 
         End Function
 
@@ -463,19 +470,23 @@ Namespace OMDSArduino
                         ' Update the I/O pin objects
                         Try
 
+                            mypins(x).Changed = False
+
+                            p1 = Arduino.GetPins(x).CurrentMode
+                            p2 = mypins(x).CurrentMode
+                            If p1 <> p2 Then
+                                mypins(x).CurrentMode = Arduino.GetPins(x).CurrentMode
+                                pins_changed = True
+                                mypins(x).Changed = True
+                            End If
+
                             p1 = Arduino.GetPins(x).CurrentValue
                             p2 = mypins(x).CurrentValue
                             If p1 <> p2 Then
+                                mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
                                 pins_changed = True
                                 mypins(x).Changed = True
-                                If x = 13 Then
-                                    x = x
-                                End If
-                            Else
-                                mypins(x).Changed = False
                             End If
-
-                            mypins(x).CurrentValue = Arduino.GetPins(x).CurrentValue
 
                             Select Case mypins(x).CurrentMode
                                 Case Sharpduino.Constants.PinModes.Analog
