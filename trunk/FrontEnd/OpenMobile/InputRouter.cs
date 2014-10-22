@@ -81,10 +81,10 @@ namespace OpenMobile
                 _Mice_MappedIndex[i] = -1;
 
             // Idle detection
+            tmrIdleDetection = new Timer[BuiltInComponents.Host.ScreenCount];
             int IdleDetectionInterval = BuiltInComponents.SystemSettings.IdleDetectionInterval;
             if (IdleDetectionInterval > 0)
             {
-                tmrIdleDetection = new Timer[BuiltInComponents.Host.ScreenCount];
                 for (int i = 0; i < tmrIdleDetection.Length; i++)
                 {
                     tmrIdleDetection[i] = new Timer(IdleDetectionInterval * 1000);

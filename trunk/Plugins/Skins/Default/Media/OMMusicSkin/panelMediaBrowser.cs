@@ -35,7 +35,7 @@ using OpenMobile.Threading;
 
 namespace OMMusicSkin
 {
-    public class MediaBrowser
+    public class panelMediaBrowser
     {
         IMediaDatabase _DB = null;
 
@@ -56,7 +56,6 @@ namespace OMMusicSkin
             Menu
         }
 
-
         private StoredData.ScreenInstanceData ScreenSpecificData = new StoredData.ScreenInstanceData();
         private OMMusicSkin _MainPlugin;
         private OMListItem.subItemFormat _MediaListSubItemFormat = new OMListItem.subItemFormat();
@@ -66,9 +65,12 @@ namespace OMMusicSkin
 
         private bool _ListUpdate_Cancel = false;
 
-        public OMPanel Initialize(OMMusicSkin mainPlugin)
+        public panelMediaBrowser(OMMusicSkin mainPlugin)
         {
             _MainPlugin = mainPlugin;
+        }
+
+        public OMPanel Initialize()        {
 
             ScreenSpecificData.SetProperty("ListMode", ListModes.Song);
             ScreenSpecificData.SetProperty("ArtistFilter", "");
@@ -76,7 +78,7 @@ namespace OMMusicSkin
             ScreenSpecificData.SetProperty("SongFilter", "");
 
             // Create a new panel
-            OMPanel panel = new OMPanel("PlaylistEditor", "Music > Media browser", OM.Host.getSkinImage("AIcons|4-collections-view-as-list"));
+            OMPanel panel = new OMPanel("MediaBrowser", "Music > Media browser", OM.Host.getSkinImage("AIcons|4-collections-view-as-list"));
 
             #region media list
 
@@ -508,7 +510,7 @@ namespace OMMusicSkin
         void mnuItem_ClearPlaylist_OnClick(OMControl sender, int screen)
         {
             // Get current playlist
-            PlayList2 playlist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
             playlist.Clear();
 
             OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Current playlist cleared", 5));
@@ -520,7 +522,7 @@ namespace OMMusicSkin
         void lstMedia_OnHoldClick(OMControl sender, int screen)
         {
             // Get current playlist
-            PlayList2 currentPlaylist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
+            Playlist currentPlaylist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
             if (currentPlaylist == null)
                 return;
 
@@ -662,14 +664,14 @@ namespace OMMusicSkin
 
                                     #endregion
 
-                                    PlayList2 playlist = null;
+                                    Playlist playlist = null;
 
                                     switch ((string)PopupMenu.ShowMenu(screen))
                                     {
                                         case "mnuItemAddToNewPlaylist":
                                             {
                                                 string newPlaylistName = OSK.ShowDefaultOSK(screen, selectedMediaItem.Artist, "Playlist name", "Enter playlist name", OSKInputTypes.Keypad, false);
-                                                playlist = new PlayList2(newPlaylistName);
+                                                playlist = new Playlist(newPlaylistName);
                                             }
                                             break;
 
@@ -733,7 +735,7 @@ namespace OMMusicSkin
                                     string playlistName = lst.SelectedItem.tag as string;
                                     if (String.IsNullOrEmpty(playlistName))
                                         return;
-                                    string playlistDisplayName = PlayList2.GetDisplayName(playlistName);
+                                    string playlistDisplayName = Playlist.GetDisplayName(playlistName);
 
                                     #region Menu popup
 
@@ -756,7 +758,7 @@ namespace OMMusicSkin
                                         case "mnuItemNew":
                                             {   // Add new empty playlist
                                                 string newPlaylistName = OSK.ShowDefaultOSK(screen, "", "Playlist name", "Enter playlist name", OSKInputTypes.Keypad, false);
-                                                PlayList2 newPlaylist = new PlayList2(newPlaylistName);
+                                                Playlist newPlaylist = new Playlist(newPlaylistName);
                                                 newPlaylist.Save();
                                                 MediaList_Search(sender.Parent, screen);
                                             }
@@ -1427,7 +1429,7 @@ namespace OMMusicSkin
                 _ListUpdate_Cancel = false;
                 foreach (var playlistName in playlistNames)
                 {
-                    string playlistDisplayName = PlayList2.GetDisplayName(playlistName);
+                    string playlistDisplayName = Playlist.GetDisplayName(playlistName);
                     int playlistCount = _DB.getPlayListCount(playlistName);
                     string countInfo = String.Format("Contains {0} items", playlistCount);
                     if (playlistCount == 1)

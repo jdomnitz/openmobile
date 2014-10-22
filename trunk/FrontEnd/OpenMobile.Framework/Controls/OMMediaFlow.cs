@@ -24,30 +24,30 @@ using OpenMobile.Graphics;
 using OpenMobile;
 using System.Collections.Generic;
 using OpenMobile.Media;
+using System.Linq;
+using System.Collections;
 
 namespace OpenMobile.Controls
 {
-    /// <summary>
-    /// An "coverflow" style control for images
-    /// </summary>
     public class OMMediaFlow : OMImageFlow
     {
-        #region Constructor
-
         /// <summary>
-        /// Creates a new media flow control
+        /// List sources
         /// </summary>
-        /// <param name="Name"></param>
-        /// <param name="Left"></param>
-        /// <param name="Top"></param>
-        /// <param name="Width"></param>
-        /// <param name="Height"></param>
-        public OMMediaFlow(string name, int left, int top, int width, int height)
-            : base(name, left, top, width, height)
+        public enum ListSources
         {
+            /// <summary>
+            /// All items in the playlist
+            /// </summary>
+            Items,
+
+            /// <summary>
+            /// The active buffer in the playlist (history + currentItem + queue)
+            /// </summary>
+            Buffer
         }
 
-        #endregion
+        private PropertyChangedEventHandler _PropertyChangedEventHandler;
 
         /// <summary>
         /// The image to use if media image is missing
@@ -71,391 +71,91 @@ namespace OpenMobile.Controls
         private OImage _NoMediaImage;
 
         /// <summary>
-        /// List sources
-        /// </summary>
-        public enum ListSources
-        {
-            /// <summary>
-            /// All items in the playlist
-            /// </summary>
-            Items,
-
-            /// <summary>
-            /// The active buffer in the playlist (history + currentItem + queue)
-            /// </summary>
-            Buffer
-        }
-
-        /// <summary>
         /// The source to use for the list visualization
         /// </summary>
-        public ListSources ListSource
+        public ListSources MediaListSource
         {
             get
             {
-                return this._ListSource;
+                return this._MediaListSource;
             }
             set
             {
-                if (this._ListSource != value)
+                if (this._MediaListSource != value)
                 {
-                    this._ListSource = value;
+                    this._MediaListSource = value;
                 }
             }
         }
-        private ListSources _ListSource = ListSources.Items;
+        private ListSources _MediaListSource = ListSources.Items;
 
         /// <summary>
-        /// Gets or sets the databounded playlist 
+        /// Set or get the playlist source
         /// </summary>
-        public PlayList2 PlayListSource
+        public override object ListSource
         {
             get
             {
-                return this._PlayListSource;
+                return _ListSource;
             }
             set
             {
-                if (this._PlayListSource != value)
+                if (!(value is Playlist))
+                    throw new Exception("Invalid list source type, must be Playlist3");
+
+                if (_ListSource != null)
+                    _ListSource.PropertyChanged -= _PropertyChangedEventHandler;
+
+                _ListSource = value as Playlist;
+                _ListSource.PropertyChanged += _PropertyChangedEventHandler;
+
+                switch (_MediaListSource)
                 {
-                    // Disconnect current event
-                    if (this._PlayListSource != null)
+                    case ListSources.Items:
+                        base.ListSource = _ListSource.Items;
+                        break;
+                    case ListSources.Buffer:
+                        base.ListSource = _ListSource.BufferItems;
+                        break;
+                }
+                SelectedIndex = (_MediaListSource == ListSources.Buffer ? _ListSource.BufferItems_CurrentItemIndex : _ListSource.Items_CurrentItemIndex);
+                this.Text = ExtractLabelText();
+               
+            }
+        }
+        private Playlist _ListSource;
+
+        void _ListSource_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "CurrentItem":
                     {
-                        this._PlayListSource.PropertyChanged -= new PropertyChangedEventHandler(_PlayListSource_PropertyChanged);
-                        this._PlayListSource.OnList_Items_Changed -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListChanged);
-                        this._PlayListSource.OnList_Items_Cleared -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListCleared);
-                        this._PlayListSource.OnList_Items_ItemInserted -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItemInserted);
-                        this._PlayListSource.OnList_Items_ItemRemoved -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItemRemoved);
-                        this._PlayListSource.OnList_Buffer_Changed -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnList_Buffer_Changed);
-                        this._PlayListSource.OnList_Buffer_Cleared -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnList_Buffer_Cleared);
-                        this._PlayListSource.OnList_Buffer_ItemInserted -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItem_Buffer_Inserted);
-                        this._PlayListSource.OnList_Buffer_ItemRemoved -= new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItem_Buffer_Removed);
-                    }
-
-                    // Map source
-                    this._PlayListSource = value;
-
-                    // Connect to new event
-                    this._PlayListSource.PropertyChanged += new PropertyChangedEventHandler(_PlayListSource_PropertyChanged);
-                    this._PlayListSource.OnList_Items_Changed += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListChanged);
-                    this._PlayListSource.OnList_Items_Cleared += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListCleared);
-                    this._PlayListSource.OnList_Items_ItemInserted += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItemInserted);
-                    this._PlayListSource.OnList_Items_ItemRemoved += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItemRemoved);
-                    this._PlayListSource.OnList_Buffer_Changed += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnList_Buffer_Changed);
-                    this._PlayListSource.OnList_Buffer_Cleared += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnList_Buffer_Cleared);
-                    this._PlayListSource.OnList_Buffer_ItemInserted += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItem_Buffer_Inserted);
-                    this._PlayListSource.OnList_Buffer_ItemRemoved += new PlayList2.MediaListItemChangedEventHandler(_PlayListSource_OnListItem_Buffer_Removed);
-
-                    // Update covers and other media info for the playlist
-                    //this._PlayListSource.ReadMediaTags();
-                    LoadImagesFromPlayList();
-                    SelectedIndex = (_ListSource == ListSources.Buffer ? _PlayListSource.BufferIndex : _PlayListSource.CurrentIndex);
-                    this.Text = ExtractLabelText();
-                }
-            }
-        }
-        private PlayList2 _PlayListSource;
-
-        void _PlayListSource_OnListItem_Buffer_Removed(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Buffer)
-                return;
-
-            try
-            {
-                this.RemoveAt(index);
-                SelectedIndex = _PlayListSource.BufferIndex;
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_OnListItem_Buffer_Inserted(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Buffer)
-                return;
-
-            try
-            {
-                this.Insert(GetCoverImage(list[index].coverArt), index);
-                SelectedIndex = _PlayListSource.BufferIndex;
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_OnList_Buffer_Cleared(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Buffer)
-                return;
-
-            try
-            {
-                this.Clear();
-                SelectedIndex = _PlayListSource.BufferIndex;
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_OnList_Buffer_Changed(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Buffer)
-                return;
-
-            try
-            {
-                LoadImagesFromPlayList();
-                SelectedIndex = _PlayListSource.BufferIndex;
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_OnListItemRemoved(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Items)
-                return;
-            try
-            {
-                this.RemoveAt(index);
-                if (index >= list.Count)
-                    SelectedIndex = index - 1;
-                else
-                    SelectedIndex = index;
-                //SelectedIndex = _PlayListSource.CurrentIndex; //<-- Commented this out so the coverflow wouldn't "flow" back and remain at the spot we just removed the playlist item from
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_OnListItemInserted(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Items)
-                return;
-
-            try
-            {
-                this.Insert(GetCoverImage(list[index].coverArt), index);
-                SelectedIndex = _PlayListSource.CurrentIndex;
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_OnListCleared(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Items)
-                return;
-
-            try
-            {
-                this.Clear();
-                SelectedIndex = _PlayListSource.CurrentIndex;
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_OnListChanged(List<mediaInfo> list, int index)
-        {
-            if (_ListSource != ListSources.Items)
-                return;
-
-            try
-            {
-                LoadImagesFromPlayList();
-                SelectedIndex = _PlayListSource.CurrentIndex;
-                this.Text = ExtractLabelText();
-            }
-            catch
-            {
-            }
-        }
-
-        void _PlayListSource_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (_ListSource != ListSources.Items)
-                return;
-
-            try
-            {
-                switch (e.PropertyName)
-                {
-                    case "Items":
-                    case "CurrentItem":
-                    case "Random":
+                        if (_ListSource != null)
                         {
-                            LoadImagesFromPlayList();
-                            SelectedIndex = _PlayListSource.CurrentIndex;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-            catch
-            {
-            }
-        }
-
-        private void LoadImagesFromPlayList()
-        {
-            switch (_ListSource)
-            {
-                case ListSources.Items:
-                    {   // Show all items in the playlist
-                        lock (_Images)
-                        {
-                            mediaInfo[] playListItems = _PlayListSource.Items.ToArray();
-
-                            // Resize images list to match playlist length
-                            if (_Images.Count > playListItems.Length)
-                                _Images.RemoveRange(playListItems.Length, _Images.Count - playListItems.Length);
-
-                            for (int i = 0; i < playListItems.Length; i++)
+                            switch (MediaListSource)
                             {
-                                if (playListItems[i] != null)
-                                {
-                                    if (_Images.Count <= i)
-                                        Insert(playListItems[i].coverArt == null ? NoMediaImage : playListItems[i].coverArt);
-                                    else
-                                    {
-                                        if (_Images[i].Image != playListItems[i].coverArt)
-                                        {
-                                            if (playListItems[i].coverArt == null)
-                                            {
-                                                _Images[i].Image = NoMediaImage;
-                                            }
-                                            else
-                                            {
-                                                _Images[i].Image = playListItems[i].coverArt;
-                                            }
-                                        }
-                                    }
-                                }
+                                case ListSources.Items:
+                                    base.SelectedIndex = _ListSource.Items_CurrentItemIndex;
+                                    break;
+                                case ListSources.Buffer:
+                                    var index = _ListSource.BufferItems_CurrentItemIndex;
+                                    if (index >= 0)
+                                        base.SelectedIndex = index;
+                                    break;
+                                default:
+                                    break;
                             }
-                            SelectedIndex = _PlayListSource.CurrentIndex;
                         }
-                    }
-                    break;
-                case ListSources.Buffer:
-                    {   // Show the buffer list
-                        lock (_Images)
-                        {
-                            mediaInfo[] playListItems = _PlayListSource.Buffer.ToArray();
 
-                            // Resize images list to match playlist length
-                            if (_Images.Count > playListItems.Length)
-                                _Images.RemoveRange(playListItems.Length, _Images.Count - playListItems.Length);
+                        //if (_MediaListSource == ListSources.Items)
+                        //    this.SelectedIndex = _ListSource.Items_CurrentItemIndex;
 
-                            for (int i = 0; i < playListItems.Length; i++)
-                            {
-                                if (playListItems[i] != null)
-                                {
-                                    if (_Images.Count <= i)
-                                        Insert(playListItems[i].coverArt == null ? NoMediaImage : playListItems[i].coverArt);
-                                    else
-                                    {
-                                        if (_Images[i].Image != playListItems[i].coverArt)
-                                        {
-                                            if (playListItems[i].coverArt == null)
-                                            {
-                                                _Images[i].Image = NoMediaImage;
-                                            }
-                                            else
-                                            {
-                                                _Images[i].Image = playListItems[i].coverArt;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            SelectedIndex = _PlayListSource.BufferIndex;
-                        }
+                        this.Text = ExtractLabelText();
                     }
                     break;
                 default:
                     break;
-            }
-        }
-
-        private OImage GetCoverImage(OImage image)
-        {
-            if (image == null)
-                return NoMediaImage;
-            else
-                return image;
-        }
-
-        internal override string ExtractLabelText()
-        {
-            lock (this._Images)
-            {
-                try
-                {
-                    switch (_ListSource)
-                    {
-                        case ListSources.Items:
-                            {
-                                if (_MediaInfoFormatString != null && _PlayListSource != null && _PlayListSource.Items != null)
-                                {
-                                    return String.Format(_MediaInfoFormatString,
-                                        _PlayListSource.Items[this.SelectedIndex].Album,
-                                        _PlayListSource.Items[this.SelectedIndex].Artist,
-                                        _PlayListSource.Items[this.SelectedIndex].Genre,
-                                        _PlayListSource.Items[this.SelectedIndex].Length,
-                                        _PlayListSource.Items[this.SelectedIndex].Location,
-                                        _PlayListSource.Items[this.SelectedIndex].Lyrics,
-                                        _PlayListSource.Items[this.SelectedIndex].Name,
-                                        _PlayListSource.Items[this.SelectedIndex].Rating,
-                                        _PlayListSource.Items[this.SelectedIndex].TrackNumber,
-                                        _PlayListSource.Items[this.SelectedIndex].Type);
-                                }
-                                else
-                                    return String.Empty;
-                            }
-                        case ListSources.Buffer:
-                            {
-                                if (_MediaInfoFormatString != null && _PlayListSource != null && _PlayListSource.Buffer != null)
-                                {
-                                    return String.Format(_MediaInfoFormatString,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Album,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Artist,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Genre,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Length,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Location,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Lyrics,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Name,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Rating,
-                                        _PlayListSource.Buffer[this.SelectedIndex].TrackNumber,
-                                        _PlayListSource.Buffer[this.SelectedIndex].Type);
-                                }
-                                else
-                                    return String.Empty;
-                            }
-                        default:
-                            return String.Empty;
-                    }
-                }
-                catch
-                {
-                    return String.Empty;
-                }
             }
         }
 
@@ -487,6 +187,102 @@ namespace OpenMobile.Controls
                 }
             }
         }
-        private string _MediaInfoFormatString;
+        private string _MediaInfoFormatString = "{1} - {0}\n{6}";
+
+        /// <summary>
+        /// Creates a new media flow control
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="left"></param>
+        /// <param name="top"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public OMMediaFlow(string name, int left, int top, int width, int height)
+            : base(name, left, top, width, height)
+        {
+            _PropertyChangedEventHandler = new PropertyChangedEventHandler(_ListSource_PropertyChanged);
+
+            base.AssignListItemAction = item =>
+            {
+                if (item is mediaInfo)
+                {
+                    var mediaItem = item as mediaInfo;
+                    return mediaItem.coverArt;
+                }
+                if (item is OImage)
+                    return (OImage)item;
+
+                return null;
+            };
+            base.Animation_InsertionOfNewItems = false;
+        }
+
+        internal override string ExtractLabelText()
+        {
+            lock (base._Images)
+            {
+                try
+                {
+                    if (_MediaInfoFormatString != null && base.ListSource != null)
+                    {
+                        lock (base.ListSource)
+                        {
+                            var mediaInfo = ((System.Collections.IList)base.ListSource)[base.SelectedIndex] as mediaInfo;
+
+                            return String.Format(_MediaInfoFormatString,
+                                mediaInfo.Album,
+                                mediaInfo.Artist,
+                                mediaInfo.Genre,
+                                mediaInfo.Length,
+                                mediaInfo.Location,
+                                mediaInfo.Lyrics,
+                                mediaInfo.Name,
+                                mediaInfo.Rating,
+                                mediaInfo.TrackNumber,
+                                mediaInfo.Type);
+                        }
+                    }
+                    else
+                        return String.Empty;
+                }
+                catch
+                {
+                    return String.Empty;
+                }
+            }
+        }
+
+        //internal override void ListContentChanged(ListChangedEventArgs e)
+        //{
+        //    if (_ListSource != null)
+        //    {
+        //        switch (MediaListSource)
+        //        {
+        //            case ListSources.Items:
+        //                base.SelectedIndex = _ListSource.Items_CurrentItemIndex;
+        //                break;
+        //            case ListSources.Buffer:
+        //                var index = _ListSource.BufferItems_CurrentItemIndex;
+        //                if (index >= 0)
+        //                    base.SelectedIndex = index;
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //    }
+        //    base.ListContentChanged(e);
+        //}
+
+        public override object Clone(OMPanel parent)
+        {
+            var newObject = (OMMediaFlow)base.Clone(parent);
+            newObject._PropertyChangedEventHandler = new PropertyChangedEventHandler(newObject._ListSource_PropertyChanged);
+            if (newObject._ListSource != null)
+            {
+                newObject._ListSource.PropertyChanged += newObject._PropertyChangedEventHandler;
+            }
+            return newObject;
+        }
+
     }
 }

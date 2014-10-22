@@ -24,6 +24,7 @@ using OpenMobile.Graphics;
 using OpenMobile;
 using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL;
+using System.Collections;
 
 namespace OpenMobile.Controls
 {
@@ -910,6 +911,26 @@ namespace OpenMobile.Controls
         }
         private bool _ClipRendering = true;
 
+        /// <summary>
+        /// Controls how the animation of new items are done. False = no/little animation, True = full animation
+        /// </summary>
+        public bool Animation_InsertionOfNewItems
+        {
+            get
+            {
+                return this._Animation_InsertionOfNewItems;
+            }
+            set
+            {
+                if (this._Animation_InsertionOfNewItems != value)
+                {
+                    this._Animation_InsertionOfNewItems = value;
+                }
+            }
+        }
+        private bool _Animation_InsertionOfNewItems = true;
+        
+
         #endregion
 
         public OImage overlay = null;
@@ -997,64 +1018,67 @@ namespace OpenMobile.Controls
         private int _SelectedIndexStored = -1;
         private void Update()
         {
-            lock (_Images)
+            lock (ListSource)
             {
-                bool animationActive = false;
-
-                for (int i = _Images.Count - 1; i >= 0; i--)
+                lock (_Images)
                 {
-                    CalcRV(ref _Images[i].AnimEnd, i - _SelectedIndex);
-                    if (Animate(ref _Images[i].Current, _Images[i].AnimEnd))
+                    bool animationActive = false;
+
+                    for (int i = _Images.Count - 1; i >= 0; i--)
+                    {
+                        CalcRV(ref _Images[i].AnimEnd, i - _SelectedIndex);
+                        if (Animate(ref _Images[i].Current, _Images[i].AnimEnd))
+                            animationActive = true;
+                    }
+
+                    if (!animationActive && _View_rotate_active)
+                        cleanUpDelay++;
+                    else
+                        cleanUpDelay = 0;
+
+                    if (cleanUpDelay > 1)
+                        CleanupAnimation();
+
+                    //slowly reset view angle
+                    if (!_View_rotate_active)
+                    {
+                        _View_rotate += (0 - _View_rotate) * _ViewRotate_ReverseSpeed;
+                        if (System.Math.Abs(_View_rotate) < 0.0001)
+                            _View_rotate = 0;
+
+                        if (_View_rotate != 0)
+                            animationActive = true;
+                    }
+
+                    if (animationActive)
+                        _updateCountIdle = 0;
+
+                    if (!animationActive && _updateCountIdle < 10)
+                    {
+                        _updateCountIdle++;
                         animationActive = true;
-                }
+                    }
 
-                if (!animationActive && _View_rotate_active)
-                    cleanUpDelay++;
-                else
-                    cleanUpDelay = 0;
+                    // Selected index changed?
+                    if (_SelectedIndexStored != _SelectedIndex)
+                    {
+                        // Override to update text field
+                        this.Text = ExtractLabelText();
 
-                if (cleanUpDelay > 1)
-                    CleanupAnimation();
+                        _SelectedIndexStored = _SelectedIndex;
+                    }
 
-                //slowly reset view angle
-                if (!_View_rotate_active)
-                {
-                    _View_rotate += (0 - _View_rotate) * _ViewRotate_ReverseSpeed;
-                    if (System.Math.Abs(_View_rotate) < 0.0001)
-                        _View_rotate = 0;
-
-                    if (_View_rotate != 0)
-                        animationActive = true;
-                }
-
-                if (animationActive)
-                    _updateCountIdle = 0;
-
-                if (!animationActive && _updateCountIdle < 10)
-                {
-                    _updateCountIdle++;
-                    animationActive = true;
-                }
-
-                // Selected index changed?
-                if (_SelectedIndexStored != _SelectedIndex)
-                {
-                    // Override to update text field
-                    this.Text = ExtractLabelText();
-
-                    _SelectedIndexStored = _SelectedIndex;
-                }
-
-                if (animationActive | _View_rotate_active)
-                {
-                    Refresh();
-                    if (tmrUpdate != null)
-                        tmrUpdate.Enabled = true;
-                }
-                else
-                {   // Stop update timer
-                    if (tmrUpdate != null)
-                        tmrUpdate.Enabled = false;
+                    if (animationActive | _View_rotate_active)
+                    {
+                        Refresh();
+                        if (tmrUpdate != null)
+                            tmrUpdate.Enabled = true;
+                    }
+                    else
+                    {   // Stop update timer
+                        if (tmrUpdate != null)
+                            tmrUpdate.Enabled = false;
+                    }
                 }
             }
         }
@@ -1090,6 +1114,14 @@ namespace OpenMobile.Controls
 
         #endregion
 
+        /// <summary>
+        /// Callback to inform about list changed
+        /// </summary>
+        /// <returns></returns>
+        internal virtual void ListContentChanged(ListChangedEventArgs e)
+        {            
+        }
+
         #region List item control
 
         public void Insert(OImage image)
@@ -1108,32 +1140,58 @@ namespace OpenMobile.Controls
 
         public void Insert(OImage image, float width, float height, int? index)
         {
-            // Insert new item
-            ImageWrapper img = new ImageWrapper(image, width, height);
-            CalcRV(ref img.Current, _Images.Count-1);
-            img.Current.x += 1;
-            img.Current.rot = 90;
+            lock (_Images)
+            {
+                // Insert new item
+                ImageWrapper img = new ImageWrapper(image, width, height);
 
-            if (!index.HasValue)
-            {
-                _Images.Add(img);
-            }
-            else
-            {
-                _Images.Insert(index.Value, img);
-                //if (index.Value < _Images.Count)
-                //{
-                //    _Images[index.Value].Image = image;
-                //    _Images[index.Value].Width = width;
-                //    _Images[index.Value].Height = height;
-                //}
+                // Set initial placement
+                if (index.HasValue && !_Animation_InsertionOfNewItems)
+                {
+                    if (index >= 0 && index <= _Images.Count - 2)
+                    {
+                        //img.Current.x = _Images[index.Value + 1].Current.x;
+                        CalcRV(ref img.Current, index.Value);
+                        CalcRV(ref img.AnimEnd, index.Value);
+                    }
+                    else if (index >= 1 && index <= _Images.Count - 2)
+                    {
+                        //img.Current.x = _Images[index.Value - 1].Current.x;
+                        CalcRV(ref img.Current, index.Value);
+                        CalcRV(ref img.AnimEnd, index.Value);
+                    }
+                }
+                else
+                {
+                    CalcRV(ref img.Current, _Images.Count - 1);
+                    img.Current.x += 1;
+                }
+                img.Current.rot = 90;
+
+                if (!index.HasValue)
+                {
+                    _Images.Add(img);
+                }
+                else
+                {
+                    _Images.Insert(index.Value, img);
+                    //if (index.Value < _Images.Count)
+                    //{
+                    //    _Images[index.Value].Image = image;
+                    //    _Images[index.Value].Width = width;
+                    //    _Images[index.Value].Height = height;
+                    //}
+                }
             }
             Update();
         }
 
         public void Clear()
         {
-            _Images.Clear();
+            lock (_Images)
+            {
+                _Images.Clear();
+            }
             Update();
         }
 
@@ -1141,8 +1199,10 @@ namespace OpenMobile.Controls
         {
             if (index >= _Images.Count || index < 0)
                 return;
-
-            _Images.RemoveAt(index);
+            lock (_Images)
+            {
+                _Images.RemoveAt(index);
+            }
             Update();
         }
 
@@ -1245,6 +1305,179 @@ namespace OpenMobile.Controls
             else if (index < _SelectedIndex)
                 MoveLeft(index);           
         }
+
+        /// <summary>
+        /// The source of the list items
+        /// </summary>
+        public virtual object ListSource
+        {
+            get
+            {
+                return this._ListSource;
+            }
+            set
+            {
+                if (this._ListSource != value)
+                {
+                    ListSource_DisconnectEvents();
+
+                    // Activate new object
+                    this._ListSource = value;
+
+                    // Add items 
+                    AddItemsFromListSource();
+
+                    ListSource_ConnectEvents();
+                }
+            }
+        }
+        private object _ListSource = new object();
+
+        private void ListSource_DisconnectEvents()
+        {
+            // Unsubscribe from events for current object
+            if (_ListSource != null)
+            {
+                if (typeof(IBindingList).IsInstanceOfType(_ListSource))
+                {
+                    var listSource = _ListSource as IBindingList;
+
+                    if (listSource_ListChangedEventHandler == null)
+                        listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
+                    listSource.ListChanged -= listSource_ListChangedEventHandler;
+                }
+            }
+        }
+
+        private void ListSource_ConnectEvents()
+        {
+            // Subscribe to events of new object
+            if (typeof(IBindingList).IsInstanceOfType(_ListSource))
+            {
+                var listSource = _ListSource as IBindingList;
+
+                if (listSource_ListChangedEventHandler == null)
+                    listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
+                listSource.ListChanged += listSource_ListChangedEventHandler;
+            }
+        }
+
+        private void AddItemsFromListSource()
+        {
+            // Add items 
+            if (typeof(System.Collections.IEnumerable).IsInstanceOfType(_ListSource))
+            {
+                var listObject = _ListSource as System.Collections.IEnumerable;
+                foreach (var item in listObject)
+                {
+                    this.Insert(GetListItem(item));
+                }
+            }
+        }
+
+        private OImage GetListItem(object item)
+        {
+            if (_AssignListItemAction == null)
+            {
+                if (item is OImage)
+                    return (OImage)item;
+                else
+                    return null;
+            }
+            else
+            {
+                return _AssignListItemAction(item);
+            }
+        }
+
+        private ListChangedEventHandler listSource_ListChangedEventHandler;
+        void listSource_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            var listSource = _ListSource as IBindingList;
+
+            switch (e.ListChangedType)
+            {
+                case ListChangedType.ItemAdded:
+                    {
+                        OImage img = GetListItem(listSource[e.NewIndex]);
+                        if (img != null)
+                            this.Insert(img, e.NewIndex);
+                    }
+                    break;
+                case ListChangedType.ItemChanged:
+                    {
+                        OImage img = null;
+                        if (e.NewIndex >= 0)
+                        {
+                            img = GetListItem(listSource[e.NewIndex]);
+                        }
+                        if (img != null)
+                        {
+                            _Images[e.NewIndex].Image = img;
+                            Update();
+                        }
+                    }
+                    break;
+                case ListChangedType.ItemDeleted:
+                    {
+                        this.RemoveAt(e.NewIndex);
+                    }
+                    break;
+                case ListChangedType.ItemMoved:
+                    {
+                        var item = _Images[e.OldIndex];
+                        this.RemoveAt(e.OldIndex);
+                        this.Insert(item.Image, e.NewIndex);
+                    }
+                    break;
+                case ListChangedType.PropertyDescriptorAdded:
+                    break;
+                case ListChangedType.PropertyDescriptorChanged:
+                    break;
+                case ListChangedType.PropertyDescriptorDeleted:
+                    break;
+                case ListChangedType.Reset:
+                    {
+                        ListSource_DisconnectEvents();
+                        this.Clear();
+
+                        // Re add items 
+                        AddItemsFromListSource();
+
+                        ListSource_ConnectEvents();
+
+                        Update();
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            this.Text = ExtractLabelText();
+
+            ListContentChanged(e);
+        }
+
+        /// <summary>
+        /// The action to use when assigning an item to the list (This action should convert the list source items to an OImage)
+        /// </summary>
+        public Func<object, OImage> AssignListItemAction
+        {
+            get
+            {
+                return this._AssignListItemAction;
+            }
+            set
+            {
+                if (this._AssignListItemAction != value)
+                {
+                    this._AssignListItemAction = value;
+                }
+            }
+        }
+        private Func<object, OImage> _AssignListItemAction;
+        
+
 
         #endregion
 
@@ -1483,19 +1716,30 @@ namespace OpenMobile.Controls
         #region Mouse Throw
 
         Timer _tmrThrowHandler = null;
-        Point _accDistance;
+        //Point _accDistance;
         bool _ThrowActive = false;
+        int _StepCount = 0;
+        int _StepCountLimit = 10;
+        float _NormalizedDistance = 1f;
         void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
         {
-            _accDistance += RelativeDistance;
-            if (System.Math.Abs(_accDistance.X) > 50)
+            _NormalizedDistance = 1.0f - System.Math.Abs(RelativeDistance.X / 20.0f);
+
+            _StepCountLimit = (int)System.Math.Ceiling(5.0f * _NormalizedDistance);
+            //System.Diagnostics.Debug.WriteLine("normalizedDistance = {0}, StepCountLimit = {3}, RelativeDistance = {1}, TotalDistance = {2}", _NormalizedDistance, RelativeDistance, TotalDistance, _StepCountLimit);
+            
+            _StepCount++;
+
+            //_accDistance += RelativeDistance;
+            if (System.Math.Abs(TotalDistance.X) > 10 && _StepCount > _StepCountLimit)
             {
                 _ThrowActive = true;
                 if (RelativeDistance.X > 0)
                     SelectedIndex--;
                 else if (RelativeDistance.X < 0)
                     SelectedIndex++;
-                _accDistance.X = _accDistance.Y = 0;
+                _StepCount = 0;
+                //_accDistance.X = _accDistance.Y = 0;
             }
         }
 
@@ -1547,7 +1791,8 @@ namespace OpenMobile.Controls
             else
                 return;
 
-            throwSpeed.X *= 0.8f;
+            //throwSpeed.X *= 0.8f;
+            throwSpeed.X *= 1 - _NormalizedDistance;
 
             if (System.Math.Abs(throwSpeed.X) > 0)
             {

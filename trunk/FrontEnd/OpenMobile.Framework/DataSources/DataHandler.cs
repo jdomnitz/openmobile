@@ -28,7 +28,7 @@ namespace OpenMobile.Data
     /// <summary>
     /// A handler for sensors
     /// </summary>
-    public class DataHandler
+    public class DataHandler: IDisposable
     {
         /// <summary>
         /// An dataholder for queued datasource subscriptions
@@ -45,17 +45,17 @@ namespace OpenMobile.Data
             }
         }
 
-        private List<DataSourceSubscriptionCacheItem> _DataSourceSubscriptionCache = new List<DataSourceSubscriptionCacheItem>();
-        private List<DataSource> _DataSources = new List<DataSource>();
-        private Thread PollThread;
-        private int PollEngine_Resolution = 500;
-        private bool PollEngine_Run = false;
-        private bool PollEngine_Enable = false;
-        private EventWaitHandle PollEngine_WaitHandle;
-        private List<DataSourceGroup> _DataSourceGroups = new List<DataSourceGroup>();
+        static private List<DataSourceSubscriptionCacheItem> _DataSourceSubscriptionCache = new List<DataSourceSubscriptionCacheItem>();
+        static private List<DataSource> _DataSources = new List<DataSource>();
+        static private Thread PollThread;
+        static private int PollEngine_Resolution = 500;
+        static private bool PollEngine_Run = false;
+        static private bool PollEngine_Enable = false;
+        static private EventWaitHandle PollEngine_WaitHandle;
+        static private List<DataSourceGroup> _DataSourceGroups = new List<DataSourceGroup>();
 
         /// <summary>
-        /// Creates a new datahandler
+        /// Creates a new data handler
         /// </summary>
         public DataHandler()
         {
@@ -71,6 +71,7 @@ namespace OpenMobile.Data
 
         public void Dispose()
         {
+            PollEngine_Run = false;
             if (PollThread != null)
             {
                 PollEngine_Enable = false;

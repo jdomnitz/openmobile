@@ -520,7 +520,7 @@ namespace OpenMobile
 
             // Start application
             SetStartupInfoText("Loading completed");
-            Application.Run();
+            //Application.Run();
         }
 
         private static void InitPluginsAndData()
@@ -734,10 +734,29 @@ namespace OpenMobile
             try
             {
                 for (int i = 0; i < pluginCollection.Count; i++)
+                {
                     if (pluginCollection[i] != null)
-                        pluginCollection[i].Dispose();
+                    {
+                        try
+                        {
+                            pluginCollection[i].Dispose();
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+
                 for (int i = 0; i < RenderingWindows.Count; i++)
-                    RenderingWindows[i].Dispose();
+                {
+                    try
+                    {
+                        RenderingWindows[i].Dispose();
+                    }
+                    catch
+                    {
+                    }
+                }
                 InputRouter.Dispose();
                 theHost.Dispose();
                 OpenMobile.Threading.SafeThread.Dispose();
@@ -747,8 +766,8 @@ namespace OpenMobile
             catch
             {   // No use of logging messages as we've already disposed the debug plugin...
             }
-            Thread.Sleep(5000);
-            Environment.Exit(0); //Force
+            //Thread.Sleep(500);
+            //Environment.Exit(0); //Force
         }
 
         internal static bool loadPlugin(string arg)

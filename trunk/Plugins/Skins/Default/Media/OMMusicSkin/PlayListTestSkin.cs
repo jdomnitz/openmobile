@@ -33,26 +33,22 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using OpenMobile.Threading;
 
-namespace ControlDemo
+namespace OMMusicSkin
 {
-    internal class panelPlayListTest
+    internal class PlayListTestSkin
     {
-        private HighLevelCode _MainPlugin;
+        private OMMusicSkin _MainPlugin;
         private IMediaDatabase _DB = null;
         private IEnumerable<mediaInfo> _DBItems;
         private Playlist _Playlist = new Playlist("TestList");
         private OMListItem.subItemFormat _MediaListSubItemFormat = new OMListItem.subItemFormat();
 
-        public panelPlayListTest(HighLevelCode mainPlugin)
+        public OMPanel Initialize(OMMusicSkin mainPlugin)
         {
             _MainPlugin = mainPlugin;
-        }
-
-        public OMPanel Initialize()
-        {
 
             // Create a new panel
-            OMPanel panel = new OMPanel("PlaylistTest", "Music > Playlist", OM.Host.getSkinImage("AIcons|4-collections-view-as-list"));
+            OMPanel panel = new OMPanel("PlaylistSkin", "Music > Playlist", OM.Host.getSkinImage("AIcons|4-collections-view-as-list"));
 
             /*
             // List subitem format

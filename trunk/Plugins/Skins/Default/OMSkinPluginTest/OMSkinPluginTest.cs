@@ -75,7 +75,7 @@ namespace OMSkinPluginTest
             object playlistObject;
             if (OM.Host.DataHandler.GetDataSourceValue(screen, "Zone.MediaProvider.Playlist", null, out playlistObject))
             {
-                OpenMobile.Media.PlayList2 playlist = playlistObject as OpenMobile.Media.PlayList2;
+                OpenMobile.Media.Playlist playlist = playlistObject as OpenMobile.Media.Playlist;
                 if (playlist != null)
                 {
                     if (!playlist.HasItems)

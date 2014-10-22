@@ -71,7 +71,7 @@ namespace OpenMobile.Media
         /// <summary>
         /// Current PlayList
         /// </summary>
-        public PlayList2 Playlist
+        public Playlist Playlist
         {
             get
             {
@@ -85,7 +85,7 @@ namespace OpenMobile.Media
                 }
             }
         }
-        private PlayList2 _Playlist = null;
+        private Playlist _Playlist = null;
 
         /// <summary>
         /// Creates a new MediaSource
@@ -105,7 +105,7 @@ namespace OpenMobile.Media
         {
             // Initialize current PlayList
             if (Playlist == null)
-                Playlist = new PlayList2(String.Format("{0}_PlayList_Current", _Name));
+                Playlist = new Playlist(String.Format("{0}_PlayList_Current", _Name));
         }
 
         /// <summary>

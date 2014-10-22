@@ -1432,6 +1432,9 @@ namespace OMMediaDB2
             if (!DB_ConnectAndOpen())
                 return false;
             
+            // Clear existing content of the playlist in the DB
+            DB_DeletePlaylist(name);
+
             foreach (mediaInfo media in mediaList)
                 DB_InsertMediaInfo(DBObjectTypes.PlaylistItem, media, name);
 
