@@ -99,20 +99,20 @@ namespace ControlDemo
                 case "Play CD":
                     if (Configuration.RunningOnWindows)
                     {
-                        string[] songs = Directory.GetFiles(lastPath);
-                        if (theHost.setPlaylist(PlayList.Convert(songs), screen))
-                            theHost.execute(eFunction.nextMedia, screen.ToString());
+                        //string[] songs = Directory.GetFiles(lastPath);
+                        //if (theHost.setPlaylist(PlayList.Convert(songs), screen))
+                        //    theHost.execute(eFunction.nextMedia, screen.ToString());
                     }
                     else if (Configuration.RunningOnLinux)
                     {
-                        string name = DeviceInfo.get(lastPath).VolumeLabel;
-                        string[] arg = name.Split(new char[] { '|' });
-                        List<string> songs = new List<string>();
-                        int tracks = int.Parse(arg[1]);
-                        for (int i = 1; i <= tracks; i++)
-                            songs.Add("cdda://" + i.ToString());
-                        if (theHost.setPlaylist(PlayList.Convert(songs), screen))
-                            theHost.execute(eFunction.nextMedia, screen.ToString());
+                        //string name = DeviceInfo.get(lastPath).VolumeLabel;
+                        //string[] arg = name.Split(new char[] { '|' });
+                        //List<string> songs = new List<string>();
+                        //int tracks = int.Parse(arg[1]);
+                        //for (int i = 1; i <= tracks; i++)
+                        //    songs.Add("cdda://" + i.ToString());
+                        //if (theHost.setPlaylist(PlayList.Convert(songs), screen))
+                        //    theHost.execute(eFunction.nextMedia, screen.ToString());
                     }
                     break;
                 case "Play DVD":
@@ -122,15 +122,15 @@ namespace ControlDemo
                         theHost.sendMessage("UI", "OMNotify", "ShowMediaControls" + screen.ToString());
                     break;
                 case "Play Playlists":
-                    DeviceInfo info = DeviceInfo.get(lastPath);
-                    List<mediaInfo> media = new List<mediaInfo>();
-                    //theHost.SendStatusData(eDataType.Info, this, "", "Loading playlists...");
-                    if (info.PlaylistFolders.Length == 0)
-                        return;
-                    foreach (string playlist in PlayList.listPlaylists(info.PlaylistFolders[0]))
-                        media.AddRange(PlayList.readPlaylist(playlist));
-                    theHost.setPlaylist(media, screen);
-                    theHost.execute(eFunction.Play, screen.ToString(), media[0].Location);
+                    //DeviceInfo info = DeviceInfo.get(lastPath);
+                    //List<mediaInfo> media = new List<mediaInfo>();
+                    ////theHost.SendStatusData(eDataType.Info, this, "", "Loading playlists...");
+                    //if (info.PlaylistFolders.Length == 0)
+                    //    return;
+                    //foreach (string playlist in PlayList.listPlaylists(info.PlaylistFolders[0]))
+                    //    media.AddRange(PlayList.readPlaylist(playlist));
+                    //theHost.setPlaylist(media, screen);
+                    //theHost.execute(eFunction.Play, screen.ToString(), media[0].Location);
                     break;
                 case "Eject":
                     theHost.execute(eFunction.ejectDisc, lastPath);

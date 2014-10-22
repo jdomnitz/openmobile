@@ -407,10 +407,10 @@ namespace OpenMobile
 
             videoPlaybackPosition = new Rectangle[AudioDeviceCount];
 
-            // Start loading playlist data
-            SandboxedThread.Asynchronous(loadPlaylists);
+            //// Start loading playlist data
+            //SandboxedThread.Asynchronous(loadPlaylists);
 
-            // Initialize builtin helperfunctions
+            // Initialize built in helper functions
             SandboxedThread.Asynchronous(OpenMobile.helperFunctions.OSK.Init);
 
             // Register commands and datasources
@@ -564,40 +564,40 @@ namespace OpenMobile
             return true;
         }
 
-        /// <summary>
-        /// Saves all current playlists to the media database
-        /// </summary>
-        private void savePlaylists()
-        {
-            using (PluginSettings s = new PluginSettings())
-            {
-                // TODO: ReEnable PlayList load and save
-                for (int i = 0; i < AudioDeviceCount; i++)
-                {
-                    PlayList.writePlaylistToDB("Current" + i.ToString(), getPlaylistForAudioDeviceInstance(i));
-                    s.setSetting(BuiltInComponents.OMInternalPlugin, "Media.Instance" + i.ToString() + ".Random", getRandomForAudioDeviceInstance(i).ToString());
-                }
-            }
-        }
+        ///// <summary>
+        ///// Saves all current playlists to the media database
+        ///// </summary>
+        //private void savePlaylists()
+        //{
+        //    using (PluginSettings s = new PluginSettings())
+        //    {
+        //        // TODO: ReEnable PlayList load and save
+        //        for (int i = 0; i < AudioDeviceCount; i++)
+        //        {
+        //            PlayList.writePlaylistToDB("Current" + i.ToString(), getPlaylistForAudioDeviceInstance(i));
+        //            s.setSetting(BuiltInComponents.OMInternalPlugin, "Media.Instance" + i.ToString() + ".Random", getRandomForAudioDeviceInstance(i).ToString());
+        //        }
+        //    }
+        //}
 
-        /// <summary>
-        /// Loads playlists from media database and activates them
-        /// </summary>
-        private void loadPlaylists()
-        {
-            using (PluginSettings s = new PluginSettings())
-            {
-                bool res;
-                string dbname = s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
-                // TODO: ReEnable PlayList load and save
-                for (int i = 0; i < AudioDeviceCount; i++)
-                {
-                    setPlaylistForAudioDeviceInstance(PlayList.readPlaylistFromDB("Current" + i.ToString(), dbname), i);
-                    if (bool.TryParse(s.getSetting(BuiltInComponents.OMInternalPlugin, "Media.Instance" + i.ToString() + ".Random"), out res))
-                        setRandomForAudioDeviceInstance(i, res);
-                }
-            }
-        }
+        ///// <summary>
+        ///// Loads playlists from media database and activates them
+        ///// </summary>
+        //private void loadPlaylists()
+        //{
+        //    using (PluginSettings s = new PluginSettings())
+        //    {
+        //        bool res;
+        //        string dbname = s.getSetting(BuiltInComponents.OMInternalPlugin, "Default.MusicDatabase");
+        //        // TODO: ReEnable PlayList load and save
+        //        for (int i = 0; i < AudioDeviceCount; i++)
+        //        {
+        //            setPlaylistForAudioDeviceInstance(PlayList.readPlaylistFromDB("Current" + i.ToString(), dbname), i);
+        //            if (bool.TryParse(s.getSetting(BuiltInComponents.OMInternalPlugin, "Media.Instance" + i.ToString() + ".Random"), out res))
+        //                setRandomForAudioDeviceInstance(i, res);
+        //        }
+        //    }
+        //}
 
         #endregion
 
@@ -1640,7 +1640,7 @@ namespace OpenMobile
             {
                 closing = true;
                 SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.CloseProgramPreview, String.Empty, String.Empty, String.Empty); });
-                savePlaylists();
+                //savePlaylists();
                 //SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
                 raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
                 Hal_Send(halCommand);
@@ -1682,7 +1682,7 @@ namespace OpenMobile
                 case eFunction.restartProgram:
                     try
                     {
-                        savePlaylists();
+                        //savePlaylists();
                         raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
                         Stop();
                     }

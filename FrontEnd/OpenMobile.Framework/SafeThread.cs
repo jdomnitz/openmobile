@@ -160,6 +160,7 @@ namespace OpenMobile.Threading
                     
                     // Start new thread
                     p.Name = String.Format("OpenMobile.SafeThread.{0}", p.ManagedThreadId);
+                    p.IsBackground = true;
                     p.Start();
                 }
             }
@@ -234,6 +235,9 @@ namespace OpenMobile.Threading
                             break;
                         }
                     }
+
+                    if (s.state == ThreadState.States.Kill)
+                        break;
 
                     // Should we terminate this thread?
                     if ((functions.Count == 0) && (availableThreads > 1))

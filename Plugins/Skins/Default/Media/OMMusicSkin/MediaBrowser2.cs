@@ -247,7 +247,7 @@ namespace OMMusicSkin
         void lstMedia_OnHoldClick(OMControl sender, int screen)
         {
             // Get current playlist
-            PlayList2 playlist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
 
             // Get selected list item
             OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
@@ -344,7 +344,7 @@ namespace OMMusicSkin
         void mnuItem_ClearPlaylist_OnClick(OMControl sender, int screen)
         {
             // Get current playlist
-            PlayList2 playlist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
             playlist.Clear();
         }
 

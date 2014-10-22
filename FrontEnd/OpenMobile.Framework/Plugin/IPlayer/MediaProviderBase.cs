@@ -194,12 +194,12 @@ namespace OpenMobile.Plugin
                     return GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData;
                 case MediaProvider_Data.Suffle:
                     if (GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist != null)
-                        return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.Random;
+                        return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.Shuffle;
                     else
                         return false;
                 case MediaProvider_Data.Repeat:
                     if (GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist != null)
-                        return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.Repeat;
+                        return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.Shuffle;
                     else
                         return false;
                 case MediaProvider_Data.PlayList:

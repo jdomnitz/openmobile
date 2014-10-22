@@ -1222,12 +1222,12 @@ namespace OpenMobile
             mediaFlow_UIBottomBar_MediaImages_CoverFlow.Color = Color.FromArgb(178, Color.White);
             mediaFlow_UIBottomBar_MediaImages_CoverFlow.TextAlignment = Alignment.TopCenter;
             mediaFlow_UIBottomBar_MediaImages_CoverFlow.Animation_FadeOutDistance = 6;
-            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ReflectionsEnabled = false;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ReflectionsEnabled = true;
             mediaFlow_UIBottomBar_MediaImages_CoverFlow.NoUserInteraction = true;
             mediaFlow_UIBottomBar_MediaImages_CoverFlow.Control_PlacementOffsetY = 5;
             mediaFlow_UIBottomBar_MediaImages_CoverFlow.ImageSize = new Size(mediaFlow_UIBottomBar_MediaImages_CoverFlow.Height * 0.6f, mediaFlow_UIBottomBar_MediaImages_CoverFlow.Height * 0.6f);
             //mediaFlow_UIBottomBar_MediaImages_CoverFlow.Visible = false;
-            mediaFlow_UIBottomBar_MediaImages_CoverFlow.ListSource = OMMediaFlow.ListSources.Buffer;
+            mediaFlow_UIBottomBar_MediaImages_CoverFlow.MediaListSource = OMMediaFlow.ListSources.Buffer;
             panel.addControl(mediaFlow_UIBottomBar_MediaImages_CoverFlow);
 
             //// Mediasource icon
@@ -1287,8 +1287,8 @@ namespace OpenMobile
                     OMMediaFlow mediaFlow = manager[dataSource.Screen, "MediaBar"]["mediaFlow_CoverFlow"] as OMMediaFlow;
                     if (mediaFlow != null)
                     {
-                        if (dataSource.Value is PlayList2)
-                            mediaFlow.PlayListSource = dataSource.Value as PlayList2;
+                        if (dataSource.Value is Playlist)
+                            mediaFlow.ListSource = dataSource.Value as Playlist;
                     }
                 });
             });
@@ -1674,7 +1674,7 @@ namespace OpenMobile
         private void UIHandler_OnShowMediaBanner(int screen, bool fast)
         {
             // Check for valid data before showing media banner
-            PlayList2 playlist = OM.Host.DataHandler.GetDataSourceValue<PlayList2>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
             if (playlist == null || !playlist.HasItems)
                 return;
 

@@ -37,22 +37,20 @@ using OpenMobile.Media;
 namespace ControlDemo
 {
     [SkinIcon("*#")]
-    public sealed class ControlDemo : IHighLevel
+    public sealed class ControlDemo : HighLevelCode
     {
-
-        #region IHighLevel Members
-        ScreenManager manager;
-        IPluginHost theHost;
+        public ControlDemo()
+            : base("ControlDemo", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "Control demo", "Demo", "OM Dev team/Borte", "")
+        {
+        }
 
         imageItem imgBtnIconOn;
         imageItem imgBtnIconOff;
         MenuPopup PopupMenu;
 
-        public eLoadStatus initialize(IPluginHost host)
-        {
-            theHost = host;
-            manager = new ScreenManager(this);
 
+        public override eLoadStatus initialize(IPluginHost host)
+        {
             #region Disabled code
 
             //OMLabel lblDataSourceTest1 = new OMLabel("lblDataSourceTest1", theHost.ClientArea[0].Left, theHost.ClientArea[0].Top, 250, 50);
@@ -344,22 +342,22 @@ namespace ControlDemo
             // Queue any loading of panels as these panels are likely to not being used so we don't have to load them into memory
 
             // Load main panel (default)
-            manager.QueuePanel("ControlDemo", Initialize, true);
-
-            // Load playlist panel
-            manager.QueuePanel("PlayListTest", panelPlayListTest.Initialize);
+            base.PanelManager.QueuePanel("ControlDemo", Initialize, true);
 
             // Load images panel
-            manager.QueuePanel("Images", panelImages.Initialize);
+            base.PanelManager.QueuePanel("Images", panelImages.Initialize);
 
             // Load 3D panel
-            manager.QueuePanel("panel3D", panel3D.Initialize);
+            base.PanelManager.QueuePanel("panel3D", panel3D.Initialize);
 
             // Load SlideIn panel
-            manager.QueuePanel("SlideInTest", panelSlideInTest.Initialize);
+            base.PanelManager.QueuePanel("SlideInTest", panelSlideInTest.Initialize);
 
             // Load DataSources panel
-            manager.QueuePanel("DataSources", panelDataSources.Initialize);
+            base.PanelManager.QueuePanel("DataSources", panelDataSources.Initialize);
+
+            // Load Playlist panel
+            base.PanelManager.QueuePanel("PlaylistTest", new panelPlayListTest(this).Initialize);
 
             return eLoadStatus.LoadSuccessful;
         }
@@ -453,15 +451,15 @@ namespace ControlDemo
             btnOMList2Test.OnClick += new userInteraction(btnCommonTransitionToPanel_OnClick);
             p.addControl(btnOMList2Test);
             // Load OMList2 panel
-            panelOMList2Test.Initialize(this.pluginName, manager, theHost);
+            panelOMList2Test.Initialize(this.pluginName, base.PanelManager, OM.Host);
 
             // Playlist test
-            OMButton btnPlayList = OMButton.PreConfigLayout_CleanStyle("btnPlayList", btnOMList2Test.Region.Left, btnOMList2Test.Region.Bottom - 1, 300, 90, corners:GraphicCorners.None, icon:"", text:"PlayList");
-            btnPlayList.OnClick += new userInteraction(btnPlayList_OnClick);
-            p.addControl(btnPlayList);
+            OMButton btnPlaylist = OMButton.PreConfigLayout_CleanStyle("btnPlaylist", btnOMList2Test.Region.Left, btnOMList2Test.Region.Bottom - 1, 300, 90, corners: GraphicCorners.None, icon: "", text: "Playlist");
+            btnPlaylist.OnClick += new userInteraction(btnPlaylist_OnClick);
+            p.addControl(btnPlaylist);
 
             // Images test
-            OMButton btnImages = OMButton.PreConfigLayout_CleanStyle("btnImages", btnOMList2Test.Region.Left, btnPlayList.Region.Bottom - 1, 300, 90, corners: GraphicCorners.None, icon: "", text: "Images");
+            OMButton btnImages = OMButton.PreConfigLayout_CleanStyle("btnImages", btnOMList2Test.Region.Left, btnPlaylist.Region.Bottom - 1, 300, 90, corners: GraphicCorners.None, icon: "", text: "Images");
             btnImages.OnClick += new userInteraction(btnImages_OnClick);
             p.addControl(btnImages);
 
@@ -483,15 +481,15 @@ namespace ControlDemo
 
         void btnTest_OnClick(OMControl sender, int screen)
         {
-            OM.Host.UIHandler.PopUpMenu.GetButtonStrip(screen).Buttons["Item1"] = 
-                Button.CreateMenuItem("Item1", theHost.UIHandler.PopUpMenu.ButtonSize, 255, theHost.getSkinImage("Aicons|3-rating-good"), "Changed item", false, null, null, null);
+            OM.Host.UIHandler.PopUpMenu.GetButtonStrip(screen).Buttons["Item1"] =
+                Button.CreateMenuItem("Item1", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Aicons|3-rating-good"), "Changed item", false, null, null, null);
         }
 
         void btn3D_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "panel3D");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            OM.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
+            OM.Host.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "panel3D");
+            OM.Host.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void btnCommonTransitionToPanel_OnClick(OMControl sender, int screen)
@@ -502,32 +500,28 @@ namespace ControlDemo
                 return;
 
             // Transition to panel
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, panelName);
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            OM.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
+            OM.Host.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, panelName);
+            OM.Host.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void btnSlideInTest_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "SlideInTest");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            OM.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
+            OM.Host.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "SlideInTest");
+            OM.Host.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
         void btnImages_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "Images");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            OM.Host.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
+            OM.Host.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "Images");
+            OM.Host.execute(eFunction.ExecuteTransition, screen.ToString());
         }
 
-        PlayList playlist = null;
-
-        void btnPlayList_OnClick(OMControl sender, int screen)
+        void btnPlaylist_OnClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.TransitionFromPanel, screen.ToString(), this.pluginName);
-            theHost.execute(eFunction.TransitionToPanel, screen.ToString(), this.pluginName, "PlayListTest");
-            theHost.execute(eFunction.ExecuteTransition, screen.ToString());
+            base.GotoPanel(screen, "PlaylistTest");
         }
 
         void OSKButton3_OnClick(OMControl sender, int screen)
@@ -535,13 +529,13 @@ namespace ControlDemo
             //OSK osk = new OSK("", "password", "Please input password now", OSKInputTypes.Keypad, true);
             //string Result = osk.ShowOSK(screen);
             string Result = OSK.ShowDefaultOSK(screen, "", "password", "Please input password now", OSKInputTypes.Keypad, true);
-            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("OSK result: {0}", Result)));
+            OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("OSK result: {0}", Result)));
         }
 
         void btnPopupMenu_OnClick(OMControl sender, int screen)
         {
             int Selection = (int)PopupMenu.ShowMenu(screen);
-            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("PopupMenu selection: {0}", Selection)));
+            OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("PopupMenu selection: {0}", Selection)));
         }
 
         bool btnSelected = false;
@@ -550,21 +544,21 @@ namespace ControlDemo
             //OSK osk = new OSK("", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
             //string Result = osk.ShowOSK(screen);
             string Result = OSK.ShowDefaultOSK(screen, "", "Type something", "Please input something now", (OSKInputTypes)sender.Tag, false);
-            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("OSK result: {0}", Result)));
+            OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("OSK result: {0}", Result)));
         }
 
         void List1_SelectedIndexChanged(OMList sender, int screen)
         {
-            OMList List1 = (OMList)manager[screen]["List1"];
-            OMList List2 = (OMList)manager[screen]["List2"];
+            OMList List1 = (OMList)base.PanelManager[screen]["List1"];
+            OMList List2 = (OMList)base.PanelManager[screen]["List2"];
             string find = List1.SelectedItem.text.Substring(0, 1);
             List2.Items = List1.Items.FindAll(a => a.text.StartsWith(find)).ConvertAll(x => (OpenMobile.OMListItem)x.Clone());
         }
 
         void OK_OnClick(OMControl sender, int screen)
         {
-            OMButton btn = (OMButton)manager[screen]["btnDialog"];
-            btn.Image = theHost.getSkinImage("Full");
+            OMButton btn = (OMButton)base.PanelManager[screen]["btnDialog"];
+            btn.Image = OM.Host.getSkinImage("Full");
         }
 
 
@@ -580,21 +574,21 @@ namespace ControlDemo
 
             // Create a buttonstrip
             ButtonStrip PopUpMenuStrip = new ButtonStrip(sender.OwnerPlugin.pluginName, sender.Name, "PopUpMenuStrip");
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Item1", theHost.UIHandler.PopUpMenu.ButtonSize, 255, theHost.getSkinImage("Aicons|5-content-email"), "Send email", false, null, null, null));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Item1", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Aicons|5-content-email"), "Send email", false, null, null, null));
             // Add some more buttons to the buttonstrip
             for (int i = 2; i < 9; i++)
             {
                 PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Item" + i.ToString(),
-                    theHost.UIHandler.PopUpMenu.ButtonSize,
+                    OM.Host.UIHandler.PopUpMenu.ButtonSize,
                     255,
-                    theHost.getSkinImage("Aicons|5-content-email"),
+                    OM.Host.getSkinImage("Aicons|5-content-email"),
                     "Send email" + i.ToString(),
                     false,
                     null, null, null));
             }
 
             // Load the buttonstrip
-            theHost.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);
+            OM.Host.UIHandler.PopUpMenu.SetButtonStrip(screen, PopUpMenuStrip);
 
             // Demo temperature notification
             OImage tempIcon = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
@@ -648,7 +642,7 @@ namespace ControlDemo
             dialog.Button = OpenMobile.helperFunctions.Forms.buttons.Yes |
                                 OpenMobile.helperFunctions.Forms.buttons.No;
 
-            theHost.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("MsgBox result: {0}", dialog.ShowMsgBox(screen))));          
+            OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(String.Format("MsgBox result: {0}", dialog.ShowMsgBox(screen))));          
         }
 
         void t_Elapsed(object sender, ElapsedEventArgs e)
@@ -658,73 +652,11 @@ namespace ControlDemo
 
         void button_OnClick(OMControl sender, int screen)
         {
-            OMGauge g = ((OMGauge)manager[screen][2]);
+            OMGauge g = ((OMGauge)base.PanelManager[screen][2]);
             if (g.BufferSize == 5)
                 g.BufferSize = 0;
             else
                 g.BufferSize = 5;
         }
-
-        public OMPanel loadPanel(string name, int screen)
-        {
-            return manager[screen, name];
-        }
-        public Settings loadSettings()
-        {
-            return null;
-        }
-        #endregion
-        #region IBasePlugin Members
-
-        public string authorName
-        {
-            get { return "OM DevTeam/Borte"; }
-        }
-
-        public string authorEmail
-        {
-            get { return ""; }
-        }
-
-        public string pluginName
-        {
-            get { return "ControlDemo"; }
-        }
-        public string displayName
-        {
-            get { return "Control Demo"; }
-        }
-        public float pluginVersion
-        {
-            get { return 0.1F; }
-        }
-
-        public string pluginDescription
-        {
-            get { return "Controls demo"; }
-        }
-
-        public imageItem pluginIcon
-        {
-            get { return OM.Host.getSkinImage("Icons|Icon-OM"); }
-        }
-
-        public bool incomingMessage(string message, string source)
-        {
-            throw new NotImplementedException();
-        }
-        public bool incomingMessage<T>(string message, string source, ref T data)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
-        #region IDisposable Members
-
-        public void Dispose()
-        {
-            //
-        }
-
-        #endregion
     }
 }

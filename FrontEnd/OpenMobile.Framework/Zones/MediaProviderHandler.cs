@@ -243,12 +243,12 @@ namespace OpenMobile.Media
         /// <summary>
         /// Current PlayList2
         /// </summary>
-        public PlayList2 Playlist
+        public Playlist Playlist
         {
             get
             {
                 if (_ActiveMediaProvider != null)
-                    return (PlayList2)_ActiveMediaProvider.GetData(_Zone, new MediaProvider_DataWrapper(MediaProvider_Data.PlayList));
+                    return (Playlist)_ActiveMediaProvider.GetData(_Zone, new MediaProvider_DataWrapper(MediaProvider_Data.PlayList));
                 return null;
             }
             set

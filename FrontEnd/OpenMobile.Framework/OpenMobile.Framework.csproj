@@ -121,15 +121,14 @@
     <Compile Include="Controls\ButtonStrip\ButtonStrip.cs" />
     <Compile Include="Controls\ControlGroup.cs" />
     <Compile Include="Controls\ControlLayout.cs" />
+    <Compile Include="Controls\OMImageFlow.cs" />
+    <Compile Include="Controls\OMMediaFlow.cs" />
     <Compile Include="Controls\IShowing.cs" />
     <Compile Include="Controls\OMContainer2.cs" />
-    <Compile Include="Controls\OMObjectList3.cs" />
     <Compile Include="Controls\EventArgs.cs" />
     <Compile Include="Controls\OMMouseHandler.cs" />
     <Compile Include="Controls\OMObjectList2.cs" />
     <Compile Include="Controls\iVisibility.cs" />
-    <Compile Include="Controls\OMMediaFlow.cs" />
-    <Compile Include="Controls\OMImageFlow.cs" />
     <Compile Include="Controls\OMCube.cs" />
     <Compile Include="Controls\OMControlGraphicsBase.cs" />
     <Compile Include="Controls\OMObjectList.cs" />
@@ -217,7 +216,6 @@
     <Compile Include="Math\SunTimes.cs" />
     <Compile Include="IPluginHost.cs" />
     <Compile Include="Media\ManagedTagReader.cs" />
-    <Compile Include="Media\Playlist_Obsolete.cs" />
     <Compile Include="Net\NetworkStatus.cs" />
     <Compile Include="Net\RSS.cs" />
     <Compile Include="Plugin\BasePluginCode.cs" />
@@ -340,7 +338,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

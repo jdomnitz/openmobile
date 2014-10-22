@@ -761,11 +761,13 @@ namespace OpenMobile.Controls
         {
             base.RenderBegin(g, e);
 
-            lock (this)
+            lock (_Items)
             {
                 try
                 {
                     if ((width == 0) || (height == 0))
+                        return;
+                    if (_Items.Count == 0)
                         return;
 
                     //float tmp = OpacityFloat;
@@ -1631,48 +1633,64 @@ namespace OpenMobile.Controls
             {
                 if (this._ListSource != value)
                 {
-                    // Unsubscribe from events for current object
-                    if (_ListSource != null)
-                    {
-                        if (typeof(IBindingList).IsInstanceOfType(_ListSource))
-                        {
-                            var listSource = _ListSource as IBindingList;
-
-                            if (listSource_ListChangedEventHandler == null)
-                                listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
-                            listSource.ListChanged -= listSource_ListChangedEventHandler;
-                        }
-                    }
+                    ListSource_DisconnectEvents();
 
                     // Activate new object
                     this._ListSource = value;
 
-                    // Subscribe to events of new object
-                    if (typeof(IBindingList).IsInstanceOfType(_ListSource))
-                    {
-                        var listSource = _ListSource as IBindingList;
-
-                        if (listSource_ListChangedEventHandler == null)
-                            listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
-                        listSource.ListChanged += listSource_ListChangedEventHandler;
-                    }
-
                     // Add items 
-                    if (typeof(System.Collections.IEnumerable).IsInstanceOfType(_ListSource))
-                    {
-                        var listObject = _ListSource as System.Collections.IEnumerable;
-                        foreach (var item in listObject)
-                        {
-                            if (_AssignListItemAction == null)
-                                this.Add(item.ToString());
-                            else
-                                this.Add(_AssignListItemAction(item));
-                        }
-                    }
+                    AddItemsFromListSource();
+
+                    ListSource_ConnectEvents();
                 }
             }
         }
         private object _ListSource;
+
+        private void ListSource_DisconnectEvents()
+        {
+            // Unsubscribe from events for current object
+            if (_ListSource != null)
+            {
+                if (typeof(IBindingList).IsInstanceOfType(_ListSource))
+                {
+                    var listSource = _ListSource as IBindingList;
+
+                    if (listSource_ListChangedEventHandler == null)
+                        listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
+                    listSource.ListChanged -= listSource_ListChangedEventHandler;
+                }
+            }
+        }
+
+        private void ListSource_ConnectEvents()
+        {
+            // Subscribe to events of new object
+            if (typeof(IBindingList).IsInstanceOfType(_ListSource))
+            {
+                var listSource = _ListSource as IBindingList;
+
+                if (listSource_ListChangedEventHandler == null)
+                    listSource_ListChangedEventHandler = new ListChangedEventHandler(listSource_ListChanged);
+                listSource.ListChanged += listSource_ListChangedEventHandler;
+            }
+        }
+
+        private void AddItemsFromListSource()
+        {
+            // Add items 
+            if (typeof(System.Collections.IEnumerable).IsInstanceOfType(_ListSource))
+            {
+                var listObject = _ListSource as System.Collections.IEnumerable;
+                foreach (var item in listObject)
+                {
+                    if (_AssignListItemAction == null)
+                        this.Add(item.ToString());
+                    else
+                        this.Add(_AssignListItemAction(item));
+                }
+            }
+        }
 
         private ListChangedEventHandler listSource_ListChangedEventHandler;
         void listSource_ListChanged(object sender, ListChangedEventArgs e)
@@ -1757,6 +1775,20 @@ namespace OpenMobile.Controls
                 case ListChangedType.PropertyDescriptorDeleted:
                     break;
                 case ListChangedType.Reset:
+                    {
+                        ListSource_DisconnectEvents();
+                        _Items.Clear();
+
+                        // Re add items 
+                        AddItemsFromListSource();
+
+                        ListSource_ConnectEvents();
+
+                        // Raise list changed event
+                        Raise_OnListChanged(parent.ActiveScreen);
+
+                        base.Refresh();
+                    }
                     break;
                 default:
                     break;

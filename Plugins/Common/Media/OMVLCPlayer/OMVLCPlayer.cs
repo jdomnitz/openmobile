@@ -116,7 +116,7 @@ namespace OMVLCPlayer
         private Dictionary<Zone, CommandGroup> _Zone_CommandGroup_Media = new Dictionary<Zone, CommandGroup>();
         private Dictionary<Zone, DataSourceGroup> _Zone_DataSourceGroup_Media = new Dictionary<Zone, DataSourceGroup>();
         private Dictionary<Zone, mediaInfo> _Zone_MediaInfo = new Dictionary<Zone, mediaInfo>();
-        private Dictionary<Zone, PlayList2> _Zone_Playlist = new Dictionary<Zone, PlayList2>();
+        private Dictionary<Zone, Playlist> _Zone_Playlist = new Dictionary<Zone, Playlist>();
         private Dictionary<Zone, Timer> _Zone_DelayedCommand = new Dictionary<Zone, Timer>();
         private Dictionary<Zone, PlaybackModes> _Zone_PlaybackMode = new Dictionary<Zone, PlaybackModes>();
         private Dictionary<Zone, float> _Zone_PlaybackPos = new Dictionary<Zone, float>();
@@ -189,8 +189,8 @@ namespace OMVLCPlayer
 
                         // Initialize play lists
                         string playlistName = String.Format("{0}.Zone{1}.PlayList_Current", this.pluginName, zone.Index);
-                        PlayList2.SetDisplayName(ref playlistName, String.Format("[{0}] Current playlist ({1})", zone.Name, this.pluginName));
-                        PlayList2 playlist = new PlayList2(playlistName);
+                        Playlist.SetDisplayName(ref playlistName, String.Format("[{0}] Current playlist ({1})", zone.Name, this.pluginName));
+                        Playlist playlist = new Playlist(playlistName);
                         playlist.Load();
                         _Zone_Playlist.Add(zone, playlist);
 
@@ -215,10 +215,10 @@ namespace OMVLCPlayer
 
         void Host_OnSystemEvent(eFunction function, object[] args)
         {
-            if (function == eFunction.CloseProgramPreview)
-            {
-                SavePlayerStates();
-            }
+            //if (function == eFunction.CloseProgramPreview)
+            //{
+            //    SavePlayerStates();
+            //}
         }
 
         private void SetVLCFileEnvironment()
@@ -444,7 +444,7 @@ namespace OMVLCPlayer
 
                 dataSourceGroup.AddDataSource(
                     OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playlist", 0, DataSource.DataTypes.raw, DataSourceGetter, "Current playlist as PlayList2"), _Zone_Playlist[zone]));
+                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playlist", 0, DataSource.DataTypes.raw, DataSourceGetter, "Current playlist as Playlist3"), _Zone_Playlist[zone]));
 
                 dataSourceGroup.AddDataSource(
                     OM.Host.DataHandler.AddDataSource(
@@ -554,6 +554,10 @@ namespace OMVLCPlayer
 
                 commandGroup.AddCommand(
                     OM.Host.CommandHandler.AddCommand(
+                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "PlayURL", CommandExecutor, 0, false, "")));
+
+                commandGroup.AddCommand(
+                    OM.Host.CommandHandler.AddCommand(
                         new Command(this, this.pluginName, String.Format("Zone{0}", i), "Stop", CommandExecutor, 0, false, "")));
 
                 commandGroup.AddCommand(
@@ -644,9 +648,9 @@ namespace OMVLCPlayer
                             result = true;
                             if (Params.IsParamsValid(param, 1))
                             {
-                                if (param[0] is PlayList2)
+                                if (param[0] is Playlist)
                                 {   // Set playlist
-                                    _Zone_Playlist[zone] = param[0] as PlayList2;
+                                    _Zone_Playlist[zone] = param[0] as Playlist;
 
                                     // Push update for datasource for playlist
                                     OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playlist", this.pluginName, zone.Index), _Zone_Playlist[zone]);
@@ -705,7 +709,7 @@ namespace OMVLCPlayer
                                 }
                             }
 
-                            // Do we have a minmum of one parameter?
+                            // Do we have a minimum of one parameter?
                             else if (Params.IsParamsValid(param, 1))
                             {   // Yes
 
@@ -717,7 +721,7 @@ namespace OMVLCPlayer
 
                                 else if (param[0] is int)
                                 {   // Play index in playlist
-                                    _Zone_Playlist[zone].SetCurrentStartIndex((int)param[0]);
+                                    _Zone_Playlist[zone].CurrentIndex = (int)param[0];
                                     media = _Zone_Playlist[zone].CurrentItem;
                                     MediaInfo_Set(zone, media);
                                 }
@@ -727,6 +731,33 @@ namespace OMVLCPlayer
                                     media = new mediaInfo(eMediaType.Local, Params.GetParam<string>(param, 0, ""));
                                 }
 
+                            }
+
+                            if (media != null)
+                            {
+                                result = true;
+                                return PlayerControl_Play(zone, media);
+                            }
+                            return "Invalid media";
+                        }
+
+                    #endregion
+
+                    #region PlayURL
+
+                    case "PlayURL":
+                        {
+                            PlayerControl_DelayedPlay_Cancel(zone);
+
+                            mediaInfo media = null;
+
+                            // Do we have a minimum of one parameter?
+                            if (Params.IsParamsValid(param, 1))
+                            {   // Yes
+                                if (param[0] is string)
+                                {   // Play media location directly
+                                    media = new mediaInfo(eMediaType.URLStream, Params.GetParam<string>(param, 0, ""));
+                                }
                             }
 
                             if (media != null)
@@ -924,10 +955,10 @@ namespace OMVLCPlayer
                     case "Shuffle.Enable":
                     {
                         result = true;
-                        _Zone_Playlist[zone].Random = true;
+                        _Zone_Playlist[zone].Shuffle = true;
 
                         // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Shuffle", this.pluginName, zone.Index), _Zone_Playlist[zone].Random);
+                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Shuffle", this.pluginName, zone.Index), _Zone_Playlist[zone].Shuffle);
                         return "";
                     }
 
@@ -938,10 +969,10 @@ namespace OMVLCPlayer
                     case "Shuffle.Disable":
                     {
                         result = true;
-                        _Zone_Playlist[zone].Random = false;
+                        _Zone_Playlist[zone].Shuffle = false;
 
                         // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Shuffle", this.pluginName, zone.Index), _Zone_Playlist[zone].Random);
+                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Shuffle", this.pluginName, zone.Index), _Zone_Playlist[zone].Shuffle);
                         return "";
                     }
 
@@ -952,10 +983,10 @@ namespace OMVLCPlayer
                     case "Shuffle.Toggle":
                     {
                         result = true;
-                        _Zone_Playlist[zone].Random = !_Zone_Playlist[zone].Random;
+                        _Zone_Playlist[zone].Shuffle = !_Zone_Playlist[zone].Shuffle;
 
                         // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Repeat", this.pluginName, zone.Index), _Zone_Playlist[zone].Random);
+                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Repeat", this.pluginName, zone.Index), _Zone_Playlist[zone].Shuffle);
                         return "";
                     }
 
@@ -1056,6 +1087,21 @@ namespace OMVLCPlayer
                                 #region URL Stream
 
                                 // TODO: Implement URL streaming
+
+                                try
+                                {
+                                    var VLCmedia = _PlayerFactory.CreateMedia<IMedia>(media.Location);
+                                    VLCmedia.Parse(false);
+                                    _Zone_Player_MetaData[zone] = new VLCMetaData(VLCmedia);
+                                    _ZonePlayer[zone].Open(VLCmedia);
+                                    VLCmedia.Dispose();
+                                    _ZonePlayer[zone].Play();
+                                }
+                                catch
+                                {
+                                    return "Invalid media";
+                                }
+
 
                                 _Zone_PlaybackMode[zone] = PlaybackModes.Play;
 
@@ -1601,7 +1647,7 @@ namespace OMVLCPlayer
             {
                 //lock (_ZonePlayer)
                 {
-                    //SavePlayerStates();
+                    SavePlayerStates();
 
                     //// Save playlists
                     //foreach (var key in _Zone_Playlist.Keys)
@@ -1634,7 +1680,10 @@ namespace OMVLCPlayer
                     foreach (var key in _ZonePlayer.Keys)
                         if (_ZonePlayer != null)
                             if (_ZonePlayer.ContainsKey(key))
+                            {
+                                _ZonePlayer[key].Stop();
                                 _ZonePlayer[key].Dispose();
+                            }
                 }
 
                 foreach (var key in _Zone_DelayedCommand.Keys)
@@ -1651,7 +1700,7 @@ namespace OMVLCPlayer
         }
         ~OMVLCPlayer()
         {
-            Dispose();
+            //Dispose();
         }
 
         #endregion
