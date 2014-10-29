@@ -93,8 +93,6 @@ Namespace OMArduino
             AddHandler omArduinopanel.Entering, AddressOf panel_enter
             AddHandler omArduinopanel.Leaving, AddressOf panel_leave
 
-            ' Subscribe to the various things we wish to monitor on the panel
-
             Dim text1lbl As New OMLabel("_text1lbl", OM.Host.ClientArea(0).Left + 50, OM.Host.ClientArea(0).Top + 410, 400, 75)
             text1lbl.Text = "Arduino connected:"
             text1lbl.TextAlignment = Alignment.CenterRight
@@ -117,6 +115,41 @@ Namespace OMArduino
             omArduinopanel.addControl(text3lbl)
 
             PanelManager.loadPanel(omArduinopanel, True)
+
+            ' Build the panel for editing I/O pin object
+            Dim editPinPanel As New OMPanel("EditPin", "Edit Pin")
+            AddHandler editPinPanel.Entering, AddressOf pin_panel_enter
+            AddHandler editPinPanel.Leaving, AddressOf pin_panel_leave
+
+            Dim shpEditPin As New OMBasicShape("editFavBackground", OM.Host.ClientArea(0).Left + 150, OM.Host.ClientArea(0).Top + 100, OM.Host.ClientArea(0).Width - 300, 290, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(235, Color.Black), Color.Transparent, 0, 5))
+            editPinPanel.addControl(shpEditPin)
+
+            Dim pinNameLabel As New OMLabel("pinNameLabel", shpEditPin.Left + 15, shpEditPin.Top + 10, 150, 50)
+            pinNameLabel.Text = "Name:"
+            pinNameLabel.TextAlignment = Alignment.CenterRight
+            editPinPanel.addControl(pinNameLabel)
+
+            Dim pinNameText As New OMTextBox("pinNameText", pinNameLabel.Left + pinNameLabel.Width + 20, shpEditPin.Top + 10, 400, 50)
+            pinNameText.OSKType = 1
+            editPinPanel.addControl(pinNameText)
+
+            ' Need items to edit
+            '  pin.mode (listbox with available capabilities
+            '  pin.value ???
+            Dim pinModeList As New OMList("pinModeList", pinNameText.Left, pinNameText.Top + pinNameText.Height + 10, 200, 150)
+            editPinPanel.addControl(pinModeList)
+
+            Dim okButton As OMButton = OMButton.PreConfigLayout_CleanStyle("okButton", shpEditPin.Left + (shpEditPin.Width / 2) - 110, shpEditPin.Top + shpEditPin.Height - 50, 100, 40, OpenMobile.Graphics.GraphicCorners.All)
+            AddHandler okButton.OnClick, AddressOf okButton_OnClick
+            okButton.Text = "Ok"
+            editPinPanel.addControl(okButton)
+
+            Dim cancelButton As OMButton = OMButton.PreConfigLayout_CleanStyle("cancelButton", shpEditPin.Left + (shpEditPin.Width / 2) + 10, okButton.Top, 100, 40, OpenMobile.Graphics.GraphicCorners.All)
+            cancelButton.Text = "Cancel"
+            AddHandler cancelButton.OnClick, AddressOf cancelButton_OnClick
+            editPinPanel.addControl(cancelButton)
+
+            PanelManager.loadPanel(editPinPanel, False)
 
             System.Threading.Thread.Sleep(2000)
             If Not OM.Host.DataHandler.SubscribeToDataSource("OMDSArduino.Arduino.Connected", AddressOf Subscription_Updated) Then
@@ -342,7 +375,7 @@ Namespace OMArduino
             Select Case pin.CurrentMode
                 Case Sharpduino.Constants.PinModes.Input
                 Case Sharpduino.Constants.PinModes.Output
-                    ' Toggle the OUTPUT
+                    ' Digital OUTPUT - Toggle it
                     If pin.CurrentValue = 0 Then
                         y = 1
                     Else
@@ -366,6 +399,17 @@ Namespace OMArduino
         Private Sub Button_OnHoldClick(ByVal sender As OMControl, ByVal screen As Integer)
             ' I/O pin screen object hold-clicked
             ' Manage user specified settings here
+
+            Dim x = Val(sender.Tag)
+            pin = mypins(x)
+
+            ShowPanel(screen, "EditPin")
+
+            Exit Sub
+
+        End Sub
+
+        Public Sub change_pin_mode(ByVal sender As OMControl, ByVal screen As Integer)
 
             Dim x As Integer
 
@@ -447,6 +491,44 @@ Namespace OMArduino
 
             'om.host.UIHandler.PopUpMenu.SetButtonStrip(PopUpMenuStrip)
             sender.PopUpMenu = PopUpMenuStrip
+
+        End Sub
+
+        Public Sub pin_panel_enter(ByVal sender As OMPanel, ByVal screen As Integer)
+
+            Dim pPanel As OMPanel = PanelManager(screen, "EditPin")
+            Dim pList As OMList = pPanel("pinModeList")
+            Dim pinModeListItem As New OMListItem("Test List Item")
+
+            ' Populate listbox with available capabilities for user select
+
+            pList.Clear()
+            'For Each mode As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In pin.Capabilities
+            For Each capability As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In pin.Capabilities
+                pinModeListItem = New OMListItem(capability.Key.ToString)
+                pList.Add(pinModeListItem)
+            Next
+            pList.Refresh()
+
+            'editPinPanel.addControl(pinModeList)
+
+        End Sub
+
+        Public Sub pin_panel_leave(ByVal sender As OMPanel, ByVal screen As Integer)
+
+        End Sub
+
+        Public Sub okButton_OnClick(ByVal sender As OMButton, ByVal screen As Integer)
+
+            Dim fPanel As OMPanel = PanelManager(screen, "EditPin")
+            OM.Host.execute(eFunction.HidePanel, screen, Me.pluginName & ";EditPin")
+
+        End Sub
+
+        Public Sub cancelButton_OnClick(ByVal sender As OMButton, ByVal screen As Integer)
+
+            Dim fPanel As OMPanel = PanelManager(screen, "EditPin")
+            OM.Host.execute(eFunction.HidePanel, screen, Me.pluginName & ";EditPin")
 
         End Sub
 
