@@ -118,24 +118,48 @@ Namespace OMArduino
 
             ' Build the panel for editing I/O pin object
             Dim editPinPanel As New OMPanel("EditPin", "Edit Pin")
+            editPinPanel.Tag = -1
             AddHandler editPinPanel.Entering, AddressOf pin_panel_enter
             AddHandler editPinPanel.Leaving, AddressOf pin_panel_leave
 
-            Dim shpEditPin As New OMBasicShape("editFavBackground", OM.Host.ClientArea(0).Left + 150, OM.Host.ClientArea(0).Top + 100, OM.Host.ClientArea(0).Width - 300, 290, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(235, Color.Black), Color.Transparent, 0, 5))
+            Dim shpEditPin As New OMBasicShape("shpEditPin", OM.Host.ClientArea(0).Left + 150, OM.Host.ClientArea(0).Top + 50, OM.Host.ClientArea(0).Width - 300, 400, New ShapeData(shapes.RoundedRectangle, Color.FromArgb(235, Color.Black), Color.Transparent, 0, 5))
             editPinPanel.addControl(shpEditPin)
 
-            Dim pinNameLabel As New OMLabel("pinNameLabel", shpEditPin.Left + 15, shpEditPin.Top + 10, 150, 50)
+            Dim pinLabel As New OMLabel("pinLabel", shpEditPin.Left + 15, shpEditPin.Top + 10, 150, 50)
+            pinLabel.Text = "PIN:"
+            pinLabel.TextAlignment = Alignment.CenterRight
+            editPinPanel.addControl(pinLabel)
+
+            Dim pinText As New OMTextBox("pinText", pinLabel.Left + pinLabel.Width + 20, pinLabel.Top, 150, 50)
+            pinText.TextAlignment = Alignment.CenterCenter
+            editPinPanel.addControl(pinText)
+
+            Dim pinEnableLabel As New OMLabel("pinEnableLabel", pinText.Left + pinText.Width + 30, pinText.Top, 150, 50)
+            pinEnableLabel.Text = "Enabled:"
+            pinEnableLabel.TextAlignment = Alignment.CenterRight
+            editPinPanel.addControl(pinEnableLabel)
+
+            Dim pinEnableCheck As New OMCheckbox("pinEnableCheck", pinEnableLabel.Left + pinEnableLabel.Width + 20, pinEnableLabel.Top, 50, 50)
+            editPinPanel.addControl(pinEnableCheck)
+
+            Dim pinNameLabel As New OMLabel("pinNameLabel", pinLabel.Left, pinLabel.Top + 50 + 10, 150, 50)
             pinNameLabel.Text = "Name:"
             pinNameLabel.TextAlignment = Alignment.CenterRight
             editPinPanel.addControl(pinNameLabel)
 
-            Dim pinNameText As New OMTextBox("pinNameText", pinNameLabel.Left + pinNameLabel.Width + 20, shpEditPin.Top + 10, 400, 50)
+            Dim pinNameText As New OMTextBox("pinNameText", pinNameLabel.Left + pinNameLabel.Width + 20, pinNameLabel.Top, 400, 50)
             pinNameText.OSKType = 1
+            pinNameText.TextAlignment = Alignment.CenterCenter
             editPinPanel.addControl(pinNameText)
 
             ' Need items to edit
             '  pin.mode (listbox with available capabilities
             '  pin.value ???
+            Dim pinModeLabel As New OMLabel("pinModeLabel", pinNameLabel.Left, pinNameLabel.Top + 50 + 10, 150, 50)
+            pinModeLabel.Text = "Pin Mode:"
+            pinModeLabel.TextAlignment = Alignment.CenterRight
+            editPinPanel.addControl(pinModeLabel)
+
             Dim pinModeList As New OMList("pinModeList", pinNameText.Left, pinNameText.Top + pinNameText.Height + 10, 200, 150)
             editPinPanel.addControl(pinModeList)
 
@@ -167,6 +191,9 @@ Namespace OMArduino
 
         End Sub
 
+        '''<summary>
+        '''Datasource subscription update handler
+        '''</summary>
         Private Sub Subscription_Updated(ByVal sensor As OpenMobile.Data.DataSource)
 
             'om.host.DebugMsg("OMArduino - Subscription_Updated()", sensor.FullName)
@@ -201,9 +228,9 @@ Namespace OMArduino
             Dim status As OMLabel
             Dim thepins As OMLabel
 
-            ' Data must have been updated if subscription was updated.
+            ' This is the first subscription update, set up the screen objects.
             If m_Verbose Then
-                'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Pin subscription received."))
+                'OM.Host.DebugMsg(DebugMessageType.Info, "OMArduino - Subscription_Updated()", String.Format("Pin subscription first run."))
             End If
 
             mypins = sensor.Value
@@ -229,6 +256,12 @@ Namespace OMArduino
                     For x = 0 To OM.Host.ScreenCount - 1
 
                         mPanel = PanelManager(x, "OMArduino")
+
+                        ' Since this is first run, add-in applicable user stuff
+                        ' .Title
+                        ' .CurrentMode (load AND set mode)
+                        ' .Script
+                        ' .Descr
 
                         If PanelManager.IsPanelLoaded(x, "OMArduino") Then
 
@@ -282,12 +315,16 @@ Namespace OMArduino
 
         End Sub
 
+        '''<summary>
+        '''Refreshes main panel objects
+        '''</summary>
         Private Sub Update_Screen_Objects(ByVal sensor As OpenMobile.Data.DataSource)
+
+            Dim DigitalOnly As Boolean = True   ' Eliminates spurious Analog values while we test code
 
             Dim mPanel As OMPanel
             Dim pincount As Integer = 0         ' Number of pins available
             Dim z As Integer = 0                ' Loop counter
-            Dim DigitalOnly As Boolean = True   ' Eliminates spurious Analog values while we test code
 
             ' Data must have been updated if subscription was updated.
 
@@ -372,6 +409,10 @@ Namespace OMArduino
             x = Val(sender.Tag)
             pin = mypins(x)
 
+            If Not pin.Enabled Then
+                Exit Sub
+            End If
+
             Select Case pin.CurrentMode
                 Case Sharpduino.Constants.PinModes.Input
                 Case Sharpduino.Constants.PinModes.Output
@@ -399,40 +440,16 @@ Namespace OMArduino
         Private Sub Button_OnHoldClick(ByVal sender As OMControl, ByVal screen As Integer)
             ' I/O pin screen object hold-clicked
             ' Manage user specified settings here
-
+            Dim pPanel As OMPanel = PanelManager(screen, "EditPin")
             Dim x = Val(sender.Tag)
             pin = mypins(x)
+
+            ' Set panel tag to pin index number for retrieval later
+            pPanel.Tag = x
 
             ShowPanel(screen, "EditPin")
 
             Exit Sub
-
-        End Sub
-
-        Public Sub change_pin_mode(ByVal sender As OMControl, ByVal screen As Integer)
-
-            Dim x As Integer
-
-            my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) long clicked.", sender.Name, sender.Tag))
-
-            ' grab the required pin
-            x = Val(sender.Tag)
-            pin = mypins(x)
-
-            Select Case pin.CurrentMode
-                Case Sharpduino.Constants.PinModes.Input
-                    ' Set digital input to digital output
-                    If m_Verbose Then
-                        OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to OUTPUT"))
-                    End If
-                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETMODE", Sharpduino.Constants.PinModes.Output})
-                Case Sharpduino.Constants.PinModes.Output
-                    ' Set digital output to digital input
-                    If m_Verbose Then
-                        OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to INPUT"))
-                    End If
-                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETMODE", Sharpduino.Constants.PinModes.Input})
-            End Select
 
         End Sub
 
@@ -497,17 +514,39 @@ Namespace OMArduino
         Public Sub pin_panel_enter(ByVal sender As OMPanel, ByVal screen As Integer)
 
             Dim pPanel As OMPanel = PanelManager(screen, "EditPin")
+            Dim pEnable As OMCheckbox = pPanel("pinEnableCheck")
+            Dim pTitle As OMTextBox = pPanel("pinNameText")
+            Dim pName As OMTextBox = pPanel("pinText")
             Dim pList As OMList = pPanel("pinModeList")
+            Dim pCheck As OMCheckbox = pPanel("pinEnableCheck")
             Dim pinModeListItem As New OMListItem("Test List Item")
 
-            ' Populate listbox with available capabilities for user select
+            ' The following are user editable attributes/properties for pins
+            '   .CurrentMode (load AND set mode)
+            '   .Title
+            '   .Script
+            '   .Descr
+            '   .Enabled
 
+            ' Set the checkbox to current value
+
+            pcheck.Checked = pin.Enabled
+            pTitle.Text = pin.Title
+            pName.Text = pin.Name
+
+
+            ' Populate listbox with available capabilities for user select
             pList.Clear()
             'For Each mode As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In pin.Capabilities
             For Each capability As KeyValuePair(Of Sharpduino.Constants.PinModes, Integer) In pin.Capabilities
                 pinModeListItem = New OMListItem(capability.Key.ToString)
                 pList.Add(pinModeListItem)
+                If capability.Key = pin.CurrentMode Then
+                    ' Set item to be the selected item
+                    pList.Select(pList.Count - 1)
+                End If
             Next
+
             pList.Refresh()
 
             'editPinPanel.addControl(pinModeList)
@@ -521,6 +560,22 @@ Namespace OMArduino
         Public Sub okButton_OnClick(ByVal sender As OMButton, ByVal screen As Integer)
 
             Dim fPanel As OMPanel = PanelManager(screen, "EditPin")
+            Dim fpin As String = pin.Name
+            Dim pinIndex As Integer = fPanel.Tag  ' Tag was set when panel was entered
+
+            ' Take any changes and apply them to the pin properties
+            '  Save user items to database
+            '   .Title (save)
+            '   .CurrentMode (save AND set mode)
+            '      call change_pin_mode
+            '   .Script (save and run script)
+            '      call run_script
+            '   .Descr (save)
+            '   .Enabled (save)
+
+            ' We could call for pin update here to update main panel
+
+
             OM.Host.execute(eFunction.HidePanel, screen, Me.pluginName & ";EditPin")
 
         End Sub
@@ -529,6 +584,33 @@ Namespace OMArduino
 
             Dim fPanel As OMPanel = PanelManager(screen, "EditPin")
             OM.Host.execute(eFunction.HidePanel, screen, Me.pluginName & ";EditPin")
+
+        End Sub
+
+        Public Sub change_pin_mode(ByVal sender As OMControl, ByVal screen As Integer)
+
+            Dim x As Integer
+
+            my_dialog(sender, screen, "OMArduino message", String.Format("{0} ({1}) long clicked.", sender.Name, sender.Tag))
+
+            ' grab the required pin
+            x = Val(sender.Tag)
+            pin = mypins(x)
+
+            Select Case pin.CurrentMode
+                Case Sharpduino.Constants.PinModes.Input
+                    ' Set digital input to digital output
+                    If m_Verbose Then
+                        OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to OUTPUT"))
+                    End If
+                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETMODE", Sharpduino.Constants.PinModes.Output})
+                Case Sharpduino.Constants.PinModes.Output
+                    ' Set digital output to digital input
+                    If m_Verbose Then
+                        OM.Host.DebugMsg("OMArduino - CommandExecutor()", String.Format("Requesting SETMODE to INPUT"))
+                    End If
+                    OM.Host.CommandHandler.ExecuteCommand("OMDSArduino.Pins.Execute", {x, "SETMODE", Sharpduino.Constants.PinModes.Input})
+            End Select
 
         End Sub
 
