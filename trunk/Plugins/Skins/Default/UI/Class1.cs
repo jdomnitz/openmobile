@@ -2395,7 +2395,7 @@ namespace OpenMobile
         }
         void PowerOptionsStrip_Quit_OnHoldClick(OMControl sender, int screen)
         {
-            theHost.execute(eFunction.closeProgram);
+            OM.Host.execute(eFunction.closeProgram);
         }
         void PowerOptionsStrip_Quit_OnLongClick(OMControl sender, int screen)
         {
@@ -3758,11 +3758,14 @@ namespace OpenMobile
 
             #endregion
 
-            //// Shutdown program
-            //if (function == eFunction.CloseProgramPreview)
-            //{
-            //    OM.Host.UIHandler.InfoBanner_Show(0, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Closing program, please wait...", 0));
-            //}
+            // Shutdown program
+            if (function == eFunction.CloseProgramPreview)
+            {
+                OM.Host.ForEachScreen((screen) =>
+                    {
+                        OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Closing program, please wait...", 0));
+                    });
+            }
 
             // Toggle day/night
             if (function == eFunction.CurrentLocationDay)

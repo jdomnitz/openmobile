@@ -148,30 +148,45 @@ namespace OMGPS3_DotSpatial
             else
                 OM.Host.DebugMsg(DebugMessageType.Error, "Serial port access timed out!");
 
-            try
-            {
-                Devices.Undetect();
-            }
-            catch
-            {
-            }
+            //try
+            //{
+            //    Devices.Undetect();
+            //    OM.Host.DebugMsg(DebugMessageType.Info, "Undetected known devices, to be ready for discovery of devices");
+            //}
+            //catch (Exception ex)
+            //{
+            //    //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Failed to undetect GPS devices (Exception: {0})", ex.Message));
+            //    OM.Host.DebugMsg("Failed to undetect GPS devices", ex);
+            //}
 
             // Connect to GPS
             if (_GPS_Connectmode == GPSConnectMode.Auto)
+            {
+                OM.Host.DebugMsg(DebugMessageType.Info, "GPS Detection set to automatic, starting detection.");
                 Devices.BeginDetection();
+            }
             else
             {
+                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("GPS Detection set to manual. Configured port: {0}", _GPS_PortName));
                 Notifications_InitAndShow();
 
                 // Ensure this is a valid selection
                 if (IsPortValid(_GPS_PortName))
                 {   // Valid port
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Trying to manually connect to {0}", _GPS_PortName));
                     SerialDevice manualDevice = new SerialDevice(_GPS_PortName, _GPS_BaudRate);
                     manualDevice.BeginDetection();
                     manualDevice.WaitForDetection(new TimeSpan(0, 0, 5));
                     manualDevice.CancelDetection();
                     if (manualDevice.IsGpsDevice)
+                    {
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Device at port {0} recognized as GPS device", _GPS_PortName));
                         Devices.Add(manualDevice);
+                    }
+                    else
+                    {
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("No device or device at port {0} NOT recognized as GPS device", _GPS_PortName));
+                    }
                 }
                 Devices_Connect();
             }
@@ -216,13 +231,13 @@ namespace OMGPS3_DotSpatial
 
         private void Devices_DeviceDetectionAttemptFailed(object sender, DeviceDetectionExceptionEventArgs e)
         {
-            //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("No device detected at {0}. Message: ", e.Device, e.Exception.Message));
+            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("No device detected at {0}. Message: ", e.Device, e.Exception.Message));
             //_GPSStatusNotification_SetData(text: String.Format("GPS detection failed :{0} ({1})", e.Device, e.Exception.Message));
         }
 
         private void Devices_DeviceDetectionAttempted(object sender, DeviceEventArgs e)
         {
-            //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Trying to detect device at {0}",e.Device));
+            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Trying to detect device at {0}",e.Device));
             //_GPSStatusNotification_SetData(text: String.Format("GPS detecting :{0}", e.Device));
         }
 
@@ -254,6 +269,7 @@ namespace OMGPS3_DotSpatial
                 OM.Host.DebugMsg(DebugMessageType.Warning, "No GPS detected!");
                 OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
                 OM.Host.DebugMsg(DebugMessageType.Info, "Serial port access released");
+                Devices.Undetect();
             }
         }
 

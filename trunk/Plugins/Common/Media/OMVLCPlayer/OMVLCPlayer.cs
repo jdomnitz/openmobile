@@ -191,7 +191,9 @@ namespace OMVLCPlayer
                         string playlistName = String.Format("{0}.Zone{1}.PlayList_Current", this.pluginName, zone.Index);
                         Playlist.SetDisplayName(ref playlistName, String.Format("[{0}] Current playlist ({1})", zone.Name, this.pluginName));
                         Playlist playlist = new Playlist(playlistName);
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Starting to loading items for playlist {0} from DB", playlistName));
                         playlist.Load();
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Loaded {1} items for playlist {0} from DB", playlistName, playlist.Count));
                         _Zone_Playlist.Add(zone, playlist);
 
                         // Preload one player per zone
@@ -259,12 +261,12 @@ namespace OMVLCPlayer
             // Do we have to reinstall or install the vlc core?
             //if (!vlcCore_Installed)
             {
-                if (!vlcCore_x64Installed & OpenMobile.Framework.OSSpecific.Is64BitRequired)
+                if (!vlcCore_x64Installed & OpenMobile.Framework.OSSpecific.Is64BitProcess)
                 {
                     vlcCore_x64InstallRequired = true;
                     OM.Host.DebugMsg(DebugMessageType.Info, "VLC Core not installed, 64bit installation required");
                 }
-                else if (!vlcCore_x32Installed & !OpenMobile.Framework.OSSpecific.Is64BitRequired)
+                else if (!vlcCore_x32Installed & !OpenMobile.Framework.OSSpecific.Is64BitProcess)
                 {
                     vlcCore_x32InstallRequired = true;
                     OM.Host.DebugMsg(DebugMessageType.Info, "VLC Core not installed, 32bit installation required");

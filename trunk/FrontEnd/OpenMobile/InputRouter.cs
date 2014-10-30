@@ -181,11 +181,11 @@ namespace OpenMobile
                         {
                             if (Core.RenderingWindows[i] != null && !Core.RenderingWindows[i].IsDisposed)
                             {
+                                IdleDetection_Start(i);
+
                                 // Check if system mouse is within bounds of application window
                                 if (Core.RenderingWindows[i].Focused && Core.RenderingWindows[i].Bounds.Contains(new System.Drawing.Point(mouseCursorState.X, mouseCursorState.Y)))
                                 {   // Yes mouse is within bounds, generate events to this window
-                                    IdleDetection_Restart(i);
-
                                     var clientPoint = Core.RenderingWindows[i].PointToClient(new System.Drawing.Point(mouseCursorState.X, mouseCursorState.Y));
 
                                     var mouseButton = OpenMobile.Input.Mouse.GetMouseButtons(mouseCursorState);
@@ -193,6 +193,8 @@ namespace OpenMobile
                                     // Mouse move event
                                     if (clientPoint != lastMousePoint[i])
                                     {
+                                        IdleDetection_Restart(i);
+
                                         //if (_LastReport != 0)
                                         //    System.Diagnostics.Debug.WriteLine("Raised InputRouter.MouseMove");
                                         _LastReport = 0;
@@ -289,43 +291,6 @@ namespace OpenMobile
 
         }
 
-        #region Mouse Device Events
-
-        static internal void dev_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
-        {
-            // Pass event along
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
-            {
-                IdleDetection_Restart(i);
-                MouseMoveEventArgs eOM = new MouseMoveEventArgs(e.X, e.Y, e.XDelta, e.YDelta, OpenMobile.Input.Mouse.GetMouseButtons(Core.RenderingWindows[i].Mouse));
-                Core.RenderingWindows[i].RenderingWindow_MouseMove(i, eOM);
-            } 
-        }
-
-        static internal void dev_ButtonUp(object sender, OpenTK.Input.MouseButtonEventArgs e)
-        {
-            // Pass event along
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
-            {
-                IdleDetection_Restart(i);
-                MouseButtonEventArgs eOM = new MouseButtonEventArgs(e.X, e.Y, OpenMobile.Input.Mouse.GetMouseButtons(Core.RenderingWindows[i].Mouse), false);
-                Core.RenderingWindows[i].RenderingWindow_MouseUp(i, eOM);
-            } 
-        }
-
-        static internal void dev_ButtonDown(object sender, OpenTK.Input.MouseButtonEventArgs e)
-        {
-            // Pass event along
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
-            {
-                IdleDetection_Restart(i);
-                MouseButtonEventArgs eOM = new MouseButtonEventArgs(e.X, e.Y, OpenMobile.Input.Mouse.GetMouseButtons(Core.RenderingWindows[i].Mouse), true);
-                Core.RenderingWindows[i].RenderingWindow_MouseDown(i, eOM);
-            } 
-        }
-
-        #endregion
-
         #region Keyboard Device Events
 
         static void SourcKeyPress(object sender, OpenTK.KeyPressEventArgs e)
@@ -335,7 +300,6 @@ namespace OpenMobile
             {
                 if (Core.RenderingWindows[i].Focused)
                 {
-                    IdleDetection_Restart(i);
                     KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs();
                     eOM.Character = e.KeyChar.ToString();
                     eOM.Screen = i;
@@ -351,7 +315,6 @@ namespace OpenMobile
             {
                 if (Core.RenderingWindows[i].Focused)
                 {
-                    IdleDetection_Restart(i);
                     KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs((OpenMobile.Input.Key)(int)e.Key);
                     eOM.Shift = e.Shift;
                     eOM.Control = e.Control;
@@ -390,7 +353,6 @@ namespace OpenMobile
             {
                 if (Core.RenderingWindows[i].Focused)
                 {
-                    IdleDetection_Restart(i);
                     KeyboardKeyEventArgs eOM = new KeyboardKeyEventArgs((OpenMobile.Input.Key)(int)e.Key);
                     eOM.Shift = e.Shift;
                     eOM.Control = e.Control;
@@ -532,6 +494,7 @@ namespace OpenMobile
         {
             int screen = ((Timer)sender).Screen;
             tmrIdleDetection[screen].Stop();
+            //OM.Host.DebugMsg(DebugMessageType.Info, "Idledetection entering idle state");
             tmrIdleDetection[screen].Tag = IdleDetectionState.IdleEntering;
             raiseIdleEvent(screen, false);
             tmrIdleDetection[screen].Tag = IdleDetectionState.Idle;
@@ -553,11 +516,13 @@ namespace OpenMobile
                         {
                             if ((IdleDetectionState)tmrIdleDetection[screen].Tag == IdleDetectionState.Idle)
                             {   // Timer was active, send leaving idle mode event
+                                //OM.Host.DebugMsg(DebugMessageType.Info, "Idledetection leaving idle state");
                                 tmrIdleDetection[screen].Tag = IdleDetectionState.IdleLeaving;
                                 raiseIdleEvent(screen, true);
                                 tmrIdleDetection[screen].Tag = IdleDetectionState.Normal;
                             }
 
+                            //OM.Host.DebugMsg(DebugMessageType.Info, "Idledetection timer restarted");
                             tmrIdleDetection[screen].Stop();
                             tmrIdleDetection[screen].Start();
                         }
@@ -568,6 +533,45 @@ namespace OpenMobile
             {
             }
         }
+
+        /// <summary>
+        /// Starts the idledetection timer
+        /// </summary>
+        /// <param name="screen"></param>
+        private static void IdleDetection_Start(int screen)
+        {
+            try
+            {
+                if (tmrIdleDetection != null)
+                {
+                    if (tmrIdleDetection.Length > screen)
+                    {
+                        if (tmrIdleDetection[screen] != null)
+                        {
+                            //if ((IdleDetectionState)tmrIdleDetection[screen].Tag == IdleDetectionState.Idle)
+                            //{   // Timer was active, send leaving idle mode event
+                            //    OM.Host.DebugMsg(DebugMessageType.Info, "Idledetection leaving idle state");
+                            //    tmrIdleDetection[screen].Tag = IdleDetectionState.IdleLeaving;
+                            //    raiseIdleEvent(screen, true);
+                            //    tmrIdleDetection[screen].Tag = IdleDetectionState.Normal;
+                            //}
+                            if ((IdleDetectionState)tmrIdleDetection[screen].Tag == IdleDetectionState.Normal)
+                            {
+                                if (!tmrIdleDetection[screen].Enabled)
+                                {
+                                    //OM.Host.DebugMsg(DebugMessageType.Info, "Idledetection timer started");
+                                    tmrIdleDetection[screen].Start();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+
 
         #endregion
     }

@@ -215,7 +215,7 @@ namespace OpenMobile.Media
         {
             get
             {
-                if (_Items.Count == 0)
+                if (_Items.Count == 0 || BufferItems_CurrentItemIndex < 0)
                     return new mediaInfo();
 
                 return _BufferItems[BufferItems_CurrentItemIndex];

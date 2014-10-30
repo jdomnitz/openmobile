@@ -1,4 +1,9 @@
-﻿20140924
+﻿
+
+	~ : OMVLCPlayer : Changed OMVLCPlayer to set the player core based on OM process state (32 or 64bit) rather than using the OS level state.
+	~ : DotSpatial.Positioning : Corrected a bug that prevented failed GPS devices to be undetected
+
+20140924
 	+ : Added startup argument to control which graphical engine OM uses. Usage: 
 		for V1 graphics: -Graphics=V1 
 		for V2 graphics: -Graphics=V2

@@ -26,7 +26,7 @@ using OpenMobile;
 using OpenMobile.Threading;
 using System.Windows.Forms;
 
-namespace OpenMobile.Threading
+namespace OpenMobile.OSSpecific.Windows.Threading
 {
     public static class MessagePump
     {

@@ -37,8 +37,8 @@ namespace OpenMobile
         {
             foreach (string arg in args)
             {
-                // Specific startup screen is given
-                if (arg.ToLower().StartsWith("-graphics=") == true)
+                // Specific graphics engine
+                if (arg.ToLower().StartsWith("-graphics="))
                 {
                     // Remove the identifier to get the actual data
                     var data = arg.Replace("-graphics=", "");

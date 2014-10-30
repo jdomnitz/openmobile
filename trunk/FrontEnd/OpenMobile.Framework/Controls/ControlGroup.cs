@@ -77,7 +77,7 @@ namespace OpenMobile.Controls
     }
 
     /// <summary>
-    /// A collection of controls for usage in the OMContainer control
+    /// A collection of controls which can be used during initialization (NB! This list may not be valid during runtime)
     /// </summary>
     public class ControlGroup : List<OMControl>
     {
@@ -234,6 +234,5 @@ namespace OpenMobile.Controls
             foreach (var control in this)
                 panel[screen, control.Name].Visible = visible;
         }
-
     }
 }

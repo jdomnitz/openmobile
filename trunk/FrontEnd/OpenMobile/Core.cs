@@ -35,6 +35,43 @@ using System.Linq;
 
 namespace OpenMobile
 {
+    /// <summary>
+    /// Modes for shutdown
+    /// </summary>
+    public enum ShutdownModes
+    {
+        /// <summary>
+        /// Exits program only
+        /// </summary>
+        Normal,
+
+        /// <summary>
+        /// Restart the computer
+        /// </summary>
+        Restart,
+
+        /// <summary>
+        /// Shutdown the computer
+        /// </summary>
+        Shutdown,
+
+        /// <summary>
+        /// Suspend the computer
+        /// </summary>
+        Suspend,
+
+        /// <summary>
+        /// Hibernate the computer
+        /// </summary>
+        Hibernate,
+
+        /// <summary>
+        /// Restart OpenMobile
+        /// </summary>
+        RestartOM
+
+    }
+
     public static class Core
     {
         public static PluginHost theHost = new PluginHost();
@@ -44,6 +81,8 @@ namespace OpenMobile
         public static bool exitTransition = true;
         public static OpenTK.GameWindowFlags Fullscreen;
         public static StartupArguments StartupArgs;
+
+        private static ShutdownModes _ShutdownMode = ShutdownModes.Normal;
 
         /// <summary>
         /// The maximum allowed time for a plugin to use for initialization
@@ -565,7 +604,6 @@ namespace OpenMobile
                 return;
             ErroredOut = true;
             Exception ex = (Exception)e.ExceptionObject;
-            theHost.Stop();
             string strEx = spewException(ex);
             FileStream fs = File.OpenWrite(Path.Combine(theHost.DataPath, "AppCrash-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Second.ToString() + ".log"));
             fs.Write(System.Text.ASCIIEncoding.ASCII.GetBytes(strEx), 0, strEx.Length);
@@ -613,7 +651,7 @@ namespace OpenMobile
                 RenderingWindows[i].StartupInfoText = text;
         }
 
-        [MTAThread]
+        [STAThread]
         private static void Main()
         {
             // Only handle system wide crashes if not in IDE
@@ -682,6 +720,9 @@ namespace OpenMobile
 
             #endregion
 
+            // Init os functions
+            OSFunctions.Init();
+
             // Initialize screens
             RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
             for (int i = 0; i < RenderingWindows.Capacity; i++)
@@ -731,43 +772,109 @@ namespace OpenMobile
                 RenderingWindows[i].RunAsync();
             RenderingWindows[0].Run();
 
+            // Terminate all windows
+            CloseProgram(ShutdownModes.Normal);
+
+            // Cleanup and terminate program
+            DisposeAndShutdown();
+
+            Environment.Exit(0); //Force
+        }
+
+        private static bool _Closing = false;
+        internal static void CloseProgram(ShutdownModes shutdownMode)
+        {
+            // Ensure we only run this once
+            if (_Closing)
+                return;
+
+            _Closing = true;
+
+            _ShutdownMode = shutdownMode;
+
             try
             {
-                for (int i = 0; i < pluginCollection.Count; i++)
-                {
-                    if (pluginCollection[i] != null)
-                    {
-                        try
-                        {
-                            pluginCollection[i].Dispose();
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
+                theHost.RaiseCloseProgramEvents();
+            }
+            catch (Exception ex)
+            {
+                OM.Host.DebugMsg("OpenMobile.Core Exception in RaiseCloseProgramEvents", ex);
+            }
 
-                for (int i = 0; i < RenderingWindows.Count; i++)
+            for (int i = 0; i < pluginCollection.Count; i++)
+            {
+                if (pluginCollection[i].pluginName == "OMDebug")
+                    continue;
+
+                if (pluginCollection[i] != null)
                 {
                     try
                     {
-                        RenderingWindows[i].Dispose();
+                        OM.Host.DebugMsg(DebugMessageType.Info, "OpenMobile.Core", String.Format("Disposing plugin {0}.", pluginCollection[i].pluginName));
+                        pluginCollection[i].Dispose();
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        OM.Host.DebugMsg(String.Format("OpenMobile.Core Exception while disposing plugin {0}", pluginCollection[i].pluginName), ex);
                     }
                 }
+            }
+
+            try
+            {
+                OM.Host.DebugMsg(DebugMessageType.Info, "OpenMobile.Core", "All plugins disposed.");
                 InputRouter.Dispose();
-                theHost.Dispose();
                 OpenMobile.Threading.SafeThread.Dispose();
                 BuiltInComponents.Dispose();
                 Application.Dispose();
+                OM.Host.DebugMsg(DebugMessageType.Info, "OpenMobile.Core", "PluginHost disposing... (Final message from this session)");
+                theHost.Dispose();
             }
-            catch
+            catch (Exception ex)
             {   // No use of logging messages as we've already disposed the debug plugin...
+                OM.Host.DebugMsg("OpenMobile.Core Exception while disposing", ex);
             }
+
+            for (int i = RenderingWindows.Count - 1; i >= 0; i--)
+            {
+                try
+                {
+                    RenderingWindows[i].Dispose();
+                }
+                catch (Exception ex)
+                {
+                    OM.Host.DebugMsg(String.Format("OpenMobile.Core Exception while disposing renderingwindow for screen {0}", RenderingWindows[i].Screen), ex);
+                }
+            }
+        }
+
+        internal static void DisposeAndShutdown()
+        {
+
             //Thread.Sleep(500);
-            //Environment.Exit(0); //Force
+
+            OM.Host.DebugMsg(DebugMessageType.Info, "OpenMobile.Core", String.Format("Shutdown mode: {0}", _ShutdownMode));
+            switch (_ShutdownMode)
+            {
+                case ShutdownModes.Normal:
+                    break;
+                case ShutdownModes.Restart:
+                    OSFunctions.OS.Restart();
+                    break;
+                case ShutdownModes.Shutdown:
+                    OSFunctions.OS.Shutdown();
+                    break;
+                case ShutdownModes.Suspend:
+                    OSFunctions.OS.Suspend();
+                    break;
+                case ShutdownModes.Hibernate:
+                    OSFunctions.OS.Hibernate();
+                    break;
+                case ShutdownModes.RestartOM:
+                    break;
+                default:
+                    break;
+            }
         }
 
         internal static bool loadPlugin(string arg)

@@ -903,8 +903,8 @@ namespace DotSpatial.Positioning
         public static void Undetect()
         {
             // Undetect all devices (even non-GPS devices) and clear their cache
-            foreach (BluetoothDevice device in _bluetoothDevices)
-                device.Undetect();
+                foreach (BluetoothDevice device in _bluetoothDevices)
+                    device.Undetect();
             foreach (SerialDevice device in _serialDevices)
                 device.Undetect();
 
@@ -919,6 +919,8 @@ namespace DotSpatial.Positioning
                 Registry.LocalMachine.DeleteSubKeyTree(ROOT_KEY_NAME);
             }
             catch (UnauthorizedAccessException)
+            { }
+            catch (ArgumentException)
             { }
 
             ClearDeviceCache();
@@ -1179,12 +1181,18 @@ namespace DotSpatial.Positioning
 #endif
 
                 // Stop detection for each Bluetooth device
-                foreach (BluetoothDevice t in _bluetoothDevices)
-                    t.CancelDetection();
+                if (_bluetoothDevices != null)
+                {
+                    foreach (BluetoothDevice t in _bluetoothDevices)
+                        t.CancelDetection();
+                }
 
                 // Stop detection for each serial device
-                foreach (SerialDevice t in _serialDevices)
-                    t.CancelDetection();
+                if (_serialDevices != null)
+                {
+                    foreach (SerialDevice t in _serialDevices)
+                        t.CancelDetection();
+                }
 
                 #endregion Abort detection for all devices
 

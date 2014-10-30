@@ -1018,67 +1018,64 @@ namespace OpenMobile.Controls
         private int _SelectedIndexStored = -1;
         private void Update()
         {
-            lock (ListSource)
+            lock (_Images)
             {
-                lock (_Images)
+                bool animationActive = false;
+
+                for (int i = _Images.Count - 1; i >= 0; i--)
                 {
-                    bool animationActive = false;
-
-                    for (int i = _Images.Count - 1; i >= 0; i--)
-                    {
-                        CalcRV(ref _Images[i].AnimEnd, i - _SelectedIndex);
-                        if (Animate(ref _Images[i].Current, _Images[i].AnimEnd))
-                            animationActive = true;
-                    }
-
-                    if (!animationActive && _View_rotate_active)
-                        cleanUpDelay++;
-                    else
-                        cleanUpDelay = 0;
-
-                    if (cleanUpDelay > 1)
-                        CleanupAnimation();
-
-                    //slowly reset view angle
-                    if (!_View_rotate_active)
-                    {
-                        _View_rotate += (0 - _View_rotate) * _ViewRotate_ReverseSpeed;
-                        if (System.Math.Abs(_View_rotate) < 0.0001)
-                            _View_rotate = 0;
-
-                        if (_View_rotate != 0)
-                            animationActive = true;
-                    }
-
-                    if (animationActive)
-                        _updateCountIdle = 0;
-
-                    if (!animationActive && _updateCountIdle < 10)
-                    {
-                        _updateCountIdle++;
+                    CalcRV(ref _Images[i].AnimEnd, i - _SelectedIndex);
+                    if (Animate(ref _Images[i].Current, _Images[i].AnimEnd))
                         animationActive = true;
-                    }
+                }
 
-                    // Selected index changed?
-                    if (_SelectedIndexStored != _SelectedIndex)
-                    {
-                        // Override to update text field
-                        this.Text = ExtractLabelText();
+                if (!animationActive && _View_rotate_active)
+                    cleanUpDelay++;
+                else
+                    cleanUpDelay = 0;
 
-                        _SelectedIndexStored = _SelectedIndex;
-                    }
+                if (cleanUpDelay > 1)
+                    CleanupAnimation();
 
-                    if (animationActive | _View_rotate_active)
-                    {
-                        Refresh();
-                        if (tmrUpdate != null)
-                            tmrUpdate.Enabled = true;
-                    }
-                    else
-                    {   // Stop update timer
-                        if (tmrUpdate != null)
-                            tmrUpdate.Enabled = false;
-                    }
+                //slowly reset view angle
+                if (!_View_rotate_active)
+                {
+                    _View_rotate += (0 - _View_rotate) * _ViewRotate_ReverseSpeed;
+                    if (System.Math.Abs(_View_rotate) < 0.0001)
+                        _View_rotate = 0;
+
+                    if (_View_rotate != 0)
+                        animationActive = true;
+                }
+
+                if (animationActive)
+                    _updateCountIdle = 0;
+
+                if (!animationActive && _updateCountIdle < 10)
+                {
+                    _updateCountIdle++;
+                    animationActive = true;
+                }
+
+                // Selected index changed?
+                if (_SelectedIndexStored != _SelectedIndex)
+                {
+                    // Override to update text field
+                    this.Text = ExtractLabelText();
+
+                    _SelectedIndexStored = _SelectedIndex;
+                }
+
+                if (animationActive | _View_rotate_active)
+                {
+                    Refresh();
+                    if (tmrUpdate != null)
+                        tmrUpdate.Enabled = true;
+                }
+                else
+                {   // Stop update timer
+                    if (tmrUpdate != null)
+                        tmrUpdate.Enabled = false;
                 }
             }
         }

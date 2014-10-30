@@ -30,6 +30,7 @@ using System.Text;
 
 namespace OpenMobile.Framework
 {
+
     internal static class Windows
     {
         static Guid disk = new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
@@ -380,6 +381,13 @@ namespace OpenMobile.Framework
         private static extern long GetVolumeInformation(string PathName, StringBuilder VolumeNameBuffer, UInt32 VolumeNameSize, ref UInt32 VolumeSerialNumber, ref UInt32 MaximumComponentLength, ref UInt32 FileSystemFlags, StringBuilder FileSystemNameBuffer, UInt32 FileSystemNameSize);
         internal static class windowsEmbedder
         {
+
+            private const int HWND_TOP = 0;
+            private const int HWND_TOPMOST = -1;
+            private const int HWND_NOTOPMOST = -2;
+            private const int SWP_NOMOVE = 0x0002;
+            private const int SWP_NOSIZE = 0x0001;
+
             [System.Security.SuppressUnmanagedCodeSecurity]
             [DllImport("user32.dll")]
             public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
@@ -400,10 +408,23 @@ namespace OpenMobile.Framework
             [DllImport("user32.dll", SetLastError = true)]
             public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
+            [DllImport("user32.dll", SetLastError = true)]
+            public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+            [DllImport("user32.dll", SetLastError = true)]
+            public static extern bool BringWindowToTop(IntPtr hWnd);
+
             public static int removeWindowBorder(IntPtr WindowsHandle)
             {
                 return SetWindowLong(WindowsHandle, -16, GetWindowLong(WindowsHandle, -16) & ~(0xc00000) & ~(0x800000));
             }
+
+            //public static void MoveWindowToTop(IntPtr hWnd)
+            //{
+            //    //var options = (IntPtr)HWND_TOP;
+            //    //SetWindowPos(hWnd, options, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+            //    BringWindowToTop(hWnd);
+            //}
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]

@@ -218,6 +218,30 @@ namespace OpenMobile.Framework
             return false;
         }
 
+        /// <summary>
+        /// Moves the window to the top of the z order
+        /// </summary>
+        /// <param name="windowhandle"></param>
+        /// <returns></returns>
+        static public bool MoveWindowToTop(IntPtr windowhandle)
+        {
+#if WINDOWS
+            Windows.windowsEmbedder.BringWindowToTop(windowhandle);
+            return Windows.windowsEmbedder.SetForegroundWindow(windowhandle);
+#endif
+        }
+
+        /// <summary>
+        /// Set's focus to the window
+        /// </summary>
+        /// <param name="windowhandle"></param>
+        static public bool SetFocus(IntPtr windowhandle)
+        {
+#if WINDOWS
+            return Windows.windowsEmbedder.SetForegroundWindow(windowhandle);
+#endif
+        }
+
         static void theHost_OnSystemEvent(eFunction function, object[] args)
         {
             if (function == eFunction.RenderingWindowResized)
@@ -423,6 +447,23 @@ namespace OpenMobile.Framework
             }
         }
 
+        /// <summary>
+        /// Returns TRUE if a 64bit setup is required
+        /// </summary>
+        /// <returns></returns>
+        public static bool Is64BitProcess
+        {
+            get
+            {
+#if WINDOWS
+                if (Configuration.RunningOnWindows)
+                {
+                    return (Windows.is64BitProcess);
+                }
+#endif
+                return false;
+            }
+        }
         /// <summary>
         /// Retrieves the operating system bit environment (32 or 64 bit)
         /// </summary>
