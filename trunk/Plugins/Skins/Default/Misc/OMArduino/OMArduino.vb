@@ -565,13 +565,13 @@ Namespace OMArduino
 
             ' Take any changes and apply them to the pin properties
             '  Save user items to database
-            '   .Title (save)
+            '   .Title - User specified name for pin (save)
             '   .CurrentMode (save AND set mode)
             '      call change_pin_mode
             '   .Script (save and run script)
             '      call run_script
-            '   .Descr (save)
-            '   .Enabled (save)
+            '   .Descr - User specified description (save)
+            '   .Enabled - Ignore (save)
 
             ' We could call for pin update here to update main panel
 
