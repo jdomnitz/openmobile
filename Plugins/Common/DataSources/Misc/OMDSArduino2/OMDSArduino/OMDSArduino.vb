@@ -61,6 +61,7 @@ Namespace OMDSArduino
         Dim myChanged As Boolean = False
         Dim myImageFile As String = ""
         Dim myLabelText As String = ""
+        Dim myEnabled As Boolean = True
 
         '''<summary>
         '''The Program assigned name for the pin
@@ -148,6 +149,19 @@ Namespace OMDSArduino
             End Get
             Set(value As String)
                 myImageFile = value
+            End Set
+        End Property
+
+        '''<summary>
+        '''Enable/Disable monitoring pin activity
+        '''</summary>
+        Public Property Enabled As Boolean
+            ' Enable/Disable monitoring pin activity
+            Get
+                Return myEnabled
+            End Get
+            Set(value As Boolean)
+                myEnabled = value
             End Set
         End Property
 
@@ -413,6 +427,7 @@ Namespace OMDSArduino
                                     mypins(x).Name = String.Format("A{0}", x)
                                     mypins(x).Descr = String.Format("Analog #{0}", x)
                                     mypins(x).ImageFile = "gauge"
+                                    mypins(x).Enabled = False
                                 Case Sharpduino.Constants.PinModes.PWM
                                     mypins(x).Name = String.Format("P{0}", x)
                                     mypins(x).Descr = String.Format("PWM #{0}", x)
@@ -430,6 +445,7 @@ Namespace OMDSArduino
                                     mypins(x).Descr = String.Format("Shift #{0}", x)
                                     mypins(x).ImageFile = "Icon-Arduino"
                             End Select
+                            ' Title to be overridden by user setting in skin
                             mypins(x).Title = mypins(x).Name
                             mypins(x).LabelText = mypins(x).Name
                             If m_Verbose Then
@@ -468,6 +484,12 @@ Namespace OMDSArduino
 
                     For x = 0 To pin_count - 1
                         ' Update the I/O pin objects
+
+                        If Not mypins(x).Enabled Then
+                            ' We are ignoring the pin
+                            Continue For
+                        End If
+
                         Try
 
                             mypins(x).Changed = False
