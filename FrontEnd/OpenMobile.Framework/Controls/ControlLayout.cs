@@ -26,7 +26,7 @@ using OpenMobile.Graphics;
 namespace OpenMobile.Controls
 {
     /// <summary>
-    /// A group of controls referenced by a text string
+    /// A group of controls referenced by a text string (use this class on runtime objects)
     /// </summary>
     public class ControlLayout
     {
@@ -91,7 +91,7 @@ namespace OpenMobile.Controls
         private List<OMControl> _Controls;        
 
         /// <summary>
-        /// Initialize a new ControlGroup
+        /// Initialize a new ControlLayout
         /// </summary>
         /// <param name="panel"></param>
         /// <param name="idString"></param>
@@ -99,6 +99,23 @@ namespace OpenMobile.Controls
         {
             this.Panel = panel;
             this.IDString = idString;
+        }
+
+        /// <summary>
+        /// Initialize a new ControlLayout from a ControlGroup
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="idString"></param>
+        public ControlLayout(OMPanel panel, ControlGroup cg)
+        {
+            this.Panel = panel;
+            _Controls = new List<OMControl>();
+            foreach (var control in cg)
+            {
+                var panelControl = _Panel.Controls.Find(x => x.Name == control.Name);
+                if (panelControl != null)
+                    _Controls.Add(panelControl);
+            }
         }
 
         /// <summary>

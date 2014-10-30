@@ -893,7 +893,7 @@ namespace OMMusicSkin
 
                             case "mnuItemRemove":
                                 {
-                                     dialog dialog = new dialog(_MainPlugin.pluginName, sender.Parent.Name);
+                                    dialog dialog = new dialog(_MainPlugin.pluginName, sender.Parent.Name);
                                     dialog.Header = "Delete playlist?";
                                     dialog.Text = String.Format("Are you sure you want to delete the playlist ''?");
                                     dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Question;
@@ -902,7 +902,7 @@ namespace OMMusicSkin
 
                                     if (dialog.ShowMsgBox(screen) == buttons.Yes)
                                     {   // Delete playlist
-
+                                        //_DB.removePlaylist(
                                     }
 
                                 }
@@ -1008,9 +1008,10 @@ namespace OMMusicSkin
             {
                 if (_DBItems == null)
                 {
-                    _cgProgress.SetVisible(sender, screen, true);
+                    ControlLayout clProgressControls = new ControlLayout(sender, _cgProgress);
+                    clProgressControls.Visible = true;
                     _DBItems = _DB.getSongs();
-                    _cgProgress.SetVisible(sender, screen, false);
+                    clProgressControls.Visible = false;
 
                     MediaList_ListMode_Set(ListModes.Artist, screen, sender);
                     MediaList_Search(sender, screen);

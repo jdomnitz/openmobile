@@ -142,7 +142,7 @@ namespace OMMapProvider
 
             OM.Host.ForEachScreen((screen) =>
                 {
-                    OpenMobile.Threading.MessagePump.CreateMessagePump(this.pluginName, () =>
+                    OpenMobile.OSSpecific.Windows.Threading.MessagePump.CreateMessagePump(this.pluginName, () =>
                     {
                         // The following two lines is a "hack" to make threading work without affecting the content of variables between threads
                         int s = new int();

@@ -62,7 +62,7 @@ namespace OMClock
             ControlGroup clockGroup = new ControlGroup();
 
             // Clock and date
-            OMLabel labelClockTime = new OMLabel("labelClockTime", 0, 0, theHost.ClientArea[0].Width, 200);
+            OMLabel labelClockTime = new OMLabel("labelClockTime", shapeBackground.Region.Left, shapeBackground.Region.Top, shapeBackground.Region.Width, 200);
             labelClockTime.TextAlignment = Alignment.CenterCenter;
             //labelClockTime.Font = new Font(Font.LED, 130F);
             labelClockTime.AutoFitTextMode = FitModes.FitFillSingleLine;

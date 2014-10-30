@@ -398,7 +398,9 @@ namespace OpenMobile
                 {
                     _StartupControl = false;
                     if (RenderingQueue.Contains(panelStartUp) && RenderingQueue.Count > 1)
+                    {
                         RenderingQueue.Remove(panelStartUp);
+                    }
                 }
 
                 g.Clear(Color.Black);
@@ -684,11 +686,38 @@ namespace OpenMobile
             RenderingWindow_Resize(null, e);
             base.OnResize(e);
         }
+
+        private bool _BlockWindowStateEvent = false;
+        public void SetFocus()
+        {
+            _BlockWindowStateEvent = true;
+            base.WindowState = WindowState.Maximized;
+            base.WindowState = WindowState.Fullscreen;
+            _BlockWindowStateEvent = false;
+        }
+
         protected override void OnWindowStateChanged(EventArgs e)
         {
+            // Should we block windowstate events?
+            if (_BlockWindowStateEvent)
+            {
+                base.OnWindowStateChanged(e);
+                return;
+            }
+
             if ((this.WindowState == WindowState.Fullscreen)) // && (!defaultMouse))
             {
                 base.CursorVisible = false;
+                //OpenMobile.Framework.OSSpecific.MoveWindowToTop(base.WindowInfo.Handle);
+
+                //if (OpenMobile.Framework.Windows.windowsEmbedder.SetWindowPos(base.WindowInfo.Handle, (IntPtr)0, (int)(position.X * scale.X + 1.0), (int)(position.Y * scale.Y + 1.0), (int)(position.Width * scale.X), (int)(position.Height * scale.Y), 0x20) == false)
+                //    return false;
+                //if (Windows.windowsEmbedder.SetParent(lastHandle[screen].handle, (IntPtr)theHost.GetWindowHandle(screen)) == IntPtr.Zero)
+                //    return false;
+                //if (Windows.windowsEmbedder.SetWindowLong(lastHandle[screen].handle, -16, Windows.windowsEmbedder.GetWindowLong(lastHandle[screen].handle, -16) & -12582913) != 0)
+                //    return false;
+                //Windows.windowsEmbedder.SetFocus(lastHandle[screen].handle);
+
             }
             else
             {
@@ -1501,9 +1530,9 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// [RENAME TO CloseAll] Closes all screens with animation
+        /// Closes all screens with animation
         /// </summary>
-        public static void CloseRenderer()
+        public static void CloseAllWindows()
         {
             for (int i = 0; i < Core.RenderingWindows.Count; i++)
                 Core.RenderingWindows[i].CloseMe();

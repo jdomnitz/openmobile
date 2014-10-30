@@ -180,6 +180,7 @@ namespace OpenMobile
         /// </summary>
         private HalInterface hal;
 
+
         /// <summary>
         /// TRUE = Vehicle is moving
         /// </summary>
@@ -328,6 +329,9 @@ namespace OpenMobile
 
         public void Dispose()
         {
+            // Stop zone handler
+            ZoneHandler.Stop();
+
             if (tmrCurrentClock != null)
                 tmrCurrentClock.Dispose();
             _DataHandler.Dispose();
@@ -371,18 +375,6 @@ namespace OpenMobile
             //NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
             NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(NetworkChange_NetworkAddressChanged);
             NetworkStatus.AvailabilityChanged += new NetworkStatusChangedHandler(NetworkStatus_AvailabilityChanged);
-        }
-
-        /// <summary>
-        /// Shutsdown pluginhost
-        /// </summary>
-        public void Stop()
-        {
-            // Stop Hal;
-            Hal_Stop();
-
-            // Stop zone handler
-            ZoneHandler.Stop();
         }
 
         /// <summary>
@@ -1633,22 +1625,11 @@ namespace OpenMobile
 
         #region Execute function
 
-
-        private void CloseProgram(string halCommand)
+        public void RaiseCloseProgramEvents()
         {
-            if (!closing)
-            {
-                closing = true;
-                SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.CloseProgramPreview, String.Empty, String.Empty, String.Empty); });
-                //savePlaylists();
-                //SandboxedThread.Asynchronous(delegate() { raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty); });
-                raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
-                Hal_Send(halCommand);
-                Stop();
-                RenderingWindow.CloseRenderer();
-            }
+            raiseSystemEvent(eFunction.CloseProgramPreview, String.Empty, String.Empty, String.Empty);
+            raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
         }
-
 
         /// <summary>
         /// Executes a function
@@ -1663,7 +1644,7 @@ namespace OpenMobile
                 case eFunction.closeProgram:
                     //Don't lock this to prevent deadlock
                     {
-                        CloseProgram("44");
+                        Core.CloseProgram(ShutdownModes.Normal);
                         //if (!closing)
                         //{
                         //    closing = true;
@@ -1682,9 +1663,7 @@ namespace OpenMobile
                 case eFunction.restartProgram:
                     try
                     {
-                        //savePlaylists();
-                        raiseSystemEvent(eFunction.closeProgram, String.Empty, String.Empty, String.Empty);
-                        Stop();
+                        RenderingWindow.CloseAllWindows();
                     }
                     catch (Exception) { }
                     try
@@ -1722,23 +1701,20 @@ namespace OpenMobile
 
                 // Shutdown computer
                 case eFunction.shutdown:
-                    //Hal_Send("46");
-                    //Stop();
-                    CloseProgram("46");
+                    Core.CloseProgram(ShutdownModes.Shutdown);
                     return true;
 
                 // Restart computer
                 case eFunction.restart:
-                    //Hal_Send("47");
-                    //Stop();
-                    CloseProgram("47");
+                    Core.CloseProgram(ShutdownModes.Restart);
                     return true;
 
                 // Hibernate computer
                 case eFunction.hibernate:
-                    Hal_Send("45");
+                    //Hal_Send("45");
                     //CloseProgram("45");
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
+                    Core.CloseProgram(ShutdownModes.Hibernate);
                     return true;
 
                 // Set computer in standby
@@ -1746,7 +1722,8 @@ namespace OpenMobile
                     Hal_Send("48");
                     //CloseProgram("48");
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
-                    return true;
+                    Core.CloseProgram(ShutdownModes.Suspend);
+                   return true;
 
                 // Connect to internet
                 case eFunction.connectToInternet:
@@ -4733,6 +4710,14 @@ namespace OpenMobile
         /// </summary>
         private void PluginLoadingCompleted_Exec()
         {
+            // Bring windows to top
+            for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
+                if (Core.RenderingWindows[i].WindowState == OpenTK.WindowState.Fullscreen)
+                {
+                    //Core.RenderingWindows[i].SetFocus();
+                    var result = OpenMobile.Framework.OSSpecific.MoveWindowToTop(Core.RenderingWindows[i].WindowInfo.Handle);
+                }
+
             // Preload media players
             for (int i = 0; i < ZoneHandler.Zones.Count; i++)
                 execute(eFunction.loadAVPlayer, ZoneHandler.Zones[i]);
@@ -4744,6 +4729,7 @@ namespace OpenMobile
                 if (!string.IsNullOrEmpty(action))
                     CommandHandler.ExecuteCommand(action);
             }
+
         }
 
         /// <summary>
@@ -4770,6 +4756,7 @@ namespace OpenMobile
                 return null;
             return Core.RenderingWindows[screen] as iRenderingWindow;
         }
+
 
     }
 }
