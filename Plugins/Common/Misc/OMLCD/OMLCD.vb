@@ -475,6 +475,7 @@ Namespace OMLCD
             theList.SoftEdgeData.Sides = (helperFunctions.Graphics.FadingEdge.GraphicSides.Top Or helperFunctions.Graphics.FadingEdge.GraphicSides.Bottom)
             theList.UseSoftEdges = True
             theList.Visible = False
+
             AddHandler theList.OnClick, AddressOf thelist_OnClick
             AddHandler theList.OnHoldClick, AddressOf thelist_HoldClick
             panel.addControl(theList)
