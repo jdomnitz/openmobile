@@ -174,13 +174,6 @@ namespace OpenMobile
         }
         private string _IPAddress;        
 
-
-        /// <summary>
-        /// Hardware abstraction layer
-        /// </summary>
-        private HalInterface hal;
-
-
         /// <summary>
         /// TRUE = Vehicle is moving
         /// </summary>
@@ -355,9 +348,6 @@ namespace OpenMobile
         /// </summary>
         public void Start()
         {
-            // Start Hal;
-            Hal_Start();
-
             // Start zone handler
             ZoneHandler.Start();
 
@@ -1711,16 +1701,12 @@ namespace OpenMobile
 
                 // Hibernate computer
                 case eFunction.hibernate:
-                    //Hal_Send("45");
-                    //CloseProgram("45");
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                     Core.CloseProgram(ShutdownModes.Hibernate);
                     return true;
 
                 // Set computer in standby
                 case eFunction.standby:
-                    Hal_Send("48");
-                    //CloseProgram("48");
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                     Core.CloseProgram(ShutdownModes.Suspend);
                    return true;
@@ -2152,7 +2138,7 @@ namespace OpenMobile
                 case eFunction.ejectDisc:
                     if (string.IsNullOrEmpty(arg))
                         return false;
-                    Hal_Send("35|" + arg);
+                    // TODO
                     return true;
 
                 // Navigation: Navigate to address
@@ -2645,7 +2631,7 @@ namespace OpenMobile
                                 return false;
                             Zone zone = ZoneHandler.GetZone(ret);
                             if (zone == null) return false;
-                            Hal_Send("34|" + arg1 + "|" + zone.AudioDevice.Instance.ToString());
+                            // TODO
                             //raiseSystemEvent(eFunction.systemVolumeChanged, arg1, zone.AudioDeviceInstance.ToString(), String.Empty);
                             return true;
                         }
@@ -2665,7 +2651,7 @@ namespace OpenMobile
                             if (zone == null) return false;
                             //if ((ret2 < 0) || (ret2 >= _AudioDeviceCount))
                             //    return false;
-                            Hal_Send("66|" + zone.AudioDevice.Instance.ToString() + "|" + arg2);
+                            // TODO
                             return true;
                         }
                         return false;
@@ -2688,21 +2674,7 @@ namespace OpenMobile
 
                 // Set monitor brightness on a specified screen
                 case eFunction.setMonitorBrightness:
-                    if (int.TryParse(arg1, out ret) == true)
-                    {
-                        if ((ret < 0) || (ret >= _ScreenCount))
-                            return false;
-                        if (int.TryParse(arg2, out ret2) == false)
-                            return false;
-
-                        // Turn monitor off?
-                        if ((ret2 == 0) && ((Environment.OSVersion.Version.Major < 6) || ret > 0))
-                            Core.RenderingWindows[ret].FadeOut();
-
-                        // Send request to HAL
-                        Hal_Send("40|" + arg1 + "|" + arg2);
-                        return true;
-                    }
+                    // TODO
                     return false;
 
                 // Set balance for specified instance
@@ -2716,7 +2688,7 @@ namespace OpenMobile
                             //    return false;
                             if (int.TryParse(arg2, out ret2) == false)
                                 return false;
-                            Hal_Send("42|" + zone.AudioDevice.Instance.ToString() + "|" + arg2);
+                            // TODO
                             return true;
                         }
                         return false;
@@ -3179,13 +3151,6 @@ namespace OpenMobile
                         Core.RenderingWindows[i].PaintIdentity();
                 else if (message == "MakeCurrent")
                     Core.RenderingWindows[0].MakeCurrent();
-                return true;
-            }
-
-            // Message to HAL?
-            else if (to == "OMHal")
-            {
-                Hal_Send("-1|" + from + "|" + message);
                 return true;
             }
             try
@@ -4287,50 +4252,11 @@ namespace OpenMobile
                     // Get the system volume for a specific instance
                     case eGetData.GetSystemVolume:
                         {
-                            data = 0; // Default return value
-                            if (int.TryParse(param, out ret) == true)
-                            {
-                                Zone zone = ZoneHandler.GetZone(ret);
-                                if (zone == null) return;
-
-                                Hal_Send("3|" + zone.AudioDevice.Instance);
-                                bool res = true;
-                                while (res == true)
-                                {
-                                    Thread.Sleep(5);
-                                    res = (hal.volume == null);
-                                    if (res == false)
-                                    {
-                                        if (hal.volume[0] == zone.AudioDevice.Instance.ToString())
-                                        {
-                                            if (int.TryParse(hal.volume[1], out ret))
-                                                data = ret;
-                                            hal.volume = null;
-                                        }
-                                    }
-                                }
-                            }
                             return;
                         }
 
                     // Get the brightness of a screen
                     case eGetData.GetScreenBrightness:
-                        Hal_Send("1|" + param);
-                        bool resp = true;
-                        while (resp == true)
-                        {
-                            Thread.Sleep(5);
-                            resp = (hal.brightness == null);
-                            if (resp == false)
-                            {
-                                if (hal.brightness[0] == param)
-                                {
-                                    if (int.TryParse(hal.brightness[1], out ret))
-                                        data = ret;
-                                    hal.brightness = null;
-                                }
-                            }
-                        }
                         return;
 
                     // Get current scale factors for a screen
@@ -4583,41 +4509,6 @@ namespace OpenMobile
 
         #endregion
         
-        #region Hal Interface
-
-        /// <summary>
-        /// Starts up Hal
-        /// </summary>
-        private void Hal_Start()
-        {
-            // Start HAL (Done in separate thread to speed up startup)
-            OpenMobile.Threading.SafeThread.Asynchronous(() => { hal = new HalInterface(); });
-        }
-        /// <summary>
-        /// Shuts down Hal
-        /// </summary>
-        private void Hal_Stop()
-        {
-            // Stop HAL 
-            if (hal != null)
-                hal.close();
-        }
-
-        /// <summary>
-        /// Send a message to HAL
-        /// </summary>
-        /// <param name="text">Message</param>
-        public void Hal_Send(string text)
-        {
-            // Only send if hal is available
-            if (hal != null)
-                hal.Send(text);
-            else
-                DebugMsg( DebugMessageType.Warning,"Message sent to HAL when HAL was not ready (" + text + ")");
-        }
-
-        #endregion
-
         #region DataSources
 
         private DataSource DataSource_NetWork_Internet_Online;

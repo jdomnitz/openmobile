@@ -577,9 +577,6 @@ namespace OpenMobile
                     theHost.raiseSystemEvent(eFunction.pluginLoadingComplete, String.Empty, String.Empty, String.Empty);
                 });
 
-            // Enumerate available devices
-            theHost.Hal_Send("32");
-
             // Start executing background tasks
             OpenMobile.Threading.TaskManager.Enable(Core.theHost);
 

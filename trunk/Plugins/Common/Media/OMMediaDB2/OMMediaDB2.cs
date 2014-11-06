@@ -295,7 +295,7 @@ namespace OMMediaDB2
             {
                 if (showNotifications)
                 {
-                    string IndexStatusString = String.Format("Progress: {0}", ((amountToBeIndexed - locationsToIndex.Count) / (double)amountToBeIndexed));
+                    string IndexStatusString = String.Format("Progress: {0:.}%", 100 * ((amountToBeIndexed - locationsToIndex.Count) / (double)amountToBeIndexed));
                     _NotificationIndexingStatus.Text = IndexStatusString;
                 }
 

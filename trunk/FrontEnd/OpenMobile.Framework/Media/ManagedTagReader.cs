@@ -60,6 +60,15 @@ namespace OpenMobile.Media
             {
                 return null;
             }
+
+            // Do we have an empty tag? 
+            if (f.Tag.IsEmpty)
+            {   // Yes, use filename instead
+                mediaInfo i = new mediaInfo(filename);
+                i.Name = Path.GetFileNameWithoutExtension(filename).Replace('_', ' ');
+                return i;
+            }
+
             Tag t = f.Tag;
             mediaInfo info = new mediaInfo();
             info.Album = t.Album;
