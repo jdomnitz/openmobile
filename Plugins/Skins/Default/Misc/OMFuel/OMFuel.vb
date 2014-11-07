@@ -104,6 +104,12 @@ Namespace OMFuel
             mainContainer.Opacity = 0
             omFuelpanel.addControl(mainContainer)
 
+            PopUpMenuStrip = New ButtonStrip(Me.pluginName, "FuelPrices", "PopUpMenuStrip")
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Current", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-search"), "Current", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Home", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Home"), "Home", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Favorites", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-new-label"), "Favorites/Search" & vbCrLf & "Hold to add shown", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            omFuelpanel.PopUpMenu = PopUpMenuStrip
+
             'PanelManager.loadPanel(omFuelpanel, True)
 
             ' Build the panel to manually enter a favorite
@@ -296,18 +302,16 @@ Namespace OMFuel
 
             ' loads up the popup with the standard items
 
-            PopUpMenuStrip = New ButtonStrip(Me.pluginName, "FuelPrices", "PopUpMenuStrip")
-
-            'If ((currLat <> "0") And (currLng <> "0")) Then
-            ' We have a current location
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Current", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-search"), "Current", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
-            'End If
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Home", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Home"), "Home", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Favorites", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-new-label"), "Favorites/Search" & vbCrLf & "Hold to add shown", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
-
             ' Add any favorites
-            Dim x As Integer, xCount As Integer = StoredData.Get(Me, "favoriteCount")
+            Dim x As Integer, y As Integer, xCount As Integer = StoredData.Get(Me, "favoriteCount")
             Dim xCity As String = "", xState As String = ""
+
+            ' Remove previous favorites in the popup list
+            y = PopUpMenuStrip.Buttons.Count - 1
+            For x = y To 3 Step -1
+                PopUpMenuStrip.Buttons.RemoveAt(x)
+            Next
+            ' Add the current favorites in the popup list
             For x = 1 To xCount
                 xCity = StoredData.Get(Me, String.Format("FAVS.favoriteCity{0}", x))
                 xState = StoredData.Get(Me, String.Format("FAVS.favoriteState{0}", x))
@@ -457,9 +461,6 @@ Namespace OMFuel
 
             End If
 
-            'theHost.UIHandler.PopUpMenu.SetButtonStrip(PopUpMenuStrip)
-            sender.PopUpMenu = PopUpMenuStrip
-
             If Not String.IsNullOrEmpty(message) Then
                 If sender.IsVisible(screen) Then
                     'theHost.UIHandler.InfoBanner_Hide(screen)
@@ -557,7 +558,7 @@ Namespace OMFuel
                     xCountry = StoredData.Get(Me, "FAVS.homeCountry")
                     theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Favorite", {xZip, xCity, xState, xCountry})
                 Case "Favorites_Button"
-                    ' Regular click on button does nothing
+                    ' Regular click on button opens favorite search
                     ShowPanel(screen, "EditFavs")
                     Exit Sub
                 Case Else
@@ -589,8 +590,6 @@ Namespace OMFuel
                     End If
                     ' Populate xZip and xCountry with info from favorite
                     xZip = StoredData.Get(Me, String.Format("FAVS.favoriteZip{0}", x))
-                    xCity = StoredData.Get(Me, String.Format("FAVS.favoriteCity{0}", x))
-                    xState = StoredData.Get(Me, String.Format("FAVS.favoriteState{0}", x))
                     xCountry = StoredData.Get(Me, String.Format("FAVS.favoriteCountry{0}", x))
 
                     theHost.CommandHandler.ExecuteCommand("OMDSFuelPrices.Refresh.Favorite", {xZip, xCity, xState, xCountry})
@@ -654,6 +653,7 @@ Namespace OMFuel
                     myBanner.Text = String.Format("Saved: {0},{1}", theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Last.City").FormatedValue.ToUpper, theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Last.State").FormatedValue.ToUpper)
                     theHost.UIHandler.InfoBanner_Show(screen, myBanner)
                     panel_enter(mPanel, screen)
+                    ' Is the popup being updated?
                 Case Else
                     ' Delete a favorite
                     If xCount > 0 Then
