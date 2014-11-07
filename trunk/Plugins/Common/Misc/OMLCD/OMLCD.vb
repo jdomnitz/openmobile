@@ -1810,10 +1810,6 @@ Namespace OMLCD
             Dim settingUserCellRows = New Setting(SettingTypes.MultiChoice, "Settings.Cell_Size_Rows", "Cell Rows", "Display cell height", cOptions2, cOptions2, helperFunctions.StoredData.GetInt(Me, "Settings.Cell_Size_Rows").ToString)
             mySettings.Add(settingUserCellRows)
 
-            If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Setting {0} rows by {1} columns.", LCD.Port, LCD.Baud))
-            End If
-
             ' Connect event to get updates when setting change
             AddHandler mySettings.OnSettingChanged, AddressOf mySettings_OnSettingChanged
 
@@ -2448,6 +2444,7 @@ Namespace OMLCD
         End Function
 
         Private Sub reCalc()
+            ' Recalculates cell and page sizes
 
             Try
                 m_Number_Cell_Cols = LCD.GetModuleCols / m_Cell_Size_Cols
@@ -2456,7 +2453,7 @@ Namespace OMLCD
                 m_Number_Cell_Cols = LCD.GetModuleCols / m_Cell_Size_Cols
             End Try
             If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Number_Cell_Cols: {0} / {1}.", LCD.GetModuleCols, m_Cell_Size_Cols))
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Number of cell columns: {0} of {1}.", m_Cell_Size_Cols, LCD.GetModuleCols))
             End If
             Try
                 m_Number_Cell_Rows = LCD.GetModuleRows / m_Cell_Size_Rows
@@ -2465,11 +2462,11 @@ Namespace OMLCD
                 m_Number_Cell_Rows = LCD.GetModuleRows / m_Cell_Size_Rows
             End Try
             If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Number_Cell_Rows: {0} / {1}.", LCD.GetModuleRows, m_Cell_Size_Rows))
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Number of cell rows: {0} / {1}.", m_Cell_Size_Rows, LCD.GetModuleRows))
             End If
             m_Page_Size = m_Number_Cell_Cols * m_Number_Cell_Rows
             If m_Verbose Then
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("m_Page_Size: {0} * {1}.", m_Number_Cell_Cols, m_Number_Cell_Rows))
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Cells per page: {0} column(s) by {1} row(s).", m_Number_Cell_Cols, m_Number_Cell_Rows))
             End If
         End Sub
 
@@ -2627,6 +2624,9 @@ Namespace OMLCD
 
             ' This is an optional section to show connection to the display
             If True Then
+                If m_Verbose Then
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Sending 'Connected' message"))
+                End If
                 Dim txt1, txt2 As String
                 txt1 = "Open Mobile"
                 txt2 = "Connected..."
@@ -2802,6 +2802,7 @@ Namespace OMLCD
                 If disposing Then
                     ' TODO: free other state (managed objects).
                     ' If the data source tracker is not defined, then define it
+                    ' Do we need to stop subscriptions?  Probably not necessary
                     Try
                         If LCD.IsOpen Then
                             For x = 1 To CInt(LCD.GetModuleGPOs)
