@@ -275,6 +275,9 @@
     <Content Include="Skins\Default\AIcons\5-content-import-export.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Skins\Default\AIcons\5-content-new-event.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Skins\Default\AIcons\5-content-new.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -284,6 +287,7 @@
     <Content Include="Skins\Default\AIcons\5-content-undo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Skins\Default\AIcons\6-social-cc-bcc.png" />
     <Content Include="Skins\Default\AIcons\6-social-group.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -924,7 +928,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

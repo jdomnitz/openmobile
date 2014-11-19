@@ -69,6 +69,25 @@ namespace OpenMobile
         bool _StartupControl = true;
 
         /// <summary>
+        /// Set to true to suppress exception messages from the rendering loop
+        /// </summary>
+        public bool SuppressExceptionMessage
+        {
+            get
+            {
+                return this._SuppressExceptionMessage;
+            }
+            set
+            {
+                if (this._SuppressExceptionMessage != value)
+                {
+                    this._SuppressExceptionMessage = value;
+                }
+            }
+        }
+        private bool _SuppressExceptionMessage = false;        
+
+        /// <summary>
         /// The graphic device
         /// </summary>
         public Graphics.Graphics graphics
@@ -334,7 +353,8 @@ namespace OpenMobile
             }
             catch (Exception e)
             {
-                BuiltInComponents.Host.DebugMsg(String.Format("RenderingWindow[{0}].Run Exception", _Screen), e);
+                if (!_SuppressExceptionMessage)
+                    BuiltInComponents.Host.DebugMsg(String.Format("RenderingWindow[{0}].Run Exception", _Screen), e);
             }
         }
 
@@ -436,6 +456,7 @@ namespace OpenMobile
             {   // Mask errors
                 if (ex is AccessViolationException)
                     OM.Host.DebugMsg("RenderingWindow.OnRenderFrame Exception", ex);
+                System.Diagnostics.Debug.WriteLine("RenderingWindow.OnRenderFrame Exception", ex.Message);
             }
         }
 
@@ -647,6 +668,7 @@ namespace OpenMobile
                         RenderingError = true;
                         BuiltInComponents.Host.DebugMsg(String.Format("RenderingWindow.RenderPanels (Screen {0}) Exception:", _Screen), e);
                     }
+                    System.Diagnostics.Debug.WriteLine(String.Format("RenderingWindow.RenderPanels (Screen {0}) Exception: {1}", _Screen, e.Message));
                 }
             }
         }

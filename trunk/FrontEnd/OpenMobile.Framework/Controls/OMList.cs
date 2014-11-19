@@ -36,6 +36,22 @@ namespace OpenMobile.Controls
     public class OMList : OMLabel, IClickable, IHighlightable, IKey, IList, IThrow, IMouse, IKeyboard
     {
         /// <summary>
+        /// List scroll modes
+        /// </summary>
+        public enum Scrollmodes
+        {
+            /// <summary>
+            /// Flick to throw the list
+            /// </summary>
+            FlickToThrow,
+
+            /// <summary>
+            /// Drag the list to scroll it's contents
+            /// </summary>
+            DragToScroll
+        }
+
+        /// <summary>
         /// Occurs when the list index changes
         /// </summary>
         /// <param name="sender"></param>
@@ -59,7 +75,10 @@ namespace OpenMobile.Controls
         protected List<OMListItem> _Items;
         
         [System.NonSerialized]
-        System.Timers.Timer throwtmr;
+        Timer[] throwtmr;
+        private float[] _Throw_Speed;
+        private float[] _Throw_SpeedInitial;
+
         /// <summary>
         /// Item background color
         /// </summary>
@@ -128,6 +147,25 @@ namespace OpenMobile.Controls
         protected bool _ThrowRun = true;
         protected SmoothAnimator Animation = new SmoothAnimator();
         protected Timer _tmrListScroll = new Timer(10);
+
+        /// <summary>
+        /// The current scroll mode of the list
+        /// </summary>
+        public Scrollmodes Scrollmode
+        {
+            get
+            {
+                return this._Scrollmode;
+            }
+            set
+            {
+                if (this._Scrollmode != value)
+                {
+                    this._Scrollmode = value;
+                }
+            }
+        }
+        private Scrollmodes _Scrollmode = Scrollmodes.FlickToThrow;        
 
         /// <summary>
         /// List items
@@ -593,8 +631,11 @@ namespace OpenMobile.Controls
 
         ~OMList()
         {
-            if (throwtmr != null)
-                throwtmr.Dispose();
+            for (int i = 0; i < OM.Host.ScreenCount; i++)
+            {
+                if (throwtmr[i] != null)
+                    throwtmr[i].Dispose();
+            }
         }
 
         private void declare()
@@ -606,8 +647,17 @@ namespace OpenMobile.Controls
             //    (tmpColor.G == 255 ? tmpColor.G - 139 : tmpColor.G),
             //    (tmpColor.B == 255 ? tmpColor.B - 139 : tmpColor.B));
 
-            throwtmr = new System.Timers.Timer(50);
-            throwtmr.Elapsed += new ElapsedEventHandler(throwtmr_Elapsed);
+
+            throwtmr = new Timer[OM.Host.ScreenCount];
+            for (int i = 0; i < OM.Host.ScreenCount; i++)
+            {
+                throwtmr[i] = new Timer(5);
+                throwtmr[i].Screen = i;
+                throwtmr[i].Elapsed += new ElapsedEventHandler(throwtmr_Elapsed);
+            }
+            _Throw_Speed = new float[OM.Host.ScreenCount];
+            _Throw_SpeedInitial = new float[OM.Host.ScreenCount];
+
             _Items = new List<OMListItem>();
             _tmrListScroll = new Timer(1);
             _tmrListScroll.Elapsed += new ElapsedEventHandler(_tmrListScroll_Elapsed);
@@ -628,21 +678,62 @@ namespace OpenMobile.Controls
                 clickSelect = value;
             }
         }
+
+
+
         void throwtmr_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (thrown <= 0)
+            Timer tmr = sender as Timer;
+
+            tmr.Enabled = false;            
+
+            // Initialize animation data
+            if (tmr.Tag2 != null)
             {
-                throwtmr.Enabled = false;
-                Raise_OnScrollEnd();
-                return;
+                var distance = (int)tmr.Tag2;
+                thrown = distance;
+
+                _Throw_Speed[tmr.Screen] = (int)tmr.Tag * 10;
+                _Throw_SpeedInitial[tmr.Screen] = _Throw_Speed[tmr.Screen];
+
+                tmr.Tag2 = null;
+                tmr.Tag = null;
             }
-            Raise_OnScrolling();
+
             if (thrown > 0)
-                thrown -= 0.65f;
+            {
+                if (thrown <= 0)
+                {
+                    tmr.Enabled = false;
+                    Raise_OnScrollEnd();
+                    return;
+                }
+
+                thrown -= 1f;
+                moved += (int)_Throw_Speed[tmr.Screen];
+            }
             else
-                thrown += 0.65f;
-            moved += (int)thrown;
-            raiseUpdate(false);
+            {
+                if (thrown >= 0)
+                {
+                    tmr.Enabled = false;
+                    Raise_OnScrollEnd();
+                    return;
+                }
+
+                thrown += 1f;
+                moved -= (int)_Throw_Speed[tmr.Screen];
+            }
+
+            //_Throw_Speed -= _Throw_Friction;
+            if (System.Math.Abs(thrown) <= 100)
+            {
+                _Throw_Speed[tmr.Screen] = System.Math.Abs(_Throw_SpeedInitial[tmr.Screen] * (thrown / 100f));
+            }
+
+            Raise_OnScrolling(tmr.Screen);
+            Refresh();
+            tmr.Enabled = true;
         }
         /// <summary>
         /// Gets or Sets the list style
@@ -1023,18 +1114,18 @@ namespace OpenMobile.Controls
                             g.FillRoundRectangle(b, left + width - 5, (int)ntop, 10, (int)nheight, 6);
                     }
                 }
-                catch 
+                catch (Exception ex)
                 {
                     // No action 
+                    System.Diagnostics.Debug.WriteLine(String.Format("OMList rendering exception: {1}", ex.Message));
                 }
                 
             }
 
-            base.RenderFinish(g, e);
+            if (throwtmr[g.screen].Enabled)
+                Refresh();
 
-            // Keep refreshing if throwing
-            if (throwtmr.Enabled)
-                base.Refresh();
+            base.RenderFinish(g, e);
         }
 
         #region ICloneable Members
@@ -1153,32 +1244,70 @@ namespace OpenMobile.Controls
 
         void IThrow.MouseThrowStart(int screen, Point StartLocation, PointF CursorSpeed, PointF scaleFactors, ref bool Cancel)
         {
-            //thrown = 0;
+            throwtmr[screen].Enabled = false;
+            switch (_Scrollmode)
+            {
+                case Scrollmodes.FlickToThrow:
+                    thrown = 0;
+                    break;
+                case Scrollmodes.DragToScroll:
+                    break;
+                default:
+                    break;
+            }
         }
 
         void IThrow.MouseThrowEnd(int screen, Point StartLocation, Point TotalDistance, Point EndLocation, PointF CursorSpeed)
         {
-            //if (thrown != 0)
-            //{
-            //    Raise_OnScrollStart();
-            //    throwtmr.Enabled = true;
-            //}
+            switch (_Scrollmode)
+            {
+                case Scrollmodes.FlickToThrow:
+                    {
+                        // Calculate distance and speed
+                        var speed = System.Math.Abs(CursorSpeed.Y);
+                        if (speed > 0.2f)
+                        {
+                            speed = (int)(System.Math.Ceiling(speed));
+                            var distance = TotalDistance.Y * (int)speed;
+                            throwtmr[screen].Tag = (int)speed; 
+                            throwtmr[screen].Tag2 = distance;  
+
+                            Raise_OnScrollStart();
+                            throwtmr[screen].Enabled = true;
+                        }
+                    }
+                    break;
+                case Scrollmodes.DragToScroll:
+                    break;
+                default:
+                    break;
+            }
         }
 
         void IThrow.MouseThrow(int screen, Point StartLocation, Point TotalDistance, Point RelativeDistance, PointF CursorSpeed)
         {
-            //throwtmr.Enabled = false;
-            //thrown = 0;
-            //if (System.Math.Abs(RelativeDistance.Y) > 3)
-            //    thrown = RelativeDistance.Y;
-            //moved += RelativeDistance.Y;
-            //if (System.Math.Abs(TotalDistance.Y) > 3)
-            //{
-            //    if (selectedIndex >= 0)
-            //        items[selectedIndex].RefreshGraphic = true; 
-            //    selectedIndex = -1;
-            //    raiseUpdate(false);
-            //}
+            switch (_Scrollmode)
+            {
+                case Scrollmodes.FlickToThrow:
+                    throwtmr[screen].Enabled = false;
+                    thrown = 0;
+                    //if (System.Math.Abs(RelativeDistance.Y) > 3)
+                    //    thrown = RelativeDistance.Y;
+                    moved += RelativeDistance.Y;
+                    if (System.Math.Abs(TotalDistance.Y) > 3)
+                    {
+                        if (selectedIndex >= 0)
+                            _Items[selectedIndex].RefreshGraphic = true; 
+                        selectedIndex = -1;
+                        raiseUpdate(false);
+                    }
+                    break;
+                case Scrollmodes.DragToScroll:
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         #endregion
@@ -1219,7 +1348,7 @@ namespace OpenMobile.Controls
         public void ScrollToIndex(int index, bool animate, float animationSpeed, float animationMinTime = 250f, float animationMaxTime = 1000f)
         {
             // Cancel any ongoing scrolling
-            ScrollCancel();
+            ScrollCancel(this.parent.containingScreen());
 
             Raise_OnScrollStart();
 
@@ -1285,7 +1414,7 @@ namespace OpenMobile.Controls
                             }
                         }
 
-                        Raise_OnScrolling();
+                        Raise_OnScrolling(this.parent.containingScreen());
 
                         Refresh();
 
@@ -1305,7 +1434,7 @@ namespace OpenMobile.Controls
                 int Distance_Start = (index - centerIndex) * listItemHeight;
                 moved -= Distance_Start;
 
-                Raise_OnScrolling();
+                Raise_OnScrolling(this.parent.containingScreen());
 
                 Refresh();
             }
@@ -1315,10 +1444,10 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Cancels any ongoing scrolling
         /// </summary>
-        public void ScrollCancel()
+        public void ScrollCancel(int screen)
         {
             _ThrowRun = false;
-            throwtmr.Enabled = false;
+            throwtmr[screen].Enabled = false;
         }
 
         #region IMouse Members
@@ -1335,28 +1464,40 @@ namespace OpenMobile.Controls
             if (listItemHeight > 0) //<-Just in case
                 Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
 
-            if (TotalDistance.Y > 5)
+            switch (_Scrollmode)
             {
-                if (!ScrolledToTopOfList)
-                {
-                    _tmrListScroll.Enabled = true;
-                    Raise_OnScrollStart();
-                    Highlight(-1);
-                    Select(-1);
-                }
-                _ListScrollStepSize = TotalDistance.Y / 7;
+                case Scrollmodes.FlickToThrow:
+                    break;
+                case Scrollmodes.DragToScroll:
+                    {
+                        if (TotalDistance.Y > 5)
+                        {
+                            if (!ScrolledToTopOfList)
+                            {
+                                _tmrListScroll.Enabled = true;
+                                Raise_OnScrollStart();
+                                Highlight(-1);
+                                Select(-1);
+                            }
+                            _ListScrollStepSize = TotalDistance.Y / 7;
+                        }
+                        else if (TotalDistance.Y < -5)
+                        {
+                            if (!ScrolledToBottomOfList)
+                            {
+                                _tmrListScroll.Enabled = true;
+                                Raise_OnScrollStart();
+                                Highlight(-1);
+                                Select(-1);
+                            }
+                            _ListScrollStepSize = TotalDistance.Y / 7;
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
-            else if (TotalDistance.Y < -5)
-            {
-                if (!ScrolledToBottomOfList)
-                {
-                    _tmrListScroll.Enabled = true;
-                    Raise_OnScrollStart();
-                    Highlight(-1);
-                    Select(-1);
-                }
-                _ListScrollStepSize = TotalDistance.Y / 7;
-            }
+
         }
 
         protected int _ListScrollStepSize = 1;
@@ -1364,7 +1505,7 @@ namespace OpenMobile.Controls
         {
             moved += _ListScrollStepSize;
 
-            Raise_OnScrolling();
+            Raise_OnScrolling(this.parent.containingScreen());
 
             // Disable timer if we have scrolled to the end
             if (ScrolledToBottomOfList || ScrolledToTopOfList)
@@ -1453,7 +1594,7 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public virtual void MouseDown(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation)
         {
-            throwtmr.Enabled = false;
+            throwtmr[screen].Enabled = false;
             lastSelected = selectedIndex;
             focused = true;
             Select(highlightedIndex, false, screen);
@@ -1471,26 +1612,39 @@ namespace OpenMobile.Controls
         /// <param name="HeightScale"></param>
         public virtual void MouseUp(int screen, OpenMobile.Input.MouseButtonEventArgs e, Point StartLocation, Point TotalDistance)
         {
-            // Was scrolling active?
-            if (_tmrListScroll.Enabled)
-                // Yes, raise event that this ends
-                Raise_OnScrollEnd();
+            switch (_Scrollmode)
+            {
+                case Scrollmodes.FlickToThrow:
+                    {
+                        if (TotalDistance.X < 5 && TotalDistance.Y < 5)
+                        {
+                            if (listItemHeight > 0) //<-Just in case
+                                Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
 
-            _tmrListScroll.Enabled = false;
+                            lastSelected = selectedIndex;
+                            focused = true;
+                            Select(highlightedIndex, false, screen);
+                            //if (selectedIndex == lastSelected)
+                            //    return;
+                            //if (clickSelect)
+                            //    mode = eModeType.Scrolling;
+                        }
+                    }
+                    break;
+                case Scrollmodes.DragToScroll:
+                    {
+                        // Was scrolling active?
+                        if (_tmrListScroll.Enabled)
+                            // Yes, raise event that this ends
+                            Raise_OnScrollEnd();
 
-            //if (TotalDistance.X < 5 && TotalDistance.Y < 5)
-            //{
-            //    if (listItemHeight > 0) //<-Just in case
-            //        Highlight(((e.Y - top - (moved % listItemHeight)) / listItemHeight) + listStart);
+                        _tmrListScroll.Enabled = false;
+                    }
+                    break;
+                default:
+                    break;
+            }
 
-            //    lastSelected = selectedIndex;
-            //    focused = true;
-            //    Select(highlightedIndex, false, screen);
-            //    //if (selectedIndex == lastSelected)
-            //    //    return;
-            //    //if (clickSelect)
-            //    //    mode = eModeType.Scrolling;
-            //}
         }
 
         #endregion
@@ -1588,14 +1742,14 @@ namespace OpenMobile.Controls
         /// Event that's raised while scrolling the list
         /// </summary>
         public event userInteraction OnScrolling;
-        private void Raise_OnScrolling()
+        private void Raise_OnScrolling(int screen)
         {
             // Cancel event if no parent is present
             if (this.parent == null)
                 return;
 
             if (OnScrolling != null)
-                OnScrolling((OMList)this.parent[this.parent.ActiveScreen, this.name], this.parent.ActiveScreen);
+                OnScrolling((OMList)this.parent[screen, this.name], this.parent.ActiveScreen);
         }
 
         #endregion

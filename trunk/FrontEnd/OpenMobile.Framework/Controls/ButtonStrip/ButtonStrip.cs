@@ -816,6 +816,25 @@ namespace OpenMobile.Controls
             }
         }
         private string _PanelName;
+
+        /// <summary>
+        /// The size of the buttonstrip
+        /// </summary>
+        public Size Size
+        {
+            get
+            {
+                return this._Size;
+            }
+            set
+            {
+                if (this._Size != value)
+                {
+                    this._Size = value;
+                }
+            }
+        }
+        private Size _Size;
         
 
         #endregion
@@ -999,6 +1018,14 @@ namespace OpenMobile.Controls
 
         void IObjectShowing.Showing(OMControl control, int screen)
         {
+            if (_Size != Size.Empty)
+            {   // Set control size
+                if (_Size.Width != 0)
+                    control.Width = _Size.Width;
+                if (_Size.Height != 0)
+                    control.Height = _Size.Height;
+            }
+
             Raise_OnShowing(screen, control);
         }
 
