@@ -322,6 +322,8 @@ namespace OMMediaDB2
                 }
             }
 
+            OM.Host.raiseSystemEvent(eFunction.MediaIndexingCompleted, this.pluginName);
+
             return true;
         }
 

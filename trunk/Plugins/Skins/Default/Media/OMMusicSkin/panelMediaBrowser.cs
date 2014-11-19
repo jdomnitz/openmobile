@@ -68,9 +68,12 @@ namespace OMMusicSkin
         public panelMediaBrowser(OMMusicSkin mainPlugin)
         {
             _MainPlugin = mainPlugin;
+
+            OM.Host.OnSystemEvent += new SystemEvent(Host_OnSystemEvent);
         }
 
-        public OMPanel Initialize()        {
+        public OMPanel Initialize()
+        {
 
             ScreenSpecificData.SetProperty("ListMode", ListModes.Song);
             ScreenSpecificData.SetProperty("ArtistFilter", "");
@@ -425,16 +428,19 @@ namespace OMMusicSkin
 
             OMImage imgUpdatingBackground = new OMImage("imgUpdatingBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height);
             imgUpdatingBackground.BackgroundColor = Color.FromArgb(150, Color.Black);
+            imgUpdatingBackground.Visible = false;
             _cgProgress.Add(imgUpdatingBackground);
 
             OMImage imgUpdating = new OMImage("imgUpdating", 0, 0, OM.Host.getSkinImage("BusyAnimationTransparent.gif"));
             imgUpdating.PlaceRelativeToControl(imgUpdatingBackground, ControlDirections.CenterHorizontally);
             imgUpdating.PlaceRelativeToControl(imgUpdatingBackground, ControlDirections.CenterVertically);
+            imgUpdating.Visible = false;
             _cgProgress.Add(imgUpdating);
 
             OMLabel lblUpdating = new OMLabel("lblUpdating", 0, 0, imgUpdatingBackground.Width, 25, "Loading items, please wait...");
             lblUpdating.PlaceRelativeToControl(imgUpdating, ControlDirections.Down);
             lblUpdating.PlaceRelativeToControl(imgUpdating, ControlDirections.CenterHorizontally);
+            lblUpdating.Visible = false;
             _cgProgress.Add(lblUpdating);
 
             panel.addControlGroup(0, 0, _cgProgress);
@@ -457,6 +463,30 @@ namespace OMMusicSkin
             panel.Entering += panel_Entering;
 
             return panel;
+        }
+
+        void Host_OnSystemEvent(eFunction function, object[] args)
+        {
+            if (function == eFunction.MediaIndexingCompleted)
+            {
+                SafeThread.Asynchronous(() =>
+                {
+                    // Save reference to db
+                    if (_DB == null)
+                        _DB = OM.Host.getData(eGetData.GetMediaDatabase, "") as IMediaDatabase;
+
+                    if (_DB != null && _DBItems == null)
+                    {
+                        //ControlLayout clProgressControls = new ControlLayout(sender, _cgProgress);
+                        //clProgressControls.Visible = true;
+                        _DBItems = _DB.getSongs();
+                        //clProgressControls.Visible = false;
+
+                        //MediaList_ListMode_Set(ListModes.Artist, screen, sender);
+                        //MediaList_Search(sender, screen);
+                    }
+                });
+            }
         }
 
         void PopUpMenuStrip_OnShowing(ButtonStrip sender, int screen, OMContainer menuContainer)
@@ -1022,21 +1052,32 @@ namespace OMMusicSkin
         void panel_Entering(OMPanel sender, int screen)
         {
             // Save reference to db
-            _DB = OM.Host.getData(eGetData.GetMediaDatabase, "") as IMediaDatabase;
+            if (_DB == null)
+                _DB = OM.Host.getData(eGetData.GetMediaDatabase, "") as IMediaDatabase;
 
-            SafeThread.Asynchronous(() =>
+            if (_DBItems == null)
             {
-                if (_DBItems == null)
+                SafeThread.Asynchronous(() =>
                 {
-                    ControlLayout clProgressControls = new ControlLayout(sender, _cgProgress);
-                    clProgressControls.Visible = true;
-                    _DBItems = _DB.getSongs();
-                    clProgressControls.Visible = false;
-
-                    MediaList_ListMode_Set(ListModes.Artist, screen, sender);
-                    MediaList_Search(sender, screen);
-                }
-            });
+                    if (_DBItems == null)
+                    {
+                        ControlLayout clProgressControls = new ControlLayout(sender, _cgProgress);
+                        clProgressControls.Visible = true;
+                        _DBItems = _DB.getSongs();
+                        clProgressControls.Visible = false;
+                    }
+                    if (_DBItems != null)
+                    {
+                        MediaList_ListMode_Set(ListModes.Artist, screen, sender);
+                        MediaList_Search(sender, screen);
+                    }
+                });
+            }
+            else
+            {
+                MediaList_ListMode_Set(ListModes.Artist, screen, sender);
+                MediaList_Search(sender, screen);
+            }
         }
 
         #region MediaFilter buttons
