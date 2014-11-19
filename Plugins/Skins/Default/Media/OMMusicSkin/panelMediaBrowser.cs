@@ -443,11 +443,15 @@ namespace OMMusicSkin
 
             // Create the button strip popup
             ButtonStrip PopUpMenuStrip = new ButtonStrip(_MainPlugin.pluginName, panel.Name, "PopUpMenuStrip_Playlist");
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModePlay", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|9-av-play"), "List hold: Play now", true, OnClick: mnuItem_ListHoldModePlay_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModeEnqueue", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|9-av-add-to-queue"), "List hold: Enqueue", true, OnClick: mnuItem_ListHoldModeEnqueue_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModeMenu", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-view-as-list"), "List hold: Show menu", true, OnClick: mnuItem_ListHoldModeMenu_OnClick));
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ClearPlaylist", OM.Host.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-view-as-list"), "Clear current playlist", true, OnClick: mnuItem_ClearPlaylist_OnClick));
+            Size itemSize = OM.Host.UIHandler.PopUpMenu.ButtonSize;
+            itemSize.Width = 350;
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModePlay", itemSize, 255, OM.Host.getSkinImage("AIcons|9-av-play"), "List hold: Play now", true, OnClick: mnuItem_ListHoldModePlay_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModeEnqueue", itemSize, 255, OM.Host.getSkinImage("AIcons|9-av-add-to-queue"), "List hold: Enqueue", true, OnClick: mnuItem_ListHoldModeEnqueue_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ListHoldModeMenu", itemSize, 255, OM.Host.getSkinImage("AIcons|4-collections-view-as-list"), "List hold: Show menu", true, OnClick: mnuItem_ListHoldModeMenu_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_ClearPlaylist", itemSize, 255, OM.Host.getSkinImage("AIcons|5-content-remove"), "Clear current playlist", true, OnClick: mnuItem_ClearPlaylist_OnClick));
+            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("mnuItem_FillPlaylist", itemSize, 255, OM.Host.getSkinImage("AIcons|5-content-new-event"), "Fill current playlist", true, OnClick: mnuItem_FillPlaylist_OnClick));
             PopUpMenuStrip.OnShowing += new ButtonStrip.MenuEventHandler(PopUpMenuStrip_OnShowing);
+            PopUpMenuStrip.Size = new Size(itemSize.Width, 0);
             panel.PopUpMenu = PopUpMenuStrip;
 
             panel.Entering += panel_Entering;
@@ -515,6 +519,22 @@ namespace OMMusicSkin
 
             OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Current playlist cleared", 5));
 
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
+        }
+
+        void mnuItem_FillPlaylist_OnClick(OMControl sender, int screen)
+        {
+            // Get current playlist
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            if (playlist != null)
+            {
+                OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Please wait, filling playlist...", 8));
+
+                playlist.Clear();
+                playlist.AddRange(_DBItems);
+
+                OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, String.Format("Current playlist filled with {0} items", _DBItems.Count()), 8));
+            }
             OM.Host.UIHandler.PopUpMenu_Hide(screen, false);
         }
 
@@ -1686,7 +1706,7 @@ namespace OMMusicSkin
             OpenMobile.Threading.SafeThread.Asynchronous(() => { lst.ScrollToIndex(0, true, 100f, 10000f); });
             while (sender.Mode == eModeType.Clicked)
                 System.Threading.Thread.Sleep(100);
-            lst.ScrollCancel();
+            lst.ScrollCancel(screen);
         }
         void btnList_ScrollDown_OnClick(OMControl sender, int screen)
         {
@@ -1699,7 +1719,7 @@ namespace OMMusicSkin
             OpenMobile.Threading.SafeThread.Asynchronous(() => { lst.ScrollToIndex(lst.Items.Count - 1, true, 100f, 10000f); });
             while (sender.Mode == eModeType.Clicked)
                 System.Threading.Thread.Sleep(100);
-            lst.ScrollCancel();
+            lst.ScrollCancel(screen);
         }
 
         #endregion

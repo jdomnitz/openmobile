@@ -294,7 +294,7 @@ namespace OpenMobile.Controls
         }
 
         /// <summary>
-        /// Shows / hides the controls (NB! Will only show controls that was previously hidden by a controlLayout)
+        /// Shows / hides the controls 
         /// </summary>
         public bool Visible
         {

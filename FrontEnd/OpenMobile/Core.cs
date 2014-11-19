@@ -787,6 +787,10 @@ namespace OpenMobile
 
             _Closing = true;
 
+            // Supress exception messages
+            for (int i = RenderingWindows.Count - 1; i >= 0; i--)
+                RenderingWindows[i].SuppressExceptionMessage = true;
+
             _ShutdownMode = shutdownMode;
 
             try
