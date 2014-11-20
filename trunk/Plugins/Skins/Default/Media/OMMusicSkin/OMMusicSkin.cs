@@ -35,6 +35,26 @@ namespace OMMusicSkin
 {
     public sealed class OMMusicSkin : HighLevelCode
     {
+        /// <summary>
+        /// Setting: Preload music browser items
+        /// </summary>
+        public bool Setting_PreloadMusicBrowserEnabled
+        {
+            get
+            {
+                return this._Setting_PreloadMusicBrowserEnabled;
+            }
+            set
+            {
+                if (this._Setting_PreloadMusicBrowserEnabled != value)
+                {
+                    this._Setting_PreloadMusicBrowserEnabled = value;
+                }
+            }
+        }
+        private bool _Setting_PreloadMusicBrowserEnabled = true;
+        
+
         public OMMusicSkin()
             : base("OMMusicSkin", OM.Host.getSkinImage("Icons|Icon-Music"), 1f, "Music player", "Music", "OM Dev team/Borte", "")
         {
@@ -60,8 +80,28 @@ namespace OMMusicSkin
             PanelManager.QueuePanel(panelNowPlaying.PanelName, new panelNowPlaying(this).Initialize);
             PanelManager.QueuePanel("MediaBrowser", new panelMediaBrowser(this).Initialize);
 
+            // Settings
+            Settings_MapVariables();
+
             // Return
             return eLoadStatus.LoadSuccessful;
         }
+
+        protected override void Settings()
+        {
+            base.Setting_Add(Setting.BooleanSetting("MusicBrowser.Preload.Enabled", String.Empty, "Preload music browser items", StoredData.Get(this, "MusicBrowser.Preload.Enabled")), _Setting_PreloadMusicBrowserEnabled);
+        }
+
+        private void Settings_MapVariables()
+        {
+            _Setting_PreloadMusicBrowserEnabled = StoredData.GetBool(this, "MusicBrowser.Preload.Enabled");
+        }
+
+        protected override void setting_OnSettingChanged(int screen, Setting setting)
+        {
+            base.setting_OnSettingChanged(screen, setting);
+            Settings_MapVariables();
+        }
+
     }
 }

@@ -36,22 +36,6 @@ namespace OpenMobile.Controls
     public class OMList : OMLabel, IClickable, IHighlightable, IKey, IList, IThrow, IMouse, IKeyboard
     {
         /// <summary>
-        /// List scroll modes
-        /// </summary>
-        public enum Scrollmodes
-        {
-            /// <summary>
-            /// Flick to throw the list
-            /// </summary>
-            FlickToThrow,
-
-            /// <summary>
-            /// Drag the list to scroll it's contents
-            /// </summary>
-            DragToScroll
-        }
-
-        /// <summary>
         /// Occurs when the list index changes
         /// </summary>
         /// <param name="sender"></param>
@@ -165,7 +149,7 @@ namespace OpenMobile.Controls
                 }
             }
         }
-        private Scrollmodes _Scrollmode = Scrollmodes.FlickToThrow;        
+        private Scrollmodes _Scrollmode = BuiltInComponents.SystemSettings.TouchScrollMode;        
 
         /// <summary>
         /// List items
@@ -633,8 +617,11 @@ namespace OpenMobile.Controls
         {
             for (int i = 0; i < OM.Host.ScreenCount; i++)
             {
-                if (throwtmr[i] != null)
-                    throwtmr[i].Dispose();
+                if (throwtmr != null)
+                {
+                    if (throwtmr[i] != null)
+                        throwtmr[i].Dispose();
+                }
             }
         }
 
@@ -1247,10 +1234,10 @@ namespace OpenMobile.Controls
             throwtmr[screen].Enabled = false;
             switch (_Scrollmode)
             {
-                case Scrollmodes.FlickToThrow:
-                    thrown = 0;
+                case Scrollmodes.Drag:
                     break;
-                case Scrollmodes.DragToScroll:
+                case Scrollmodes.Throw:
+                    thrown = 0;
                     break;
                 default:
                     break;
@@ -1261,7 +1248,7 @@ namespace OpenMobile.Controls
         {
             switch (_Scrollmode)
             {
-                case Scrollmodes.FlickToThrow:
+                case Scrollmodes.Throw:
                     {
                         // Calculate distance and speed
                         var speed = System.Math.Abs(CursorSpeed.Y);
@@ -1277,7 +1264,7 @@ namespace OpenMobile.Controls
                         }
                     }
                     break;
-                case Scrollmodes.DragToScroll:
+                case Scrollmodes.Drag:
                     break;
                 default:
                     break;
@@ -1288,7 +1275,7 @@ namespace OpenMobile.Controls
         {
             switch (_Scrollmode)
             {
-                case Scrollmodes.FlickToThrow:
+                case Scrollmodes.Throw:
                     throwtmr[screen].Enabled = false;
                     thrown = 0;
                     //if (System.Math.Abs(RelativeDistance.Y) > 3)
@@ -1302,7 +1289,7 @@ namespace OpenMobile.Controls
                         raiseUpdate(false);
                     }
                     break;
-                case Scrollmodes.DragToScroll:
+                case Scrollmodes.Drag:
                     break;
                 default:
                     break;
@@ -1466,9 +1453,9 @@ namespace OpenMobile.Controls
 
             switch (_Scrollmode)
             {
-                case Scrollmodes.FlickToThrow:
+                case Scrollmodes.Throw:
                     break;
-                case Scrollmodes.DragToScroll:
+                case Scrollmodes.Drag:
                     {
                         if (TotalDistance.Y > 5)
                         {
@@ -1614,7 +1601,7 @@ namespace OpenMobile.Controls
         {
             switch (_Scrollmode)
             {
-                case Scrollmodes.FlickToThrow:
+                case Scrollmodes.Throw:
                     {
                         if (TotalDistance.X < 5 && TotalDistance.Y < 5)
                         {
@@ -1631,7 +1618,7 @@ namespace OpenMobile.Controls
                         }
                     }
                     break;
-                case Scrollmodes.DragToScroll:
+                case Scrollmodes.Drag:
                     {
                         // Was scrolling active?
                         if (_tmrListScroll.Enabled)

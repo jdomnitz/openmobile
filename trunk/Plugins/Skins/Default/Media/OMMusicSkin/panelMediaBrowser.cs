@@ -469,23 +469,20 @@ namespace OMMusicSkin
         {
             if (function == eFunction.MediaIndexingCompleted)
             {
-                SafeThread.Asynchronous(() =>
+                if (_MainPlugin.Setting_PreloadMusicBrowserEnabled)
                 {
-                    // Save reference to db
-                    if (_DB == null)
-                        _DB = OM.Host.getData(eGetData.GetMediaDatabase, "") as IMediaDatabase;
-
-                    if (_DB != null && _DBItems == null)
+                    SafeThread.Asynchronous(() =>
                     {
-                        //ControlLayout clProgressControls = new ControlLayout(sender, _cgProgress);
-                        //clProgressControls.Visible = true;
-                        _DBItems = _DB.getSongs();
-                        //clProgressControls.Visible = false;
+                        // Save reference to db
+                        if (_DB == null)
+                            _DB = OM.Host.getData(eGetData.GetMediaDatabase, "") as IMediaDatabase;
 
-                        //MediaList_ListMode_Set(ListModes.Artist, screen, sender);
-                        //MediaList_Search(sender, screen);
-                    }
-                });
+                        if (_DB != null && _DBItems == null)
+                        {
+                            _DBItems = _DB.getSongs();
+                        }
+                    });
+                }
             }
         }
 

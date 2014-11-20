@@ -227,7 +227,8 @@ namespace OpenMobile
             Setting TransitionDefaultEffect = PanelTransitionEffectHandler.Setting_TransitionDefaultEffect();
             //Setting TransitionDefaultEffect = new Setting(SettingTypes.MultiChoice, "UI.TransitionDefaultEffect", "Transition effect", "Transition; Default effect", PanelTransitionEffectHandler.GetEffectNames(), PanelTransitionEffectHandler.GetEffectNames());
             Setting IdleDetectionInterval = new Setting(SettingTypes.Text, "UI.IdleDetection.Interval", "Seconds", "Seconds before a screen is set to idle state");
-            
+            Setting listScrollMode = new Setting(SettingTypes.MultiChoice, "UI.TouchScrollMode", String.Empty, "Touch scroll mode", new List<string>(Enum.GetNames(typeof(Scrollmodes))), Scrollmodes.Throw.ToString());
+           
             using (PluginSettings settings = new PluginSettings())
             {
                 graphics.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.MinGraphics");
@@ -243,6 +244,7 @@ namespace OpenMobile
                 TransitionDefaultEffect.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.TransitionDefaultEffect");
                 UseIconOverlayColor.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.UseIconOverlayColor");
                 IdleDetectionInterval.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.IdleDetection.Interval");
+                listScrollMode.Value = settings.getSetting(BuiltInComponents.OMInternalPlugin, "UI.TouchScrollMode");
             }
             gl.Add(graphics);
             gl.Add(volume);
@@ -261,6 +263,10 @@ namespace OpenMobile
             gl.Add(new Setting(SettingTypes.Text, "Location.Home.UserEntered", "Home location:", "Postcode, city and state / country, etc.", StoredData.Get(BuiltInComponents.OMInternalPlugin, "Location.Home.UserEntered")));
             
             gl.Add(IdleDetectionInterval);
+            gl.Add(listScrollMode);
+            StoredData.SetDefaultValue(BuiltInComponents.OMInternalPlugin, listScrollMode.Name, Scrollmodes.Throw);
+
+            
             gl.OnSettingChanged += new SettingChanged(SettingsChanged);
 
             // Add settings for each screen
@@ -661,6 +667,27 @@ namespace OpenMobile
                 }
             }
 
+            /// <summary>
+            /// OM System setting: Touch scroll mode
+            /// </summary>
+            public static Scrollmodes TouchScrollMode
+            {
+                get
+                {
+                    var scrollmodeString = StoredData.Get(BuiltInComponents.OMInternalPlugin, "UI.TouchScrollMode");
+                    if (scrollmodeString == "")
+                    {
+                        scrollmodeString = Scrollmodes.Throw.ToString();
+                        TouchScrollMode = Scrollmodes.Throw;
+                    }
+                    var scrollmode = (Scrollmodes)Enum.Parse(typeof(Scrollmodes), scrollmodeString, true);
+                    return scrollmode;
+                }
+                set
+                {
+                    StoredData.Set(BuiltInComponents.OMInternalPlugin, "UI.TouchScrollMode", value.ToString());
+                }
+            }
             /// <summary>
             /// OM System setting: Idle detection action (per screen setting)
             /// </summary>
