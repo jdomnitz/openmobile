@@ -198,7 +198,7 @@ namespace OMMediaDB2
 
         #region Settings
 
-        public override void Settings()
+        protected override void Settings()
         {
             base.MySettings.Add(Setting.FolderSelection("Music.Path", String.Empty, "Music Path", StoredData.Get(this, "Music.Path")));
             base.MySettings.Add(Setting.BooleanSetting("FolderCovers.Enabled", String.Empty, "Enable cover retrival from folders", StoredData.Get(this, "FolderCovers.Enabled")));
@@ -230,7 +230,7 @@ namespace OMMediaDB2
             Settings_MapVariables();
         }
 
-        public override void setting_OnSettingChanged(int screen, Setting setting)
+        protected override void setting_OnSettingChanged(int screen, Setting setting)
         {
             base.setting_OnSettingChanged(screen, setting);
 

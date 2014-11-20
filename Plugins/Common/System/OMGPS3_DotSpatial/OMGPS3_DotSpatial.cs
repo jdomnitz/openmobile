@@ -346,7 +346,7 @@ namespace OMGPS3_DotSpatial
 
         #region Settings
 
-        public override void Settings()
+        protected override void Settings()
         {
             //base.MySettings.Add(Setting.ButtonSetting("GPS.gpsButton_CountryList", "Country Lists (Downloadables)"));
             base.MySettings.Add(Setting.BooleanSetting("GPS.SetSystemTimeFromGPS", String.Empty, "Set systemtime from GPS", StoredData.Get(this, "GPS.SetSystemTimeFromGPS")));
@@ -375,7 +375,7 @@ namespace OMGPS3_DotSpatial
             Settings_MapVariables();
         }
 
-        public override void setting_OnSettingChanged(int screen, Setting setting)
+        protected override void setting_OnSettingChanged(int screen, Setting setting)
         {
             base.setting_OnSettingChanged(screen, setting);
             

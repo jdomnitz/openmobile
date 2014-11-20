@@ -58,9 +58,9 @@ namespace OMMusicSkin
             panel.addControl(shapeBackground);
 
             // Cover art
-            OMImage Image_CoverArt = new OMImage("Image_CoverArt", OM.Host.ClientArea_Init.Right - 355, OM.Host.ClientArea_Init.Top + 70, 250, 330);
+            OMImage Image_CoverArt = new OMImage("Image_CoverArt", OM.Host.ClientArea_Init.Right - 355, OM.Host.ClientArea_Init.Top + 70, 300, 330);
             //Image_CoverArt.ReflectionData = new ReflectionsData(Color.FromArgb(255, 150, 150, 150), Color.Black);
-            Image_CoverArt.Rotation = new OpenMobile.Math.Vector3(0, 45, 0);
+            //Image_CoverArt.Rotation = new OpenMobile.Math.Vector3(0, 45, 0);
             Image_CoverArt.ReflectionData = new ReflectionsData(Color.FromArgb(127, Color.White), Color.Transparent, 0.25f);
             Image_CoverArt.DataSource = "Screen{:S:}.Zone.MediaProvider.MediaInfo.CoverArt";
             Image_CoverArt.NullImage = new imageItem(MediaLoader.MissingCoverImage);

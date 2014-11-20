@@ -159,7 +159,7 @@ namespace OMMapProvider
 
         #region Settings
 
-        public override void Settings()
+        protected override void Settings()
         {
             base.MySettings.Add(Setting.TextList<GMapProvider>("OMMaps.MapProvider", "Select provider", "Available map providers", StoredData.Get(this, "OMMaps.MapProvider"), _Map_AvailableProviders));
             base.MySettings.Add(Setting.EnumSetting<AccessMode>("OMMaps.MapMode", "Map mode", "NB! Server requires internet connection", StoredData.Get(this, "OMMaps.MapMode")));
@@ -187,7 +187,7 @@ namespace OMMapProvider
             Settings_MapVariables();
         }
 
-        public override void setting_OnSettingChanged(int screen, Setting setting)
+        protected override void setting_OnSettingChanged(int screen, Setting setting)
         {
             base.setting_OnSettingChanged(screen, setting);
 

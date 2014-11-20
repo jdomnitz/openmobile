@@ -29,6 +29,22 @@ using OpenMobile.Math;
 namespace OpenMobile
 {
     /// <summary>
+    /// List scroll modes
+    /// </summary>
+    public enum Scrollmodes
+    {
+        /// <summary>
+        /// Throw/flick the list to scroll it's contents
+        /// </summary>
+        Throw,
+
+            /// <summary>
+        /// Drag to throw the list
+        /// </summary>
+        Drag
+    }
+
+    /// <summary>
     /// The rendering mode
     /// </summary>
     public enum eModeType : byte

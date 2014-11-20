@@ -826,7 +826,9 @@ namespace OMVLCPlayer
                             // Abort any ongoing delayed commands
                             PlayerControl_DelayedPlay_Cancel(zone);
 
-                            _Zone_Playlist[zone].GotoPreviousMedia();
+                            // Check if we are close enough to go to previous item, otherwise start at beginning of current media
+                            if (GetPlayer_CurrentPosition(zone) <= TimeSpan.FromSeconds(5))
+                                _Zone_Playlist[zone].GotoPreviousMedia();
                             
                             // Update media info
                             mediaInfo media = _Zone_Playlist[zone].CurrentItem;

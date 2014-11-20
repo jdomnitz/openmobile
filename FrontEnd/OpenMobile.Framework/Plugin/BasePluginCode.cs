@@ -30,6 +30,9 @@ namespace OpenMobile.Plugin
     /// </summary>
     public abstract class BasePluginCode: IBasePlugin
     {
+        /// <summary>
+        /// Local settings collection
+        /// </summary>
         public Settings MySettings = null;
 
         /// <summary>
@@ -74,7 +77,7 @@ namespace OpenMobile.Plugin
         /// Sets the settings for this plugin and lets the base code handle the rest
         /// </summary>
         /// <returns></returns>
-        virtual public void Settings()
+        virtual protected void Settings()
         {
         }
 
@@ -94,9 +97,50 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="screen"></param>
         /// <param name="setting"></param>
-        virtual public void setting_OnSettingChanged(int screen, Setting setting)
+        virtual protected void setting_OnSettingChanged(int screen, Setting setting)
         {            
         }
+
+        /// <summary>
+        /// Get a setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        virtual protected object Setting_Get(string name)
+        {
+            return StoredData.Get(this, name);
+        }
+
+        /// <summary>
+        /// Set a setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        virtual protected bool Setting_Set(string name, object value)
+        {
+            return StoredData.Set(this, name, value);
+        }
+
+        /// <summary>
+        /// Add a new setting
+        /// </summary>
+        /// <param name="setting"></param>
+        virtual protected void Setting_Add(Setting setting)
+        {
+            MySettings.Add(setting);
+        }
+        /// <summary>
+        /// Add a new setting with a default value
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <param name="defaultValue"></param>
+        virtual protected void Setting_Add(Setting setting, object defaultValue)
+        {
+            MySettings.Add(setting);
+            StoredData.SetDefaultValue(this, setting.Name, defaultValue);
+        }
+
 
         /// <summary>
         /// Name of the author of this plugin
