@@ -283,7 +283,7 @@ namespace OpenMobile.Controls
                 try
                 {
                     if (OnTextChange != null)
-                        OnTextChange(this, this.containingScreen());
+                        OnTextChange(this.parent[this.name], this.containingScreen());
                 }
                 catch (Exception) { };
             }

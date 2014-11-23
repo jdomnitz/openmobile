@@ -583,8 +583,8 @@ namespace OMMusicSkin
 
             // Get currently selected item
             mediaInfo selectedMediaItem = lst.SelectedItem.tag as mediaInfo;
-            if (selectedMediaItem == null)
-                return;
+            //if (selectedMediaItem == null)
+            //    return;
 
 
             switch (_ListHoldBehavior[screen])
@@ -627,8 +627,21 @@ namespace OMMusicSkin
                                 }
                                 break;
                             case ListModes.Playlist:
+                                {
+                                    var playlistName = lst.SelectedItem.tag as string;
+                                    var playlist = new Playlist(playlistName);
+                                    playlist.Load();
+                                    currentPlaylist.Clear();
+                                    currentPlaylist.AddRange(playlist.Items);
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                }
                                 break;
                             case ListModes.PlaylistItems:
+                                {
+                                    currentPlaylist.AddDistinct(selectedMediaItem);
+                                    currentPlaylist.CurrentItem = selectedMediaItem;
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                }
                                 break;
                             default:
                                 break;
@@ -664,11 +677,27 @@ namespace OMMusicSkin
                                 }
                                 break;
                             case ListModes.Genre:
+                                {
+                                    var items = GetGenreSongs(selectedMediaItem.Genre);
+                                    currentPlaylist.AddRangeDistinct(items);
+                                    OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Genre enqueued", 5));
+                                }
                                 break;
                             case ListModes.Playlist:
-                                break;
+                                 {
+                                    var playlistName = lst.SelectedItem.tag as string;
+                                    var playlist = new Playlist(playlistName);
+                                    playlist.Load();
+                                    currentPlaylist.AddRangeDistinct(playlist.Items);
+                                    OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Playlist enqueued", 5));
+                                 }
+                               break;
                             case ListModes.PlaylistItems:
-                                break;
+                                 {
+                                    currentPlaylist.AddDistinct(selectedMediaItem);
+                                    OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Playlist song enqueued", 5));
+                                 }
+                               break;
                             default:
                                 break;
                         }
@@ -697,17 +726,17 @@ namespace OMMusicSkin
                                     ListItem1.image = OM.Host.getSkinImage("AIcons|5-content-new").image;
                                     PopupMenu.AddMenuItem(ListItem1);
 
-                                    OMListItem ListItem2 = new OMListItem("Enqueue", "mnuItemEnqueue" as object);
+                                    OMListItem ListItem2 = new OMListItem("Add to playlist", "mnuItemAddToPlaylist" as object);
                                     ListItem2.image = OM.Host.getSkinImage("AIcons|9-av-add-to-queue").image;
                                     PopupMenu.AddMenuItem(ListItem2);
 
-                                    OMListItem ListItem3 = new OMListItem("Play now", "mnuItemPlayNow" as object);
-                                    ListItem3.image = OM.Host.getSkinImage("AIcons|9-av-play").image;
-                                    PopupMenu.AddMenuItem(ListItem3);
+                                    //OMListItem ListItem3 = new OMListItem("Play now", "mnuItemPlayNow" as object);
+                                    //ListItem3.image = OM.Host.getSkinImage("AIcons|9-av-play").image;
+                                    //PopupMenu.AddMenuItem(ListItem3);
 
-                                    OMListItem ListItem4 = new OMListItem("Play next", "mnuItemPlayNext" as object);
-                                    ListItem4.image = OM.Host.getSkinImage("AIcons|9-av-next").image;
-                                    PopupMenu.AddMenuItem(ListItem4);
+                                    //OMListItem ListItem4 = new OMListItem("Play next", "mnuItemPlayNext" as object);
+                                    //ListItem4.image = OM.Host.getSkinImage("AIcons|9-av-next").image;
+                                    //PopupMenu.AddMenuItem(ListItem4);
 
                                     #endregion
 
@@ -719,11 +748,28 @@ namespace OMMusicSkin
                                             {
                                                 string newPlaylistName = OSK.ShowDefaultOSK(screen, selectedMediaItem.Artist, "Playlist name", "Enter playlist name", OSKInputTypes.Keypad, false);
                                                 playlist = new Playlist(newPlaylistName);
+                                                playlist.Save();
                                             }
                                             break;
 
-                                        case "mnuItemEnqueue":
+                                        case "mnuItemAddToPlaylist":
                                             {
+                                                var playlists = _DB.listPlaylists();
+
+                                                // Popup menu
+                                                MenuPopup PopupMenuListSelection = new MenuPopup("Select playlist", MenuPopup.ReturnTypes.Index);
+
+                                                // Popup menu items
+                                                foreach (var playlistName in playlists)
+                                                    PopupMenu.AddMenuItem(new OMListItem(Playlist.GetDisplayName(playlistName)));
+
+                                                var selectedPlaylistIndex = (int)PopupMenu.ShowMenu(screen);
+
+                                                var playlistToAddTo = new Playlist(playlists[selectedPlaylistIndex]);
+                                                playlistToAddTo.Load();
+                                                playlistToAddTo.AddRangeDistinct(playlist.Items);
+                                                playlistToAddTo.Save();
+                                                OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Item added to playlist", 5));
                                             }
                                             break;
 
@@ -1690,34 +1736,18 @@ namespace OMMusicSkin
 
         void txtMediaFilter_OnTextChange(OMControl sender, int screen)
         {
-            //MediaList_SearchSongs(sender.Parent, screen);
+            OMLabel lbl = sender.Parent[screen, "lblMediaFilterInfo"] as OMLabel;
+            OMTextBox txt = sender as OMTextBox;
+            if (lbl != null)
+            {
+                if (String.IsNullOrWhiteSpace(txt.Text))
+                    lbl.Visible = true;
+                else
+                    lbl.Visible = false;
+            }
+            
 
             MediaList_Search(sender.Parent, screen);
-
-            //if (db == null) return;
-
-            //OMObjectList2 lst = sender.Parent[screen, "lstMedia"] as OMObjectList2;
-            //OMLabel lbl = sender.Parent[screen, "lblMediaFilterInfo"] as OMLabel;
-            //OMTextBox txt = sender as OMTextBox;
-            //if (txt.Tag == null || !(txt.Tag is int))
-            //    txt.Tag = 0;
-            //int id = (int)txt.Tag;
-            //id++;
-            //txt.Tag = id;
-            //lbl.Visible = String.IsNullOrEmpty(txt.Text);
-            //if (lst != null)
-            //{
-            //    lst.Clear();
-            //    db.beginGetSongs(songFilter: String.Format("*{0}*", ((OMTextBox)sender).Text));
-            //    mediaInfo info = db.getNextMedia();
-            //    while (info != null)
-            //    {
-            //        if ((int)txt.Tag != id)
-            //            return;
-            //        lst.AddItemFromItemBase(ControlDirections.Down, info);
-            //        info = db.getNextMedia();
-            //    }
-            //}
         }
 
         void txtMediaFilter_SetText(OMPanel panel, int screen, string text)
