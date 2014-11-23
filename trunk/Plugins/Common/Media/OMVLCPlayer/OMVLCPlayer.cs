@@ -637,7 +637,6 @@ namespace OMVLCPlayer
 
             try
             {
-
                 TimeSpan timeSinceLastCommand = DateTime.Now - _Zone_TimeStampLastCommand[zone];
                 _Zone_TimeStampLastCommand[zone] = DateTime.Now;
 

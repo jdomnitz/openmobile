@@ -663,10 +663,21 @@ namespace OpenMobile.Controls
             g.ResetClip();
         }
 
+        Rectangle _PreviousRect;
         protected override void onSizeChanged()
         {
+            //if (this.Region != _PreviousRect)
+            //{
+            //    Rectangle moved = this.Region - _PreviousRect;
+
+            //    // Also move all contained controls
+            //    foreach (var control in _Controls)
+            //        control.Translate(moved);
+            //}
+
             base.onSizeChanged();
             _ForceUpdateOfControlsInView = true;
+            _PreviousRect = this.Region;
         }
 
         internal virtual void ModifyControlAndOffsetData(ControlGroup controlGroup, ref Rectangle Offset)
@@ -1225,7 +1236,8 @@ namespace OpenMobile.Controls
                 else
                 {
                     // Calculate distance from current location to control's location
-                    Point Distance = (this.Region.Center - controlFound.Region.Center);
+                    //Point Distance = (this.Region.Center - controlFound.Region.Center);
+                    Point Distance = new Point((this.Region.Left - controlFound.Region.Left), (this.Region.Top - controlFound.Region.Top));
                     ScrollRegion.X = Distance.X;
                     ScrollRegion.Y = Distance.Y;
 

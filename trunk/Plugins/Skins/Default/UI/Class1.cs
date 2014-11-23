@@ -1989,6 +1989,9 @@ namespace OpenMobile
             }
             // Ensure controls is placed correctly
             PopUpMenu.Bottom = Image_UIBottomBar_Background.Region.Top;
+
+            // Ensure popup menu items are placed correctly
+            container.ScrollToControl(container.Controls[0]);
         }
 
         void UIHandler_OnHidePopUpMenu(int screen, bool fast)
