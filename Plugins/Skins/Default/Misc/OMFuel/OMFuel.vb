@@ -56,7 +56,6 @@ Namespace OMFuel
         Private currLat As Single = 0
         Private currLng As Single = 0
         Private message As String = ""
-        Private PopUpMenuStrip As ButtonStrip
         Private temp_count As Integer = 0
         Private updated As Boolean = False
         Private initialized As Boolean = False
@@ -104,10 +103,11 @@ Namespace OMFuel
             mainContainer.Opacity = 0
             omFuelpanel.addControl(mainContainer)
 
-            PopUpMenuStrip = New ButtonStrip(Me.pluginName, "FuelPrices", "PopUpMenuStrip")
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Current", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-search"), "Current", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Home", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Home"), "Home", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
-            PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Favorites", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-new-label"), "Favorites/Search" & vbCrLf & "Hold to add shown", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            Dim PopUpMenuStrip = New ButtonStrip(Me.pluginName, "FuelPrices", "PopUpMenuStrip")
+            'PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Current", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-search"), "Current", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            'PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Home", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Home"), "Home", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            'PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem("Favorites", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-new-label"), "Favorites/Search" & vbCrLf & "Hold to add shown", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            AddHandler PopUpMenuStrip.OnShowing, AddressOf PopUpMenuStrip_OnShowing
             omFuelpanel.PopUpMenu = PopUpMenuStrip
 
             'PanelManager.loadPanel(omFuelpanel, True)
@@ -286,8 +286,6 @@ Namespace OMFuel
         Public Sub panel_leave(ByVal sender As OMPanel, ByVal screen As Integer)
 
             theHost.UIHandler.InfoBanner_Hide(screen)
-            'theHost.UIHandler.PopUpMenu.ClearButtonStrip(screen)
-            PopUpMenuStrip = Nothing
 
         End Sub
 
@@ -296,27 +294,34 @@ Namespace OMFuel
             'theHost.DebugMsg("OMFuel - panel_enter()", "")
 
             Dim client As WebClient = New WebClient
+            Dim PopUpMenu As ButtonStrip = sender.PopUpMenu
 
-            'Dim message As String = ""
-            'message = theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Messages.Text").FormatedValue
+            Dim y As Integer, xCount As Integer = StoredData.Get(Me, "favoriteCount")
+            Dim xCity As String, xState As String
 
-            ' loads up the popup with the standard items
+            For x = PopUpMenu.Buttons.Count - 1 To 0 Step -1
+                PopUpMenu.Buttons.RemoveAt(x)
+            Next
 
-            ' Add any favorites
-            Dim x As Integer, y As Integer, xCount As Integer = StoredData.Get(Me, "favoriteCount")
-            Dim xCity As String = "", xState As String = ""
+            PopUpMenu.Buttons.Add(Button.CreateMenuItem("Current", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|2-action-search"), "Current Location", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            PopUpMenu.Buttons.Add(Button.CreateMenuItem("Home", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Home"), "Home", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+            PopUpMenu.Buttons.Add(Button.CreateMenuItem("Favorites", theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-new-label"), "Favorites/Search" & vbCrLf & "Hold to add shown", False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
 
             ' Remove previous favorites in the popup list
-            y = PopUpMenuStrip.Buttons.Count - 1
-            For x = y To 3 Step -1
-                PopUpMenuStrip.Buttons.RemoveAt(x)
-            Next
+            'y = PopUpMenu.Buttons.Count - 1
+            'For x = y To 3 Step -1
+            'PopUpMenu.Buttons.RemoveAt(x)
+            'Next
+
             ' Add the current favorites in the popup list
             For x = 1 To xCount
                 xCity = StoredData.Get(Me, String.Format("FAVS.favoriteCity{0}", x))
                 xState = StoredData.Get(Me, String.Format("FAVS.favoriteState{0}", x))
-                PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem(xCity, theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-labels"), String.Format("*{0},{1}", xCity, xState), False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
+                PopUpMenu.Buttons.Add(Button.CreateMenuItem(xCity, theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("AIcons|4-collections-labels"), String.Format("*{0},{1}", xCity, xState), False, AddressOf grades_onClick, AddressOf grades_onHoldClick, Nothing))
             Next
+
+            'Dim message As String = ""
+            'message = theHost.DataHandler.GetDataSource("OMDSFuelPrices;Fuel.Messages.Text").FormatedValue
 
             ' Set up the main container for prices
             Dim theContainer As OMContainer = sender(screen, "mainContainer")
@@ -358,7 +363,8 @@ Namespace OMFuel
                         GradeFilter = gradeKey
                     End If
 
-                    PopUpMenuStrip.Buttons.Add(Button.CreateMenuItem(gradeKey, theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Gas"), gradeKey, False, AddressOf grades_onClick, Nothing, Nothing))
+                    ' Adds found fuel grades to the popup menu list
+                    PopUpMenu.Buttons.Add(Button.CreateMenuItem(gradeKey, theHost.UIHandler.PopUpMenu.ButtonSize, 255, OM.Host.getSkinImage("Icons|Icon-Gas"), gradeKey, False, AddressOf grades_onClick, Nothing, Nothing))
 
                     If gradeKey <> GradeFilter Then
                         Continue For
@@ -524,6 +530,13 @@ Namespace OMFuel
             ' btn_ShowMap.Command_Click = "Screen{:S:}.Map.Show.MapPlugin"
             ' x = theHost.CommandHandler.ExecuteCommand("Map.Zoom.Out")
             'OM.Host.CommandHandler.ExecuteCommand(screen, "Map.Goto.Current")
+
+        End Sub
+
+        '''<summary>
+        '''Preprocess the popup menu before showing
+        '''</summary>
+        Private Sub PopUpMenuStrip_OnShowing(sender As ButtonStrip, screen As Integer, menuContainer As OMContainer)
 
 
         End Sub
