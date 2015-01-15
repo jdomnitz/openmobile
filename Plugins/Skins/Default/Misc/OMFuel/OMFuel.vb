@@ -44,6 +44,7 @@ Imports OpenMobile.helperFunctions
 Imports OpenMobile.Plugin
 
 Namespace OMFuel
+    ' Fuel Prices Skin
 
     Public NotInheritable Class OMFuel
         Inherits HighLevelCode
@@ -296,7 +297,8 @@ Namespace OMFuel
             Dim client As WebClient = New WebClient
             Dim PopUpMenu As ButtonStrip = sender.PopUpMenu
 
-            Dim y As Integer, xCount As Integer = StoredData.Get(Me, "favoriteCount")
+            'Dim y As Integer
+            Dim xCount As Integer = StoredData.Get(Me, "favoriteCount")
             Dim xCity As String, xState As String
 
             For x = PopUpMenu.Buttons.Count - 1 To 0 Step -1
@@ -718,7 +720,7 @@ Namespace OMFuel
             Dim cityBox As OMTextBox = fPanel("favCity")
 
             Dim myLoc As OpenMobile.Location = New OpenMobile.Location
-            Dim xAddress As String, xZip As String, xCity As String, xState As String, xCountry As String
+            Dim xAddress As String, xZip As String = "", xCity As String, xState As String, xCountry As String
 
             If String.IsNullOrEmpty(zipBox.Text) Then
                 myLoc.Keyword = cityBox.Text
