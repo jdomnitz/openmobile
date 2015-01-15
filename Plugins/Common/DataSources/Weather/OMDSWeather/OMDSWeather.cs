@@ -32,12 +32,24 @@ using OpenMobile;
 using OpenMobile.Data;
 using System.Data.SQLite;
 using OpenMobile.Graphics;
+using System.Web;
 
 namespace OMDSWeather
 {
+
+    enum WebsiteToScrape
+    {
+        WeatherDotCom,
+        WeatherUnderground,
+        WeatherMSN
+    }
+
     [PluginLevel(PluginLevels.System)]
     public class OMDSWeather : IBasePlugin, IDataSource
     {
+
+        private WebsiteToScrape toScrape = WebsiteToScrape.WeatherMSN;
+
         //events
         public delegate void UpdatedSearchedWeatherEventHandler(Dictionary<int, Dictionary<string, string>> polledsearchedweather);
         public static event UpdatedSearchedWeatherEventHandler UpdatedSearchedWeather;
@@ -95,14 +107,14 @@ namespace OMDSWeather
             // Initialize default data
             StoredData.SetDefaultValue(this, "OMDSWeather.RefreshRate", 5);
             refreshRate = StoredData.GetInt(this, "OMDSWeather.RefreshRate") * 1000 * 60;
-            
+
             //tmr = new System.Timers.Timer[theHost.ScreenCount];
 
             //theHost.DataHandler.AddDataSource(new DataSource(this.pluginName, "Weather", "Searched", "List", DataSource.DataTypes.raw, "Searched Weather Results"), searchedDictionary);
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Search", "SearchLocation", SearchWeather2, 2, false, "Searches for weather at the specified search area: param={string searchText, int screen}"));
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Search", "CurrentLocation", SearchCurrentWeather, 1, false, "Searches for weather at the current location"));
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Refresh", "Weather", RefreshWeather, 0, false, "Refreshes Searched and Current Location Weather: OPTIONAL param={int screen, int screen, int screen, ...}"));
-            
+
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Favorites", "Add", AddFavorite, 1, false, "Adds the searched area to the favorites list: param={int screen, string displayedFavoriteText}"));
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Favorites", "Remove", RemoveFavorite, 2, false, "Removes the selected area to the favorites list: param={int screen, int index}"));
             OM.Host.CommandHandler.AddCommand(new Command(this.pluginName, "Weather", "Favorites", "Show", ShowFavorite, 2, false, "Retrieves the weather for the favorite location: param={int screen, int index}"));
@@ -174,85 +186,9 @@ namespace OMDSWeather
                 return; //don't enable again as the end of this method enables the timer again
             tmr.Tag = "Running";
             int screen = tmr.Screen;
-            VisibleSearchProgress(true, screen);
 
-            if (OM.Host.InternetAccess)
-            {
-                Dictionary<string, object> Results = new Dictionary<string, object>();
-                Dictionary<string, string> searchResults = new Dictionary<string, string>();
-                Location loc = OM.Host.CommandHandler.ExecuteCommand<Location>("Map.Lookup.Location", OM.Host.CurrentLocation);
-                if ((loc.Zip != "") && (loc.State != "") && (loc.Country != "") && (loc.City != ""))
-                {
-                    if (loc.Country == "US")
-                        searchResults = SearchArea(loc.Zip);
-                    else
-                        searchResults = SearchArea(loc.City + ", " + loc.State);
+            HandleSearch(searchedArea[screen], screen, tmr);
 
-                    if (searchResults.Keys.ElementAt(0) == "AreaFound")
-                    {
-                        Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
-                        Results.Add("Temp", GetSearchedTemp(searchResults["SearchHtml"], true));
-                        Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"]));
-                        Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"]));
-                        GetSearchedForecast(searchResults["ForecastHtml"], Results);
-                        Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"]));
-                    }
-                    else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
-                    {
-                        for (int j = 0; j < searchResults.Count; j++)
-                            Results.Add(searchResults.Keys.ElementAt(j), searchResults[searchResults.Keys.ElementAt(j)]);
-                    }
-                    else
-                    {
-                        //problem with connections or no results
-                        tmr.Interval = 15000; //15 seconds
-                    }
-                }
-                else
-                {
-                    //something is blank in loc
-
-                }
-                if (!fromCurrent[screen])
-                {
-                    //we are using the searchedArea instead of current
-                    Results.Clear();
-                    searchResults.Clear();
-                    searchResults = SearchArea(searchedArea[screen], screen);
-                    if (searchResults.Keys.ElementAt(0) == "AreaFound")
-                    {
-                        Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
-                        Results.Add("Temp", GetSearchedTemp(searchResults["SearchHtml"]));
-                        Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"]));
-                        Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"]));
-                        GetSearchedForecast(searchResults["ForecastHtml"], Results);
-                        Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"]));
-                    }
-                    else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
-                    {
-                        for (int j = 0; j < searchResults.Count; j++)
-                            Results.Add(searchResults.Keys.ElementAt(j), searchResults[searchResults.Keys.ElementAt(j)]);
-                    }
-                    else
-                    {
-                        //problem with connections or no results
-                        tmr.Interval = 15000; //15 seconds
-                    }
-                }
-                if (fromRefresh[screen])
-                {
-                    fromRefresh[screen] = false;
-                    tmr.Interval = refreshRate;
-                }
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Weather.Searched.List" + screen.ToString(), Results);
-            }
-            else
-            {
-                //refreshQueue = true;
-                tmr.Interval = 15000; //15 seconds
-            }
-
-            VisibleSearchProgress(false, screen);
             //enable again
             tmr.Tag = "";
             tmr.Enabled = true;
@@ -294,7 +230,7 @@ namespace OMDSWeather
             results = true;
             int screen = GetScreenFromParam(param[0]);
             int index = Convert.ToInt32(param[1]);
-            if(index == 1)
+            if (index == 1)
                 OM.Host.CommandHandler.ExecuteCommand("Weather.Search.SearchLocation", new object[] { searchedArea[screen], screen });
             else
                 OM.Host.CommandHandler.ExecuteCommand("Weather.Search.SearchLocation", new object[] { favoritesSearchedList[screen][index], screen });
@@ -421,7 +357,7 @@ namespace OMDSWeather
             }
         }
 
-        
+
 
         private void poller()
         {
@@ -444,18 +380,18 @@ namespace OMDSWeather
                         if ((loc.Zip != "") && (loc.State != "") && (loc.Country != "") && (loc.City != ""))
                         {
                             if (loc.Country == "US")
-                                searchResults = SearchArea(loc.Zip);
+                                searchResults = SearchAreaWeatherDotCom(loc.Zip);
                             else
-                                searchResults = SearchArea(loc.City + ", " + loc.State);
+                                searchResults = SearchAreaWeatherDotCom(loc.City + ", " + loc.State);
 
                             if (searchResults.Keys.ElementAt(0) == "AreaFound")
                             {
                                 Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
-                                Results.Add("Temp", GetSearchedTemp(searchResults["SearchHtml"], true));
-                                Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"]));
-                                Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"]));
-                                GetSearchedForecast(searchResults["ForecastHtml"], Results);
-                                Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"]));
+                                Results.Add("Temp", GetSearchedTempWeatherDotCom(searchResults["SearchHtml"], true));
+                                Results.Add("Image", GetSearchedImageWeatherDotCom(searchResults["SearchHtml"]));
+                                Results.Add("Description", GetSearchedDescriptionWeatherDotCom(searchResults["SearchHtml"]));
+                                GetSearchedForecastWeatherDotCom(searchResults["ForecastHtml"], Results);
+                                Results.Add("UpdatedTime", getUpdatedTimeWeatherDotCom(searchResults["SearchHtml"]));
                             }
                             else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
                             {
@@ -472,7 +408,7 @@ namespace OMDSWeather
                         {
                             //something is blank in loc
 
-                        } 
+                        }
                         for (int i = 0; i < theHost.ScreenCount; i++)
                         {
                             if (!fromCurrent[i])
@@ -480,15 +416,15 @@ namespace OMDSWeather
                                 //we are using the searchedArea instead of current
                                 Results.Clear();
                                 searchResults.Clear();
-                                searchResults = SearchArea(searchedArea[i], i);
+                                searchResults = SearchAreaWeatherDotCom(searchedArea[i], i);
                                 if (searchResults.Keys.ElementAt(0) == "AreaFound")
                                 {
                                     Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
-                                    Results.Add("Temp", GetSearchedTemp(searchResults["SearchHtml"]));
-                                    Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"]));
-                                    Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"]));
-                                    GetSearchedForecast(searchResults["ForecastHtml"], Results);
-                                    Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"]));
+                                    Results.Add("Temp", GetSearchedTempWeatherDotCom(searchResults["SearchHtml"]));
+                                    Results.Add("Image", GetSearchedImageWeatherDotCom(searchResults["SearchHtml"]));
+                                    Results.Add("Description", GetSearchedDescriptionWeatherDotCom(searchResults["SearchHtml"]));
+                                    GetSearchedForecastWeatherDotCom(searchResults["ForecastHtml"], Results);
+                                    Results.Add("UpdatedTime", getUpdatedTimeWeatherDotCom(searchResults["SearchHtml"]));
                                 }
                                 else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
                                 {
@@ -509,7 +445,7 @@ namespace OMDSWeather
                     for (int i = 0; i < theHost.ScreenCount; i++)
                         VisibleSearchProgress(false, i);
 
-                    
+
 
 
 
@@ -758,18 +694,18 @@ namespace OMDSWeather
             if ((loc.Zip != "") && (loc.State != "") && (loc.Country != "") && (loc.City != ""))
             {
                 if (loc.Country == "US")
-                    searchResults = SearchArea(loc.Zip, screen);
+                    searchResults = SearchAreaWeatherDotCom(loc.Zip, screen);
                 else
-                    searchResults = SearchArea(loc.City + ", " + loc.State, screen);
+                    searchResults = SearchAreaWeatherDotCom(loc.City + ", " + loc.State, screen);
 
                 if (searchResults.Keys.ElementAt(0) == "AreaFound")
                 {
                     Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
-                    Results.Add("Temp", GetCurrentTemp(searchResults["SearchHtml"]));
-                    Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"]));
-                    Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"]));
-                    GetSearchedForecast(searchResults["ForecastHtml"], Results);
-                    Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"]));
+                    Results.Add("Temp", GetCurrentTempWeatherDotCom(searchResults["SearchHtml"]));
+                    Results.Add("Image", GetSearchedImageWeatherDotCom(searchResults["SearchHtml"]));
+                    Results.Add("Description", GetSearchedDescriptionWeatherDotCom(searchResults["SearchHtml"]));
+                    GetSearchedForecastWeatherDotCom(searchResults["ForecastHtml"], Results);
+                    Results.Add("UpdatedTime", getUpdatedTimeWeatherDotCom(searchResults["SearchHtml"]));
                 }
                 else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
                 {
@@ -801,172 +737,157 @@ namespace OMDSWeather
             int screen = Convert.ToInt32(param[1]);
             searchedArea[screen] = param[0].ToString();
             fromCurrent[screen] = false;
+            HandleSearch(param[0].ToString(), screen);
+            return null;
+        }
+
+        private void HandleSearch(string toSearch, int screen, OpenMobile.Timer tmr = null)
+        {
             Dictionary<string, object> Results = new Dictionary<string, object>();
             VisibleSearchProgress(true, screen);
-            //Dictionary<string, string> searchResults = WeatherInfo.SearchArea(param[0].ToString(), Convert.ToInt32(param[1]));
-            Dictionary<string, string> searchResults = SearchArea(param[0].ToString(), screen);
-            if (searchResults.Keys.ElementAt(0) == "AreaFound")
+            Dictionary<string, string> searchResults = new Dictionary<string, string>();
+
+            #region HandleRefreshing
+            if (tmr != null)
             {
-                Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
-                //searchedArea[screen] = Results["Area"].ToString();
-                Results.Add("Temp", GetSearchedTemp(searchResults["SearchHtml"]));
-                Results.Add("Image", GetSearchedImage(searchResults["SearchHtml"]));
-                Results.Add("Description", GetSearchedDescription(searchResults["SearchHtml"]));
-                GetSearchedForecast(searchResults["ForecastHtml"], Results);
-                Results.Add("UpdatedTime", getUpdatedTime(searchResults["SearchHtml"]));
-                Results.Add("RealSearchedArea", searchedArea[screen]);
+                if (OM.Host.InternetAccess)
+                {
+                    Location loc = OM.Host.CommandHandler.ExecuteCommand<Location>("Map.Lookup.Location", OM.Host.CurrentLocation);
+                    if ((loc.Zip != "") && (loc.State != "") && (loc.Country != "") && (loc.City != ""))
+                    {
+                        string currentSearch = loc.Zip;
+                        if (loc.Country != "US")
+                            currentSearch = loc.City + ", " + loc.State;
+
+                        searchResults = HandleSearching(currentSearch, screen);
+                        if (!HandleResults(Results, searchResults, screen))
+                        {
+                            //problem with connections or no results
+                            tmr.Interval = 15000; //15 seconds
+                        }
+                    }
+                    else
+                    {
+                        //something is blank in loc
+
+                    }
+                    if (!fromCurrent[screen])
+                    {
+                        //we are using the searchedArea instead of current
+                        Results.Clear();
+                        searchResults.Clear();
+                        searchResults = HandleSearching(searchedArea[screen], screen);
+                        if (!HandleResults(Results, searchResults, screen))
+                        {
+                            //problem with connections or no results
+                            tmr.Interval = 15000; //15 seconds
+                        }
+                    }
+                    if (fromRefresh[screen])
+                    {
+                        fromRefresh[screen] = false;
+                        tmr.Interval = refreshRate;
+                    }
+                    BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Weather.Searched.List" + screen.ToString(), Results);
+                }
+                else
+                {
+                    //refreshQueue = true;
+                    tmr.Interval = 15000; //15 seconds
+                }
+                VisibleSearchProgress(false, screen);
+                return;
             }
-            else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
-            {
-                for (int i = 0; i < searchResults.Count; i++)
-                    Results.Add(searchResults.Keys.ElementAt(i), searchResults[searchResults.Keys.ElementAt(i)]);
-            }
-            else
+            #endregion
+
+            #region HandleSearching
+            searchResults = HandleSearching(toSearch, screen);
+            if (!HandleResults(Results, searchResults, screen))
             {
                 //problem with connections or no results
                 refreshQueue = true;
             }
             BuiltInComponents.Host.DataHandler.PushDataSourceValue("OMDSWeather;Weather.Searched.List" + screen.ToString(), Results);
             VisibleSearchProgress(false, screen);
+            #endregion
+
+        }
+
+        private Dictionary<string, string> HandleSearching(string toSearch, int screen)
+        {
+            if (toScrape == WebsiteToScrape.WeatherDotCom)
+            {
+                return SearchAreaWeatherDotCom(toSearch, screen);
+            }
+            else if (toScrape == WebsiteToScrape.WeatherUnderground)
+            {
+                return SearchAreaWeatherUnderground(toSearch, screen);
+            }
+            else if (toScrape == WebsiteToScrape.WeatherMSN)
+            {
+                return SearchAreaWeatherMSN(toSearch, screen);
+            }
             return null;
         }
 
-        private string getUpdatedTime(string html)
+        private bool HandleResults(Dictionary<string, object> Results, Dictionary<string, string> searchResults, int screen)
         {
-            html = html.Remove(0, html.IndexOf("Updated:") + 9);
-            string time = html.Substring(0, html.IndexOf("<"));
-            if (String.IsNullOrEmpty(time))
+            if (searchResults.Keys.ElementAt(0) == "AreaFound")
             {
-                html = html.Remove(0, html.IndexOf("Updated:") + 9);
-                time = html.Substring(0, html.IndexOf("<"));
-            }
-            return time;
-        }
-
-        private string GetSearchedTemp(string html, bool updateCurrent = false)
-        {
-            html = html.Remove(0, html.IndexOf("wx-temperature\">") + 20);
-            string degreecheck = html.Substring(0, html.IndexOf(">"));
-            html = html.Remove(0, html.IndexOf(">") + 1);
-            string temp = DegreeCheck(html.Substring(0, html.IndexOf("<")), degreecheck);
-            if (updateCurrent)
-            {
-                if (currentWeatherNotificationImage != null && currentWeatherNotification != null)
-                    currentWeatherNotification.Dispose();
-                currentWeatherNotificationImage = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
-                Font f = Font.Arial;
-                f.Size = 24;
-                currentWeatherNotificationImage.RenderText(0, 0, currentWeatherNotificationImage.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, temp, f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
-                if (currentWeatherNotification == null)
+                if (toScrape == WebsiteToScrape.WeatherDotCom)
                 {
-                    currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, currentWeatherNotificationImage, "CurrentWeatherNotification", "");
-                    currentWeatherNotification.State = Notification.States.Active;
-                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
-                    OM.Host.UIHandler.AddNotification(currentWeatherNotification);
+                    Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
+                    Results.Add("Temp", GetSearchedTempWeatherDotCom(searchResults["SearchHtml"]));
+                    Results.Add("Image", GetSearchedImageWeatherDotCom(searchResults["SearchHtml"]));
+                    Results.Add("Description", GetSearchedDescriptionWeatherDotCom(searchResults["SearchHtml"]));
+                    GetSearchedForecastWeatherDotCom(searchResults["ForecastHtml"], Results);
+                    Results.Add("UpdatedTime", getUpdatedTimeWeatherDotCom(searchResults["SearchHtml"]));
+                    Results.Add("RealSearchedArea", searchedArea[screen]);
                 }
-                else
+                else if (toScrape == WebsiteToScrape.WeatherUnderground)
                 {
-                    currentWeatherNotification.Icon = currentWeatherNotificationImage;
+                    Results.Add("Area", searchResults["AreaFound"] + "\n(Click To Search Weather)");
+                    Results.Add("Temp", GetSearchedTempWeatherUnderground(searchResults["SearchHtml"]));
+                    Results.Add("Image", GetSearchedImageWeatherUnderground(searchResults["SearchHtml"]));
+                    Results.Add("Description", GetSearchedDescriptionWeatherUnderground(searchResults["SearchHtml"]));
+                    GetSearchedForecastWeatherUnderground(searchResults["ForecastHtml"], Results);
+                    Results.Add("UpdatedTime", getUpdatedTimeWeatherUnderground(searchResults["SearchHtml"]));
+                    Results.Add("RealSearchedArea", searchedArea[screen]);
                 }
+                else if (toScrape == WebsiteToScrape.WeatherMSN)
+                {
+                    Results.Add("Area", HttpUtility.HtmlDecode(searchResults["AreaFound"]) + "\n(Click To Search Weather)");
+                    Results.Add("Temp", GetSearchedTempWeatherMSN(searchResults["SearchHtml"]));
+                    //Results.Add ("Image", GetSearchedImageWeatherMSN (searchResults ["SearchHtml"]));
+                    //Results.Add ("Description", GetSearchedDescriptionWeatherMSN (searchResults ["SearchHtml"]));
+                    //image and description come from the first forecastday via MSN
+                    GetSearchedForecastWeatherMSN(searchResults["ForecastHtml"], Results);
+                    Results.Add("Image", Results["ForecastImage1"]);
+                    Results.Add("Description", Results["ForecastDescription1"]);
+                    Results.Add("UpdatedTime", getUpdatedTimeWeatherMSN(searchResults["SearchHtml"]));
+                    Results.Add("RealSearchedArea", searchedArea[screen]);
+                }
+                return true;
             }
-            return temp;
-        }
-
-        private string GetCurrentTemp(string html)
-        {
-            html = html.Remove(0, html.IndexOf("wx-temperature\">") + 20);
-            string degreecheck = html.Substring(0, html.IndexOf(">"));
-            html = html.Remove(0, html.IndexOf(">") + 1);
-
-            string temp = DegreeCheck(html.Substring(0, html.IndexOf("<")), degreecheck);
-
-            if (currentWeatherNotificationImage != null)
-                currentWeatherNotification.Dispose();
-            currentWeatherNotificationImage = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
-            Font f = Font.Arial;
-            f.Size = 24;
-            currentWeatherNotificationImage.RenderText(0, 0, currentWeatherNotificationImage.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, temp, f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
-            if (currentWeatherNotification == null)
+            else if (searchResults.Keys.ElementAt(0) == "MultipleResults")
             {
-                currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, currentWeatherNotificationImage, "CurrentWeatherNotification", "");
-                currentWeatherNotification.State = Notification.States.Active;
-                currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
-                OM.Host.UIHandler.AddNotification(currentWeatherNotification);
+                for (int i = 0; i < searchResults.Count; i++)
+                    Results.Add(searchResults.Keys.ElementAt(i), searchResults[searchResults.Keys.ElementAt(i)]);
+                return true;
             }
             else
             {
-                currentWeatherNotification.Icon = currentWeatherNotificationImage;
-            }
-
-            return temp;
-        }
-
-        private imageItem GetSearchedImage(string html)
-        {
-            try
-            {
-                html = html.Remove(0, html.IndexOf("wx-data-part wx-first"));
-                html = html.Remove(0, html.IndexOf("src=") + 5);
-                string imageurl = html.Substring(0, html.IndexOf(" ") - 1);
-
-                imageItem image = new imageItem(OpenMobile.Net.Network.imageFromURL(imageurl));
-                return image;
-            }
-            catch { }
-            return imageItem.NONE;
-        }
-
-        private string GetSearchedDescription(string html)
-        {
-            html = html.Remove(0, html.IndexOf("wx-phrase") + 12);
-            if (html.Contains("weather-phrase"))
-                html = html.Remove(0, html.IndexOf(">") + 1);
-            string currentdescstr = html.Substring(0, html.IndexOf("<"));
-            return currentdescstr;
-        }
-
-        private void GetSearchedForecast(string html, Dictionary<string, object> Results)
-        {
-            html = html.Remove(0, html.IndexOf("wx-temperature-") + 3);
-            string degreecheck = html.Substring(0, html.IndexOf(">") - 1);
-            int i = 1;
-            while (html.Contains("wx-daypart"))
-            {
-                if (i == 11)
-                    break;
-                html = html.Remove(0, html.IndexOf("wx-daypart") + 10);
-                html = html.Remove(0, html.IndexOf("wx-label") + 10);
-                string forecastdaystr = html.Substring(0, html.IndexOf("<"));
-                Results.Add("ForecastDay" + i.ToString(), forecastdaystr);
-
-                html = html.Remove(0, html.IndexOf("src") + 5);
-                string forecastimageurl = html.Substring(0, html.IndexOf(" ") - 1);
-                imageItem forecastimage = new imageItem(OpenMobile.Net.Network.imageFromURL(forecastimageurl));
-                Results.Add("ForecastImage" + i.ToString(), forecastimage);
-
-                html = html.Remove(0, html.IndexOf("wx-temp") + 10);
-                string forecasthighstr = DegreeCheck(html.Substring(0, html.IndexOf("<")), degreecheck);
-                Results.Add("ForecastHigh" + i.ToString(), forecasthighstr);
-
-                html = html.Remove(0, html.IndexOf("wx-temp-alt") + 14);
-                string forecastlowstr = DegreeCheck(html.Substring(0, html.IndexOf("<")), degreecheck);
-                Results.Add("ForecastLow" + i.ToString(), forecastlowstr);
-
-                html = html.Remove(0, html.IndexOf("wx-phrase") + 11);
-                string forecastdescstr = html.Substring(0, html.IndexOf("<"));
-                if (forecastdescstr.Contains("x-severe"))
-                    forecastdescstr = forecastdescstr.Remove(0, 10);
-                Results.Add("ForecastDescription" + i.ToString(), forecastdescstr);
-
-                i++;
+                return false;
             }
         }
 
-        private Dictionary<string, string> SearchArea(string searchText, int screen = -1)
+        #region WeatherDotCom
+        private Dictionary<string, string> SearchAreaWeatherDotCom(string searchText, int screen = -1)
         {
 
             Dictionary<string, string> wi = new Dictionary<string, string>();
-            string url = "http://www.weather.com/search/enhancedlocalsearch?where=" + searchText + "&loctypes=1";
+            //string url = "http://www.weather.com/search/enhancedlocalsearch?where=" + searchText + "&loctypes=1";
+            string url = "http://www.weather.com/search/enhancedlocalsearch?where=" + searchText + "&loctypes=1&from=hdr"; //2015.01.13 *** The new url doesn't expose the search results via text in the html
             //string url = "http://www.weather.com/localsearch/morelocations/?where=" + searchText; //ONLY GETS 1-20 results???
             //url = url.Replace(",", "+");
             url = url.Replace(" ", ",");
@@ -1016,7 +937,8 @@ namespace OMDSWeather
                                 url = "http://www.weather.com" + searchhtml.Substring(0, searchhtml.IndexOf(" ") - 1);
                                 searchhtml = wc.DownloadString(url);
                             }
-                            wi = DictionaryAddRange(wi, MultipleAreas(searchhtml));
+                            wi = DictionaryAddRange(wi, MultipleAreasWeatherDotCom(searchhtml));
+
                         }
                         else
                         {
@@ -1029,7 +951,7 @@ namespace OMDSWeather
                             url = currentUrl.Replace("today", "tenday");
                             forecasthtml = wc.DownloadString(url);
                             //asynch alerts???
-                            Alerts(searchhtml, area, screen);
+                            AlertsWeatherDotCom(searchhtml, area, screen);
                             //asynch alerts???
                         }
                         wi.Add("SearchHtml", searchhtml);
@@ -1047,7 +969,7 @@ namespace OMDSWeather
             return wi;
         }
 
-        private Dictionary<string, string> MultipleAreas(string searchhtml)
+        private Dictionary<string, string> MultipleAreasWeatherDotCom(string searchhtml)
         {
             Dictionary<string, string> wi = new Dictionary<string, string>();
             string url = "";
@@ -1066,8 +988,666 @@ namespace OMDSWeather
             return wi;
         }
 
-        
-        private void Alerts(string html, string area, int screen = -1)
+        private string GetSearchedTempWeatherDotCom(string html, bool updateCurrent = false)
+        {
+            html = html.Remove(0, html.IndexOf("wx-temperature\">") + 20);
+            string degreecheck = html.Substring(0, html.IndexOf(">"));
+            html = html.Remove(0, html.IndexOf(">") + 1);
+            string temp = DegreeCheckWeatherDotCom(html.Substring(0, html.IndexOf("<")), degreecheck);
+            if (updateCurrent)
+            {
+                if (currentWeatherNotificationImage != null && currentWeatherNotification != null)
+                    currentWeatherNotification.Dispose();
+                currentWeatherNotificationImage = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
+                Font f = Font.Arial;
+                f.Size = 24;
+                currentWeatherNotificationImage.RenderText(0, 0, currentWeatherNotificationImage.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, temp, f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
+                if (currentWeatherNotification == null)
+                {
+                    //currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, currentWeatherNotificationImage, "CurrentWeatherNotification", "");
+                    //currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, imageItem.NONE.image, "CurrentWeatherNotification", "");
+                    currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", imageItem.NONE.image);
+                    currentWeatherNotification.State = Notification.States.Active;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    OM.Host.UIHandler.AddNotification(currentWeatherNotification);
+                }
+                else
+                {
+                    currentWeatherNotification.IconStatusBar.Dispose();
+                    currentWeatherNotification.IconStatusBar = currentWeatherNotificationImage;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    //currentWeatherNotification.Icon = currentWeatherNotificationImage;
+                }
+            }
+            return temp;
+        }
+
+        private imageItem GetSearchedImageWeatherDotCom(string html)
+        {
+            try
+            {
+                html = html.Remove(0, html.IndexOf("wx-data-part wx-first"));
+                html = html.Remove(0, html.IndexOf("src=") + 5);
+                string imageurl = html.Substring(0, html.IndexOf(" ") - 1);
+
+                imageItem image = new imageItem(OpenMobile.Net.Network.imageFromURL(imageurl));
+                return image;
+            }
+            catch { }
+            return imageItem.NONE;
+        }
+
+        private string GetSearchedDescriptionWeatherDotCom(string html)
+        {
+            html = html.Remove(0, html.IndexOf("wx-phrase") + 12);
+            if (html.Contains("weather-phrase"))
+                html = html.Remove(0, html.IndexOf(">") + 1);
+            string currentdescstr = html.Substring(0, html.IndexOf("<"));
+            return currentdescstr;
+        }
+
+        private void GetSearchedForecastWeatherDotCom(string html, Dictionary<string, object> Results)
+        {
+            html = html.Remove(0, html.IndexOf("wx-temperature-") + 3);
+            string degreecheck = html.Substring(0, html.IndexOf(">") - 1);
+            int i = 1;
+            while (html.Contains("wx-daypart"))
+            {
+                if (i == 11)
+                    break;
+                html = html.Remove(0, html.IndexOf("wx-daypart") + 10);
+                html = html.Remove(0, html.IndexOf("wx-label") + 10);
+                string forecastdaystr = html.Substring(0, html.IndexOf("<"));
+                Results.Add("ForecastDay" + i.ToString(), forecastdaystr);
+
+                html = html.Remove(0, html.IndexOf("src") + 5);
+                string forecastimageurl = html.Substring(0, html.IndexOf(" ") - 1);
+                imageItem forecastimage = new imageItem(OpenMobile.Net.Network.imageFromURL(forecastimageurl));
+                Results.Add("ForecastImage" + i.ToString(), forecastimage);
+
+                html = html.Remove(0, html.IndexOf("wx-temp") + 10);
+                string forecasthighstr = DegreeCheckWeatherDotCom(html.Substring(0, html.IndexOf("<")), degreecheck);
+                Results.Add("ForecastHigh" + i.ToString(), forecasthighstr);
+
+                html = html.Remove(0, html.IndexOf("wx-temp-alt") + 14);
+                string forecastlowstr = DegreeCheckWeatherDotCom(html.Substring(0, html.IndexOf("<")), degreecheck);
+                Results.Add("ForecastLow" + i.ToString(), forecastlowstr);
+
+                html = html.Remove(0, html.IndexOf("wx-phrase") + 11);
+                string forecastdescstr = html.Substring(0, html.IndexOf("<"));
+                if (forecastdescstr.Contains("x-severe"))
+                    forecastdescstr = forecastdescstr.Remove(0, 10);
+                Results.Add("ForecastDescription" + i.ToString(), forecastdescstr);
+
+                i++;
+            }
+        }
+
+        private string getUpdatedTimeWeatherDotCom(string html)
+        {
+            html = html.Remove(0, html.IndexOf("Updated:") + 9);
+            string time = html.Substring(0, html.IndexOf("<"));
+            if (String.IsNullOrEmpty(time))
+            {
+                html = html.Remove(0, html.IndexOf("Updated:") + 9);
+                time = html.Substring(0, html.IndexOf("<"));
+            }
+            return time;
+        }
+
+        private string DegreeCheckWeatherDotCom(string temp, string newdegree)
+        {
+            string newtemp = temp;
+            string currentdegree = "";
+            string degreesymbol = ((Char)176).ToString();
+            if (newdegree.Contains("temperature-f"))
+                newdegree = "Fahrenheit";
+            else
+                newdegree = "Celcius";
+            using (PluginSettings ps = new PluginSettings())
+            {
+                if ((ps.getSetting(this, "OMDSWeather.Degree") == "") || (ps.getSetting(this, "OMDSWeather.Degree") == null))
+                    ps.setSetting(this, "OMDSWeather.Degree", newdegree);
+                currentdegree = ps.getSetting(this, "OMDSWeather.Degree");
+            }
+            if (newdegree == "Fahrenheit")
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), false).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
+            else if (newdegree == "Celcius")
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), true).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
+            if (newtemp.IndexOf(".") >= 0)
+            {
+                string degreesymbol2 = degreesymbol + "F";
+                if (newtemp.IndexOf("C") >= 0)
+                    degreesymbol2 = degreesymbol + "C";
+                newtemp = newtemp.Remove(newtemp.IndexOf("."));
+                newtemp = newtemp + degreesymbol2;
+            }
+            return newtemp;
+        }
+        #endregion
+
+        #region WeatherUnderground
+        private Dictionary<string, string> SearchAreaWeatherUnderground(string searchText, int screen = -1)
+        {
+            Dictionary<string, string> wi = new Dictionary<string, string>();
+            string url = "" + searchText;
+            url = url.Replace(" ", ",");
+            if (url.Contains("("))
+                url = url.Substring(0, url.IndexOf("(")).Trim();
+            using (System.Net.WebClient wc = new System.Net.WebClient())
+            {
+                if (!OM.Host.InternetAccess)
+                {
+                    wi.Clear();
+                    wi.Add("No Internet Connection Found", "");
+                }
+                else
+                {
+                    try
+                    {
+                        string searchhtml = "";
+                        string forecasthtml = "";
+                        string currentUrl = "";
+                        HttpWebRequest myWebRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+                        using (HttpWebResponse myWebResponse = (HttpWebResponse)myWebRequest.GetResponse())
+                        {
+                            currentUrl = myWebResponse.ResponseUri.ToString();
+                            using (System.IO.StreamReader sr = new System.IO.StreamReader(myWebResponse.GetResponseStream()))
+                            {
+                                searchhtml = sr.ReadToEnd();
+                            }
+                        }
+                        //string searchhtml = wc.DownloadString(url);
+                        if (searchhtml.ToLower().Contains("did not return results."))
+                        {
+                            wi.Add("NothingFound", "");
+                        }
+                        else if (searchhtml.ToLower().Contains("<h1>weather for")) //return wi with areas to choose from
+                        {
+                            wi.Add("MultipleResults", "");
+                            wi = DictionaryAddRange(wi, MultipleAreasWeatherUnderground(searchhtml));
+
+                        }
+                        else
+                        {
+                            string area = searchhtml.Remove(0, searchhtml.IndexOf("<div id=\"location\">"));
+                            area = searchhtml.Remove(0, searchhtml.IndexOf("<h1>") + 4).Trim();
+                            area = area.Substring(0, area.IndexOf("<span")).Trim();
+                            wi.Add("AreaFound", area);
+                            forecasthtml = searchhtml;
+                            //asynch alerts???
+                            //Alerts(searchhtml, area, screen);
+                            //asynch alerts???
+                        }
+                        wi.Add("SearchHtml", searchhtml);
+                        wi.Add("ForecastHtml", forecasthtml);
+                    }
+                    catch (Exception ex)
+                    {
+                        wi.Clear();
+                        wi.Add("Problem With Internet Connection", "");
+                    }
+                }
+            }
+
+            return wi;
+        }
+
+        private Dictionary<string, string> MultipleAreasWeatherUnderground(string searchhtml)
+        {
+            //<h1>Weather for
+            Dictionary<string, string> wi = new Dictionary<string, string>();
+            string url = "";
+            searchhtml = searchhtml.Remove(0, searchhtml.IndexOf("<h1>Weather for"));
+            while (searchhtml.Contains("title=\"Weather Forecast"))
+            {
+                url = searchhtml.Substring(0, searchhtml.IndexOf("title=\"Weather Forecast")).Trim();
+                url = url.Remove(0, url.LastIndexOf("<td><a href=") + 12).Trim();
+                url = url.Replace("\"", "");
+                searchhtml = searchhtml.Remove(0, searchhtml.IndexOf("title=\"Weather Forecast") + 15);
+                searchhtml = searchhtml.Remove(0, searchhtml.IndexOf(">") + 1);
+                if (!wi.Keys.Contains(searchhtml.Substring(0, searchhtml.IndexOf("</a>"))))
+                    wi.Add(searchhtml.Substring(0, searchhtml.IndexOf("</a>")), "http://www.wunderground.com" + url);
+            }
+            return wi;
+        }
+
+        private string GetSearchedTempWeatherUnderground(string html, bool updateCurrent = false)
+        {
+            html = html.Remove(0, html.IndexOf("<span id=\"update-time\">") + 20);
+            html = html.Remove(0, html.IndexOf("data-variable=\"temperature\">"));
+            string degreecheck = html.Remove(0, html.IndexOf("<span class=\"wx-unit\">") + 22);
+            html = html.Substring(0, html.IndexOf("</span>"));
+            html = html.Remove(0, html.LastIndexOf(">") + 1);
+            string temp = DegreeCheckWeatherUnderground(html.Substring(0, html.IndexOf("<")), degreecheck);
+            if (updateCurrent)
+            {
+                if (currentWeatherNotificationImage != null && currentWeatherNotification != null)
+                    currentWeatherNotification.Dispose();
+                currentWeatherNotificationImage = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
+                Font f = Font.Arial;
+                f.Size = 24;
+                currentWeatherNotificationImage.RenderText(0, 0, currentWeatherNotificationImage.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, temp, f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
+                if (currentWeatherNotification == null)
+                {
+                    //currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, currentWeatherNotificationImage, "CurrentWeatherNotification", "");
+                    //currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, imageItem.NONE.image, "CurrentWeatherNotification", "");
+                    currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", imageItem.NONE.image);
+                    currentWeatherNotification.State = Notification.States.Active;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    OM.Host.UIHandler.AddNotification(currentWeatherNotification);
+                }
+                else
+                {
+                    currentWeatherNotification.IconStatusBar.Dispose();
+                    currentWeatherNotification.IconStatusBar = currentWeatherNotificationImage;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    //currentWeatherNotification.Icon = currentWeatherNotificationImage;
+                }
+            }
+            return temp;
+        }
+
+        private imageItem GetSearchedImageWeatherUnderground(string html)
+        {
+            try
+            {
+                html = html.Remove(0, html.IndexOf("src=") + 5);
+                string imageurl = html.Substring(0, html.IndexOf(" ") - 1);
+
+                imageItem image = new imageItem(OpenMobile.Net.Network.imageFromURL(imageurl));
+                return image;
+            }
+            catch { }
+            return imageItem.NONE;
+        }
+
+        private string GetSearchedDescriptionWeatherUnderground(string html)
+        {
+            html = html.Remove(0, html.IndexOf("data-variable=\"condition\"") + 12);
+            html = html.Remove(0, html.IndexOf("wx-value\">") + 10);
+            string currentdescstr = html.Substring(0, html.IndexOf("<"));
+            return currentdescstr;
+        }
+
+        private void GetSearchedForecastWeatherUnderground(string html, Dictionary<string, object> Results)
+        {
+            html = html.Remove(0, html.IndexOf("wx-temperature-") + 3);
+            string degreecheck = html.Substring(0, html.IndexOf(">") - 1);
+            int i = 1;
+            while (html.Contains("wx-daypart"))
+            {
+                if (i == 11)
+                    break;
+                html = html.Remove(0, html.IndexOf("wx-daypart") + 10);
+                html = html.Remove(0, html.IndexOf("wx-label") + 10);
+                string forecastdaystr = html.Substring(0, html.IndexOf("<"));
+                Results.Add("ForecastDay" + i.ToString(), forecastdaystr);
+
+                html = html.Remove(0, html.IndexOf("src") + 5);
+                string forecastimageurl = html.Substring(0, html.IndexOf(" ") - 1);
+                imageItem forecastimage = new imageItem(OpenMobile.Net.Network.imageFromURL(forecastimageurl));
+                Results.Add("ForecastImage" + i.ToString(), forecastimage);
+
+                html = html.Remove(0, html.IndexOf("wx-temp") + 10);
+                string forecasthighstr = DegreeCheckWeatherUnderground(html.Substring(0, html.IndexOf("<")), degreecheck);
+                Results.Add("ForecastHigh" + i.ToString(), forecasthighstr);
+
+                html = html.Remove(0, html.IndexOf("wx-temp-alt") + 14);
+                string forecastlowstr = DegreeCheckWeatherUnderground(html.Substring(0, html.IndexOf("<")), degreecheck);
+                Results.Add("ForecastLow" + i.ToString(), forecastlowstr);
+
+                html = html.Remove(0, html.IndexOf("wx-phrase") + 11);
+                string forecastdescstr = html.Substring(0, html.IndexOf("<"));
+                if (forecastdescstr.Contains("x-severe"))
+                    forecastdescstr = forecastdescstr.Remove(0, 10);
+                Results.Add("ForecastDescription" + i.ToString(), forecastdescstr);
+
+                i++;
+            }
+        }
+
+        private string getUpdatedTimeWeatherUnderground(string html)
+        {
+            html = html.Remove(0, html.IndexOf("Updated:") + 9);
+            string time = html.Substring(0, html.IndexOf("<"));
+            if (String.IsNullOrEmpty(time))
+            {
+                html = html.Remove(0, html.IndexOf("Updated:") + 9);
+                time = html.Substring(0, html.IndexOf("<"));
+            }
+            return time;
+        }
+
+        private string DegreeCheckWeatherUnderground(string temp, string newdegree)
+        {
+            string newtemp = temp;
+            string currentdegree = "";
+            string degreesymbol = ((Char)176).ToString();
+            if (newdegree.Contains("F"))
+                newdegree = "Fahrenheit";
+            else
+                newdegree = "Celcius";
+            using (PluginSettings ps = new PluginSettings())
+            {
+                if ((ps.getSetting(this, "OMDSWeather.Degree") == "") || (ps.getSetting(this, "OMDSWeather.Degree") == null))
+                    ps.setSetting(this, "OMDSWeather.Degree", newdegree);
+                currentdegree = ps.getSetting(this, "OMDSWeather.Degree");
+            }
+            if (newdegree == "Fahrenheit")
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), false).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
+            else if (newdegree == "Celcius")
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), true).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
+            if (newtemp.IndexOf(".") >= 0)
+            {
+                string degreesymbol2 = degreesymbol + "F";
+                if (newtemp.IndexOf("C") >= 0)
+                    degreesymbol2 = degreesymbol + "C";
+                newtemp = newtemp.Remove(newtemp.IndexOf("."));
+                newtemp = newtemp + degreesymbol2;
+            }
+            return newtemp;
+        }
+
+        #endregion
+
+        #region WeatherMSN
+        private Dictionary<string, string> SearchAreaWeatherMSN(string searchText, int screen = -1)
+        {
+            Dictionary<string, string> wi = new Dictionary<string, string>();
+            string url = "http://www.msn.com/en-us/weather/weathersearch?q=" + searchText;
+            url = url.Replace(" ", "+");
+            //url = url.Replace (",", "+");
+            if (url.Contains("("))
+                url = url.Substring(0, url.IndexOf("(")).Trim();
+            using (System.Net.WebClient wc = new System.Net.WebClient())
+            {
+                if (!OM.Host.InternetAccess)
+                {
+                    wi.Clear();
+                    wi.Add("No Internet Connection Found", "");
+                }
+                else
+                {
+                    try
+                    {
+                        string searchhtml = "";
+                        string forecasthtml = "";
+                        string currentUrl = "";
+                        HttpWebRequest myWebRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+                        using (HttpWebResponse myWebResponse = (HttpWebResponse)myWebRequest.GetResponse())
+                        {
+                            currentUrl = myWebResponse.ResponseUri.ToString();
+                            using (System.IO.StreamReader sr = new System.IO.StreamReader(myWebResponse.GetResponseStream()))
+                            {
+                                searchhtml = sr.ReadToEnd();
+                            }
+                        }
+                        //string searchhtml = wc.DownloadString(url);
+                        if (searchhtml.ToLower().Contains("no weather search results are found."))
+                        {
+                            wi.Add("NothingFound", "");
+                        }
+                        else if (searchhtml.ToLower().Contains("<h2>places</h2>")) //return wi with areas to choose from
+                        {
+                            wi.Add("MultipleResults", "");
+                            wi = DictionaryAddRange(wi, MultipleAreasWeatherMSN(searchhtml));
+                            if (wi.Count == 2)
+                            {
+                                searchhtml = wc.DownloadString(wi[wi.Keys.ElementAt(1)]);
+                                wi.Clear();
+                                string area = searchhtml.Remove(0, searchhtml.IndexOf("<title>") + 7);
+                                area = area.Substring(0, area.IndexOf("-")).Trim();
+                                wi.Add("AreaFound", area);
+                                forecasthtml = searchhtml;
+                                wi.Add("SearchHtml", searchhtml);
+                                wi.Add("ForecastHtml", forecasthtml);
+                                //asynch alerts???
+                                //Alerts(searchhtml, area, screen);
+                                //asynch alerts???
+                            }
+                        }
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        wi.Clear();
+                        wi.Add("Problem With Internet Connection", "");
+                    }
+                }
+            }
+
+            return wi;
+        }
+
+        private Dictionary<string, string> MultipleAreasWeatherMSN(string searchhtml)
+        {
+            //<h1>Weather for
+            Dictionary<string, string> wi = new Dictionary<string, string>();
+            string url = "";
+            searchhtml = searchhtml.Remove(0, searchhtml.IndexOf("<h2>Places</h2>"));
+            searchhtml = searchhtml.Substring(0, searchhtml.IndexOf("<h2>Web Results</h2>"));
+            while (searchhtml.Contains("a href="))
+            {
+                searchhtml = searchhtml.Remove(0, searchhtml.IndexOf("a href=") + 8);
+                url = searchhtml.Substring(0, searchhtml.IndexOf("\""));
+                searchhtml = searchhtml.Remove(0, searchhtml.IndexOf("<span>") + 6);
+                if (!wi.Keys.Contains(searchhtml.Substring(0, searchhtml.IndexOf("<"))))
+                    wi.Add(HttpUtility.HtmlDecode(searchhtml.Substring(0, searchhtml.IndexOf("<"))), "http://www.msn.com" + url);
+            }
+            return wi;
+        }
+
+        private string GetSearchedTempWeatherMSN(string html, bool updateCurrent = false)
+        {
+            html = html.Remove(0, html.IndexOf("<span class=\"current\"") + 20);
+            html = html.Remove(0, html.IndexOf(">") + 1);
+            string degreecheck = html.Remove(0, html.IndexOf("<div class=\"type\">") + 18);
+            //html = html.Substring (0, html.IndexOf ("</span>"));
+            //html = html.Remove (0, html.LastIndexOf (">") + 1);
+            string temp = DegreeCheckWeatherUnderground(html.Substring(0, html.IndexOf("<")).Trim(), degreecheck.Substring(0, degreecheck.IndexOf("<")).Trim());
+            if (updateCurrent)
+            {
+                if (currentWeatherNotificationImage != null && currentWeatherNotification != null)
+                    currentWeatherNotification.Dispose();
+                currentWeatherNotificationImage = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
+                Font f = Font.Arial;
+                f.Size = 24;
+                currentWeatherNotificationImage.RenderText(0, 0, currentWeatherNotificationImage.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, temp, f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
+                if (currentWeatherNotification == null)
+                {
+                    //currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, currentWeatherNotificationImage, "CurrentWeatherNotification", "");
+                    //currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, imageItem.NONE.image, "CurrentWeatherNotification", "");
+                    currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", imageItem.NONE.image);
+                    currentWeatherNotification.State = Notification.States.Active;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    OM.Host.UIHandler.AddNotification(currentWeatherNotification);
+                }
+                else
+                {
+                    currentWeatherNotification.IconStatusBar.Dispose();
+                    currentWeatherNotification.IconStatusBar = currentWeatherNotificationImage;
+                    currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                    //currentWeatherNotification.Icon = currentWeatherNotificationImage;
+                }
+            }
+            return temp;
+        }
+
+        private imageItem GetSearchedImageWeatherMSN(string html)
+        {
+            try
+            {
+                html = html.Remove(0, html.IndexOf("src=") + 5);
+                string imageurl = html.Substring(0, html.IndexOf(" ") - 1);
+
+                imageItem image = new imageItem(OpenMobile.Net.Network.imageFromURL(imageurl));
+                return image;
+            }
+            catch { }
+            return imageItem.NONE;
+        }
+
+        private string GetSearchedDescriptionWeatherMSN(string html)
+        {
+            html = html.Remove(0, html.IndexOf("data-variable=\"condition\"") + 12);
+            html = html.Remove(0, html.IndexOf("wx-value\">") + 10);
+            string currentdescstr = html.Substring(0, html.IndexOf("<"));
+            return currentdescstr;
+        }
+
+        private void GetSearchedForecastWeatherMSN(string html, Dictionary<string, object> Results)
+        {
+            html = html.Remove(0, html.IndexOf("<section class=\"cur\" data-degree=") + 15);
+            string degreecheck = html.Remove(0, html.IndexOf("class=\"type\">&#176;"));
+            degreecheck = degreecheck.Substring(0, degreecheck.IndexOf("<"));
+            html = html.Remove(0, html.IndexOf("<ul class=\"forecast-list\">") + 3);
+            //html = html.Substring(0, html.IndexOf("<div class=\"dailydetails\">"));
+            //string degreecheck = html.Substring(0, html.IndexOf(">") - 1);
+            int i = 1;
+            while (html.Contains("<a role=\"button\""))
+            {
+                if (i == 11)
+                    break;
+                html = html.Remove(0, html.IndexOf("<a role=\"button\"") + 10);
+
+                html = html.Remove(0, html.IndexOf("<span>") + 6);
+                string forecastdaystr = html.Substring(0, html.IndexOf("<"));
+                html = html.Remove(0, html.IndexOf("<span>") + 6).Trim();
+                Results.Add("ForecastDay" + i.ToString(), forecastdaystr + " " + html.Substring(0, html.IndexOf("<")));
+
+                html = html.Remove(0, html.IndexOf("src") + 5);
+                string forecastimageurl = html.Substring(0, html.IndexOf(" ") - 1);
+                imageItem forecastimage = new imageItem(OpenMobile.Net.Network.imageFromURL(forecastimageurl));
+                Results.Add("ForecastImage" + i.ToString(), forecastimage);
+
+                html = html.Remove(0, html.IndexOf("alt=\"") + 5);
+                string forecastdescstr = html.Substring(0, html.IndexOf("\""));
+                Results.Add("ForecastDescription" + i.ToString(), forecastdescstr);
+
+                html = html.Remove(0, html.IndexOf("<p") + 1);
+                html = html.Remove(0, html.IndexOf(">") + 1);
+                string forecasthighstr = DegreeCheckWeatherUnderground(html.Substring(0, html.IndexOf("&")), degreecheck);
+                Results.Add("ForecastHigh" + i.ToString(), forecasthighstr);
+
+                html = html.Remove(0, html.IndexOf("<p") + 1);
+                html = html.Remove(0, html.IndexOf(">") + 1);
+                string forecastlowstr = DegreeCheckWeatherUnderground(html.Substring(0, html.IndexOf("&")), degreecheck);
+                Results.Add("ForecastLow" + i.ToString(), forecastlowstr);
+
+                //				html = html.Remove(0, html.IndexOf("wx-phrase") + 11);
+                //
+                //				if (forecastdescstr.Contains("x-severe"))
+                //					forecastdescstr = forecastdescstr.Remove(0, 10);
+
+
+                i++;
+            }
+        }
+
+        private string getUpdatedTimeWeatherMSN(string html)
+        {
+            //			html = html.Remove(0, html.IndexOf("Updated:") + 9);
+            //			string time = html.Substring(0, html.IndexOf("<"));
+            //			if (String.IsNullOrEmpty(time))
+            //			{
+            //				html = html.Remove(0, html.IndexOf("Updated:") + 9);
+            //				time = html.Substring(0, html.IndexOf("<"));
+            //			}
+            //			return time;
+            return "";
+        }
+
+        private string DegreeCheckWeatherMSN(string temp, string newdegree)
+        {
+            string newtemp = temp;
+            string currentdegree = "";
+            string degreesymbol = ((Char)176).ToString();
+            if (newdegree.Contains("F"))
+                newdegree = "Fahrenheit";
+            else
+                newdegree = "Celcius";
+            using (PluginSettings ps = new PluginSettings())
+            {
+                if ((ps.getSetting(this, "OMDSWeather.Degree") == "") || (ps.getSetting(this, "OMDSWeather.Degree") == null))
+                    ps.setSetting(this, "OMDSWeather.Degree", newdegree);
+                currentdegree = ps.getSetting(this, "OMDSWeather.Degree");
+            }
+            if (newdegree == "Fahrenheit")
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), false).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
+            else if (newdegree == "Celcius")
+            {
+                try
+                {
+                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), true).ToString();
+                }
+                catch
+                {
+                    newtemp = "?";
+                }
+            }
+            if (newtemp.IndexOf(".") >= 0)
+            {
+                string degreesymbol2 = degreesymbol + "F";
+                if (newtemp.IndexOf("C") >= 0)
+                    degreesymbol2 = degreesymbol + "C";
+                newtemp = newtemp.Remove(newtemp.IndexOf("."));
+                newtemp = newtemp + degreesymbol2;
+            }
+            return newtemp;
+        }
+        #endregion
+
+        private void AlertsWeatherDotCom(string html, string area, int screen = -1)
         {
             int alertCount = 0;
             if (html.Contains("wx-show-alert-links")) //more than 1 alert
@@ -1168,51 +1748,51 @@ namespace OMDSWeather
                 Color overlayColor = Color.Red;
                 if (alertHtml.Contains("pollen"))
                     overlayColor = Color.Yellow;
-                    string alertURL = "www.weather.com" + alertHtml.Substring(0, alertHtml.IndexOf(" ") - 1);
-                    string alertDescription = alertHtml.Substring(0, alertHtml.IndexOf("</a>"));
-                    alertDescription = alertDescription.Remove(0, alertDescription.LastIndexOf(">") + 1);
-                    string alertTime = "";
-                    if (html.Contains("wx-alert-time"))
+                string alertURL = "www.weather.com" + alertHtml.Substring(0, alertHtml.IndexOf(" ") - 1);
+                string alertDescription = alertHtml.Substring(0, alertHtml.IndexOf("</a>"));
+                alertDescription = alertDescription.Remove(0, alertDescription.LastIndexOf(">") + 1);
+                string alertTime = "";
+                if (html.Contains("wx-alert-time"))
+                {
+                    html = html.Remove(0, html.IndexOf("wx-alert-time") + 15);
+                    alertTime = " -- " + html.Substring(0, html.IndexOf("<"));
+                }
+                Notification newNotification = new Notification(this, "Weather Alerts", OM.Host.getPluginImage(this, "Images|Icon-Weather_Conditions2").image.Copy().Overlay(overlayColor), OM.Host.getPluginImage(this, "Images|Icon-Weather_Conditions2").image.Copy().Overlay(overlayColor), "**** " + alertDescription + " ****", area + alertTime);
+                if ((screen == -1) || (fromCurrent[screen]))
+                    newNotification.Tag = "Current";
+                else
+                    newNotification.Tag = "";
+                if (screen == -1)
+                {
+                    for (int i = 0; i < OM.Host.ScreenCount; i++)
                     {
-                        html = html.Remove(0, html.IndexOf("wx-alert-time") + 15);
-                        alertTime = " -- " + html.Substring(0, html.IndexOf("<"));
+                        AlertAddChange(i, newNotification, alertCount);
                     }
-                    Notification newNotification = new Notification(this, "Weather Alerts", OM.Host.getPluginImage(this, "Images|Icon-Weather_Conditions2").image.Copy().Overlay(overlayColor), OM.Host.getPluginImage(this, "Images|Icon-Weather_Conditions2").image.Copy().Overlay(overlayColor), "**** " + alertDescription + " ****", area + alertTime);
-                    if ((screen == -1) || (fromCurrent[screen]))
-                        newNotification.Tag = "Current";
-                    else
-                        newNotification.Tag = "";
-                    if (screen == -1)
-                    {
-                        for (int i = 0; i < OM.Host.ScreenCount; i++)
-                        {
-                            AlertAddChange(i, newNotification, alertCount);
-                        }
-                    }
+                }
+                else
+                {
+                    if (fromCurrent[screen])
+                        AlertAddChange(screen, newNotification, alertCount);
                     else
                     {
-                        if(fromCurrent[screen])
-                            AlertAddChange(screen, newNotification, alertCount);
-                        else
+                        if (alertCount == 0)
                         {
-                            if (alertCount == 0)
+                            //get the starting point of the "non current" notifications
+                            for (int i = 0; i < alertNotifications[screen].Count; i++)
                             {
-                                //get the starting point of the "non current" notifications
-                                for (int i = 0; i < alertNotifications[screen].Count; i++)
+                                if (alertNotifications[screen][i].Tag.ToString() == "Current")
                                 {
-                                    if (alertNotifications[screen][i].Tag.ToString() == "Current")
-                                    {
-                                        alertCount += 1;
-                                    }
-                                    else
-                                        break;
+                                    alertCount += 1;
                                 }
+                                else
+                                    break;
                             }
-                            AlertAddChange(screen, newNotification, alertCount);
                         }
+                        AlertAddChange(screen, newNotification, alertCount);
                     }
-                    alertCount += 1;
-                
+                }
+                alertCount += 1;
+
 
             }
             else //no alerts
@@ -1290,53 +1870,7 @@ namespace OMDSWeather
             alertNotifications[screen].Remove(notification);
         }
 
-        private string DegreeCheck(string temp, string newdegree)
-        {
-            string newtemp = temp;
-            string currentdegree = "";
-            string degreesymbol = ((Char)176).ToString();
-            if (newdegree.Contains("temperature-f"))
-                newdegree = "Fahrenheit";
-            else
-                newdegree = "Celcius";
-            using (PluginSettings ps = new PluginSettings())
-            {
-                if ((ps.getSetting(this, "OMDSWeather.Degree") == "") || (ps.getSetting(this, "OMDSWeather.Degree") == null))
-                    ps.setSetting(this, "OMDSWeather.Degree", newdegree);
-                currentdegree = ps.getSetting(this, "OMDSWeather.Degree");
-            }
-            if (newdegree == "Fahrenheit")
-            {
-                try
-                {
-                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), false).ToString();
-                }
-                catch
-                {
-                    newtemp = "?";
-                }
-            }
-            else if (newdegree == "Celcius")
-            {
-                try
-                {
-                    newtemp = Globalization.convertToLocalTemp(Convert.ToDouble(temp), true).ToString();
-                }
-                catch
-                {
-                    newtemp = "?";
-                }
-            }
-            if (newtemp.IndexOf(".") >= 0)
-            {
-                string degreesymbol2 = degreesymbol + "F";
-                if (newtemp.IndexOf("C") >= 0)
-                    degreesymbol2 = degreesymbol + "C";
-                newtemp = newtemp.Remove(newtemp.IndexOf("."));
-                newtemp = newtemp + degreesymbol2;
-            }
-            return newtemp;
-        }
+
 
         private string GetSearchHTML(int screen)
         {
@@ -1350,7 +1884,36 @@ namespace OMDSWeather
             return inner["ForecastHtml"];
         }
 
-        
+        private string GetCurrentTempWeatherDotCom(string html)
+        {
+            html = html.Remove(0, html.IndexOf("wx-temperature\">") + 20);
+            string degreecheck = html.Substring(0, html.IndexOf(">"));
+            html = html.Remove(0, html.IndexOf(">") + 1);
+
+            string temp = DegreeCheckWeatherDotCom(html.Substring(0, html.IndexOf("<")), degreecheck);
+
+            if (currentWeatherNotificationImage != null)
+                currentWeatherNotification.Dispose();
+            currentWeatherNotificationImage = new OImage(Color.Transparent, 85, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height);
+            Font f = Font.Arial;
+            f.Size = 24;
+            currentWeatherNotificationImage.RenderText(0, 0, currentWeatherNotificationImage.Width, OM.Host.UIHandler.StatusBar_DefaultIconSize.Height, temp, f, eTextFormat.Normal, Alignment.CenterCenter, BuiltInComponents.SystemSettings.SkinTextColor, BuiltInComponents.SystemSettings.SkinFocusColor, FitModes.FitFillSingleLine);
+            if (currentWeatherNotification == null)
+            {
+                currentWeatherNotification = new Notification(Notification.Styles.IconOnly, this, "CurrentWeatherNotification", DateTime.Now, null, currentWeatherNotificationImage, "CurrentWeatherNotification", "");
+                currentWeatherNotification.State = Notification.States.Active;
+                currentWeatherNotification.IconSize_Width = currentWeatherNotificationImage.Width;
+                OM.Host.UIHandler.AddNotification(currentWeatherNotification);
+            }
+            else
+            {
+                currentWeatherNotification.Icon = currentWeatherNotificationImage;
+            }
+
+            return temp;
+        }
+
+        /*
         private void tmr_Elapsed(object sender, EventArgs e)
         {
             for (int i = 0; i < tmr.Length; i++)
@@ -1400,6 +1963,7 @@ namespace OMDSWeather
                 }
             }
         }
+        */
 
         //private string GetSearchedTemp(OpenMobile.Data.DataSource dataSource, int screen)
         //{
