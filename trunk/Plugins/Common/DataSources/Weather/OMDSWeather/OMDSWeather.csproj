@@ -53,6 +53,7 @@
       <HintPath>..\..\..\..\..\FrontEnd\References\System.Data.SQLite.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
