@@ -328,7 +328,7 @@ Namespace OMFuel
 
             ' Set up the main container for prices
             Dim theContainer As OMContainer = sender(screen, "mainContainer")
-            theContainer.Disabled() = True
+            theContainer.NoUserInteraction() = True
             theContainer.ClearControls()
 
             If m_Verbose Then
@@ -471,7 +471,7 @@ Namespace OMFuel
 
             End If
 
-            theContainer.Disabled() = False
+            theContainer.NoUserInteraction() = False
 
             If Not String.IsNullOrEmpty(message) Then
                 If sender.IsVisible(screen) Then
