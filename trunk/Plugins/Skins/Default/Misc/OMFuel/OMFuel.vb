@@ -102,6 +102,7 @@ Namespace OMFuel
             mainContainer.ScrollBar_ColorNormal = Color.Transparent
             mainContainer.BackgroundColor = Color.Transparent
             mainContainer.Opacity = 0
+            mainContainer.MainScrollDirection = OMContainer.ScrollDirections.X
             omFuelpanel.addControl(mainContainer)
 
             Dim PopUpMenuStrip = New ButtonStrip(Me.pluginName, "FuelPrices", "PopUpMenuStrip")
@@ -327,6 +328,7 @@ Namespace OMFuel
 
             ' Set up the main container for prices
             Dim theContainer As OMContainer = sender(screen, "mainContainer")
+            theContainer.Disabled() = True
             theContainer.ClearControls()
 
             If m_Verbose Then
@@ -468,6 +470,8 @@ Namespace OMFuel
                 Next ' Looping through highest level dictionary
 
             End If
+
+            theContainer.Disabled() = False
 
             If Not String.IsNullOrEmpty(message) Then
                 If sender.IsVisible(screen) Then
