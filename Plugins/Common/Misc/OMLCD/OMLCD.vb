@@ -176,6 +176,7 @@ Namespace OMLCD
         Private LastKeyAssign As Integer = 0                ' The keycode received while assigning buttons
         Private m_Function_Key As Boolean = False           ' Indicates a Fn keypress, waiting to handle
         Private m_Use_Fn_Ind As Boolean = True              ' Show Fn on bottom right corner while Fn key is active
+        Private m_military As Boolean = False               ' Convert time to military?
 
         Private display_data As New List(Of display_items_struct)              ' To track displayable items
 
@@ -2412,6 +2413,9 @@ Namespace OMLCD
             For x = 0 To display_data.Count - 1
                 If display_data(x).Source = sensor.FullName Then
                     display_data(x).Value = sensor.FormatedValue
+                    If display_data(x).Source Like "*Time*" Then
+                        display_data(x).Value = TimeReformat(display_data(x).Value)
+                    End If
                     display_data(x).IsNew = True
                     display_data(x).lastChar = 0
                     If display_data(x).OnScreen = True Then
@@ -2526,13 +2530,13 @@ Namespace OMLCD
                         End Try
                         label = keys(0)
                         source = keys(1)
+                        If source Like "*Time*" Then
+                            ' the datasource probably contains a time value
+                            data = TimeReformat(data)
+                        End If
                     End If
                     ' Here, if user options selected specific time format
                     '  and this is a time datasource, we can reformat here
-                    If keys(1) Like "*Time*" Then
-                        ' the datasource probably contains a time value
-                        data = TimeReformat(data)
-                    End If
                     display_data.Add(New display_items_struct(source, label, True, data, False, 0))
                 Else
                     ' No more data to fill the current page
@@ -2555,10 +2559,22 @@ Namespace OMLCD
 
         End Sub
         Private Function TimeReformat(ByVal source As String) As String
+            ' Reformat time value to save space
 
             If m_Verbose Then
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Time value: {0}", source))
             End If
+
+            If source.Length > m_Cell_Size Then
+                ' Remove AM/PM indicator + it's leading space
+                source = source.Replace(" AM", "A")
+                source = source.Replace(" PM", "P")
+            End If
+
+            If m_military Then
+                ' Do nothing for now (we have to find the time value)
+            End If
+
             Return source
 
         End Function
