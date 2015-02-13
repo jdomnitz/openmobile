@@ -40,7 +40,7 @@ Public Class RadioComm
     Private m_Fade As Boolean = True
     Private m_verbose As Boolean = False        ' Controls logging of extra info to debug log
     Private m_RouteVolume As Integer = 100
-    Private connect_timeout As Integer = 6     ' Time to wait for connect and powerup of Radio in seconds
+    Private connect_timeout As Integer = 20     ' Time to wait for connect and powerup of Radio in seconds
     Private m_Retries As Integer = 5            ' How many times to have the driver check for a radio
     Private m_Tries As Integer = 0              ' How many tries left to test for a radio
     Private port_index As Integer = -1          ' Which port in the array we are working with
@@ -165,13 +165,18 @@ Public Class RadioComm
                     m_Radio.Open()
                     starttime = Now()
                     Do While Not m_Radio.IsPowered
-                        ' wait max time then exit
+                        ' wait a little while for radio to come alive
                         elapsedtime = Now().Subtract(starttime)
-                        'm_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Elapsed time: {0}ms.", elapsedtime.Seconds))
+                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Elapsed time: {0}ms.", elapsedtime.Seconds))
                         If elapsedtime.Seconds > connect_timeout Then
+                            ' the radio did not come up
                             If m_verbose Then
                                 m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Waited too long for response.")
+                                If m_Radio.IsOpen Then
+                                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", "(Radio reports COM is open)")
+                                End If
                             End If
+                            m_Radio.Close()
                             Exit Do
                         End If
                         If m_CommError Then
@@ -180,6 +185,7 @@ Public Class RadioComm
                                 m_Host.DebugMsg(OpenMobile.DebugMessageType.Error, "OMVisteonRadio - find_radio()", String.Format("Comm error probing {0}.", available_ports(x)))
                             End If
                             m_CommError = False
+                            m_Radio.Close()
                             Exit Do
                         End If
                         System.Threading.Thread.Sleep(50)
@@ -195,6 +201,7 @@ Public Class RadioComm
                         m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Attempt #{0}: Serial access denied.", x))
                     End If
                 End If
+                System.Threading.Thread.Sleep(500)
             Next
         End If
 
@@ -464,6 +471,54 @@ Public Class RadioComm
         End Try
 
     End Function
+    Private Sub m_Host_OnSystemEvent(ByVal type As OpenMobile.eFunction, args As Object) Handles m_Host.OnSystemEvent
+
+        Select Case type
+
+            Case Is = eFunction.shutdown
+                If m_verbose Then
+                    m_Host.DebugMsg(String.Format("OMVisteonRadio - m_Host_OnSystemEvent()"), "System Event: Shutdown")
+                End If
+                If m_Radio.IsPowered Then
+                    m_Radio.PowerOff()
+                End If
+                If m_Radio.IsOpen Then
+                    m_Radio.Close()
+                End If
+            Case Is = eFunction.closeProgram
+                If m_verbose Then
+                    m_Host.DebugMsg(String.Format("OMVisteonRadio - m_Host_OnSystemEvent()"), "System Event: closeProgram")
+                End If
+                If m_Radio.IsPowered Then
+                    m_Radio.PowerOff()
+                End If
+                If m_Radio.IsOpen Then
+                    m_Radio.Close()
+                End If
+            Case Is = eFunction.restartProgram
+                If m_verbose Then
+                    m_Host.DebugMsg(String.Format("OMVisteonRadio - m_Host_OnSystemEvent()"), "System Event: restartProgram")
+                End If
+                If m_Radio.IsPowered Then
+                    m_Radio.PowerOff()
+                End If
+                If m_Radio.IsOpen Then
+                    m_Radio.Close()
+                End If
+            Case Is = eFunction.restart
+                If m_verbose Then
+                    m_Host.DebugMsg(String.Format("OMVisteonRadio - m_Host_OnSystemEvent()"), "System Event: restart")
+                End If
+                If m_Radio.IsPowered Then
+                    m_Radio.PowerOff()
+                End If
+                If m_Radio.IsOpen Then
+                    m_Radio.Close()
+                End If
+
+        End Select
+
+    End Sub
 
     Private Sub m_Host_OnPowerChange(ByVal type As OpenMobile.ePowerEvent) Handles m_Host.OnPowerChange
 
@@ -842,26 +897,42 @@ Public Class RadioComm
     Private Sub m_Radio_HDRadioEventCommError() Handles m_Radio.HDRadioEventCommError
 
         m_Host.DebugMsg(OpenMobile.DebugMessageType.Error, "OMVisteonRadio - m_Radio_HDRadioEventCommError()", String.Format("HD Radio communication error."))
+        m_Radio.Close()
         m_CommError = True
 
     End Sub
 
     Private Sub m_Radio_HDRadioEventSysErrorRadioNotFound() Handles m_Radio.HDRadioEventSysErrorRadioNotFound
         ' Radio Not Found
-        m_NotFound = True
+
         If m_verbose Then
-            m_Host.DebugMsg(OpenMobile.DebugMessageType.Info, "OMVisteonRadio", String.Format("Radio not found."))
+            m_Host.DebugMsg(OpenMobile.DebugMessageType.Info, "OMVisteonRadio", String.Format("Radio not found. Closing port."))
         End If
+
+        m_Radio.Close()
+        m_NotFound = True
+
+        ' allow waiting threads to continue
+        waitHandle.Set()
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysErrorRadioNotFound()", String.Format("waitHandle signalled."))
+        End If
+
     End Sub
 
     Private Sub m_Radio_HDRadioEventSysPortOpened() Handles m_Radio.HDRadioEventSysPortOpened
 
-        m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysPortOpened()", String.Format("Opened port {0}", m_ComPort))
-
-        waitHandle.Set()
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysPortOpened()", String.Format("waitHandle signalled."))
+            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysPortOpened()", String.Format("Opened port {0}", m_ComPort))
         End If
+
+        m_Radio.PowerOn()
+
+        ' allow waiting threads to continue
+        'waitHandle.Set()
+        'If m_verbose Then
+        'm_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysPortOpened()", String.Format("waitHandle signalled."))
+        'End If
 
     End Sub
 
