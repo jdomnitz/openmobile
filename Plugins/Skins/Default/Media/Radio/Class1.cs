@@ -20,6 +20,7 @@
 *********************************************************************************/
 using System.Collections.Generic;
 using System.Threading;
+using System;
 using OpenMobile;
 using OpenMobile.Controls;
 using OpenMobile.Data;
@@ -929,14 +930,18 @@ namespace OMRadio
             if ((function == eFunction.Play)||(function==eFunction.tunerDataUpdated))
             {
                 UpdateStationInfo(zone);
-                try
+
+                UpdateStationList(zone.AudioDevice.Instance);
+
+                /*try
                 {
                    UpdateStationList(zone.AudioDevice.Instance);
                 }
-                catch
+                catch (Exception e)
                 {
                     theHost.DebugMsg(string.Format("Radio - OnMediaEvent({0}, {1}, {2})", function, zone.Description, arg), string.Format("UpdateStationList failed"));
-                }
+                    theHost.DebugMsg(string.Format("Radio - OnMediaEvent({0}, {1}, {2})", function, zone.Description, arg), e.Message );
+                }*/
             }
             else if (function == eFunction.Stop)
             {
@@ -950,7 +955,7 @@ namespace OMRadio
                 }
                 catch 
                 {
-                    //theHost.DebugMsg(string.Format("Radio - OnMediaEvent({0}, {1}, {2})", function, zone.Description, arg), string.Format("UpdateStationList failed"));
+                    theHost.DebugMsg(string.Format("Radio - OnMediaEvent({0}, {1}, {2})", function, zone.Description, arg), string.Format("UpdateStationList failed"));
                 }
             }
             else if (function == eFunction.unloadTunedContent)
@@ -1136,17 +1141,20 @@ namespace OMRadio
 
         private bool UpdateStationList(int instance)
         {
-            //theHost.DebugMsg("Radio - UpdateStationList", "Updating station list.");
+            theHost.DebugMsg("Radio - UpdateStationList", "Updating station list.");
 
             // Get radio info
             tunedContentInfo info = theHost.getData(eGetData.GetTunedContentInfo, "", instance.ToString()) as tunedContentInfo;
 
             if (info == null)
             {
+                theHost.DebugMsg("Radio - UpdateStationInfo()", "No station info found.");
                 for (int i = 0; i < theHost.ScreenCount; i++)
                     ((OMLabel)manager[i]["Radio_StationName"]).Text = "No data available!";
                 return false;
             }
+
+            theHost.DebugMsg("Radio - UpdateStationInfo()", info.currentStation.stationName);
 
             // Update list source label
             for (int i = 0; i < theHost.ScreenCount; i++)
@@ -1183,7 +1191,8 @@ namespace OMRadio
                     }
                     if (Stations.Length == 0)
                     {
-                        List.Add(new OMListItem("Loading . . ."));
+                        //List.Add(new OMListItem("Loading . . ."));
+                        List.Add(new OMListItem("-empty-"));
                     }
                     else
                     {
