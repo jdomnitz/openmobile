@@ -41,6 +41,7 @@ Public Class RadioComm
     Private m_verbose As Boolean = False        ' Controls logging of extra info to debug log
     Private m_RouteVolume As Integer = 100
     Private connect_timeout As Integer = 20     ' Time to wait for connect and powerup of Radio in seconds
+    Private access_wait As Integer = 1000       ' How long to wait for serial access (ms)
     Private m_Retries As Integer = 5            ' How many times to have the driver check for a radio
     Private m_Tries As Integer = 0              ' How many tries left to test for a radio
     Private port_index As Integer = -1          ' Which port in the array we are working with
@@ -65,6 +66,8 @@ Public Class RadioComm
     Private initialized As Boolean = False
 
     Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
+    Private comWaitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
+    Private pwrWaitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
 
     Public Event OnMediaEvent(ByVal [function] As OpenMobile.eFunction, ByVal zone As OpenMobile.Zone, ByVal arg As String) Implements OpenMobile.Plugin.IPlayer.OnMediaEvent
 
@@ -149,61 +152,50 @@ Public Class RadioComm
 
         If m_ComPort <> "Auto" Then
             ' Try the user specified COM port
-            myNotification.Text = String.Format("Searching for radio on {0}", m_ComPort)
-            If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Searching for radio on {0}", m_ComPort))
-            End If
-            ' Try a couple times here
+            myNotification.Text = String.Format("Waiting for lock on {0}", m_ComPort)
+            ' Try a couple times to get serial access
             For x = 1 To m_Retries
+                If m_verbose Then
+                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Waiting for serial access (attempt {0}).", x))
+                End If
                 access_granted = OpenMobile.helperFunctions.SerialAccess.GetAccess(Me)
                 If access_granted Then
-                    If m_verbose Then
-                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Serial access granted")
-                    End If
-                    m_NotFound = False
-                    m_Radio.ComPortString = m_ComPort
-                    m_Radio.Open()
-                    starttime = Now()
-                    Do While Not m_Radio.IsPowered
-                        ' wait a little while for radio to come alive
-                        elapsedtime = Now().Subtract(starttime)
-                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Elapsed time: {0}ms.", elapsedtime.Seconds))
-                        If elapsedtime.Seconds > connect_timeout Then
-                            ' the radio did not come up
-                            If m_verbose Then
-                                m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Waited too long for response.")
-                                If m_Radio.IsOpen Then
-                                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", "(Radio reports COM is open)")
-                                End If
-                            End If
-                            m_Radio.Close()
-                            Exit Do
-                        End If
-                        If m_CommError Then
-                            myNotification.Text = String.Format("Comm error probing {0}.", available_ports(x))
-                            If m_verbose Then
-                                m_Host.DebugMsg(OpenMobile.DebugMessageType.Error, "OMVisteonRadio - find_radio()", String.Format("Comm error probing {0}.", available_ports(x)))
-                            End If
-                            m_CommError = False
-                            m_Radio.Close()
-                            Exit Do
-                        End If
-                        System.Threading.Thread.Sleep(50)
-                    Loop
-                    If m_verbose Then
-                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Releasing serial lock.")
-                    End If
-                    OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
                     Exit For
-                Else
-                    myNotification.Text = "Radio not found."
+                End If
+                System.Threading.Thread.Sleep(50)
+            Next
+            If access_granted Then
+                myNotification.Text = String.Format("Searching for radio on {0}", m_ComPort)
+                If m_verbose Then
+                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Serial access granted")
+                End If
+                m_NotFound = False
+                m_Radio.ComPortString = m_ComPort
+                m_Radio.Open()
+                starttime = Now()
+                If comWaitHandle.WaitOne(5000) = False Then
+                    ' comm port did not open
                     If m_verbose Then
-                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Attempt #{0}: Serial access denied.", x))
+                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Com Port did not open.")
+                    End If
+                    If m_CommError Then
+                        myNotification.Text = String.Format("Comm error probing {0}.", m_ComPort)
+                        If m_verbose Then
+                            m_Host.DebugMsg(OpenMobile.DebugMessageType.Error, "OMVisteonRadio - find_radio()", String.Format("Comm error probing {0}.", m_ComPort))
+                        End If
+                        m_CommError = False
+                        m_Radio.Close()
                     End If
                 End If
-                System.Threading.Thread.Sleep(500)
-            Next
-        End If
+                m_Radio.PowerOn()
+                If pwrWaitHandle.WaitOne(5000) = False Then
+                    ' radio did not power on
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Radio did not power on.")
+                    End If
+                End If
+            End If ' Access granted
+        End If ' Auto
 
         If m_Radio.IsPowered Then
             m_ComPort = m_Radio.ComPortString
@@ -221,37 +213,56 @@ Public Class RadioComm
         '  so now we will auto-scan ports to see if we find it
 
         For x = 0 To UBound(available_ports)
-            access_granted = OpenMobile.helperFunctions.SerialAccess.GetAccess(Me)
-            If access_granted Then
-                myNotification.Text = String.Format("Checking for radio on {0}.", available_ports(x))
+            ' Try the user specified COM port
+            myNotification.Text = String.Format("Searching for radio on {0}", available_ports(x))
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Searching for radio on {0}", available_ports(x)))
+            End If
+            ' Try a couple times to get serial access
+            For y = 1 To m_Retries
                 If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Checking for radio on {0}.", available_ports(x)))
+                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Waited serial access (attempt {0}).", y))
                 End If
+                access_granted = OpenMobile.helperFunctions.SerialAccess.GetAccess(Me)
+                If access_granted Then
+                    Exit For
+                End If
+                System.Threading.Thread.Sleep(50)
+            Next
+            If access_granted Then
+                If m_verbose Then
+                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Serial access granted")
+                End If
+                m_NotFound = False
                 m_Radio.ComPortString = available_ports(x)
                 m_Radio.Open()
                 starttime = Now()
-                Do While Not m_Radio.IsPowered
-                    ' wait max time then exit
-                    elapsedtime = Now().Subtract(starttime)
-                    If elapsedtime.Seconds > connect_timeout Then
-                        Exit Do
+                If comWaitHandle.WaitOne(5000) = False Then
+                    ' comm port did not open
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Com Port did not open.")
                     End If
                     If m_CommError Then
                         myNotification.Text = String.Format("Comm error probing {0}.", available_ports(x))
                         If m_verbose Then
-                            m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Comm error probing {0}.", available_ports(x)))
+                            m_Host.DebugMsg(OpenMobile.DebugMessageType.Error, "OMVisteonRadio - find_radio()", String.Format("Comm error probing {0}.", available_ports(x)))
                         End If
                         m_CommError = False
-                        Exit Do
+                        m_Radio.Close()
                     End If
-                    System.Threading.Thread.Sleep(50)
-                Loop
-                OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
-                If m_Radio.IsOpen Then
-                    m_ComPort = m_Radio.ComPortString
-                    Exit For
+                    Continue For
                 End If
-            End If
+                m_Radio.PowerOn()
+                If pwrWaitHandle.WaitOne(5000) = False Then
+                    ' radio did not power on
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Radio did not power on.")
+                    End If
+                    m_Radio.Close()
+                    Continue For
+                End If
+                Exit For
+            End If ' Access granted
         Next
 
         If Not m_Radio.IsPowered Then
@@ -262,7 +273,7 @@ Public Class RadioComm
             Exit Sub
         End If
 
-        myNotification.Text = String.Format("Found radio on {0}.", m_Radio.ComPortString)
+        myNotification.Text = String.Format("Radio found on {0}.", m_Radio.ComPortString)
         helperFunctions.StoredData.Set(Me, "OMVisteonRadio.ComPort", m_Radio.ComPortString)
 
     End Sub
@@ -926,6 +937,8 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysPortOpened()", String.Format("Opened port {0}", m_ComPort))
         End If
 
+        comWaitHandle.Set()
+
         m_Radio.PowerOn()
 
         ' allow waiting threads to continue
@@ -973,6 +986,9 @@ Public Class RadioComm
             helperFunctions.StoredData.Set(Me, "OMVisteonRadio.LastPlaying", sFormatted)
             tuneTo(m_CurrentInstance, sFormatted)
         End If
+
+        waitHandle.Set()
+        pwrWaitHandle.Set()
 
     End Sub
 
