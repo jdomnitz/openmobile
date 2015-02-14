@@ -974,6 +974,7 @@ Namespace OMLCD
             End Try
 
         End Sub
+
         Public Sub ResetGPOStates()
 
             For x = 0 To GetModuleGPOs - 1
@@ -981,6 +982,7 @@ Namespace OMLCD
             Next
 
         End Sub
+
         Public Sub SetGPOState(ByVal GPO As Byte, ByVal state As Boolean) Implements iLCDInterface.SetGPOState
 
             Dim data() As Byte = {254, Commands.GPOOff, 0}
@@ -1043,6 +1045,7 @@ Namespace OMLCD
             End Try
 
         End Sub
+
         Public Sub SwitchBank(ByVal Bank As Byte) Implements iLCDInterface.SwitchBank
             Dim changeBank() As Byte = {254, 192, Bank}
             Try
