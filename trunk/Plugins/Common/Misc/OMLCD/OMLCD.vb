@@ -2815,6 +2815,7 @@ Namespace OMLCD
 
         Protected Overridable Sub Dispose(ByVal disposing As Boolean)
             If Not Me.disposedValue Then
+                Me.disposedValue = True
                 If disposing Then
                     ' TODO: free other state (managed objects).
                     ' If the data source tracker is not defined, then define it
@@ -2840,7 +2841,48 @@ Namespace OMLCD
                 ' TODO: free your own state (unmanaged objects).
                 ' TODO: set large fields to null.
             End If
-            Me.disposedValue = True
+        End Sub
+
+        Private Sub end_LCD()
+            ' Terminate all LCD operations
+
+            If LCD.IsOpen Then
+                helperFunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Port)
+                LCD.ShowStartupScreen()
+                LCD.Close()
+            End If
+            m_Refresh_tmr.Enabled = False
+            m_Refresh_tmr.Stop()
+            m_Delay_tmr.Enabled = False
+            m_Delay_tmr.Stop()
+
+        End Sub
+
+        Private Sub m_Host_OnSystemEvent(ByVal type As OpenMobile.eFunction, args As Object) Handles theHost.OnSystemEvent
+
+            Select Case type
+                Case Is = eFunction.shutdown
+                    If m_Verbose Then
+                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: shutdown")
+                    End If
+                    end_LCD()
+                Case Is = eFunction.closeProgram
+                    If m_Verbose Then
+                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: closeProgram")
+                    End If
+                    end_LCD()
+                Case Is = eFunction.restart
+                    If m_Verbose Then
+                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: restart")
+                    End If
+                    end_LCD()
+                Case Is = eFunction.restartProgram
+                    If m_Verbose Then
+                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: restartProgram")
+                    End If
+                    end_LCD()
+            End Select
+
         End Sub
 
         Private powerEventReceived = False
@@ -2851,7 +2893,6 @@ Namespace OMLCD
             '  start again on resume
 
             Select Case type
-
                 Case Is = ePowerEvent.SystemResumed
                     powerEventReceived = False
                     If powerResumeReceived Then
@@ -2861,7 +2902,6 @@ Namespace OMLCD
                     powerResumeReceived = True
                     'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format(Me.pluginName & " resuming from sleep/hibernate."))
                     FindLCD()
-
                 Case Is = ePowerEvent.SleepOrHibernatePending
                     powerResumeReceived = False
                     If powerEventReceived Then
@@ -2869,26 +2909,11 @@ Namespace OMLCD
                         Exit Sub
                     End If
                     powerEventReceived = True
-                    m_Refresh_tmr.Enabled = False
-                    m_Refresh_tmr.Stop()
-                    m_Delay_tmr.Enabled = False
-                    m_Delay_tmr.Stop()
-
-                    theHost.DataHandler.UnsubscribeFromDataSource("", AddressOf m_Subscriptions_Updated)
-                    If LCD.IsOpen Then
-                        helperFunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Port)
-                        LCD.ShowStartupScreen()
-                        LCD.Close()
-                    End If
-
+                    end_LCD()
                 Case Is = ePowerEvent.ShutdownPending
                     powerEventReceived = False
                     powerResumeReceived = False
-                    If LCD.IsOpen Then
-                        helperFunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Port)
-                        LCD.Close()
-                    End If
-
+                    end_LCD()
             End Select
 
         End Sub
