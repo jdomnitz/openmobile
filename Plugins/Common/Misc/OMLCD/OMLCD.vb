@@ -180,6 +180,7 @@ Namespace OMLCD
 
         Private display_data As New List(Of display_items_struct)              ' To track displayable items
 
+        Private m_Enable_Subs As Boolean = False            ' Enable monitoring subscriptions
         Private m_Justification As String = "Left"          ' Left, Right, Center, Full
         Private m_Verbose As Boolean = False
         Private m_Initialized As Boolean = False            ' Flags if BackgroundLoad() has finished
@@ -247,6 +248,8 @@ Namespace OMLCD
             'For q = 0 To 255
             'helperfunctions.StoredData.Delete(Me, Me.pluginName &".GPOs." & q.ToString)
             'Next
+
+            m_Enable_Subs = True
 
             ' Removes old style settings
             helperFunctions.StoredData.Delete(Me, "VerboseDebug")
@@ -1895,6 +1898,7 @@ Namespace OMLCD
 
         Private Sub connect()
 
+            myNotification.Text = String.Format("Finding/connecting to module...")
             LCD.Connect(Me, m_Verbose)
 
         End Sub
@@ -1982,7 +1986,7 @@ Namespace OMLCD
             m_Delay_tmr.Stop()
             m_Delay_tmr.Enabled = False
 
-            myNotification.Text = "LCD Stopped responding."
+            myNotification.Text = "LCD disconnected."
 
         End Sub
 
@@ -2326,6 +2330,13 @@ Namespace OMLCD
             Dim settingData As String = ""
             Dim settingName As String = ""
             Dim Inverted As Boolean = False
+
+            If Not m_Enable_Subs Then
+                If m_Verbose Then
+                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Subscription updates ignored"))
+                End If
+                Exit Sub
+            End If
 
             If m_Verbose Then
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Update from {0}: {1}", sensor.FullName, sensor.FormatedValue))
@@ -2816,21 +2827,14 @@ Namespace OMLCD
         Protected Overridable Sub Dispose(ByVal disposing As Boolean)
             If Not Me.disposedValue Then
                 Me.disposedValue = True
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "I am being disposed.")
                 If disposing Then
                     ' TODO: free other state (managed objects).
                     ' If the data source tracker is not defined, then define it
                     ' Do we need to stop subscriptions?  Probably not necessary
                     Try
                         If LCD.IsOpen Then
-                            For x = 1 To CInt(LCD.GetModuleGPOs)
-                                LCD.SetGPOState(CByte(x), False)
-                            Next
-                            LCD.AutoScroll = True
-                            LCD.LineWrap = True
-                            LCD.ClearScreen()
-                            LCD.Display = True
-                            LCD.ShowStartupScreen()
-                            LCD.Close()
+                            end_LCD()
                         End If
                     Catch ex As Exception
                         If (theHost IsNot Nothing) Then
@@ -2846,15 +2850,20 @@ Namespace OMLCD
         Private Sub end_LCD()
             ' Terminate all LCD operations
 
-            If LCD.IsOpen Then
-                helperFunctions.StoredData.Set(Me, "Settings.ComPort", LCD.Port)
-                LCD.ShowStartupScreen()
-                LCD.Close()
-            End If
+            ' Stop processing subscriptions
+            m_Enable_Subs = False
+
+            'theHost.DataHandler.UnsubscribeFromDataSource("*", AddressOf m_Subscriptions_Updated)
+
             m_Refresh_tmr.Enabled = False
             m_Refresh_tmr.Stop()
             m_Delay_tmr.Enabled = False
             m_Delay_tmr.Stop()
+
+            If LCD.IsOpen Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "System Event wants to close me.")
+                LCD.Close()
+            End If
 
         End Sub
 
@@ -2863,22 +2872,22 @@ Namespace OMLCD
             Select Case type
                 Case Is = eFunction.shutdown
                     If m_Verbose Then
-                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: shutdown")
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: shutdown")
                     End If
                     end_LCD()
                 Case Is = eFunction.closeProgram
                     If m_Verbose Then
-                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: closeProgram")
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: closeProgram")
                     End If
                     end_LCD()
                 Case Is = eFunction.restart
                     If m_Verbose Then
-                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: restart")
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: restart")
                     End If
                     end_LCD()
                 Case Is = eFunction.restartProgram
                     If m_Verbose Then
-                        theHost.DebugMsg(String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: restartProgram")
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("OMLCD - m_Host_OnSystemEvent()"), "System Event: restartProgram")
                     End If
                     end_LCD()
             End Select
