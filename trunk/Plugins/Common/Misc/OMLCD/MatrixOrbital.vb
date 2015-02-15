@@ -106,6 +106,12 @@ Namespace OMLCD
         Private lock_timeout As Integer = 10000              'Max milliseconds to wait for serial port lock
         Private query_response_time As Integer = 450        'Milliseconds to wait for query response from LCD
 
+        Private splash_data() As Byte = {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, _
+                        32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 1, 2, 3, 32, 32, Asc("O"), _
+                        Asc("P"), Asc("E"), Asc("N"), 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 4, 5, 6, 7, _
+                        32, 32, 32, 32, Asc("M"), Asc("O"), Asc("B"), Asc("I"), Asc("L"), Asc("E"), 32, 32, 32, _
+                        32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32}
+
         Private who_called As OpenMobile.Plugin.IBasePlugin
 
         Private m_connected As Boolean = False              'Are we all done our connection process?
@@ -653,6 +659,8 @@ Namespace OMLCD
                         m_comm_port = portname
                         m_open = True
                         m_connected = True
+                        Me.ReloadStartupCharacters()
+                        Me.RebuildStartupScreen()
                         If m_Verbose Then
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Found {0} on {1}", Me.GetModuleType, m_comm_port))
                             theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Display type: {0}", Me.GetModuleStyle))
@@ -875,23 +883,30 @@ Namespace OMLCD
 
         Public Sub Close() Implements iLCDInterface.Close
 
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Initiating close request."))
+            End If
+
             Try
-                Me.ResetGPOStates()
                 Me.ShowStartupScreen()
+                Me.ResetGPOStates()
+                System.Threading.Thread.Sleep(250)
                 Me.SerialPort1.Close()
                 Me.SerialPort1.Dispose()
                 Me.SerialPort1 = Nothing
                 If m_Verbose Then
-                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection was terminated."))
+                    theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Connection closed."))
                 End If
             Catch ex As Exception
-                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Issue closing device. " & ex.Message))
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Issue closing connection. " & ex.Message))
             End Try
 
             m_open = False
             m_connected = False
             m_moduleType = 0
             m_comm_port = DEFAULT_COM_PORT
+
+            RaiseEvent CommLost()
 
         End Sub
 
@@ -1058,29 +1073,8 @@ Namespace OMLCD
 
         End Sub
 
-        Public Sub RebuildStartupScreen()
-            ' Builds and saves the startup screen with custom characters in Bank 0
-
-            Dim data() As Byte = {254, Commands.ChangeStartUpScreen, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, _
-                                  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 1, 2, 3, 32, 32, Asc("O"), _
-                                  Asc("P"), Asc("E"), Asc("N"), 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 4, 5, 6, 7, _
-                                  32, 32, 32, 32, Asc("M"), Asc("O"), Asc("B"), Asc("I"), Asc("L"), Asc("E"), 32, 32, 32, _
-                                  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32}
-
-            Try
-                If m_open Then
-                    Me.ReloadStartupCharacters()
-                    Me.SerialPort1.Write(data, 0, UBound(data) + 1)
-                    Me.ShowStartupScreen()
-                End If
-            Catch ex As Exception
-                disconnected()
-            End Try
-
-        End Sub
-
         Public Sub ReloadStartupCharacters()
-            ' Rebuilds the custom characters for splash screen
+            ' Rebuilds the custom characters for the OpenMobile logo
             ' Saves the custom characters into Bank 0 for use in startup screen
 
             ' Data for OM Logo
@@ -1092,6 +1086,10 @@ Namespace OMLCD
             Dim char6() As Byte = {254, Commands.SaveCustomStartupChar, 5, 0, 0, 1, 6, 0, 0, 24, 7}
             Dim char7() As Byte = {254, Commands.SaveCustomStartupChar, 6, 0, 12, 16, 0, 0, 0, 3, 28}
             Dim char8() As Byte = {254, Commands.SaveCustomStartupChar, 7, 7, 7, 4, 4, 8, 16, 0, 0}
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->ReloadStartupCharacters"))
+            End If
 
             ' Write the characters to the display
             Try
@@ -1106,6 +1104,35 @@ Namespace OMLCD
                     Me.SerialPort1.Write(char8, 0, UBound(char1) + 1)
                 End If
             Catch ex As Exception
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->ReloadStartupCharacters Exception: {0}", ex.Message))
+                disconnected()
+            End Try
+
+        End Sub
+
+        Public Sub RebuildStartupScreen()
+            ' Builds and saves the startup screen using custom characters in Bank 0
+            ' This screen only shows up on power-up + OS driver connect
+
+            Dim data() As Byte = {254, Commands.ChangeStartUpScreen}
+
+            ' Add in the splash screen data
+            ReDim Preserve data(data.Length + splash_data.Length - 1)
+            System.Array.Copy(splash_data, data, splash_data.Count)
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->RebuildStartupScreen"))
+            End If
+
+            Try
+                If m_open Then
+                    Me.ClearScreen()
+                    Me.Home()
+                    Me.ReloadStartupCharacters()
+                    Me.SerialPort1.Write(data, 0, UBound(data) + 1)
+                End If
+            Catch ex As Exception
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->RebuildStartupScreen Exception: {0}", ex.Message))
                 disconnected()
             End Try
 
@@ -1114,24 +1141,38 @@ Namespace OMLCD
         Public Sub ShowStartupScreen()
             ' Show the startup splash screen
             ' Must be done manually because stored startup screen only happens
-            '  on LCD power-up / restart
+            '  on LCD power-up + OS driver load
 
-            ' Select Bank Command
-            Dim cmd() As Byte = {254, Commands.LoadCustomChars, 0}
-            ' Startup Page Data
-            Dim data() As Byte = {32, 32, 32, 32, 32, 32, 32, 32, 32, 32, _
-                                  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 1, 2, 3, 32, 32, Asc("O"), _
-                                  Asc("P"), Asc("E"), Asc("N"), 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 4, 5, 6, 7, _
-                                  32, 32, 32, 32, Asc("M"), Asc("O"), Asc("B"), Asc("I"), Asc("L"), Asc("E"), 32, 32, 32, _
-                                  32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32}
+            Dim msg As String = ""
 
+            ' Select Custom Character memory bank command, bank 0
+            Dim data() As Byte = {254, Commands.LoadCustomChars, 0}
+
+            If m_Verbose Then
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->ShowStartupScreen"))
+            End If
+
+            ' Send page text
             Try
                 If m_open Then
+                    Me.ClearScreen()
                     Me.Home()
-                    Me.SerialPort1.Write(cmd, 0, 3)
-                    Me.SerialPort1.Write(data, 0, 80)
+                    If m_Verbose Then
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Writing OM Logo Screen...."))
+                    End If
+                    Me.SerialPort1.Write(data, 0, data.Length)
+                    System.Threading.Thread.Sleep(1000)
+                    Me.SerialPort1.Write(splash_data, 0, splash_data.Length)
+                    If m_Verbose Then
+                        For x = 0 To UBound(splash_data)
+                            msg = msg & Chr(splash_data(x))
+                        Next
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("'{0}'", msg))
+                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("....done"))
+                    End If
                 End If
             Catch ex As Exception
+                theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->ShowStartupScreen Exception: {0}", ex.Message))
                 disconnected()
             End Try
 
