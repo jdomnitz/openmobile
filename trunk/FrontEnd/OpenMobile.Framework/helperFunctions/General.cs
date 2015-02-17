@@ -324,6 +324,13 @@ namespace OpenMobile.helperFunctions
                 host = theHost;
             }
             /// <summary>
+            /// Initializes the Directory Browser class
+            /// </summary>
+            public getFilePath()
+            {
+                host = OM.Host;
+            }
+            /// <summary>
             /// Loads a file selection plugin
             /// </summary>
             /// <param name="screen"></param>
@@ -484,10 +491,34 @@ namespace OpenMobile.helperFunctions
             return err;
         }
 
+        /// <summary>
+        /// Sets the UTC time
+        /// </summary>
+        /// <param name="time"></param>
         public static void SetUTCTime(DateTime time)
         {
             if (Configuration.RunningOnWindows)
                 OpenMobile.Framework.Windows.SetTime(time);
+        }
+
+        /// <summary>
+        /// Checks if a object is a number
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool IsNumber(this object value)
+        {
+            return value is sbyte
+                    || value is byte
+                    || value is short
+                    || value is ushort
+                    || value is int
+                    || value is uint
+                    || value is long
+                    || value is ulong
+                    || value is float
+                    || value is double
+                    || value is decimal;
         }
 
     }

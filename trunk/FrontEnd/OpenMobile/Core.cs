@@ -377,7 +377,7 @@ namespace OpenMobile
         /// <summary>
         /// Order to of types to try to load the plugins by
         /// </summary>
-        private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IAudioDeviceProvider), typeof(IDataSource), typeof(IMediaProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(IMediaDatabase), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
+        private static Type[] pluginTypes = new Type[] { typeof(IRawHardware), typeof(IAudioDeviceProvider), typeof(IMediaDatabase), typeof(IDataSource), typeof(IMediaProvider), typeof(IAVPlayer), typeof(IPlayer), typeof(ITunedContent), typeof(INetwork), typeof(IHighLevel), typeof(INavigation), typeof(IOther), typeof(IBasePlugin) };
         public static eLoadStatus[] status;
 
         private static void Plugin_Initialize(int index)

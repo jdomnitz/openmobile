@@ -56,6 +56,7 @@ namespace OMMusicSkin
             Menu
         }
 
+        public const string PanelName = "MediaBrowser";
         private StoredData.ScreenInstanceData ScreenSpecificData = new StoredData.ScreenInstanceData();
         private OMMusicSkin _MainPlugin;
         private OMListItem.subItemFormat _MediaListSubItemFormat = new OMListItem.subItemFormat();
@@ -81,7 +82,7 @@ namespace OMMusicSkin
             ScreenSpecificData.SetProperty("SongFilter", "");
 
             // Create a new panel
-            OMPanel panel = new OMPanel("MediaBrowser", "Music > Media browser", OM.Host.getSkinImage("AIcons|4-collections-view-as-list"));
+            OMPanel panel = new OMPanel(PanelName, "Music > Media browser", OM.Host.getSkinImage("AIcons|4-collections-view-as-list"));
 
             #region media list
 
@@ -447,6 +448,17 @@ namespace OMMusicSkin
 
             #endregion
 
+            #region Access block
+
+            OMLabel lblAccessBlock = new OMLabel("lblAccessBlock", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height);
+            lblAccessBlock.BackgroundColor = Color.FromArgb(230, Color.Black);
+            lblAccessBlock.Text = "Music browser skin can only be used for file based media providers.\r\nPlease select a provider before continuing";
+            lblAccessBlock.TextAlignment = Alignment.CenterCenter;
+            lblAccessBlock.Visible = false;
+            panel.addControl(lblAccessBlock);
+
+            #endregion
+
             // Create the button strip popup
             ButtonStrip PopUpMenuStrip = new ButtonStrip(_MainPlugin.pluginName, panel.Name, "PopUpMenuStrip_Playlist");
             Size itemSize = OM.Host.UIHandler.PopUpMenu.ButtonSize;
@@ -541,7 +553,7 @@ namespace OMMusicSkin
         void mnuItem_ClearPlaylist_OnClick(OMControl sender, int screen)
         {
             // Get current playlist
-            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.Playlist");
             playlist.Clear();
 
             OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Current playlist cleared", 5));
@@ -552,7 +564,7 @@ namespace OMMusicSkin
         void mnuItem_FillPlaylist_OnClick(OMControl sender, int screen)
         {
             // Get current playlist
-            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.Playlist");
             if (playlist != null)
             {
                 OM.Host.UIHandler.InfoBanner_Show(screen, new InfoBanner(InfoBanner.Styles.AnimatedBanner, "Please wait, filling playlist...", 8));
@@ -569,7 +581,7 @@ namespace OMMusicSkin
         void lstMedia_OnHoldClick(OMControl sender, int screen)
         {
             // Get current playlist
-            Playlist currentPlaylist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            Playlist currentPlaylist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.Playlist");
             if (currentPlaylist == null)
                 return;
 
@@ -599,7 +611,7 @@ namespace OMMusicSkin
                                 {
                                     currentPlaylist.AddDistinct(selectedMediaItem);
                                     currentPlaylist.CurrentItem = selectedMediaItem;
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListModes.Artist:
@@ -607,7 +619,7 @@ namespace OMMusicSkin
                                     var items = GetArtistSongs(selectedMediaItem.Artist);
                                     currentPlaylist.AddRangeDistinct(items);
                                     currentPlaylist.CurrentItem = items.First();
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListModes.Album:
@@ -615,7 +627,7 @@ namespace OMMusicSkin
                                     var items = GetAlbumSongs(selectedMediaItem.Artist, selectedMediaItem.Album);
                                     currentPlaylist.AddRangeDistinct(items);
                                     currentPlaylist.CurrentItem = items.First();
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListModes.Genre:
@@ -623,7 +635,7 @@ namespace OMMusicSkin
                                     var items = GetGenreSongs(selectedMediaItem.Genre);
                                     currentPlaylist.AddRangeDistinct(items);
                                     currentPlaylist.CurrentItem = items.First();
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListModes.Playlist:
@@ -633,14 +645,14 @@ namespace OMMusicSkin
                                     playlist.Load();
                                     currentPlaylist.Clear();
                                     currentPlaylist.AddRange(playlist.Items);
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListModes.PlaylistItems:
                                 {
                                     currentPlaylist.AddDistinct(selectedMediaItem);
                                     currentPlaylist.CurrentItem = selectedMediaItem;
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             default:
@@ -1121,7 +1133,61 @@ namespace OMMusicSkin
                 MediaList_ListMode_Set(ListModes.Artist, screen, sender);
                 MediaList_Search(sender, screen);
             }
+
+            // Check if current media provider is a file based content provider
+            var currentProvider = OM.Host.MediaProviderHandler.GetMediaProviderForZoneOrScreen(screen);
+            var zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            var isTunedContentProvider = OM.Host.MediaProviderHandler.IsMediaSourceOfType(currentProvider.GetMediaSource(zone), MediaSourceTypes.FileBasedMedia.ToString());
+            if (!isTunedContentProvider)
+            {   // Tuned content provider is not active, show dialog to activate provider
+                SelectMediaProvider(sender, screen, "Select audio player", MediaSourceTypes.FileBasedMedia.ToString());
+            }
+            AccessBlock_ShowHide(sender, screen);
         }
+
+        private void SelectMediaProvider(OMPanel panel, int screen, string header, string mediaSourceType)
+        {
+            OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
+
+            // Get a list of providers
+            var providerList = OM.Host.MediaProviderHandler.GetMediaProvidersByMediaSourceType(mediaSourceType);
+
+            // Popup menu
+            MenuPopup PopupMenu = new MenuPopup(header, MenuPopup.ReturnTypes.Tag);
+            PopupMenu.Top = 75;
+            PopupMenu.Height = 450;
+            PopupMenu.Width = 700;
+            PopupMenu.FontSize = 26;
+
+            foreach (var provider in providerList)
+            {
+                IBasePlugin baseProvider = provider as IBasePlugin;
+                OMListItem listItem = new OMListItem(baseProvider.pluginName, baseProvider.pluginDescription, baseProvider.pluginName);
+                listItem.image = baseProvider.pluginIcon.image;
+                PopupMenu.AddMenuItem(listItem);
+            }
+
+            // Show menu
+            var selectedProvider = PopupMenu.ShowMenu(screen);
+
+            // Activate provider
+            if (selectedProvider != null)
+            {
+                var statusMessage = OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Activate", selectedProvider as string) as string;
+
+                // Handle error messages
+                if (statusMessage is string && !String.IsNullOrWhiteSpace(statusMessage as string))
+                {
+                    dialog dialog = new dialog(_MainPlugin.pluginName, panel.Name);
+                    dialog.Header = "Failed to activate provider";
+                    dialog.Text = String.Format("Unable to activate provider '{0}'\r\n{1}", selectedProvider as string, statusMessage as string);
+                    dialog.Icon = OpenMobile.helperFunctions.Forms.icons.Error;
+                    dialog.Button = OpenMobile.helperFunctions.Forms.buttons.OK;
+                    dialog.ShowMsgBox(screen);
+                }
+            }
+        }
+
 
         #region MediaFilter buttons
 
@@ -1803,6 +1869,27 @@ namespace OMMusicSkin
         private IEnumerable<mediaInfo> GetArtistSongs(string artist)
         {
             return _DBItems.Where(x => x != null && x.Artist != null && x.Artist.ToLower() == artist.ToLower());
+        }
+
+        private void AccessBlock_ShowHide(OMPanel sender, int screen)
+        {
+            OMLabel lbl = _MainPlugin.PanelManager[screen, PanelName][screen, "lblAccessBlock"] as OMLabel;
+
+            var zone = OM.Host.ZoneHandler.GetActiveZone(screen);
+            var isTunedContentProvider = false;
+            var currentProvider = OM.Host.MediaProviderHandler.GetMediaProviderForZoneOrScreen(screen);
+            if (currentProvider != null)
+                isTunedContentProvider = OM.Host.MediaProviderHandler.IsMediaSourceOfType(currentProvider.GetMediaSource(zone), MediaSourceTypes.FileBasedMedia.ToString());
+            if (currentProvider == null || !isTunedContentProvider)
+            {
+                if (lbl != null)
+                    lbl.Visible = true;
+            }
+            else
+            {
+                if (lbl != null)
+                    lbl.Visible = false;
+            }
         }
 
     }

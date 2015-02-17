@@ -48,18 +48,25 @@ namespace OMDir
             {
                 ((OMLabel)manager[screen][2]).Text = "Select a Folder";
                 type[screen] = 1;  //Type=0: Select File; Type=1: Select Folder; Multi-Select Files=2;
-                SafeThread.Asynchronous(delegate() { loadRoot(((OMList)manager[screen]["left"])); }, theHost);
+                SafeThread.Asynchronous(delegate() 
+                { 
+                    loadRoot(((OMList)manager[screen]["left"]));
+                }, theHost);
             }
             else
             {
                 ((OMLabel)manager[screen][2]).Text = "Select a File";
                 type[screen] = 0;
-                SafeThread.Asynchronous(delegate() { loadRoot(((OMList)manager[screen]["left"])); }, theHost);
-            }
-            if ((name != "Folder") && (name != ""))
-            {
-                if (Directory.Exists(name))
-                    loadPath(screen, name);
+                SafeThread.Asynchronous(delegate() 
+                { 
+                    loadRoot(((OMList)manager[screen]["left"]));
+                    if ((name != "Folder") && (name != ""))
+                    {
+                        if (Directory.Exists(name))
+                            loadPath(screen, name);
+                    }
+
+                }, theHost);
             }
             return manager[screen];
         }

@@ -20,33 +20,19 @@
 *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using OpenMobile;
-using OpenMobile.Media;
-using OpenMobile.Graphics;
 using OpenMobile.Plugin;
 
-namespace OpenMobile.Plugin
+namespace OpenMobile.Media
 {
     /// <summary>
-    /// A common code base for the IMediaProvider interface
+    /// A base class for a media provider
     /// </summary>
-    /// <typeparam name="T">Type of data for local ZoneSpecificLocalData</typeparam>
     public abstract class MediaProviderBase : BasePluginCode, IMediaProvider
     {
         /// <summary>
-        /// Zone specific local data
-        /// </summary>
-        protected class ZoneSpecificLocalData 
-        {
-            /// <summary>
-            /// Provider info
-            /// </summary>
-            public MediaProviderInfo ProviderInfo = new MediaProviderInfo();
-        }
-
-        /// <summary>
-        /// Initializes a MediaProviderCode plugin
+        /// Initializes a new media provider plugin
         /// </summary>
         /// <param name="pluginName"></param>
         /// <param name="pluginIcon"></param>
@@ -60,384 +46,361 @@ namespace OpenMobile.Plugin
         }
 
         /// <summary>
-        /// Base plugin for this provider
+        /// Playback states
         /// </summary>
-        public virtual IBasePlugin ProviderBasePlugin 
+        public enum PlaybackState
         {
-            get
+            /// <summary>
+            /// Playback has stopped
+            /// </summary>
+            Stopped,
+
+            /// <summary>
+            /// Playback is currently active
+            /// </summary>
+            Playing,
+
+            /// <summary>
+            /// Playback is currently paused
+            /// </summary>
+            Paused,
+
+            /// <summary>
+            /// Provider is busy doing a task other than stopped, playing and paused
+            /// </summary>
+            Busy
+        }
+
+        #region DataSources
+
+        /// <summary>
+        /// Reports the playback state back to the media handler
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="playbackState"></param>
+        public virtual void MediaProviderData_ReportState_Playback(Zone zone, PlaybackState playbackState)
+        {
+            switch (playbackState)
             {
-                return this;
-            }
-        }
-
-        /// <summary>
-        /// Zone specific data
-        /// </summary>
-        protected Dictionary<Zone, ZoneSpecificLocalData> _ZoneSpecificData = new Dictionary<Zone, ZoneSpecificLocalData>();
-        
-        /// <summary>
-        /// Media provider type for this plugin
-        /// </summary>
-        protected MediaProviderTypes _MediaProviderType;
-
-        /// <summary>
-        /// Gets the media provider types supported by this plugin
-        /// </summary>
-        /// <returns></returns>
-        public abstract MediaProviderTypes MediaProviderType { get; }
-
-        /// <summary>
-        /// Available media sources for this plugin
-        /// </summary>
-        protected List<MediaSource> _MediaSources = new List<MediaSource>();
-
-        /// <summary>
-        /// Gets all media sources supported by this MediaProvider
-        /// </summary>
-        /// <returns></returns>
-        public virtual List<MediaSource> GetMediaSources()
-        {
-            return _MediaSources;
-        }
-
-        /// <summary>
-        /// Sets the currently active media source
-        /// </summary>
-        /// <param name="zone"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public virtual bool SetMediaSource(Zone zone, string name)
-        {
-            ZoneSpecificLocalData dta = GetZoneSpecificDataInstance(zone);
-            MediaSource mediaSource = _MediaSources.Find(x => x.Name.Equals(name));
-            if (mediaSource == null)
-                return false;
-
-            mediaSource = mediaSource.Clone();
-            mediaSource.InitPlayList();
-            dta.ProviderInfo.MediaSource = mediaSource;
-
-            Raise_OnProviderInfoChanged(zone, dta.ProviderInfo);
-            return true;
-        }
-
-        /// <summary>
-        /// Gets zone specific data
-        /// </summary>
-        /// <param name="zone"></param>
-        /// <returns></returns>
-        protected ZoneSpecificLocalData GetZoneSpecificDataInstance(Zone zone)
-        {
-            if (_ZoneSpecificData.ContainsKey(zone))
-                return _ZoneSpecificData[zone];
-            else
-            {
-                ZoneSpecificLocalData dta = new ZoneSpecificLocalData();
-                _ZoneSpecificData.Add(zone, dta);
-                return dta;
-            }
-        }
-
-        /// <summary>
-        /// Activate media provider (use this to power on)
-        /// </summary>
-        /// <param name="zone"></param>
-        /// <returns></returns>
-        public virtual MediaProviderState ActivateMediaProvider(Zone zone)
-        {
-            return new MediaProviderState(true, String.Empty);
-        }
-
-        /// <summary>
-        /// Deactivate media provider (use this to power off)
-        /// </summary>
-        /// <param name="zone"></param>
-        /// <returns></returns>
-        public virtual MediaProviderState DeactivateMediaProvider(Zone zone)
-        {
-            return new MediaProviderState(false, String.Empty);
-        }
-
-        /// <summary>
-        /// Gets the current information from the media provider
-        /// </summary>
-        /// <param name="zone"></param>
-        /// <returns></returns>
-        public virtual MediaProviderInfo GetMediaProviderInfo(Zone zone)
-        {
-            return GetZoneSpecificDataInstance(zone).ProviderInfo;
-        }
-
-        /// <summary>
-        /// Executes the specified command
-        /// </summary>
-        /// <param name="zone"></param>
-        /// <param name="command"></param>
-        /// <returns>The returned data from the command</returns>
-        public abstract bool ExecuteCommand(Zone zone, MediaProvider_CommandWrapper command);
-
-        /// <summary>
-        /// Gets data from the mediaprovider
-        /// </summary>
-        /// <param name="zone"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public virtual object GetData(Zone zone, MediaProvider_DataWrapper data)
-        {
-            switch (data.DataType)
-            {
-                case MediaProvider_Data.PlaybackState:
-                    return GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData.State;
-                case MediaProvider_Data.MediaInfo:
-                    return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo;
-                case MediaProvider_Data.PlaybackPositionData:
-                    return GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData;
-                case MediaProvider_Data.Suffle:
-                    if (GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist != null)
-                        return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.Shuffle;
-                    else
-                        return false;
-                case MediaProvider_Data.Repeat:
-                    if (GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist != null)
-                        return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist.Shuffle;
-                    else
-                        return false;
-                case MediaProvider_Data.PlayList:
-                    return GetZoneSpecificDataInstance(zone).ProviderInfo.MediaSource.Playlist;
+                case PlaybackState.Stopped:
+                    _MediaProviderHandler.IsStoppedCallback(this, zone, true);
+                    _MediaProviderHandler.IsPlayingCallback(this, zone, false);
+                    _MediaProviderHandler.IsPausedCallback(this, zone, false);
+                    _MediaProviderHandler.IsBusyCallback(this, zone, false);
+                    break;
+                case PlaybackState.Playing:
+                    _MediaProviderHandler.IsStoppedCallback(this, zone, false);
+                    _MediaProviderHandler.IsPlayingCallback(this, zone, true);
+                    _MediaProviderHandler.IsPausedCallback(this, zone, false);
+                    _MediaProviderHandler.IsBusyCallback(this, zone, false);
+                    break;
+                case PlaybackState.Paused:
+                    _MediaProviderHandler.IsStoppedCallback(this, zone, false);
+                    _MediaProviderHandler.IsPlayingCallback(this, zone, false);
+                    _MediaProviderHandler.IsPausedCallback(this, zone, true);
+                    _MediaProviderHandler.IsBusyCallback(this, zone, false);
+                    break;
+                case PlaybackState.Busy:
+                    _MediaProviderHandler.IsStoppedCallback(this, zone, false);
+                    _MediaProviderHandler.IsPlayingCallback(this, zone, false);
+                    _MediaProviderHandler.IsPausedCallback(this, zone, false);
+                    _MediaProviderHandler.IsBusyCallback(this, zone, true);
+                    break;
                 default:
                     break;
             }
-            return null;
         }
 
         /// <summary>
-        /// Data changed event
-        /// </summary>
-        public virtual event MediaProviderData_EventHandler OnDataChanged;
-
-        /// <summary>
-        /// Raises the data changed event to any subscribers
+        /// Reports the current media source back to the media handler
         /// </summary>
         /// <param name="zone"></param>
-        /// <param name="e"></param>
-        protected virtual void Raise_OnDataChanged(Zone zone, MediaProvider_Data dataType, params object[] parameters)
+        /// <param name="mediaSource"></param>
+        public virtual void MediaProviderData_ReportMediaSource(Zone zone, MediaSource mediaSource)
         {
-            if (OnDataChanged != null)
+            _MediaProviderHandler.SetMediaSourceCallback(this, zone, mediaSource);
+        }
+
+        /// <summary>
+        /// Reports the media info back to the media handler
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="media"></param>
+        /// <param name="playbackPos"></param>
+        public virtual void MediaProviderData_ReportMediaInfo(Zone zone, mediaInfo media, TimeSpan playbackPos = new TimeSpan())
+        {
+            _MediaProviderHandler.SetMediaInfoCallback(this, zone, media, playbackPos);
+        }
+
+        /// <summary>
+        /// Reports the media text back to the media handler
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="text1"></param>
+        /// <param name="text2"></param>
+        public virtual void MediaProviderData_ReportMediaText(Zone zone, string text1, string text2)
+        {
+            _MediaProviderHandler.SetMediaTextCallback(this, zone, text1, text2);
+        }
+
+        /// <summary>
+        /// Reports a change of playlist back to the media handler
+        /// </summary>
+        /// <param name="zone"></param>
+        public virtual void MediaProviderData_RefreshPlaylist(Zone zone)
+        {
+            _MediaProviderHandler.RefreshPlaylistCallback(this, zone);
+        }
+
+        /// <summary>
+        /// Gets the current playlist 
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public abstract Playlist MediaProviderData_GetPlaylist(Zone zone);
+
+        Playlist IMediaProvider.GetPlaylist(Zone zone)
+        {
+            return MediaProviderData_GetPlaylist(zone);
+        }
+
+        /// <summary>
+        /// Set the current playlist 
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public abstract Playlist MediaProviderData_SetPlaylist(Zone zone, Playlist playlist);
+
+        Playlist IMediaProvider.SetPlaylist(Zone zone, Playlist playlist)
+        {
+            return MediaProviderData_SetPlaylist(zone, playlist);
+        }
+
+
+        #endregion
+
+        #region Commands
+
+        IMediaProviderHandler IMediaProvider.MediaProviderHandler
+        {
+            get
             {
-                MediaProviderData_EventHandler handler = OnDataChanged;
-                handler(this, zone, new MediaProviderData_EventArgs(new MediaProvider_DataWrapper(dataType, parameters)));
+                return _MediaProviderHandler;
+            }
+            set
+            {
+                _MediaProviderHandler = value;
             }
         }
+        private IMediaProviderHandler _MediaProviderHandler;
 
         /// <summary>
-        /// Provider info has changed
-        /// </summary>
-        public virtual event MediaProviderInfo_EventHandler OnProviderInfoChanged;
-
-        /// <summary>
-        /// Updates providerinfo
+        /// Callback when this provider is activated
         /// </summary>
         /// <param name="zone"></param>
-        /// <param name="providerInfo"></param>
-        protected virtual void MediaProviderInfo_Update(Zone zone, MediaProviderInfo providerInfo)
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Activate(Zone zone);
+
+        string IMediaProvider.Activate(Zone zone)
         {
-            ZoneSpecificLocalData dta = GetZoneSpecificDataInstance(zone);
-            dta.ProviderInfo.Zone = zone;
-            dta.ProviderInfo = providerInfo;
-            Raise_OnProviderInfoChanged(zone, dta.ProviderInfo);
+            return MediaProviderCommand_Activate(zone);
         }
 
         /// <summary>
-        /// Raises the provider info changed event to any subscribers
+        /// Callback when this provider is deactivated
         /// </summary>
         /// <param name="zone"></param>
-        /// <param name="providerInfo"></param>
-        protected virtual void Raise_OnProviderInfoChanged(Zone zone, MediaProviderInfo providerInfo)
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Deactivate(Zone zone);
+
+        string IMediaProvider.Deactivate(Zone zone)
         {
-            if (OnProviderInfoChanged != null)
-            {
-                MediaProviderInfo_EventHandler handler = OnProviderInfoChanged;
-                handler(this, zone, providerInfo);
-            }
+            return MediaProviderCommand_Deactivate(zone);
         }
 
-        protected virtual void MediaInfo_MediaText_Set(Zone zone, string text1, string text2, bool raiseEvent = true)
+        /// <summary>
+        /// Called when a play command is executed
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="param"></param>
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Playback_Start(Zone zone, object[] param);
+
+        string IMediaProvider.Playback_Start(Zone zone, object[] param)
         {
-            // Clear media text
-            MediaProviderInfo providerInfo = GetZoneSpecificDataInstance(zone).ProviderInfo;
-            providerInfo.MediaText1 = text1;
-            providerInfo.MediaText2 = text2;
-            if (raiseEvent)
-                Raise_OnProviderInfoChanged(zone, providerInfo);
+            return MediaProviderCommand_Playback_Start(zone, param);
         }
 
-        protected virtual void MediaInfo_Clear(Zone zone)
+        /// <summary>
+        /// Called when a pause command is executed
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="param"></param>
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Playback_Pause(Zone zone, object[] param);
+
+        string IMediaProvider.Playback_Pause(Zone zone, object[] param)
         {
-            GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo = new mediaInfo();
-            MediaInfo_RaiseEvent(zone);
-            Raise_OnDataChanged(zone, MediaProvider_Data.PlaybackPositionData, TimeSpan.Zero, TimeSpan.Zero, 0);
+            return MediaProviderCommand_Playback_Pause(zone, param);
         }
 
-        protected virtual void MediaInfo_UpdateMissingInfo(Zone zone, string album, string artist, string name, string genre, int? length, int? tracknumber, bool raiseEvent = true)
-        {
-            bool updated = false;
-            mediaInfo media = GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo;
-            if (album != null)
-                if (String.IsNullOrEmpty(media.Album))
-                {
-                    media.Album = album;
-                    updated = true;
-                }
-            if (artist != null)
-                if (String.IsNullOrEmpty(media.Artist))
-                {
-                    media.Artist = artist;
-                    updated = true;
-                }
-            if (genre != null)
-                if (String.IsNullOrEmpty(media.Genre))
-                {
-                    media.Genre = genre;
-                    updated = true;
-                }
-            if (length.HasValue)
-                if (media.Length != length.Value)
-                {
-                    media.Length = length.Value;
-                    updated = true;
-                }
-            if (tracknumber.HasValue)
-                if (media.TrackNumber != tracknumber.Value)
-                {
-                    media.TrackNumber = tracknumber.Value;
-                    updated = true;
-                }
-            if (name != null)
-                if (String.IsNullOrEmpty(media.Name))
-                {
-                    media.Name = name;
-                    updated = true;
-                }
+        /// <summary>
+        /// Called when a stop command is executed
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="param"></param>
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Playback_Stop(Zone zone, object[] param);
 
-            GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo = media;
-
-            if (raiseEvent && updated)
-                MediaInfo_RaiseEvent(zone);
-        }
-        protected virtual void MediaInfo_Set(Zone zone, mediaInfo media, bool raiseEvent = true)
+        string IMediaProvider.Playback_Stop(Zone zone, object[] param)
         {
-            GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo = media;
-            if (raiseEvent)
-                MediaInfo_RaiseEvent(zone);
-        }
-        protected virtual void MediaInfo_Set(Zone zone, string album, string artist, string name, string genre, int? length, int? tracknumber, bool raiseEvent = true)
-        {
-            mediaInfo media = GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo;
-            if (album != null)
-                media.Album = album;
-            if (artist != null)
-                media.Artist = artist;
-            if (genre != null)
-                media.Genre = genre;
-            if (length.HasValue)
-                media.Length = length.Value;
-            if (tracknumber.HasValue)
-                media.TrackNumber = tracknumber.Value;
-            if (name != null)
-                media.Name = name;
-            GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo = media;
-
-            if (raiseEvent)
-                MediaInfo_RaiseEvent(zone);
-        }
-        protected virtual void MediaInfo_Set(Zone zone, string album, string artist, string name, string genre, int? length, int? tracknumber, OImage mediaImage, bool raiseEvent = true)
-        {
-            mediaInfo media = GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo;
-            media.coverArt = mediaImage;
-            GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo = media;
-            MediaInfo_Set(zone, album, artist, name, genre, length, tracknumber, raiseEvent);
-        }
-        protected virtual void MediaInfo_RaiseEvent(Zone zone)
-        {
-            Raise_OnDataChanged(zone, MediaProvider_Data.MediaInfo, GetZoneSpecificDataInstance(zone).ProviderInfo.MediaInfo);
+            return MediaProviderCommand_Playback_Stop(zone, param);
         }
 
-        protected virtual void MediaInfo_PlaybackPositionData_Set(Zone zone, TimeSpan? currentPos, TimeSpan? mediaLength)
+        /// <summary>
+        /// Called when a next command is executed
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="param"></param>
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Playback_Next(Zone zone, object[] param);
+
+        string IMediaProvider.Playback_Next(Zone zone, object[] param)
         {
-            MediaProvider_PlaybackData playbackData = GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData;
-            
-            TimeSpan pos;
-            if (currentPos.HasValue)
-                pos = currentPos.Value;
-            else
-                pos = TimeSpan.Zero;
-
-            TimeSpan length;
-            if (mediaLength.HasValue)
-                length = mediaLength.Value;
-            else
-                length = TimeSpan.Zero;
-
-            int percent = (int)((pos.TotalSeconds / length.TotalSeconds) * 100.0);
-
-            playbackData.CurrentPos = pos;
-            playbackData.CurrentPosPercent = percent;
-            playbackData.Length = length;
-
-            GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData = playbackData;
-
-            Raise_OnDataChanged(zone, MediaProvider_Data.PlaybackPositionData, playbackData.CurrentPos, playbackData.Length, playbackData.CurrentPosPercent);
-            Raise_OnProviderInfoChanged(zone, GetZoneSpecificDataInstance(zone).ProviderInfo);
-        }
-        protected virtual void MediaInfo_PlaybackPositionData_Set(Zone zone, int? currentPosInSeconds, int? mediaLengthInSeconds)
-        {
-            MediaProvider_PlaybackData playbackData = GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData;
-
-            TimeSpan pos;
-            if (currentPosInSeconds.HasValue)
-                pos = TimeSpan.FromSeconds(currentPosInSeconds.Value);
-            else
-                pos = TimeSpan.Zero;
-
-            TimeSpan length;
-            if (mediaLengthInSeconds.HasValue)
-                length = TimeSpan.FromSeconds(mediaLengthInSeconds.Value);
-            else
-                length = TimeSpan.Zero;
-
-            int percent = (int)((pos.TotalSeconds / length.TotalSeconds) * 100.0);
-
-            playbackData.CurrentPos = pos;
-            playbackData.CurrentPosPercent = percent;
-            playbackData.Length = length;
-
-            GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData = playbackData;
-
-            Raise_OnDataChanged(zone, MediaProvider_Data.PlaybackPositionData, playbackData.CurrentPos, playbackData.Length, playbackData.CurrentPosPercent);
-            Raise_OnProviderInfoChanged(zone, GetZoneSpecificDataInstance(zone).ProviderInfo);
+            return MediaProviderCommand_Playback_Next(zone, param);
         }
 
-        protected virtual void MediaInfo_PlayBackState_Set(Zone zone, MediaProvider_PlaybackState playbackState)
+        /// <summary>
+        /// Called when a previous command is executed
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="param"></param>
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Playback_Previous(Zone zone, object[] param);
+
+        string IMediaProvider.Playback_Previous(Zone zone, object[] param)
         {
-            GetZoneSpecificDataInstance(zone).ProviderInfo.PlaybackData.State = playbackState;
-            Raise_OnDataChanged(zone, MediaProvider_Data.PlaybackState, playbackState);
-            Raise_OnProviderInfoChanged(zone, GetZoneSpecificDataInstance(zone).ProviderInfo);
+            return MediaProviderCommand_Playback_Previous(zone, param);
         }
 
-        protected virtual bool MediaSource_RegisterNew(MediaSource source)
+        /// <summary>
+        /// Called when a seekForward command is executed
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="param"></param>
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Playback_SeekForward(Zone zone, object[] param);
+
+        string IMediaProvider.Playback_SeekForward(Zone zone, object[] param)
         {
-            MediaSource mediaSource = _MediaSources.Find(x => x.Name.Equals(source.Name));
-            if (mediaSource == null)
-                _MediaSources.Add(source);
-            else
-                return false;
-            return true;
+            return MediaProviderCommand_Playback_SeekForward(zone, param);
         }
 
-        protected virtual bool MediaSource_Set(Zone zone, MediaSource source)
+        /// <summary>
+        /// Called when a seekBackward command is executed
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="param"></param>
+        /// <returns>Errorcode / Errorstring if an error occurs</returns>
+        public abstract string MediaProviderCommand_Playback_SeekBackward(Zone zone, object[] param);
+
+        string IMediaProvider.Playback_SeekBackward(Zone zone, object[] param)
         {
-            return SetMediaSource(zone, source.Name);
+            return MediaProviderCommand_Playback_SeekBackward(zone, param);
         }
+
+        /// <summary>
+        /// Sets the shuffle state
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public abstract bool MediaProviderData_SetShuffle(Zone zone, bool state);
+        bool IMediaProvider.SetShuffle(Zone zone, bool state)
+        {
+            return MediaProviderData_SetShuffle(zone, state);
+        }
+
+        /// <summary>
+        /// Gets the shuffle state
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public abstract bool MediaProviderData_GetShuffle(Zone zone);
+        bool IMediaProvider.GetShuffle(Zone zone)
+        {
+            return MediaProviderData_GetShuffle(zone);
+        }
+
+        /// <summary>
+        /// Sets the repeat state
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public abstract bool MediaProviderData_SetRepeat(Zone zone, bool state);
+        bool IMediaProvider.SetRepeat(Zone zone, bool state)
+        {
+            return MediaProviderData_SetRepeat(zone, state);
+        }
+
+        /// <summary>
+        /// Gets the repeat state
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public abstract bool MediaProviderData_GetRepeat(Zone zone);
+        bool IMediaProvider.GetRepeat(Zone zone)
+        {
+            return MediaProviderData_GetRepeat(zone);
+        }
+
+        /// <summary>
+        /// Gets the abilities of a media source
+        /// </summary>
+        /// <param name="mediaSource"></param>
+        /// <returns></returns>
+        public abstract MediaProviderAbilities MediaProviderData_GetMediaSourceAbilities(string mediaSource);
+        MediaProviderAbilities IMediaProvider.GetMediaSourceAbilities(string mediaSource)
+        {
+            return MediaProviderData_GetMediaSourceAbilities(mediaSource);
+        }
+
+        /// <summary>
+        /// Gets a list of all available MediaSources from this provider
+        /// </summary>
+        /// <returns></returns>
+        public abstract List<MediaSource> MediaProviderData_GetMediaSources();
+        List<MediaSource> IMediaProvider.GetMediaSources()
+        {
+            return MediaProviderData_GetMediaSources();
+        }
+
+        /// <summary>
+        /// Gets the currently active MediaSource 
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <returns></returns>
+        public abstract MediaSource MediaProviderData_GetMediaSource(Zone zone);
+        MediaSource IMediaProvider.GetMediaSource(Zone zone)
+        {
+            return MediaProviderData_GetMediaSource(zone);
+        }
+
+        /// <summary>
+        /// Activates a MediaSource
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="mediaSourceName"></param>
+        /// <returns></returns>
+        public abstract string MediaProviderCommand_ActivateMediaSource(Zone zone, string mediaSourceName);
+        string IMediaProvider.ActivateMediaSource(Zone zone, string mediaSourceName)
+        {
+            return MediaProviderCommand_ActivateMediaSource(zone, mediaSourceName);
+        }
+
+        #endregion
+
 
     }
 }

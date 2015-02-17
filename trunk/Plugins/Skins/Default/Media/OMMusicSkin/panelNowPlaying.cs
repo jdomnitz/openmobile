@@ -62,7 +62,7 @@ namespace OMMusicSkin
             //Image_CoverArt.ReflectionData = new ReflectionsData(Color.FromArgb(255, 150, 150, 150), Color.Black);
             //Image_CoverArt.Rotation = new OpenMobile.Math.Vector3(0, 45, 0);
             Image_CoverArt.ReflectionData = new ReflectionsData(Color.FromArgb(127, Color.White), Color.Transparent, 0.25f);
-            Image_CoverArt.DataSource = "Screen{:S:}.Zone.MediaProvider.MediaInfo.CoverArt";
+            Image_CoverArt.DataSource = "Screen{:S:}.Zone.MediaInfo.CoverArt";
             Image_CoverArt.NullImage = new imageItem(MediaLoader.MissingCoverImage);
             Image_CoverArt.DataSourceControlsVisibility = false;
             panel.addControl(Image_CoverArt);
@@ -70,7 +70,7 @@ namespace OMMusicSkin
             // Media labels: Title
             OMAnimatedLabel2 lbl_Title = new OMAnimatedLabel2("lbl_Title", 70, 140, Image_CoverArt.Region.Left - 70 - 20, 40);
             //OMLabel lbl_Title = new OMLabel("lbl_Title", 15, 157, Image_CoverArt.Region.Left - 15 - 15, 40);
-            lbl_Title.Text = "{Screen{:S:}.Zone.MediaProvider.MediaInfo.Name}";
+            lbl_Title.Text = "{Screen{:S:}.Zone.MediaInfo.Name}";
             lbl_Title.FontSize = 30;
             lbl_Title.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
             lbl_Title.ActivationType = OMAnimatedLabel2.AnimationActivationTypes.TextToLong;
@@ -80,7 +80,7 @@ namespace OMMusicSkin
 
             // Media labels: Artist
             OMAnimatedLabel2 lbl_Artist = new OMAnimatedLabel2("lbl_Artist", lbl_Title.Region.Left, lbl_Title.Region.Bottom + 5, lbl_Title.Region.Width, 30);
-            lbl_Artist.Text = "{Screen{:S:}.Zone.MediaProvider.MediaInfo.Artist}";
+            lbl_Artist.Text = "{Screen{:S:}.Zone.MediaInfo.Artist}";
             lbl_Artist.FontSize = 24;
             lbl_Artist.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
             lbl_Artist.ActivationType = OMAnimatedLabel2.AnimationActivationTypes.TextToLong;
@@ -91,7 +91,7 @@ namespace OMMusicSkin
 
             // Media labels: Album
             OMAnimatedLabel2 lbl_Album = new OMAnimatedLabel2("lbl_Album", lbl_Artist.Region.Left, lbl_Artist.Region.Bottom + 5, lbl_Artist.Region.Width, 30);
-            lbl_Album.Text = "{Screen{:S:}.Zone.MediaProvider.MediaInfo.Album}";
+            lbl_Album.Text = "{Screen{:S:}.Zone.MediaInfo.Album}";
             lbl_Album.FontSize = 24;
             lbl_Album.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
             lbl_Album.ActivationType = OMAnimatedLabel2.AnimationActivationTypes.TextToLong;
@@ -102,7 +102,7 @@ namespace OMMusicSkin
 
             // Media labels: Genre
             OMAnimatedLabel2 lbl_Genre = new OMAnimatedLabel2("lbl_Genre", lbl_Album.Region.Left, lbl_Album.Region.Bottom + 5, lbl_Album.Region.Width, 30);
-            lbl_Genre.Text = "{Screen{:S:}.Zone.MediaProvider.MediaInfo.Genre}";
+            lbl_Genre.Text = "{Screen{:S:}.Zone.MediaInfo.Genre}";
             lbl_Genre.FontSize = 24;
             lbl_Genre.Animation = OMAnimatedLabel2.eAnimation.ScrollSmooth_LR;
             lbl_Genre.ActivationType = OMAnimatedLabel2.AnimationActivationTypes.TextToLong;
@@ -113,7 +113,7 @@ namespace OMMusicSkin
 
             // Media labels: Genre
             OMLabel lbl_PlaybackPos = new OMLabel("lbl_PlaybackPos", lbl_Genre.Region.Left, lbl_Genre.Region.Bottom + 5, lbl_Genre.Region.Width, 30);
-            lbl_PlaybackPos.Text = "{Screen{:S:}.Zone.MediaProvider.Playback.Pos.Text} / {Screen{:S:}.Zone.MediaProvider.MediaInfo.Length.Text}";
+            lbl_PlaybackPos.Text = "{Screen{:S:}.Zone.Playback.Pos.Text} / {Screen{:S:}.Zone.MediaInfo.Length.Text}";
             lbl_PlaybackPos.FontSize = 24;
             lbl_PlaybackPos.TextAlignment = Alignment.CenterRight;
             lbl_PlaybackPos.Opacity = 127;
@@ -220,7 +220,7 @@ namespace OMMusicSkin
                 if (!dataSourcesSubscribed)
                 {
                     dataSourcesSubscribed = true;
-                    OM.Host.DataHandler.SubscribeToDataSource("Zone.MediaProvider.MediaInfo.Rating", (x) =>
+                    OM.Host.DataHandler.SubscribeToDataSource("Zone.MediaInfo.Rating", (x) =>
                     {
                         OMPanel localPanel = _MainPlugin.PanelManager[x.Screen, panel.Name];
                         if (localPanel != null)
@@ -247,14 +247,14 @@ namespace OMMusicSkin
         void mnuItem_ShuffleToggle_OnClick(OMControl sender, int screen)
         {
             OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
-            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Shuffle.Toggle", screen));
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.Shuffle.Toggle", screen));
         }
 
         void PopUpMenuStrip_OnShowing(ButtonStrip sender, int screen, OMContainer menuContainer)
         {   // Configure items to show the current state of the list hold mode
             ButtonStrip popup = sender as ButtonStrip;
 
-            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.Playlist");
             if (playlist == null)
                 return;
 

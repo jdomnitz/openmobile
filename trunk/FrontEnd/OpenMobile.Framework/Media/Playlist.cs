@@ -308,6 +308,9 @@ namespace OpenMobile.Media
 
         public void Add(mediaInfo item)
         {
+            if (item == null)
+                return;
+
             //_BlockListUpdateEvents = true;
             //_Items.Add(item);
             //BufferItems_IncrementCurrentItemIndex();
@@ -344,6 +347,9 @@ namespace OpenMobile.Media
         }
         public bool AddDistinct(mediaInfo item)
         {
+            if (item == null)
+                return false;
+
             if (!_Items.Any(x => x == item))
             {
                 Add(item);

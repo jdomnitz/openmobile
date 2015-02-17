@@ -261,6 +261,30 @@ namespace OpenMobile
 
         #endregion
 
+        #region MediaProviderHandler
+
+        /// <summary>
+        /// The mediaprovider handler
+        /// </summary>
+        public OpenMobile.Media.MediaProviderHandler MediaProviderHandler
+        {
+            get
+            {
+                return this._MediaProviderHandler;
+            }
+            set
+            {
+                if (this._MediaProviderHandler != value)
+                {
+                    this._MediaProviderHandler = value;
+                }
+            }
+        }
+        private OpenMobile.Media.MediaProviderHandler _MediaProviderHandler = null;
+        
+
+        #endregion
+
         #region Constructor and initialization
 
         public PluginHost()
@@ -807,6 +831,17 @@ namespace OpenMobile
             return Core.pluginCollection.Find(x => (x !=null && x.pluginName == name));            
         }
 
+        /// <summary>
+        /// Gets all plugins that matches a specific type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pluginType"></param>
+        /// <returns></returns>
+        public List<IBasePlugin> GetPlugins<T>()
+        {
+            return Core.pluginCollection.FindAll(x => typeof(T).IsInstanceOfType(x));
+        }
+
         #endregion
 
         #region Panel handling
@@ -1224,7 +1259,6 @@ namespace OpenMobile
         }
 
         #endregion
-
 
         #region Security
 
@@ -4609,9 +4643,12 @@ namespace OpenMobile
                     var result = OpenMobile.Framework.OSSpecific.MoveWindowToTop(Core.RenderingWindows[i].WindowInfo.Handle);
                 }
 
-            // Preload media players
-            for (int i = 0; i < ZoneHandler.Zones.Count; i++)
-                execute(eFunction.loadAVPlayer, ZoneHandler.Zones[i]);
+            // Start mediaprovider handler
+            _MediaProviderHandler = new MediaProviderHandler();
+
+            //// Preload media players
+            //for (int i = 0; i < ZoneHandler.Zones.Count; i++)
+            //    execute(eFunction.loadAVPlayer, ZoneHandler.Zones[i]);
             
             for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
             {

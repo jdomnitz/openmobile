@@ -1,0 +1,2 @@
+﻿Add your radio channel graphics in this folder.
+Filenames must match either channel long name or channel short name. File type can be either PNG, JPG or GIF.

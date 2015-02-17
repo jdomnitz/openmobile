@@ -53,5 +53,11 @@ namespace OMWinInfo
         {
             LocalParam.Add(textBox1.Text);
         }
+
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                LocalParam.Add(textBox1.Text);
+        }
     }
 }

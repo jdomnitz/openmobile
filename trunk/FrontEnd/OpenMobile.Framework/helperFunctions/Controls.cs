@@ -195,7 +195,7 @@ namespace OpenMobile.helperFunctions.Controls
         /// <param name="reference"></param>
         /// <param name="controlToPlace"></param>
         /// <param name="direction"></param>
-        public static void PlaceControl(OMControl reference, OMControl controlToPlace, ControlDirections direction)
+        public static void PlaceControl(OMControl reference, OMControl controlToPlace, ControlDirections direction, ControlSizeControl sizeControl = ControlSizeControl.None)
         {
             if (reference == null || controlToPlace == null)
                 return;
@@ -227,6 +227,24 @@ namespace OpenMobile.helperFunctions.Controls
                 case ControlDirections.Absolute:
                 default:
                     return;
+            }
+
+            switch (sizeControl)
+            {
+                case ControlSizeControl.None:
+                    break;
+                case ControlSizeControl.SameSize:
+                    controlToPlace.Width = reference.Region.Width;
+                    controlToPlace.Height = reference.Region.Height;
+                    break;
+                case ControlSizeControl.SameHeight:
+                    controlToPlace.Height = reference.Region.Height;
+                    break;
+                case ControlSizeControl.SameWidth:
+                    controlToPlace.Width = reference.Region.Width;
+                    break;
+                default:
+                    break;
             }
         }
     }

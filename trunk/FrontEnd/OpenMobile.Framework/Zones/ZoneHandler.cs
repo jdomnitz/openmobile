@@ -46,9 +46,6 @@ namespace OpenMobile.Zones
         public ZoneHandler()
         {
             zone_OnVolumeChangedDelegate = new Zone.VolumeChangedDelegate(zone_OnVolumeChanged);
-            MediaHandler_OnDataChangedDelegate = new MediaProviderData_EventHandler(MediaHandler_OnDataChanged);
-            MediaHandler_OnProviderChangedDelegate = new MediaProviderChanged_EventHandler(MediaHandler_OnProviderChanged);
-            MediaHandler_OnProviderInfoChangedDelegate = new MediaProviderInfo_EventHandler(MediaHandler_OnProviderInfoChanged);
         }
 
         public void Dispose()
@@ -238,23 +235,14 @@ namespace OpenMobile.Zones
                 if (oldZone != null)
                 {
                     oldZone.OnVolumeChanged -= zone_OnVolumeChangedDelegate;
-                    oldZone.MediaHandler.OnDataChanged -= MediaHandler_OnDataChangedDelegate;
-                    oldZone.MediaHandler.OnProviderChanged -= MediaHandler_OnProviderChangedDelegate;
-                    oldZone.MediaHandler.OnProviderInfoChanged -= MediaHandler_OnProviderInfoChangedDelegate;
                 }
             }
 
             _ActiveZones[Screen] = zone.ID;
 
-            // Start media handler if not already done
-            if (zone.MediaHandler == null)
-                zone.MediaHandler = new MediaProviderHandler(zone);
 
             // Connect to zone events
             zone.OnVolumeChanged += zone_OnVolumeChangedDelegate;
-            zone.MediaHandler.OnDataChanged += MediaHandler_OnDataChangedDelegate;
-            zone.MediaHandler.OnProviderChanged += MediaHandler_OnProviderChangedDelegate;
-            zone.MediaHandler.OnProviderInfoChanged += MediaHandler_OnProviderInfoChangedDelegate;
 
             // Refresh events in the zone
             zone.ConnectEvents();
@@ -264,18 +252,8 @@ namespace OpenMobile.Zones
             {
                 if (_ActiveZones[i] == zone.ID)
                 {
-                    //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Name", i), zone.Name);
-                    //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.AudioDevice", i), zone.AudioDevice.Name);
-
                     OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.Name", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.Name);
                     OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.AudioDevice", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.AudioDevice.Name);
-
-                    // Also push audio data to ensure all data is refreshed
-                    PushDataSources_AudioDevice(zone);
-
-                    PushDataSources_MediaInfo(i, zone.MediaHandler);
-
-                    PushDataSources_MediaProviderInfo(i, zone.MediaHandler.ProviderInfo);
                 }
             }
 
@@ -284,48 +262,6 @@ namespace OpenMobile.Zones
             Raise_OnZoneUpdated(zone, Screen, false);
 
             return true;
-        }
-
-        private MediaProviderData_EventHandler MediaHandler_OnDataChangedDelegate;
-        void MediaHandler_OnDataChanged(object sender, Zone zone, MediaProviderData_EventArgs e)
-        {
-            // Push data sources
-            OM.Host.ForEachScreen(delegate(int screen)
-            {
-                if (GetActiveZone(screen) == zone)
-                {
-                    if (e.Data.DataType == MediaProvider_Data.MediaInfo || 
-                        e.Data.DataType == MediaProvider_Data.PlaybackPositionData || 
-                        e.Data.DataType == MediaProvider_Data.Suffle ||
-                        e.Data.DataType == MediaProvider_Data.Repeat)
-                    {
-                        PushDataSources_MediaInfo(screen, zone.MediaHandler);
-                    }
-                }
-            });
-        }
-
-        private MediaProviderInfo_EventHandler MediaHandler_OnProviderInfoChangedDelegate;
-        void MediaHandler_OnProviderInfoChanged(object sender, Zone zone, MediaProviderInfo providerInfo)
-        {
-            // Push data sources
-            OM.Host.ForEachScreen(delegate(int screen)
-            {
-                if (GetActiveZone(screen) == zone)
-                {
-                    PushDataSources_MediaProviderInfo(screen, providerInfo);
-                }
-            });
-
-            // Raise event
-            BuiltInComponents.Host.raiseMediaEvent(eFunction.MediaProviderInfoChanged, zone, String.Empty);
-        }
-
-        private MediaProviderChanged_EventHandler MediaHandler_OnProviderChangedDelegate;
-        void MediaHandler_OnProviderChanged(object sender, Zone zone)
-        {
-            // Raise event
-            BuiltInComponents.Host.raiseMediaEvent(eFunction.MediaProviderChanged, zone, String.Empty);
         }
 
         /// <summary>
@@ -1190,8 +1126,6 @@ namespace OpenMobile.Zones
         private Zone.VolumeChangedDelegate zone_OnVolumeChangedDelegate;
         private void zone_OnVolumeChanged(Zone zone, AudioDevice audioDevice)
         {
-            PushDataSources_AudioDevice(zone);
-
             // Loop trough all active zones in case the same zone is active on more than one screen
             for (int i = 0; i < BuiltInComponents.Host.ScreenCount; i++)
             {
@@ -1202,96 +1136,12 @@ namespace OpenMobile.Zones
             }
         }
 
-        private void PushDataSources_MediaProviderInfo(int screen, Media.MediaProviderInfo providerInfo)
-        {
-            if (providerInfo != null)
-            {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaText1", screen), providerInfo.MediaText1);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaText2", screen), providerInfo.MediaText2);
-            }
-            else
-            {   // Force empty values if nothing is available
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaText1", screen), String.Empty);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaText2", screen), String.Empty);
-            }
-
-            if (providerInfo != null && providerInfo.MediaSource != null)
-            {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaSource.Name", screen), providerInfo.MediaSource.Name);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaSource.Icon", screen), providerInfo.MediaSource.Icon);
-            }
-            else
-            {   // Force empty values if nothing is available
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaSource.Name", screen), String.Empty);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaSource.Icon", screen), null);
-            }
-
-            if (providerInfo != null && providerInfo.MediaType != null)
-            {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaType.Text", screen), providerInfo.MediaType.Text);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaType.Icon", screen), providerInfo.MediaType.Icon);
-            }
-            else
-            {   // Force empty values if nothing is available
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaType.Text", screen), String.Empty);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.MediaType.Icon", screen), null);
-            }
-
-            if (providerInfo != null && providerInfo.PlaybackData != null)
-            {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Playback.Stopped", screen), providerInfo.PlaybackData.State == MediaProvider_PlaybackState.Stopped);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Playback.Playing", screen), providerInfo.PlaybackData.State == MediaProvider_PlaybackState.Playing);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Playback.Paused", screen), providerInfo.PlaybackData.State == MediaProvider_PlaybackState.Paused);
-            }
-            else
-            {   // Force empty values if nothing is available
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Playback.Stopped", screen), false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Playback.Playing", screen), false);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Playback.Paused", screen), false);
-            }
-        }
-
-        private void PushDataSources_MediaInfo(int screen, Media.MediaProviderHandler mediaHandler)
-        {
-            if (mediaHandler != null)
-            {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Shuffle", screen), mediaHandler.Shuffle);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaProvider.Repeat", screen), mediaHandler.Repeat);
-            }
-
-            if (mediaHandler != null && mediaHandler.MediaInfo != null && mediaHandler.PlaybackData != null)
-            {
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Artist", screen), mediaHandler.MediaInfo.Artist);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Album", screen), mediaHandler.MediaInfo.Album);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Genre", screen), mediaHandler.MediaInfo.Genre);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Length", screen), mediaHandler.MediaInfo.Length);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Location", screen), mediaHandler.MediaInfo.Location);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Name", screen), mediaHandler.MediaInfo.Name);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Rating", screen), mediaHandler.MediaInfo.Rating);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.TrackNumber", screen), mediaHandler.MediaInfo.TrackNumber);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.CoverArt", screen), mediaHandler.MediaInfo.coverArt);
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Type", screen), mediaHandler.MediaInfo.Type.ToString());
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Playback.Pos", screen), Timespan_Format(mediaHandler.PlaybackData.CurrentPos));
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Playback.Length", screen), Timespan_Format(mediaHandler.PlaybackData.Length));
-                BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.MediaInfo.Playback.PosPercent", screen), mediaHandler.PlaybackData.CurrentPosPercent);
-            }
-        }
-        
         private string Timespan_Format(TimeSpan ts)
         {
             if (ts.TotalSeconds < 3600)
                 return String.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
             else
                 return String.Format("{0:00}:{1:00}:{2:00}", ts.TotalHours, ts.Minutes, ts.Seconds);
-        }
-
-        private void PushDataSources_AudioDevice(Zone zone)
-        {
-            //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume", screen), audioDevice.Volume);
-            //BuiltInComponents.Host.DataHandler.PushDataSourceValue(String.Format("OM;Screen{0}.Zone.Volume.Mute", screen), audioDevice.Mute);
-            OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.Volume", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.AudioDevice.Volume);
-            OM.Host.DataHandler.PushDataSourceValue(BuiltInComponents.OMInternalPlugin, String.Format("{0}.Zone{1}.Volume.Mute", BuiltInComponents.OMInternalPlugin.pluginName, zone.Index), zone.AudioDevice.Mute);
-
         }
 
         /// <summary>

@@ -206,9 +206,11 @@
     <Compile Include="helperFunctions\General.cs" />
     <Compile Include="Math\Evaluator.cs" />
     <Compile Include="Media\DeviceInfo.cs" />
-    <Compile Include="Media\MediaLoader.cs" />
-    <Compile Include="Media\MediaProviderState.cs" />
+    <Compile Include="Media\MediaProviderAbilities.cs" />
+    <Compile Include="Media\MediaProviderHandler.cs" />
     <Compile Include="Media\MediaSource.cs" />
+    <Compile Include="Plugin\IPlayer\IMediaProvider.cs" />
+    <Compile Include="Media\MediaLoader.cs" />
     <Compile Include="Media\Playlist.cs" />
     <Compile Include="Media\StorageAnalyzer.cs" />
     <Compile Include="Net\Connections.cs" />
@@ -224,7 +226,7 @@
     <Compile Include="Plugin\HighLevelCode.cs" />
     <Compile Include="Plugin\IDataSource.cs" />
     <Compile Include="Plugin\IPlayerVolumeControl.cs" />
-    <Compile Include="Plugin\IPlayer\IMediaProvider.cs" />
+    <Compile Include="Plugin\IPlayer\IMediaProviderHandler.cs" />
     <Compile Include="Plugin\IPlayer\MediaProviderBase.cs" />
     <Compile Include="RenderingWindow\iRenderingWindow.cs" />
     <Compile Include="UIHandler\InfoBar.cs" />
@@ -263,7 +265,6 @@
     <Compile Include="Widget.cs" />
     <Compile Include="Platform\GnomeIcon.cs" />
     <Compile Include="Zones\AudioDevice.cs" />
-    <Compile Include="Zones\MediaProviderHandler.cs" />
     <Compile Include="Zones\Zone.cs" />
     <Compile Include="Zones\ZoneHandler.cs" />
   </ItemGroup>
@@ -340,7 +341,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

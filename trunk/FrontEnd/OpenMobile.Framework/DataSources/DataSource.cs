@@ -29,7 +29,7 @@ namespace OpenMobile.Data
 {
     /// <summary>
     /// Get data delegate, returns the current data
-    /// <para>Set out variable "result" to true if operation was sucessfull otherwise set to false</para>
+    /// <para>Set out variable "result" to true if operation was successful otherwise set to false</para>
     /// </summary>
     /// <param name="datasource"></param>
     /// <param name="result"></param>
@@ -39,7 +39,7 @@ namespace OpenMobile.Data
 
     /// <summary>
     /// Set data delegate. New value is passed in the value field
-    /// <para>Set out variable "result" to true if operation was sucessfull otherwise set to false</para>
+    /// <para>Set out variable "result" to true if operation was successful otherwise set to false</para>
     /// </summary>
     /// <param name="datasource"></param>
     /// <param name="value"></param>

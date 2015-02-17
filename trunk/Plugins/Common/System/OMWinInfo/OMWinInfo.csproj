@@ -17,6 +17,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -31,7 +32,6 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,6 +75,12 @@
     </Compile>
     <Compile Include="frmCmdParams.Designer.cs">
       <DependentUpon>frmCmdParams.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmDetails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDetails.Designer.cs">
+      <DependentUpon>frmDetails.cs</DependentUpon>
     </Compile>
     <Compile Include="frmHistoryView.cs">
       <SubType>Form</SubType>
@@ -138,6 +144,9 @@
   <ItemGroup>
     <EmbeddedResource Include="frmCmdParams.resx">
       <DependentUpon>frmCmdParams.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDetails.resx">
+      <DependentUpon>frmDetails.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmHistoryView.resx">
       <DependentUpon>frmHistoryView.cs</DependentUpon>

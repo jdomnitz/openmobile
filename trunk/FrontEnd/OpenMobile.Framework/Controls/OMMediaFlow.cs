@@ -100,8 +100,15 @@ namespace OpenMobile.Controls
             }
             set
             {
+                if (value == null)
+                    return;
+
                 if (!(value is Playlist))
-                    throw new Exception("Invalid list source type, must be Playlist3");
+                    throw new Exception("Invalid list source type, must be Playlist");
+
+                // Is this the same as the current object, if so return
+                if (value == _ListSource)
+                    return;
 
                 if (_ListSource != null)
                     _ListSource.PropertyChanged -= _PropertyChangedEventHandler;
@@ -282,6 +289,18 @@ namespace OpenMobile.Controls
                 newObject._ListSource.PropertyChanged += newObject._PropertyChangedEventHandler;
             }
             return newObject;
+        }
+
+        internal override void DataSource_OnChanged(Data.DataSource dataSource)
+        {
+            try
+            {
+                this.ListSource = dataSource.Value;
+            }
+            catch
+            {   
+                // Mask any errors
+            }
         }
 
     }

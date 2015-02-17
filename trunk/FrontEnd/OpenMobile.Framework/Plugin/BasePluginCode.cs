@@ -106,7 +106,7 @@ namespace OpenMobile.Plugin
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        virtual protected object Setting_Get(string name)
+        virtual protected string Setting_Get(string name)
         {
             return StoredData.Get(this, name);
         }
@@ -120,6 +120,17 @@ namespace OpenMobile.Plugin
         virtual protected bool Setting_Set(string name, object value)
         {
             return StoredData.Set(this, name, value);
+        }
+
+        /// <summary>
+        /// Set a default value for a setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        virtual protected void Setting_SetDefault(string name, object value)
+        {
+            StoredData.SetDefaultValue(this, name, value);
         }
 
         /// <summary>

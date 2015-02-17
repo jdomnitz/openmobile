@@ -1157,7 +1157,13 @@ namespace OpenMobile.Controls
             if (selectedIndex == -1)
                 return;
             if (OnClick != null)
-                OnClick(this, screen);
+            {
+                var control = this.parent[screen, this.name];
+                if (control != null)
+                    OnClick(control, screen);
+                else
+                    OnClick(this, screen);
+            }
             raiseUpdate(false);
         }
 
@@ -1167,7 +1173,13 @@ namespace OpenMobile.Controls
         public void holdClickMe(int screen)
         {
             if (OnHoldClick != null)
-                OnHoldClick(this, screen);
+            {
+                var control = this.parent[screen, this.name];
+                if (control != null)
+                    OnHoldClick(control, screen);
+                else
+                    OnHoldClick(this, screen);
+            }
             raiseUpdate(false);
         }
 
@@ -1178,7 +1190,13 @@ namespace OpenMobile.Controls
         public void longClickMe(int screen)
         {
             if (OnLongClick != null)
-                OnLongClick(this, screen);
+            {
+                var control = this.parent[screen, this.name];
+                if (control != null)
+                    OnLongClick(control, screen);
+                else
+                    OnLongClick(this, screen);
+            }
             raiseUpdate(false);
         }
 
@@ -1682,6 +1700,10 @@ namespace OpenMobile.Controls
                         base.Visible = false;
                     }
                 }
+                else if (typeof(System.Collections.IEnumerable).IsInstanceOfType(dataSource.Value))
+                {
+                    this.ListSource = dataSource.Value;
+                }
                 else if (dataSource.Value is List<string>)
                 {   // List data present
                     List<string> Items = dataSource.Value as List<string>;
@@ -1775,6 +1797,10 @@ namespace OpenMobile.Controls
                 if (this._ListSource != value)
                 {
                     ListSource_DisconnectEvents();
+
+                    // Remove existing items
+                    if (this._ListSource != null)
+                        this.Clear();
 
                     // Activate new object
                     this._ListSource = value;

@@ -269,6 +269,9 @@
     <Content Include="Skins\Default\AIcons\4-collections-view-as-list.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Skins\Default\AIcons\5-content-edit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Skins\Default\AIcons\5-content-email.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -279,6 +282,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Skins\Default\AIcons\5-content-new.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Skins\Default\AIcons\5-content-picture.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Skins\Default\AIcons\5-content-remove.png">
@@ -687,6 +693,9 @@
     <Content Include="Skins\Default\Icons\Icon-Glass-Gas.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Skins\Default\Icons\Icon-Glass-Radio.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Skins\Default\Icons\Icon-GPS.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -757,6 +766,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Skins\Default\Icons\Icon-Radio.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Skins\Default\Icons\Icon-RadioDAB.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Skins\Default\Icons\Icon-RadioDAB2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Skins\Default\Icons\Icon-RadioFM.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Skins\Default\Icons\Icon-RadioFM2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Skins\Default\Icons\Icon-RadioWaves.png">
@@ -928,7 +949,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

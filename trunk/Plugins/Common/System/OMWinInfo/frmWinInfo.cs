@@ -319,7 +319,7 @@ namespace OMWinInfo
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(String.Format("An error has occured while saving the file\n{0}\n\nError:\n{1}", sfDialog.FileName, ex.ToString()));
+                    MessageBox.Show(String.Format("An error has occurred while saving the file\n{0}\n\nError:\n{1}", sfDialog.FileName, ex.ToString()));
                 }
 
             }
@@ -337,18 +337,28 @@ namespace OMWinInfo
                 Command cmd = BuiltInComponents.Host.CommandHandler.GetCommand(cmbCommand.Text);
                 if (cmd != null)
                 {
+                    object result = null;
                     if (cmd.RequiresParameters)
                     {
                         object[] param = null;
                         frmCmdParams frmParam = new frmCmdParams();
                         if (frmParam.ShowDialog(this, cmd, out param) == System.Windows.Forms.DialogResult.OK)
                         {
-                            BuiltInComponents.Host.CommandHandler.ExecuteCommand(cmbCommand.Text, param.ToArray());
+                            result = BuiltInComponents.Host.CommandHandler.ExecuteCommand(cmbCommand.Text, param.ToArray());
                         }
                     }
                     else
                     {
-                        BuiltInComponents.Host.CommandHandler.ExecuteCommand(cmbCommand.Text);
+                        result = BuiltInComponents.Host.CommandHandler.ExecuteCommand(cmbCommand.Text);
+                    }
+
+                    if (result is string)
+                    {
+                        var resultString = result as string;
+                        if (!string.IsNullOrWhiteSpace(resultString))
+                        {
+                            MessageBox.Show(String.Format("Command\r\n\r\n'{0}'\r\n\r\nreturned:\r\n\r\n{1}", cmd, resultString), "Command reply", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
                     }
                 }
             }
@@ -445,6 +455,21 @@ namespace OMWinInfo
         private void chkAuto_CheckedChanged(object sender, EventArgs e)
         {
             timer1.Enabled = chkAuto.Checked;
+        }
+
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                this.cmdDataSource.Text = (string)dataGridView1.SelectedRows[0].Cells["FullName"].Value;
+
+                DataSource datasource = BuiltInComponents.Host.DataHandler.GetDataSource(this.cmdDataSource.Text);
+                if (datasource != null)
+                {
+                    var formDetails = new frmDetails();
+                    formDetails.Show(this, datasource);
+                }
+            }
         }
     }
 }

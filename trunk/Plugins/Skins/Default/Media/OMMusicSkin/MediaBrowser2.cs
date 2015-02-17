@@ -247,7 +247,7 @@ namespace OMMusicSkin
         void lstMedia_OnHoldClick(OMControl sender, int screen)
         {
             // Get current playlist
-            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.Playlist");
 
             // Get selected list item
             OMList lst = sender.Parent[screen, "lstMedia"] as OMList;
@@ -275,7 +275,7 @@ namespace OMMusicSkin
                                     var items = GetArtistSongs(selectedMediaItem.Artist);
                                     playlist.AddRangeDistinct(items);
                                     playlist.CurrentItem = items.First();
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListHoldBehavior.Enqueue:
@@ -299,7 +299,7 @@ namespace OMMusicSkin
                                     var items = GetAlbumSongs(selectedMediaItem.Artist, selectedMediaItem.Album);
                                     playlist.AddRangeDistinct(items);
                                     playlist.CurrentItem = items.First();
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListHoldBehavior.Enqueue:
@@ -322,7 +322,7 @@ namespace OMMusicSkin
                                 {
                                     playlist.AddDistinct(selectedMediaItem);
                                     playlist.CurrentItem = selectedMediaItem;
-                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.MediaProvider.Play");
+                                    OM.Host.CommandHandler.ExecuteCommand(screen, "Zone.Play");
                                 }
                                 break;
                             case ListHoldBehavior.Enqueue:
@@ -344,7 +344,7 @@ namespace OMMusicSkin
         void mnuItem_ClearPlaylist_OnClick(OMControl sender, int screen)
         {
             // Get current playlist
-            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.Playlist");
             playlist.Clear();
         }
 

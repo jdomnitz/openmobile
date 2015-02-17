@@ -162,6 +162,15 @@ namespace OpenMobile.Controls
         /// <summary>
         /// Create a new OMLabel
         /// </summary>
+        public OMLabel(string name)
+            : base(name, 0, 0, 100, 130)
+        {
+            Init();
+        }
+
+        /// <summary>
+        /// Create a new OMLabel
+        /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="w"></param>
