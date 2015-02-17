@@ -40,6 +40,8 @@ namespace OMDataSourceTest
 
         public override eLoadStatus initialize(IPluginHost host)
         {
+            return eLoadStatus.LoadSuccessful;
+
             {
                 dataSourceGroup1 = new DataSourceGroup("", 0, this.pluginName, "TestGroup", "TestSource", "");
 

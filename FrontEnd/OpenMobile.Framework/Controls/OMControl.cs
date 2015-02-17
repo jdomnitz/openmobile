@@ -595,7 +595,7 @@ namespace OpenMobile.Controls
         /// <returns></returns>
         public virtual object Clone()
         {
-            return Clone(this.Parent);
+            return this.Clone(this.Parent);
         }
 
         /// <summary>
@@ -863,7 +863,7 @@ namespace OpenMobile.Controls
             }
             set
             {
-                // Unscubscribe to any existing data
+                // Unsubscribe to any existing data
                 if (!String.IsNullOrEmpty(this._Visible_DataSource))
                     BuiltInComponents.Host.DataHandler.UnsubscribeFromDataSource(this._Visible_DataSource, Visible_DataSource_OnChanged);
 
@@ -941,6 +941,31 @@ namespace OpenMobile.Controls
                     _Internal_Visibility = false;
                 }
             }
+
+            // if it's a string we'll use the string contents (if string is empty hide the control)
+            else if (dataSource.Value is string)
+            {
+                if (!String.IsNullOrWhiteSpace(dataSource.Value as string))
+                    _Internal_Visibility = true;
+                else
+                    _Internal_Visibility = false;
+            }
+
+            // If it's a number well use the value; 0 = hide, 1 or higher = show
+            else if (OpenMobile.helperFunctions.General.IsNumber(dataSource.Value))
+            {
+                var numberString = dataSource.Value as string;
+                double number = 0;
+                if (Double.TryParse(numberString, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out number))
+                {
+                    _Internal_Visibility = number != 0;
+                }
+                else
+                {
+                    _Internal_Visibility = false;
+                }
+            }
+            
             else
             {   // This is not a binary datasource, use null to detect state
                 _Internal_Visibility = dataSource.Value != null;

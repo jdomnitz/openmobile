@@ -503,9 +503,12 @@ namespace OMDebug
                     {
                         foreach (string queued in queue)
                         {
+                            // Mask out user names
+                            var queuedEdited = MaskOutUserNames(queued);
+
                             if (IDE)
-                                System.Diagnostics.Debug.WriteLine(queued);
-                            writer.WriteLine(queued);
+                                System.Diagnostics.Debug.WriteLine(queuedEdited);
+                            writer.WriteLine(queuedEdited);
                         }
                         queue.Clear();
                     }
@@ -513,6 +516,10 @@ namespace OMDebug
                     if (TimeStamp)
                     {
                         string Text = (((Environment.TickCount - time) / 1000.0).ToString("0.000") + " [" + Msg.Type.ToString() + "]: " + header + Msg.ToString());
+
+                        // Mask out user names
+                        Text = MaskOutUserNames(Text);
+
                         if (IDE)
                             System.Diagnostics.Debug.WriteLine(Text);
                         writer.WriteLine(Text);
@@ -520,6 +527,10 @@ namespace OMDebug
                     else
                     {
                         string Text = header + Msg.ToString();
+
+                        // Mask out user names
+                        Text = MaskOutUserNames(Text);
+
                         if (IDE)
                             System.Diagnostics.Debug.WriteLine(Text);
                         writer.WriteLine(Text);
@@ -560,9 +571,10 @@ namespace OMDebug
                     {
                         foreach (string queued in queue)
                         {
+                            var queuedEdited = MaskOutUserNames(queued);
                             if (IDE)
-                                System.Diagnostics.Debug.WriteLine(queued);
-                            writer.WriteLine(queued);
+                                System.Diagnostics.Debug.WriteLine(queuedEdited);
+                            writer.WriteLine(queuedEdited);
                         }
                         queue.Clear();
                     }
@@ -577,6 +589,8 @@ namespace OMDebug
                     else
                     {
                         string Text = header + Msg.ToString();
+                        // Mask out user names
+                        Text = MaskOutUserNames(Text);
                         if (IDE)
                             System.Diagnostics.Debug.WriteLine(Text);
                         writer.WriteLine(Text);
@@ -585,14 +599,31 @@ namespace OMDebug
                     // Write out text array
                     foreach (string text in texts)
                     {
+                        // Mask out user names
+                        var textEdited = MaskOutUserNames(text);
                         if (IDE)
-                            System.Diagnostics.Debug.WriteLine("\t" + text);
-                        writer.WriteLine("\t" + text);
+                            System.Diagnostics.Debug.WriteLine("\t" + textEdited);
+                        writer.WriteLine("\t" + textEdited);
                     }
 
                     writer.Flush();
                 }
             }
+        }
+
+        private string MaskOutUserNames(string text)
+        {
+            // Win7/8
+            if (text.Contains("/Users/"))
+            {
+                int startIndex = text.IndexOf("/Users/") + 7;
+                int endIndex = text.IndexOf("/", startIndex + 1);
+                int length = text.Length - endIndex;
+                var userString = text.Substring(startIndex, length);
+                text = text.Replace(userString, new String('*', length));
+            }
+
+            return text;
         }
 
         List<string> queue = new List<string>();

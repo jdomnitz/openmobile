@@ -63,12 +63,12 @@ namespace OMMusicSkin
 
         public override OMPanel loadPanel(string name, int screen)
         {
-            if (String.IsNullOrEmpty(name))
-            {
-                // Show now playing as default screen if coming from the main menu if media is playing, otherwise show the default screen
-                if (OM.Host.DataHandler.GetDataSourceValue<bool>(screen, "Zone.MediaProvider.Playback.Playing"))
-                    return base.loadPanel("NowPlaying", screen);
-            }
+            //if (String.IsNullOrEmpty(name))
+            //{
+            //    // Show now playing as default screen if coming from the main menu if media is playing, otherwise show the default screen
+            //    if (OM.Host.DataHandler.GetDataSourceValue<bool>(screen, "Zone.Playback.Playing"))
+            //        return base.loadPanel("NowPlaying", screen);
+            //}
 
             return base.loadPanel(name, screen);
         }
@@ -76,9 +76,9 @@ namespace OMMusicSkin
         public override eLoadStatus initialize(IPluginHost host)
         {
             // Queue panels
-            PanelManager.QueuePanel(panelPlaylistView.PanelName, new panelPlaylistView(this).Initialize, true);
-            PanelManager.QueuePanel(panelNowPlaying.PanelName, new panelNowPlaying(this).Initialize);
-            PanelManager.QueuePanel("MediaBrowser", new panelMediaBrowser(this).Initialize);
+            //PanelManager.QueuePanel(panelPlaylistView.PanelName, new panelPlaylistView(this).Initialize, true);
+            //PanelManager.QueuePanel(panelNowPlaying.PanelName, new panelNowPlaying(this).Initialize);
+            PanelManager.QueuePanel("MediaBrowser", new panelMediaBrowser(this).Initialize, true);
 
             // Settings
             Settings_MapVariables();

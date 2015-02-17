@@ -518,6 +518,63 @@ namespace OpenMobile.Data
         }
 
         /// <summary>
+        /// Forces a refresh of a datasource from the source (Don't use this method unless required as it can cause high system load if used to often)
+        /// </summary>
+        /// <param name="screen"></param>
+        /// <param name="provider"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool RefreshDataSource(int screen, OpenMobile.Plugin.IBasePlugin provider, string name)
+        {
+            object value = null;
+            return RefreshDataSource(String.Format("{0};{1}.{2}", provider.pluginName, DataNameBase.GetScreenString(screen), name), out value);
+        }
+
+        /// <summary>
+        /// Forces a refresh of a datasource from the source (Don't use this method unless required as it can cause high system load if used to often)
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool RefreshDataSource(OpenMobile.Plugin.IBasePlugin provider, string name)
+        {
+            object value = null;
+            return RefreshDataSource(String.Format("{0};{1}", provider.pluginName, name), out value);
+        }
+
+        /// <summary>
+        /// Forces a refresh of a datasource from the source (Don't use this method unless required as it can cause high system load if used to often)
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool RefreshDataSource(string name)
+        {
+            object value = null;
+            return RefreshDataSource(name, out value);
+        }
+        /// <summary>
+        /// Forces a refresh of a datasource from the source (Don't use this method unless required as it can cause high system load if used to often)
+        /// <para>NB! This method requires the name to include a provider reference (example: OM;Screen0.Zone.Volume)</para>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool RefreshDataSource(string name, out object value)
+        {
+            value = null;
+
+            var dataSource = GetDataSource(name);
+            if (dataSource == null)
+                return false;
+
+            var result = dataSource.RefreshValue(dataSource.Value, true, false, true);
+            value = dataSource.Value;
+            return result;
+        }
+
+
+        /// <summary>
         /// Gets a datasource's value and supports sending parameters along in the request
         /// <para>Name can be part of a datasources name or a full datasource name WITHOUT a provider (example: Zone.Volume)</para>
         /// </summary>
@@ -848,7 +905,7 @@ namespace OpenMobile.Data
                         // Remove items from queue
                         _DataSourceSubscriptionCache.Remove(ItemsToSubscribe[i]);
                         // Log data
-                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Warning, "DataHandler", String.Format("Datasource subscription cache, Cached item connected and removed from cache: {0}", ItemsToSubscribe[i].Name));
+                        BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "DataHandler", String.Format("Datasource subscription cache, Cached item connected and removed from cache: {0}", ItemsToSubscribe[i].Name));
                     }
                 }
             }
@@ -897,6 +954,7 @@ namespace OpenMobile.Data
 
             return prosessedString != String.Empty;
         }
+
 
     }
 }

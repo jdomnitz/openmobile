@@ -2825,7 +2825,6 @@ namespace OpenMobile.Controls
 
         internal override void DataSource_Missing(string propertyName)
         {
-            TransitionInText(_AnimationSingle, "ERR");
         }
 
         internal override void DataSource_InLine_Changed(string s)

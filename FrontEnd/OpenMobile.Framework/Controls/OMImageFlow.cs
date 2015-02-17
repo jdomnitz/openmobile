@@ -1321,6 +1321,8 @@ namespace OpenMobile.Controls
                     // Activate new object
                     this._ListSource = value;
 
+                    Clear();
+
                     // Add items 
                     AddItemsFromListSource();
 
@@ -1934,7 +1936,7 @@ namespace OpenMobile.Controls
 
         public override object Clone(OMPanel parent)
         {
-            OMImageFlow newObject = (OMImageFlow)this.MemberwiseClone();
+            OMImageFlow newObject = (OMImageFlow)base.Clone(parent);//this.MemberwiseClone();
             newObject.parent = parent;
             newObject._Images = new List<ImageWrapper>();
             foreach (ImageWrapper iW in _Images)
@@ -1945,6 +1947,11 @@ namespace OpenMobile.Controls
         }
 
         #endregion
+
+        internal override void DataSource_OnChanged(Data.DataSource dataSource)
+        {
+            this.ListSource = dataSource.Value;
+        }
 
     }
 }

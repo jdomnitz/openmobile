@@ -722,6 +722,11 @@ namespace OpenMobile.Plugin
         OpenMobile.CommandHandler CommandHandler { get; }
 
         /// <summary>
+        /// MediaProviderHandler
+        /// </summary>
+        OpenMobile.Media.MediaProviderHandler MediaProviderHandler { get; }
+
+        /// <summary>
         /// Wrapper for calling a method on each screen
         /// <para>--------------</para>
         /// <para>Sample usage:</para>
@@ -792,5 +797,12 @@ namespace OpenMobile.Plugin
                     float? longitude = null,
                     float? altitude = null);
 
+        /// <summary>
+        /// Gets all plugins that matches a specific type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pluginType"></param>
+        /// <returns></returns>
+        List<IBasePlugin> GetPlugins<T>();
     }
 }

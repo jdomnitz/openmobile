@@ -44,7 +44,7 @@ using Implementation;
 namespace OMVLCPlayer
 {
     [SupportedOSConfigurations(OSConfigurationFlags.Windows)]
-    public sealed class OMVLCPlayer : BasePluginCode
+    public sealed class OMVLCPlayer : MediaProviderBase
     {
         private class VLCMetaData
         {
@@ -110,6 +110,7 @@ namespace OMVLCPlayer
         private IMediaPlayerFactory _PlayerFactory;
         private AudioOutputModuleInfo _Player_DefaultAudioModule;
         private List<AudioOutputDeviceInfo> _Player_AudioOutputDevices = new List<AudioOutputDeviceInfo>();
+        private List<MediaSource> _MediaSources = new List<MediaSource>();
 
         // Zone specific data
         private Dictionary<Zone, IDiskPlayer> _ZonePlayer = new Dictionary<Zone, IDiskPlayer>();
@@ -122,14 +123,17 @@ namespace OMVLCPlayer
         private Dictionary<Zone, float> _Zone_PlaybackPos = new Dictionary<Zone, float>();
         private Dictionary<Zone, DateTime> _Zone_TimeStampLastCommand = new Dictionary<Zone, DateTime>();
         private Dictionary<Zone, VLCMetaData> _Zone_Player_MetaData = new Dictionary<Zone, VLCMetaData>();
+        private Dictionary<Zone, MediaSource> _Zone_MediaSource = new Dictionary<Zone, MediaSource>();
 
         // Text constants
         private const string _Text_PleaseWaitLoadingMedia = "Please wait, loading media...";
 
+
+
         #region Constructor / Plugin config
 
         public OMVLCPlayer()
-            : base("OMVLCPlayer", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "OM Official Audio/Video player", "OM Dev team/Borte", "")
+            : base("OMVLCPlayer", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "OM Official Audio/Video player (MediaProvider)", "OM Dev team/Borte", "")
         {
         }
 
@@ -143,6 +147,10 @@ namespace OMVLCPlayer
             // Do async startup so we don't block the main OM thread
             OpenMobile.Threading.SafeThread.Asynchronous(() =>
                 {
+                    // Initialize media sources
+                    _MediaSources.Add(new MediaSource_FileBasedMedia(this, "File", "File based media", OM.Host.getSkinImage("Icons|Icon-File")));
+                    _MediaSources.Add(new MediaSource_DiscBasedMedia(this, "CD", "CompactDisc", OM.Host.getSkinImage("Icons|Icon-CD")));
+
                     SetVLCFileEnvironment();
 
                     OM.Host.OnSystemEvent += new SystemEvent(Host_OnSystemEvent);
@@ -167,6 +175,9 @@ namespace OMVLCPlayer
                     {
                         // Initialize local variables
                         _Zone_MediaInfo.Add(zone, new mediaInfo());
+                       
+                        // Default media source
+                        _Zone_MediaSource.Add(zone, _MediaSources[0]);
 
                         // Restore playback mode from DB
                         _Zone_PlaybackMode.Add(zone, StoredData.GetEnum<PlaybackModes>(this, String.Format("{0}_PlaybackMode", zone), PlaybackModes.Stop));
@@ -199,17 +210,6 @@ namespace OMVLCPlayer
                         // Preload one player per zone
                         ZonePlayer_CheckInstance(zone);
                     }
-
-                    DataSources_Register();
-                    Commands_Register();
-
-                    // Restart any playing players
-                    foreach (var zone in OM.Host.ZoneHandler.Zones)
-                    {
-                        if (_Zone_PlaybackMode[zone] == PlaybackModes.Restart)
-                            PlayerControl_Restart(zone, _Zone_PlaybackPos[zone]);
-                    }
-
                 });
 
             return eLoadStatus.LoadSuccessful;
@@ -355,395 +355,7 @@ namespace OMVLCPlayer
             }
         }
 
-
-
-        #region DataSources 
-
-        private void DataSources_Register()
-        {
-            // Create one set of datasources per zone
-            for (int i = 0; i < OM.Host.ZoneHandler.Zones.Count; i++)
-            {
-                Zone zone = OM.Host.ZoneHandler.Zones[i];
-
-                DataSourceGroup dataSourceGroup = new DataSourceGroup(String.Format("{0}.Zone{1}", this.pluginName, i), this.pluginName, "Zone", "MediaProvider");
-                _Zone_DataSourceGroup_Media.Add(OM.Host.ZoneHandler.Zones[i], dataSourceGroup);
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Playing", 0, DataSource.DataTypes.binary, null, "Mediaplayer is playing as bool"), false));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Stopped", 0, DataSource.DataTypes.binary, null, "Mediaplayer has stopped as bool"), false));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Paused", 0, DataSource.DataTypes.binary, null, "Mediaplayer has paused as bool"), false));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Repeat", 0, DataSource.DataTypes.binary, null, "Repeat is enabled as bool"), false));
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Shuffle", 0, DataSource.DataTypes.binary, null, "Shuffle is enabled as bool"), false));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Artist", 0, DataSource.DataTypes.text, null, "Artist as string"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Album", 0, DataSource.DataTypes.text, null, "Album as string"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Genre", 0, DataSource.DataTypes.text, null, "Genre as string"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Rating", 0, DataSource.DataTypes.text, null, "Rating 0-5 (-1 for not set) as int"), -1));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Length.TimeSpan", 0, DataSource.DataTypes.text, null, "Total length as TimeSpan"), TimeSpan.Zero));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Length.Seconds", 0, DataSource.DataTypes.text, null, "Total length in seconds as int"), 0));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Length.Text", 0, DataSource.DataTypes.text, null, "Total length as string"), String.Empty));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Location", 0, DataSource.DataTypes.text, null, "Media location/url as string"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Name", 0, DataSource.DataTypes.text, null, "Name as string"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Rating", 0, DataSource.DataTypes.text, null, "Rating as int 0 - 5 (-1 is not set)"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.TrackNumber", 0, DataSource.DataTypes.text, null, "TrackNumber as int"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.Type", 0, DataSource.DataTypes.text, null, "Type of media as string"), ""));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo.CoverArt", 0, DataSource.DataTypes.image, null, "CoverArt of media as OImage"), null));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaInfo", 0, DataSource.DataTypes.raw, DataSourceGetter, "Current media info as mediaInfo"), _Zone_MediaInfo[zone]));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playlist", 0, DataSource.DataTypes.raw, DataSourceGetter, "Current playlist as Playlist3"), _Zone_Playlist[zone]));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Pos.TimeSpan", 0, DataSource.DataTypes.text, null, "Current playback position as TimeSpan"), TimeSpan.Zero));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Pos.Seconds", 0, DataSource.DataTypes.text, null, "Current playback position in seconds as int"), 0));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Pos.Text", 0, DataSource.DataTypes.text, null, "Current playback position as string"), String.Empty));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "Playback.Pos.Percent", 0, DataSource.DataTypes.percent, null, "Current playback position as percentage of total length as integer"), 0));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaText1", 0, DataSource.DataTypes.text, null, "MediaProvider: Media text string 1 as string"), String.Empty));
-
-                dataSourceGroup.AddDataSource(
-                    OM.Host.DataHandler.AddDataSource(
-                        new DataSource(this, this.pluginName, String.Format("Zone{0}", i), "MediaText2", 0, DataSource.DataTypes.text, null, "MediaProvider: Media text string 2 as string"), String.Empty));
-            }
-
-            OM.Host.ForEachScreen((screen) =>
-            {
-                Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
-                OM.Host.DataHandler.ActivateDataSourceGroup(_Zone_DataSourceGroup_Media[zone], screen);
-            });
-
-        }
-
-        private object DataSourceGetter(DataSource datasource, out bool result, object[] param)
-        {
-            result = false;
-
-            string datasourceName = datasource.FullNameWithoutScreen.Replace(this.pluginName, "");
-            
-            Zone zone = null;
-            if (datasource.NameLevel2.Contains("Zone"))
-            {
-                int zoneIndex = int.Parse(datasource.NameLevel2.Replace("Zone", ""));
-                zone = OM.Host.ZoneHandler.Zones[zoneIndex];
-
-                // Strip away unwanted information from the name
-                datasourceName = datasourceName.Replace(String.Format(".{0}.", datasource.NameLevel2), "");
-            }
-
-            result = true;
-
-            try
-            {
-                switch (datasourceName)
-                {
-                    #region Playlist
-
-                    case "Playlist":
-                        {
-                            return _Zone_Playlist[zone];
-                        }
-
-                    #endregion
-
-                    #region MediaInfo
-
-                    case "MediaInfo":
-                        {
-                            return _Zone_MediaInfo[zone];
-                        }
-
-                    #endregion
-
-                    default:
-                        break;
-                }
-            }
-            catch
-            {
-                result = false;
-            }
-
-            return null;
-        }
-
-        #endregion
-
-        #region Commands
-
-        void Commands_Register()
-        {
-
-            // Create one set of commands per zone
-            for (int i = 0; i < OM.Host.ZoneHandler.Zones.Count; i++)
-            {
-                CommandGroup commandGroup = new CommandGroup(String.Format("{0}.Zone{1}", this.pluginName, i), this.pluginName, "Zone", "MediaProvider");
-                _Zone_CommandGroup_Media.Add(OM.Host.ZoneHandler.Zones[i], commandGroup);
-
-                // Don't create any commands if a zone has sub zones 
-                if (OM.Host.ZoneHandler.Zones[i].HasSubZones)
-                    continue;
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Play", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "PlayURL", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Stop", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Pause", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Next", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Previous", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "SeekForward", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "SeekBackward", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Playlist.Set", CommandExecutor, 1, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Repeat.Enable", CommandExecutor, 1, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Repeat.Disable", CommandExecutor, 1, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Repeat.Toggle", CommandExecutor, 0, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Shuffle.Enable", CommandExecutor, 1, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Shuffle.Disable", CommandExecutor, 1, false, "")));
-
-                commandGroup.AddCommand(
-                    OM.Host.CommandHandler.AddCommand(
-                        new Command(this, this.pluginName, String.Format("Zone{0}", i), "Shuffle.Toggle", CommandExecutor, 0, false, "")));
-            }
-
-            OM.Host.ForEachScreen((screen) =>
-                {
-                    Zone zone = OM.Host.ZoneHandler.GetActiveZone(screen);
-                    OM.Host.CommandHandler.ActivateCommandGroup(_Zone_CommandGroup_Media[zone], screen);
-                });
-
-        }
-
-        private object CommandExecutor(Command command, object[] param, out bool result)
-        {
-            result = false;
-
-            string commandName = command.FullNameWithoutScreen.Replace(this.pluginName, "");
-            
-            Zone zone = null;
-            if (command.NameLevel2.Contains("Zone"))
-            {
-                int zoneIndex = int.Parse(command.NameLevel2.Replace("Zone", ""));
-                zone = OM.Host.ZoneHandler.Zones[zoneIndex];
-
-                // Strip away unwanted information from the command name
-                commandName = commandName.Replace(String.Format(".{0}.", command.NameLevel2), "");
-            }
-
-            try
-            {
-                TimeSpan timeSinceLastCommand = DateTime.Now - _Zone_TimeStampLastCommand[zone];
-                _Zone_TimeStampLastCommand[zone] = DateTime.Now;
-
-                switch (commandName)
-                {
-                    #region Playlist.Set
-
-                    case "Playlist.Set":
-                        {
-                            result = true;
-                            if (Params.IsParamsValid(param, 1))
-                            {
-                                if (param[0] is Playlist)
-                                {   // Set playlist
-                                    _Zone_Playlist[zone] = param[0] as Playlist;
-
-                                    // Push update for datasource for playlist
-                                    OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playlist", this.pluginName, zone.Index), _Zone_Playlist[zone]);
-                                    return "";
-                                }
-                                else
-                                {
-                                    return "Invalid datatype for playlist";
-                                }
-                            }
-                            else
-                            {
-                                return "Minimum one parameter is required";
-                            }
-                        }
-
-                    #endregion
-
-                    #region Stop
-
-                    case "Stop":
-                        {
-                            PlayerControl_DelayedPlay_Cancel(zone);
-
-                            if (_ZonePlayer.ContainsKey(zone))
-                            {
-                                _Zone_PlaybackMode[zone] = PlaybackModes.Stop;
-                                _ZonePlayer[zone].Stop();
-                            }
-                            return "";
-                        }
-
-                    #endregion
-
-                    #region Play
-
-                    case "Play":
-                        {
-                            PlayerControl_DelayedPlay_Cancel(zone);
-
-                            mediaInfo media = null;
-
-                            // Process parameters
-                            if (param == null || param.Length == 0)
-                            {   // No parameters available, play current playlist item
-
-                                if (_Zone_PlaybackMode[zone] == PlaybackModes.Pause)
-                                {
-                                    _Zone_PlaybackMode[zone] = PlaybackModes.Play;
-                                    _ZonePlayer[zone].Pause();
-                                }
-                                else
-                                {
-                                    media = _Zone_Playlist[zone].CurrentItem;
-                                    MediaInfo_Set(zone, media);
-                                }
-                            }
-
-                            // Do we have a minimum of one parameter?
-                            else if (Params.IsParamsValid(param, 1))
-                            {   // Yes
-
-                                // Check for media info present
-                                if (param[0] is mediaInfo)
-                                {   // Play media info
-                                    media = Params.GetParam<mediaInfo>(param, 0);
-                                }
-
-                                else if (param[0] is int)
-                                {   // Play index in playlist
-                                    _Zone_Playlist[zone].CurrentIndex = (int)param[0];
-                                    media = _Zone_Playlist[zone].CurrentItem;
-                                    MediaInfo_Set(zone, media);
-                                }
-
-                                else if (param[0] is string)
-                                {   // Play media location directly
-                                    media = new mediaInfo(eMediaType.Local, Params.GetParam<string>(param, 0, ""));
-                                }
-
-                            }
-
-                            if (media != null)
-                            {
-                                result = true;
-                                return PlayerControl_Play(zone, media);
-                            }
-                            return "Invalid media";
-                        }
-
-                    #endregion
-
+        /*
                     #region PlayURL
 
                     case "PlayURL":
@@ -771,242 +383,7 @@ namespace OMVLCPlayer
 
                     #endregion
 
-                    #region Pause
-
-                    case "Pause":
-                        {
-                            PlayerControl_DelayedPlay_Cancel(zone);
-
-                            if (_ZonePlayer.ContainsKey(zone))
-                            {
-                                _Zone_PlaybackMode[zone] = PlaybackModes.Pause;
-                                _ZonePlayer[zone].Pause();
-                            }
-                            return "";
-                        }
-
-                    #endregion
-
-                    #region Next
-
-                    case "Next":
-                        {
-                            // Abort any ongoing delayed commands
-                            PlayerControl_DelayedPlay_Cancel(zone);
-
-                            _Zone_Playlist[zone].GotoNextMedia();
-                            
-                            // Update media info
-                            mediaInfo media = _Zone_Playlist[zone].CurrentItem;
-                            MediaInfo_Set(zone, media);
-
-                            // Start playback of new media
-                            if (_Zone_PlaybackMode[zone] == PlaybackModes.Play)
-                            {
-                                if (timeSinceLastCommand > new TimeSpan(0, 0, 0, 1, 0))
-                                {
-                                    PlayerControl_Play(zone, media);
-                                }
-                                else
-                                {
-                                    PlayerControl_DelayedPlay_Enable(zone, media);
-                                }
-                            }
-
-                            return "";
-                        }
-
-                    #endregion
-
-                    #region Previous
-
-                    case "Previous":
-                        {
-                            // Abort any ongoing delayed commands
-                            PlayerControl_DelayedPlay_Cancel(zone);
-
-                            // Check if we are close enough to go to previous item, otherwise start at beginning of current media
-                            if (GetPlayer_CurrentPosition(zone) <= TimeSpan.FromSeconds(5))
-                                _Zone_Playlist[zone].GotoPreviousMedia();
-                            
-                            // Update media info
-                            mediaInfo media = _Zone_Playlist[zone].CurrentItem;
-                            MediaInfo_Set(zone, media);
-
-                            // Start playback of new media
-                            if (_Zone_PlaybackMode[zone] == PlaybackModes.Play)
-                            {
-                                if (timeSinceLastCommand > new TimeSpan(0, 0, 0, 1, 0))
-                                    PlayerControl_Play(zone, media);
-                                else
-                                    PlayerControl_DelayedPlay_Enable(zone, media);
-                            }
-
-                            return "";
-                        }
-
-                    #endregion
-
-                    #region Forward
-
-                    case "SeekForward":
-                    {   // Seek forward the specified seconds
-                        if (!_ZonePlayer[zone].IsSeekable)
-                            return "media not seekable";
-
-                        if (Params.IsParamsValid(param, 1))
-                        {
-                            int seconds = Params.GetParam<int>(param, 0);
-                            try
-                            {
-                                float percentage = ((float)seconds * 1000f) / (float)_ZonePlayer[zone].Length;
-                                _ZonePlayer[zone].Position += percentage;
-                                return "";
-                            }
-                            catch (Exception e)
-                            {
-                                OM.Host.DebugMsg(this.pluginName, e);
-                                return e.Message; 
-                            }
-                        }
-                        else
-                        {   // Seek forward default length
-                            float percentage = (5f * 1000f) / (float)_ZonePlayer[zone].Length;
-                            _ZonePlayer[zone].Position += percentage;
-                            return "";
-                        }
-                    }
-
-                    #endregion
-
-                    #region Backward
-
-                    case "SeekBackward":
-                    {   // Seek forward the specified seconds
-                        if (!_ZonePlayer[zone].IsSeekable)
-                            return "media not seekable";
-
-                        if (Params.IsParamsValid(param, 1))
-                        {
-                            int seconds = Params.GetParam<int>(param, 0);
-                            try
-                            {
-                                float percentage = ((float)seconds * 1000f) / (float)_ZonePlayer[zone].Length;
-                                _ZonePlayer[zone].Position -= percentage;
-                                return "";
-                            }
-                            catch (Exception e)
-                            {
-                                OM.Host.DebugMsg(this.pluginName, e);
-                                return e.Message;
-                            }
-                        }
-                        else
-                        {   // Seek forward default length of 5 seconds
-                            float percentage = (5f * 1000f) / (float)_ZonePlayer[zone].Length;
-                            _ZonePlayer[zone].Position -= percentage;
-                            return "";
-                        }
-                    }
-
-                    #endregion
-
-                    #region Repeat Enable
-
-                    case "Repeat.Enable":
-                    {
-                        result = true;
-                        _Zone_Playlist[zone].Repeat = true;
-
-                        // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Repeat", this.pluginName, zone.Index), _Zone_Playlist[zone].Repeat);
-                        return "";
-                    }
-
-                    #endregion
-
-                    #region Repeat Disable
-
-                    case "Repeat.Disable":
-                    {
-                        result = true;
-                        _Zone_Playlist[zone].Repeat = false;
-
-                        // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Repeat", this.pluginName, zone.Index), _Zone_Playlist[zone].Repeat);
-                        return "";
-                    }
-
-                    #endregion
-
-                    #region Repeat Toggle
-
-                    case "Repeat.Toggle":
-                    {
-                        result = true;
-                        _Zone_Playlist[zone].Repeat = !_Zone_Playlist[zone].Repeat;
-
-                        // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Repeat", this.pluginName, zone.Index), _Zone_Playlist[zone].Repeat);
-                        return "";
-                    }
-
-                    #endregion
-
-                    #region Shuffle Enable
-
-                    case "Shuffle.Enable":
-                    {
-                        result = true;
-                        _Zone_Playlist[zone].Shuffle = true;
-
-                        // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Shuffle", this.pluginName, zone.Index), _Zone_Playlist[zone].Shuffle);
-                        return "";
-                    }
-
-                    #endregion
-
-                    #region Shuffle Disable
-
-                    case "Shuffle.Disable":
-                    {
-                        result = true;
-                        _Zone_Playlist[zone].Shuffle = false;
-
-                        // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Shuffle", this.pluginName, zone.Index), _Zone_Playlist[zone].Shuffle);
-                        return "";
-                    }
-
-                    #endregion
-
-                    #region Shuffle Toggle
-
-                    case "Shuffle.Toggle":
-                    {
-                        result = true;
-                        _Zone_Playlist[zone].Shuffle = !_Zone_Playlist[zone].Shuffle;
-
-                        // Push update for datasource for playlist
-                        OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Repeat", this.pluginName, zone.Index), _Zone_Playlist[zone].Shuffle);
-                        return "";
-                    }
-
-                    #endregion
-
-                    default:
-                        break;
-                }
-            }
-            catch
-            {
-            }
-
-            return null;
-        }
-
-        #endregion
+        */
 
         private void tmrDelayedCommand_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -1025,7 +402,7 @@ namespace OMVLCPlayer
 
             // Update media info
             mediaInfo media = _Zone_Playlist[zone].CurrentItem;
-            MediaInfo_Set(zone, media);
+            base.MediaProviderData_ReportMediaInfo(zone, media);
 
             // Start playback of new media
             PlayerControl_Play(zone, media);
@@ -1109,7 +486,7 @@ namespace OMVLCPlayer
                                 _Zone_PlaybackMode[zone] = PlaybackModes.Play;
 
                                 // Inform user that we're loading media
-                                MediaInfo_MediaText_Set(zone, _Text_PleaseWaitLoadingMedia, media.Location);
+                                base.MediaProviderData_ReportMediaText(zone, _Text_PleaseWaitLoadingMedia, media.Location);
 
                                 #endregion
                             }
@@ -1200,43 +577,10 @@ namespace OMVLCPlayer
             return ""; // No error
         }
 
-        private void MediaInfo_MediaText_Set(Zone zone, string text1, string text2)
-        {
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaText1", this.pluginName, zone.Index), text1);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaText2", this.pluginName, zone.Index), text2);
-        }
-
-        private void MediaInfo_Set(Zone zone, mediaInfo media, TimeSpan playbackPos = new TimeSpan())
-        {
-            TimeSpan length = TimeSpan.FromSeconds(media.Length);
-
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Artist", this.pluginName, zone.Index), media.Artist);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Album", this.pluginName, zone.Index), media.Album);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Genre", this.pluginName, zone.Index), media.Genre);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Rating", this.pluginName, zone.Index), media.Rating);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Length.Seconds", this.pluginName, zone.Index), media.Length);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Length.TimeSpan", this.pluginName, zone.Index), length);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Length.Text", this.pluginName, zone.Index), TimeSpanToString(length));
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Location", this.pluginName, zone.Index), media.Location);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Name", this.pluginName, zone.Index), media.Name);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Rating", this.pluginName, zone.Index), media.Rating);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.TrackNumber", this.pluginName, zone.Index), media.TrackNumber);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.Type", this.pluginName, zone.Index), media.Type.ToString());
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo.CoverArt", this.pluginName, zone.Index), media.coverArt);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.MediaInfo", this.pluginName, zone.Index), media);
-
-            int playbackPercent = (int)((playbackPos.TotalSeconds / (double)media.Length) * 100d);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Pos.Seconds", this.pluginName, zone.Index), playbackPos.TotalSeconds);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Pos.TimeSpan", this.pluginName, zone.Index), playbackPos);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Pos.Text", this.pluginName, zone.Index), TimeSpanToString(playbackPos));
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Pos.Percent", this.pluginName, zone.Index), playbackPercent);
-
-        }
-
         private void MediaInfo_Clear(Zone zone)
         {
             _Zone_MediaInfo[zone] = new mediaInfo();
-            MediaInfo_Set(zone, _Zone_MediaInfo[zone]);
+            base.MediaProviderData_ReportMediaInfo(zone, _Zone_MediaInfo[zone]);
         }
 
         private string TimeSpanToString(TimeSpan timespan)
@@ -1312,19 +656,15 @@ namespace OMVLCPlayer
         void Events_PlayerPlaying(object sender, EventArgs e)
         {
             Zone zone = GetPlayerZone(sender);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Playing", this.pluginName, zone.Index), true);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Stopped", this.pluginName, zone.Index), false);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Paused", this.pluginName, zone.Index), false);
-            MediaInfo_Set(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
+            base.MediaProviderData_ReportState_Playback(zone, PlaybackState.Playing);
+            base.MediaProviderData_ReportMediaInfo(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
         }
 
         void Events_PlayerPaused(object sender, EventArgs e)
         {
             Zone zone = GetPlayerZone(sender);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Playing", this.pluginName, zone.Index), false);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Stopped", this.pluginName, zone.Index), false);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Paused", this.pluginName, zone.Index), true);
-            MediaInfo_Set(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
+            base.MediaProviderData_ReportState_Playback(zone, PlaybackState.Paused);
+            base.MediaProviderData_ReportMediaInfo(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
         }
 
         void Events_PlayerOpening(object sender, EventArgs e)
@@ -1381,7 +721,7 @@ namespace OMVLCPlayer
 
             media.UpdateMissingInfo(mediaFromVLC.Album, mediaFromVLC.Artist, mediaFromVLC.Title, mediaFromVLC.Genre, (int)(mediaFromVLC.Duration / 1000), trackNumberDecoded);
 
-            MediaInfo_Set(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
+            base.MediaProviderData_ReportMediaInfo(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
 
             // Also update the provider info fields
             switch (media.Type)
@@ -1389,10 +729,10 @@ namespace OMVLCPlayer
                 case eMediaType.AudioCD:
                 case eMediaType.DVD:
                 case eMediaType.BluRay:
-                    MediaInfo_MediaText_Set(zone, String.Format("{0}", media.Name), String.Format("{0}", media.TrackNumber));
+                    base.MediaProviderData_ReportMediaText(zone, String.Format("{0}", media.Name), String.Format("{0}", media.TrackNumber));
                     break;
                 default:
-                    MediaInfo_MediaText_Set(zone, String.Format("{0}", media.Name), String.Format("{0} - {1}", media.Artist, media.Album));
+                    base.MediaProviderData_ReportMediaText(zone, String.Format("{0}", media.Name), String.Format("{0} - {1}", media.Artist, media.Album));
                     break;
             }
         }
@@ -1400,9 +740,7 @@ namespace OMVLCPlayer
         void Events_PlayerStopped(object sender, EventArgs e)
         {
             Zone zone = GetPlayerZone(sender);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Playing", this.pluginName, zone.Index), false);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Stopped", this.pluginName, zone.Index), true);
-            OM.Host.DataHandler.PushDataSourceValue(this, String.Format("{0}.Zone{1}.Playback.Paused", this.pluginName, zone.Index), false);
+            base.MediaProviderData_ReportState_Playback(zone, PlaybackState.Stopped);
         }
 
         void Events_MediaEnded(object sender, EventArgs e)
@@ -1416,7 +754,7 @@ namespace OMVLCPlayer
 
             // Update media info
             mediaInfo media = _Zone_Playlist[zone].CurrentItem;
-            MediaInfo_Set(zone, media);
+            base.MediaProviderData_ReportMediaInfo(zone, media);
 
             // Start playback of new media
             PlayerControl_Play(zone, media);
@@ -1425,7 +763,7 @@ namespace OMVLCPlayer
         void Events_TimeChanged(object sender, MediaPlayerTimeChanged e)
         {
             Zone zone = GetPlayerZone(sender);
-            MediaInfo_Set(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
+            base.MediaProviderData_ReportMediaInfo(zone, _Zone_MediaInfo[zone], GetPlayer_CurrentPosition(zone));
         }
 
         void Events_PlayerPositionChanged(object sender, MediaPlayerPositionChanged e)
@@ -1433,7 +771,9 @@ namespace OMVLCPlayer
             Zone zone = GetPlayerZone(sender);
             _Zone_PlaybackPos[zone] = e.NewPosition;
         }
-        
+
+        #endregion
+
         /*
         void player_OnPlaybackStopped(mPlayer sender)
         {
@@ -1585,7 +925,7 @@ namespace OMVLCPlayer
         private string _LastMissingCoverImageSearchText = String.Empty;
 
         /// <summary>
-        /// Retrieves a folder image located in the same folder as the music specificed by url
+        /// Retrieves a folder image located in the same folder as the music specified by URL
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
@@ -1599,7 +939,6 @@ namespace OMVLCPlayer
             }
             return null;
         }
-        #endregion
 
         private void SavePlayerStates()
         {
@@ -1650,7 +989,7 @@ namespace OMVLCPlayer
             {
                 //lock (_ZonePlayer)
                 {
-                    SavePlayerStates();
+                    //SavePlayerStates();
 
                     //// Save playlists
                     //foreach (var key in _Zone_Playlist.Keys)
@@ -1707,5 +1046,293 @@ namespace OMVLCPlayer
         }
 
         #endregion
+
+        #region MediaProvider
+
+        public override string MediaProviderCommand_Activate(Zone zone)
+        {
+            base.MediaProviderData_ReportState_Playback(zone, PlaybackState.Stopped);
+            base.MediaProviderData_ReportMediaText(zone, String.Format("Activating {0}", this.pluginName), "");
+
+            // Restore playback mode from DB
+            var storedPlaybackMode = StoredData.GetEnum<PlaybackModes>(this, String.Format("{0}_PlaybackMode", zone), PlaybackModes.Stop);
+            if (!_Zone_PlaybackMode.ContainsKey(zone))
+                _Zone_PlaybackMode.Add(zone, storedPlaybackMode);
+            else
+                _Zone_PlaybackMode[zone] = storedPlaybackMode;
+
+            // Restore playback pos from DB
+            var storedPlaybackPos = StoredData.GetFloat(this, String.Format("{0}_PlaybackPos", zone), 0);
+            if (!_Zone_PlaybackPos.ContainsKey(zone))
+                _Zone_PlaybackPos.Add(zone, storedPlaybackPos);
+            else
+                _Zone_PlaybackPos[zone] = storedPlaybackPos;
+
+            // Restart any playing players
+            if (_Zone_PlaybackMode[zone] == PlaybackModes.Restart)
+                PlayerControl_Restart(zone, _Zone_PlaybackPos[zone]);
+
+            return String.Empty;
+        }
+
+        public override string MediaProviderCommand_Deactivate(Zone zone)
+        {
+            base.MediaProviderData_ReportState_Playback(zone, PlaybackState.Stopped);
+            base.MediaProviderData_ReportMediaText(zone, String.Format("Deactivating {0}", this.pluginName), "");
+
+            SavePlayerStates();
+
+            MediaProviderCommand_Playback_Stop(zone, null);
+            base.MediaProviderData_ReportMediaText(zone, String.Format("Deactivated {0}", this.pluginName), "");
+
+            return String.Empty;
+        }
+
+        public override string MediaProviderCommand_Playback_Start(Zone zone, object[] param)
+        {
+            PlayerControl_DelayedPlay_Cancel(zone);
+
+            mediaInfo media = null;
+
+            // Process parameters
+            if (param == null || param.Length == 0)
+            {   // No parameters available, play current playlist item
+
+                if (_Zone_PlaybackMode[zone] == PlaybackModes.Pause)
+                {
+                    _Zone_PlaybackMode[zone] = PlaybackModes.Play;
+                    _ZonePlayer[zone].Pause();
+                }
+                else
+                {
+                    media = _Zone_Playlist[zone].CurrentItem;
+                    base.MediaProviderData_ReportMediaInfo(zone, media);
+                }
+            }
+
+            // Do we have a minimum of one parameter?
+            else if (Params.IsParamsValid(param, 1))
+            {   // Yes
+
+                // Check for media info present
+                if (param[0] is mediaInfo)
+                {   // Play media info
+                    media = Params.GetParam<mediaInfo>(param, 0);
+                }
+
+                else if (param[0] is int)
+                {   // Play index in playlist
+                    _Zone_Playlist[zone].CurrentIndex = (int)param[0];
+                    media = _Zone_Playlist[zone].CurrentItem;
+                    base.MediaProviderData_ReportMediaInfo(zone, media);
+                }
+
+                else if (param[0] is string)
+                {   // Play media location directly
+                    media = new mediaInfo(eMediaType.Local, Params.GetParam<string>(param, 0, ""));
+                }
+
+            }
+
+            if (media != null)
+            {
+                return PlayerControl_Play(zone, media);
+            }
+            return "Invalid media";
+        }
+
+        public override Playlist MediaProviderData_GetPlaylist(Zone zone)
+        {
+            return _Zone_Playlist[zone];
+        }
+
+        public override Playlist MediaProviderData_SetPlaylist(Zone zone, Playlist playlist)
+        {
+            _Zone_Playlist[zone] = playlist;
+            return _Zone_Playlist[zone];
+        }
+
+        public override string MediaProviderCommand_Playback_Stop(Zone zone, object[] param)
+        {
+            PlayerControl_DelayedPlay_Cancel(zone);
+
+            if (_ZonePlayer.ContainsKey(zone))
+            {
+                _Zone_PlaybackMode[zone] = PlaybackModes.Stop;
+                _ZonePlayer[zone].Stop();
+            }
+            return "";
+        }
+
+        public override string MediaProviderCommand_Playback_Pause(Zone zone, object[] param)
+        {
+            PlayerControl_DelayedPlay_Cancel(zone);
+
+            if (_ZonePlayer.ContainsKey(zone))
+            {
+                _Zone_PlaybackMode[zone] = PlaybackModes.Pause;
+                _ZonePlayer[zone].Pause();
+            }
+            return "";
+        }
+
+        public override string MediaProviderCommand_Playback_Next(Zone zone, object[] param)
+        {
+            TimeSpan timeSinceLastCommand = DateTime.Now - _Zone_TimeStampLastCommand[zone];
+            _Zone_TimeStampLastCommand[zone] = DateTime.Now;
+
+            // Abort any ongoing delayed commands
+            PlayerControl_DelayedPlay_Cancel(zone);
+
+            _Zone_Playlist[zone].GotoNextMedia();
+
+            // Update media info
+            mediaInfo media = _Zone_Playlist[zone].CurrentItem;
+            base.MediaProviderData_ReportMediaInfo(zone, media);
+
+            // Start playback of new media
+            if (_Zone_PlaybackMode[zone] == PlaybackModes.Play)
+            {
+                if (timeSinceLastCommand > new TimeSpan(0, 0, 0, 1, 0))
+                {
+                    PlayerControl_Play(zone, media);
+                }
+                else
+                {
+                    PlayerControl_DelayedPlay_Enable(zone, media);
+                }
+            }
+
+            return "";
+        }
+
+        public override string MediaProviderCommand_Playback_Previous(Zone zone, object[] param)
+        {
+            TimeSpan timeSinceLastCommand = DateTime.Now - _Zone_TimeStampLastCommand[zone];
+            _Zone_TimeStampLastCommand[zone] = DateTime.Now;
+
+            // Abort any ongoing delayed commands
+            PlayerControl_DelayedPlay_Cancel(zone);
+
+            // Check if we are close enough to go to previous item, otherwise start at beginning of current media
+            if (GetPlayer_CurrentPosition(zone) <= TimeSpan.FromSeconds(5))
+                _Zone_Playlist[zone].GotoPreviousMedia();
+
+            // Update media info
+            mediaInfo media = _Zone_Playlist[zone].CurrentItem;
+            base.MediaProviderData_ReportMediaInfo(zone, media);
+
+            // Start playback of new media
+            if (_Zone_PlaybackMode[zone] == PlaybackModes.Play)
+            {
+                if (timeSinceLastCommand > new TimeSpan(0, 0, 0, 1, 0))
+                    PlayerControl_Play(zone, media);
+                else
+                    PlayerControl_DelayedPlay_Enable(zone, media);
+            }
+
+            return "";
+        }
+
+        public override string MediaProviderCommand_Playback_SeekForward(Zone zone, object[] param)
+        {
+            if (!_ZonePlayer[zone].IsSeekable)
+                return "media not seekable";
+
+            if (Params.IsParamsValid(param, 1))
+            {
+                int seconds = Params.GetParam<int>(param, 0);
+                try
+                {
+                    float percentage = ((float)seconds * 1000f) / (float)_ZonePlayer[zone].Length;
+                    _ZonePlayer[zone].Position += percentage;
+                    return "";
+                }
+                catch (Exception e)
+                {
+                    OM.Host.DebugMsg(this.pluginName, e);
+                    return e.Message;
+                }
+            }
+            else
+            {   // Seek forward default length
+                float percentage = (5f * 1000f) / (float)_ZonePlayer[zone].Length;
+                _ZonePlayer[zone].Position += percentage;
+                return "";
+            }
+        }
+
+        public override string MediaProviderCommand_Playback_SeekBackward(Zone zone, object[] param)
+        {
+            if (!_ZonePlayer[zone].IsSeekable)
+                return "media not seekable";
+
+            if (Params.IsParamsValid(param, 1))
+            {
+                int seconds = Params.GetParam<int>(param, 0);
+                try
+                {
+                    float percentage = ((float)seconds * 1000f) / (float)_ZonePlayer[zone].Length;
+                    _ZonePlayer[zone].Position -= percentage;
+                    return "";
+                }
+                catch (Exception e)
+                {
+                    OM.Host.DebugMsg(this.pluginName, e);
+                    return e.Message;
+                }
+            }
+            else
+            {   // Seek forward default length of 5 seconds
+                float percentage = (5f * 1000f) / (float)_ZonePlayer[zone].Length;
+                _ZonePlayer[zone].Position -= percentage;
+                return "";
+            }
+        }
+
+        public override bool MediaProviderData_GetShuffle(Zone zone)
+        {
+            return _Zone_Playlist[zone].Shuffle;
+        }
+
+        public override bool MediaProviderData_SetShuffle(Zone zone, bool state)
+        {
+            _Zone_Playlist[zone].Shuffle = state;
+            return _Zone_Playlist[zone].Shuffle;
+        }
+
+        public override bool MediaProviderData_GetRepeat(Zone zone)
+        {
+            return _Zone_Playlist[zone].Repeat;
+        }
+
+        public override bool MediaProviderData_SetRepeat(Zone zone, bool state)
+        {
+            _Zone_Playlist[zone].Repeat = state;
+            return _Zone_Playlist[zone].Repeat;
+        }
+
+        public override MediaProviderAbilities MediaProviderData_GetMediaSourceAbilities(string mediaSource)
+        {
+            return new MediaProviderAbilities();
+        }
+
+        public override List<MediaSource> MediaProviderData_GetMediaSources()
+        {
+            return _MediaSources;
+        }
+
+        public override MediaSource MediaProviderData_GetMediaSource(Zone zone)
+        {
+            return _Zone_MediaSource[zone];
+        }
+
+        public override string MediaProviderCommand_ActivateMediaSource(Zone zone, string mediaSourceName)
+        {
+            return "";
+        }
+
+        #endregion
+
     }
 }

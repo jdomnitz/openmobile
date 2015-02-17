@@ -77,6 +77,32 @@ namespace OpenMobile.Controls
     }
 
     /// <summary>
+    /// Controls how the size of a control is affected
+    /// </summary>
+    public enum ControlSizeControl
+    {
+        /// <summary>
+        /// No change
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Set same size 
+        /// </summary>
+        SameSize,
+
+        /// <summary>
+        /// Set same height
+        /// </summary>
+        SameHeight,
+
+        /// <summary>
+        /// Set same width
+        /// </summary>
+        SameWidth
+    }
+
+    /// <summary>
     /// A collection of controls which can be used during initialization (NB! This list may not be valid during runtime)
     /// </summary>
     public class ControlGroup : List<OMControl>

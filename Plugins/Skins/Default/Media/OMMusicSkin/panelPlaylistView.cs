@@ -65,6 +65,7 @@ namespace OMMusicSkin
             lst_ViewPlaylist_ImgFlow.MediaInfoFormatString = "{1} - {0}\n{6}";
             lst_ViewPlaylist_ImgFlow.OnClick += new userInteraction(lst_ViewPlaylist_ImgFlow_OnClick);
             lst_ViewPlaylist_ImgFlow.OnHoldClick += new userInteraction(lst_ViewPlaylist_ImgFlow_OnHoldClick);
+            lst_ViewPlaylist_ImgFlow.DataSource = "Screen{:S:}.Zone.Playlist";
             panel.addControl(lst_ViewPlaylist_ImgFlow);
 
             // Create the buttonstrip popup
@@ -141,7 +142,7 @@ namespace OMMusicSkin
                 case "mnuItemPlayNow":
                     {
                         OMMediaFlow lstImgFlow = sender.Parent[screen, "lst_ViewPlaylist_ImgFlow"] as OMMediaFlow;
-                        string reply = OM.Host.CommandHandler.ExecuteCommand<string>("Zone.MediaProvider.Play", lstImgFlow.SelectedIndex);
+                        string reply = OM.Host.CommandHandler.ExecuteCommand<string>("Zone.Play", lstImgFlow.SelectedIndex);
                         if (reply != String.Empty)
                         {
                             OpenMobile.helperFunctions.Forms.dialog dialog = new OpenMobile.helperFunctions.Forms.dialog(_MainPlugin, "Playlist");
@@ -188,7 +189,7 @@ namespace OMMusicSkin
 
                 case "mnuItemToggleShuffle":
                     {
-                        OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Shuffle.Toggle", screen));
+                        OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.Shuffle.Toggle", screen));
                     }
                     break;
 
@@ -200,12 +201,12 @@ namespace OMMusicSkin
         void panel_Entering(OMPanel sender, int screen)
         {
             OM.Host.UIHandler.ControlButtons_Show(screen, false);
-            OpenMobile.Media.Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<OpenMobile.Media.Playlist>(screen, "Zone.MediaProvider.Playlist");
-            if (playlist != null)
-            {
-                OMMediaFlow lstImgFlow = sender[screen, "lst_ViewPlaylist_ImgFlow"] as OMMediaFlow;
-                lstImgFlow.ListSource = playlist;
-            }
+            //OpenMobile.Media.Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<OpenMobile.Media.Playlist>(screen, "Zone.Playlist");
+            //if (playlist != null)
+            //{
+            //    OMMediaFlow lstImgFlow = sender[screen, "lst_ViewPlaylist_ImgFlow"] as OMMediaFlow;
+            //    lstImgFlow.ListSource = playlist;
+            //}
         }
 
         void panel_Leaving(OMPanel sender, int screen)
@@ -217,7 +218,7 @@ namespace OMMusicSkin
         void mnuItem_ShuffleToggle_OnClick(OMControl sender, int screen)
         {
             OM.Host.UIHandler.PopUpMenu_Hide(screen, true);
-            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.MediaProvider.Shuffle.Toggle", screen));
+            OM.Host.CommandHandler.ExecuteCommand(String.Format("Screen{0}.Zone.Shuffle.Toggle", screen));
         }
 
         void mnuItem_OpenURL_OnClick(OMControl sender, int screen)
@@ -229,15 +230,15 @@ namespace OMMusicSkin
 
             if (!String.IsNullOrEmpty(url))
             {
-                OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.MediaProvider.PlayURL", url);
+                OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.PlayURL", url);
                 _MainPlugin.GotoPanel(screen, "NowPlaying");
             }
         }
 
         void btnBrowser_OnClick(OMControl sender, int screen)
         {
-            //OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.MediaProvider.PlayURL", @"http://mms-live.online.no/p4_bandit_ogg_lq");
-            ////OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.MediaProvider.PlayURL", @"http://stream.sbsradio.no:8000/radiorock.mp3");
+            //OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.PlayURL", @"http://mms-live.online.no/p4_bandit_ogg_lq");
+            ////OM.Host.CommandHandler.ExecuteCommand("Screen0.Zone.PlayURL", @"http://stream.sbsradio.no:8000/radiorock.mp3");
             //base.GotoPanel(screen, "NowPlaying");
             //base.GotoPanel(screen, "PlaylistEditor");
             //_MainPlugin.GotoPanel(screen, "MusicBrowser");
@@ -251,7 +252,7 @@ namespace OMMusicSkin
         {   // Configure items to show the current state of the list hold mode
             ButtonStrip popup = sender as ButtonStrip;
 
-            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.MediaProvider.Playlist");
+            Playlist playlist = OM.Host.DataHandler.GetDataSourceValue<Playlist>(screen, "Zone.Playlist");
             if (playlist == null)
                 return;
 

@@ -2789,7 +2789,7 @@ namespace OpenMobile
     /// <summary>
     /// Information on the currently playing media
     /// </summary>
-    public sealed class mediaInfo
+    public sealed class mediaInfo : ICloneable
     {
         /// <summary>
         /// Song/Movie Name
@@ -2898,7 +2898,17 @@ namespace OpenMobile
         }
 
         /// <summary>
-        /// Replaces info in this mediaInfo if newer data is available
+        /// Updates info in this mediaInfo if data is missing
+        /// </summary>
+        /// <param name="media"></param>
+        /// <returns></returns>
+        public bool UpdateMissingInfo(mediaInfo media)
+        {
+            return UpdateMissingInfo(media.Album, media.Artist, media.Name, media.Genre, media.Length, media.TrackNumber, media.coverArt, media.Type);
+        }
+
+        /// <summary>
+        /// Updates info in this mediaInfo if data is missing
         /// </summary>
         /// <param name="album"></param>
         /// <param name="artist"></param>
@@ -2962,6 +2972,139 @@ namespace OpenMobile
             return updated;
         }
 
+        /// <summary>
+        /// Replaces info in this mediaInfo
+        /// </summary>
+        /// <param name="media"></param>
+        public void ReplaceMissingInfo(mediaInfo media)
+        {
+            ReplaceMissingInfo(media.Album, media.Artist, media.Name, media.Genre, media.Length, media.TrackNumber, media.coverArt, media.Type);
+        }
+
+        /// <summary>
+        /// Replaces info in this mediaInfo
+        /// </summary>
+        /// <param name="album"></param>
+        /// <param name="artist"></param>
+        /// <param name="name"></param>
+        /// <param name="genre"></param>
+        /// <param name="length"></param>
+        /// <param name="tracknumber"></param>
+        /// <param name="coverArt"></param>
+        /// <param name="type"></param>
+        public void ReplaceMissingInfo(string album = null, string artist = null, string name = null, string genre = null, int? length = null, int? tracknumber = null, OImage coverArt = null, eMediaType? type = null)
+        {
+            if (type.HasValue)
+                this.Type = type.Value;
+            if (album != null)
+                this.Album = album;
+            if (artist != null)
+                this.Artist = artist;
+            if (genre != null)
+                this.Genre = genre;
+            if (length.HasValue)
+                this.Length = length.Value;
+            if (tracknumber.HasValue)
+                this.TrackNumber = tracknumber.Value;
+            if (name != null)
+                this.Name = name;
+            if (coverArt != null)
+                this.coverArt = coverArt;
+        }
+
+        /// <summary>
+        /// Compares the current instance to the specified mediaInfo
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool IsContentEqual(mediaInfo other)
+        {
+            if (object.ReferenceEquals(this, null) && object.ReferenceEquals(other, null))
+                return true;
+            if (object.ReferenceEquals(this, null) || object.ReferenceEquals(other, null))
+                return false;
+
+            if (this.Name == null ^ other.Name == null)
+                return false;
+            if (this.Name != null && other.Name != null)
+                if (!this.Name.Equals(other.Name))
+                    return false;
+            if (this.Album == null ^ other.Album == null)
+                return false;            
+            if (this.Album != null && other.Album != null)
+                if (!this.Album.Equals(other.Album))
+                    return false;
+            if (this.Artist == null ^ other.Artist == null)
+                return false;
+            if (this.Artist != null && other.Artist != null)
+                if (!this.Artist.Equals(other.Artist))
+                    return false;
+            if (this._coverArt == null ^ other._coverArt == null)
+                return false;
+            if (this._coverArt != null && other._coverArt != null)
+                if (!this._coverArt.Equals(other._coverArt))
+                    return false;
+            if (this.Genre == null ^ other.Genre == null)
+                return false;
+            if (this.Genre != null && other.Genre != null)
+                if (!this.Genre.Equals(other.Genre))
+                    return false;
+            if (this.Length == null ^ other.Length == null)
+                return false;
+            if (this.Length != null && other.Length != null)
+                if (!this.Length.Equals(other.Length))
+                    return false;
+            if (this.Location == null ^ other.Location == null)
+                return false;
+            if (this.Location != null && other.Location != null)
+                if (!this.Location.Equals(other.Location))
+                    return false;
+            if (this.Lyrics == null ^ other.Lyrics == null)
+                return false;
+            if (this.Lyrics != null && other.Lyrics != null)
+                if (!this.Lyrics.Equals(other.Lyrics))
+                    return false;
+            if (this.Rating == null ^ other.Rating == null)
+                return false;
+            if (this.Rating != null && other.Rating != null)
+                if (!this.Rating.Equals(other.Rating))
+                    return false;
+            if (this.TrackNumber == null ^ other.TrackNumber == null)
+                return false;
+            if (this.TrackNumber != null && other.TrackNumber != null)
+                if (!this.TrackNumber.Equals(other.TrackNumber))
+                    return false;
+            if (this.Type == null ^ other.Type == null)
+                return false;
+            if (this.Type != null && other.Type != null)
+                if (!this.Type.Equals(other.Type))
+                    return false;
+
+            return true;
+
+            //return this.Name.Equals(other.Name)
+            //    && this.Album.Equals(other.Album)
+            //    && this.Artist.Equals(other.Artist)
+            //    && this._coverArt.Equals(other._coverArt)
+            //    && this.Genre.Equals(other.Genre)
+            //    && this.Length.Equals(other.Length)
+            //    && this.Location.Equals(other.Location)
+            //    && this.Lyrics.Equals(other.Lyrics)
+            //    && this.Rating.Equals(other.Rating)
+            //    && this.TrackNumber.Equals(other.TrackNumber)
+            //    && this.Type.Equals(other.Type);
+        }
+
+        /// <summary>
+        /// Clone this object
+        /// </summary>
+        /// <returns></returns>
+        public object Clone()
+        {
+            mediaInfo newObject = (mediaInfo)this.MemberwiseClone();
+            newObject.coverArt = newObject.coverArt.Copy();
+            return newObject;
+        }
     }
 
     /// <summary>

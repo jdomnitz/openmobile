@@ -245,8 +245,6 @@ namespace OpenMobile
         /// </summary>
         public void Dispose()
         {
-            if (_MediaHandler != null)
-                _MediaHandler.Dispose();
         }
 
         /// <summary>
@@ -388,26 +386,5 @@ namespace OpenMobile
             if (OnPropertyChanged != null)
                 OnPropertyChanged(this, propertyName);
         }
-
-        /// <summary>
-        /// MediaProvider controller
-        /// </summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public MediaProviderHandler MediaHandler
-        {
-            get
-            {
-                return this._MediaHandler;
-            }
-            set
-            {
-                if (this._MediaHandler != value)
-                {
-                    this._MediaHandler = value;
-                }
-            }
-        }
-        private MediaProviderHandler _MediaHandler;
-        
     }
 }

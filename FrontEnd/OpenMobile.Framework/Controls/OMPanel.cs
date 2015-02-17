@@ -162,9 +162,9 @@ namespace OpenMobile.Controls
         /// <param name="control"></param>
         /// <param name="placementReference"></param>
         /// <param name="direction"></param>
-        public void addControl(OMControl control, OMControl placementReference, ControlDirections direction)
+        public void addControl(OMControl control, OMControl placementReference, ControlDirections direction, ControlSizeControl sizeControl = ControlSizeControl.None)
         {
-            helperFunctions.Controls.Controls.PlaceControl(placementReference, control, direction);
+            helperFunctions.Controls.Controls.PlaceControl(placementReference, control, direction, sizeControl);
             addControl(control);
         }
 
@@ -173,9 +173,9 @@ namespace OpenMobile.Controls
         /// </summary>
         /// <param name="control"></param>
         /// <param name="direction"></param>
-        public void addControl(OMControl control, ControlDirections direction)
+        public void addControl(OMControl control, ControlDirections direction, ControlSizeControl sizeControl = ControlSizeControl.None)
         {
-            helperFunctions.Controls.Controls.PlaceControl(_LastAddedControl, control, direction);
+            helperFunctions.Controls.Controls.PlaceControl(_LastAddedControl, control, direction, sizeControl);
             addControl(control);
         }
 
