@@ -1162,7 +1162,7 @@ Namespace OMLCD
                     End If
                     Me.SerialPort1.Write(data, 0, data.Length)
                     System.Threading.Thread.Sleep(1000)
-                    Me.SerialPort1.Write(splash_data, 0, splash_data.Length)
+                    Me.SerialPort1.Write(splash_data, 0, UBound(splash_data) + 1)
                     If m_Verbose Then
                         For x = 0 To UBound(splash_data)
                             msg = msg & Chr(splash_data(x))
