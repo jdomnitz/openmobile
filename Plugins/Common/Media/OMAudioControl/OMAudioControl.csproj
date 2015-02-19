@@ -119,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="References\CoreAudioApi.dll" />
+    <Content Include="References\MediaFoundation.dll" />
     <Content Include="References\VistaAudio.dll" />
     <Content Include="References\WindowsAudio.dll" />
   </ItemGroup>

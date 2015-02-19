@@ -124,9 +124,16 @@ namespace OpenMobile.Media
         /// <param name="mediaSourceType"></param>
         /// <returns></returns>
         public List<IMediaProvider> GetMediaProvidersByMediaSourceType(string mediaSourceType)
-
         {
-            var providers = _MediaProviders.Where(x => ((IMediaProvider)x).GetMediaSources().Any(y => y.MediaSourceType == mediaSourceType));
+            var providers = _MediaProviders.Where(x => 
+                {
+                    var mediaSources = ((IMediaProvider)x).GetMediaSources();
+                    if (mediaSources == null)
+                        return false;
+
+                    return mediaSources.Any(y => y.MediaSourceType == mediaSourceType);
+                }                
+                );
             return providers.Cast<IMediaProvider>().ToList();
         }
 
