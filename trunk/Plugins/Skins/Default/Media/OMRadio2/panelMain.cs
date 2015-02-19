@@ -48,7 +48,7 @@ namespace OMRadio2
         public OMPanel Initialize()
         {
             // Create a new panel
-            OMPanel panel = new OMPanel(PanelName, "Radio", _MainPlugin.pluginIcon);
+            OMPanel panel = new OMPanel(PanelName, "Radio", OM.Host.getSkinImage("Radio"));
 
             //OMBasicShape shapeBackground = new OMBasicShape("shapeBackground", OM.Host.ClientArea_Init.Left, OM.Host.ClientArea_Init.Top, OM.Host.ClientArea_Init.Width, OM.Host.ClientArea_Init.Height,
             //    new ShapeData(shapes.Rectangle, Color.FromArgb(128, Color.Black), Color.Transparent, 0));

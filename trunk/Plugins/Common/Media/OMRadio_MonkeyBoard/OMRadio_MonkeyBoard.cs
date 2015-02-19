@@ -116,7 +116,7 @@ namespace OMRadio_MonkeyBoard
         #region Constructor / Plugin config
 
         public OMRadio_MonkeyBoard()
-            : base("OMRadio_MonkeyBoard", OM.Host.getSkinImage("Icons|Radio white"), 1f, "OM Radio interface for MonkeyBoard DAB/RDS", "OM Dev team/Borte", "")
+            : base("OMRadio_MonkeyBoard", OM.Host.getSkinImage("Radio"), 1f, "OM Radio interface for MonkeyBoard DAB/RDS", "OM Dev team/Borte", "")
         {
         }
 

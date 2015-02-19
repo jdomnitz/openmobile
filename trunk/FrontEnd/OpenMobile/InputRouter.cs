@@ -136,6 +136,7 @@ namespace OpenMobile
         private static OpenTK.Input.MouseState[] _MouseStates_Tmp;
         private static OpenTK.Input.KeyboardState[] _KeyboardStates_Tmp;
         private static OpenTK.Input.KeyboardState _KeyboardState_Stored;
+        private static int _Keyboard_MaxDeviceCount = 20;
 
         private enum EventTypes
         {
@@ -159,6 +160,22 @@ namespace OpenMobile
             System.Drawing.Point[] lastMousePoint = new System.Drawing.Point[OM.Host.ScreenCount];
             MouseButton[] lastMouseButton = new MouseButton[OM.Host.ScreenCount];
 
+            int mouseCount = 0;
+            for (int i = 0; i < _Mouse_MaxDeviceCount; i++)
+            {
+                if (OpenTK.Input.Mouse.GetState(i).IsConnected)
+                    mouseCount++;
+            }
+            OM.Host.DebugMsg(DebugMessageType.Info, "InputRouter", String.Format("Detected {0} mice devices", mouseCount));
+
+            int keyboardCount = 0;
+            for (int i = 0; i < _Keyboard_MaxDeviceCount; i++)
+            {
+                if (OpenTK.Input.Keyboard.GetState(i).IsConnected)
+                    keyboardCount++;
+            }
+            OM.Host.DebugMsg(DebugMessageType.Info, "InputRouter", String.Format("Detected {0} keyboard devices", keyboardCount));
+
             // Connect events to system keyboard
             for (int i = 0; i < Core.theHost.ScreenCount; i++)
             {
@@ -181,6 +198,8 @@ namespace OpenMobile
                         {
                             if (Core.RenderingWindows[i] != null && !Core.RenderingWindows[i].IsDisposed)
                             {
+                                //OpenTK.Input.MouseState mouseCursorState = OpenTK.Input.Mouse.GetState(1);
+                                
                                 IdleDetection_Start(i);
 
                                 // Check if system mouse is within bounds of application window
@@ -189,6 +208,7 @@ namespace OpenMobile
                                     var clientPoint = Core.RenderingWindows[i].PointToClient(new System.Drawing.Point(mouseCursorState.X, mouseCursorState.Y));
 
                                     var mouseButton = OpenMobile.Input.Mouse.GetMouseButtons(mouseCursorState);
+                                    //var mouseButton = OpenMobile.Input.Mouse.GetMouseButtons(i);
 
                                     // Mouse move event
                                     if (clientPoint != lastMousePoint[i])

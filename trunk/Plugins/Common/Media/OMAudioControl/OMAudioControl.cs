@@ -43,6 +43,10 @@ namespace OMDataSourceSample
 
         public override eLoadStatus initialize(IPluginHost host)
         {
+            // Currently this plugin only supports windows
+            if (!Configuration.RunningOnWindows)
+                return eLoadStatus.LoadFailedGracefulUnloadRequested;
+
             // TODO: Add support for WinXP (WinXP or older is currently dropped)
             if (Environment.OSVersion.Version.Major < 6)
                 return eLoadStatus.LoadFailedGracefulUnloadRequested;
