@@ -1146,7 +1146,7 @@ Namespace OMLCD
             Dim msg As String = ""
 
             ' Select Custom Character memory bank command, bank 0
-            Dim data() As Byte = {254, Commands.LoadCustomChars, 0}
+            Dim cmd() As Byte = {254, Commands.LoadCustomChars, 0}
 
             If m_Verbose Then
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->ShowStartupScreen"))
@@ -1155,21 +1155,26 @@ Namespace OMLCD
             ' Send page text
             Try
                 If m_open Then
+                    Me.AutoScroll = True
+                    Me.LineWrap = True
                     Me.ClearScreen()
+                    System.Threading.Thread.Sleep(50)
                     Me.Home()
+                    Me.SerialPort1.Write(cmd, 0, cmd.Length)
+                    System.Threading.Thread.Sleep(500)
+                    Me.SerialPort1.Write(splash_data, 0, splash_data.Length)
                     If m_Verbose Then
                         theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Writing OM Logo Screen...."))
                     End If
-                    Me.SerialPort1.Write(data, 0, data.Length)
                     System.Threading.Thread.Sleep(1000)
-                    Me.SerialPort1.Write(splash_data, 0, UBound(splash_data) + 1)
-                    If m_Verbose Then
-                        For x = 0 To UBound(splash_data)
-                            msg = msg & Chr(splash_data(x))
-                        Next
-                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("'{0}'", msg))
-                        theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("....done"))
-                    End If
+                    Me.SerialPort1.Write(splash_data, 0, splash_data.Length)
+                    'If m_Verbose Then
+                    'For x = 0 To UBound(splash_data)
+                    'msg = msg & Chr(splash_data(x))
+                    'Next
+                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("'{0}'", msg))
+                    'theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("....done"))
+                    'End If
                 End If
             Catch ex As Exception
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Info, String.Format("Matrix Orbital->ShowStartupScreen Exception: {0}", ex.Message))
