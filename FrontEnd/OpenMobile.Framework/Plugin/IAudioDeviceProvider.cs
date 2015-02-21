@@ -33,5 +33,27 @@ namespace OpenMobile.Plugin
         /// Returns a list of possible output devices (NOTE: the index corresponds to instance ID's)
         /// </summary>
         AudioDevice[] OutputDevices { get; }
+
+        /// <summary>
+        /// Returns a list of possible input devices (NOTE: the index corresponds to instance ID's)
+        /// </summary>
+        AudioDevice[] InputDevices { get; }
+
+        /// <summary>
+        /// Activates an audio route
+        /// </summary>
+        /// <param name="sourceDevice"></param>
+        /// <param name="targetDevice"></param>
+        /// <returns></returns>
+        bool ActivateRoute(AudioDevice sourceDevice, AudioDevice targetDevice);
+
+        /// <summary>
+        /// Deactivates an audio route
+        /// </summary>
+        /// <param name="sourceDevice"></param>
+        /// <param name="targetDevice"></param>
+        /// <returns></returns>
+        bool DeactivateRoute(AudioDevice sourceDevice, AudioDevice targetDevice);
+
     }
 }

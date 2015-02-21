@@ -421,7 +421,7 @@ namespace OpenMobile.Zones
 
             // Restore settings from database (deserialize)
             if (StoredData.TryGetObjectXML<List<Zone>>(BuiltInComponents.OMInternalPlugin, "System.Zones", out _Zones))
-            {   // Restore successfull
+            {   // Restore successful
                 BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Zones loaded from database");
             }
             else

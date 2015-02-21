@@ -340,6 +340,9 @@ namespace OpenMobile
             // Initialize CommandHandler
             _CommandHandler = new OpenMobile.CommandHandler();
 
+            // Initialize audio device handler
+            _AudioDeviceHandler = new Media.AudioDeviceHandler();
+
             // Initialize panel transition effects handler
             OpenMobile.Controls.PanelTransitionEffectHandler.Init();
         }
@@ -746,6 +749,19 @@ namespace OpenMobile
                 return _AudioDeviceCount;
             }
         }
+
+        /// <summary>
+        /// Controller for audio devices
+        /// </summary>
+        public AudioDeviceHandler AudioDeviceHandler
+        {
+            get
+            {
+                return _AudioDeviceHandler;
+            }
+        }
+        private AudioDeviceHandler _AudioDeviceHandler = null;
+
 
         #endregion
 

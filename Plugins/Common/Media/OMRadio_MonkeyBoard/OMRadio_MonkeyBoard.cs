@@ -60,6 +60,7 @@ namespace OMRadio_MonkeyBoard
             Preset = 1
         }
 
+        private string _AudioInputDeviceName;
         private int _RadioVolume = 50;
         private string _RadioComPort = "COM15";
         private Thread _RadioThread;
@@ -98,11 +99,13 @@ namespace OMRadio_MonkeyBoard
         protected override void Settings()
         {
             base.Setting_Add(Setting.TextEntry(String.Format("{0}.ComPort", this.pluginName), String.Empty, "Enter comport for MonkeyBoard", StoredData.Get(this, String.Format("{0}.ComPort", this.pluginName))), "COM1");
+            base.Setting_Add(Setting.TextList<AudioDevice>("AudioInputDevice", "Select input device", "Audio input device", StoredData.Get(this, "AudioInputDevice"), OM.Host.AudioDeviceHandler.InputDevices));
         }
 
         private void Settings_MapVariables()
         {
             _RadioComPort = StoredData.Get(this, String.Format("{0}.ComPort", this.pluginName));
+            _AudioInputDeviceName = StoredData.Get(this, "AudioInputDevice");
         }
 
         protected override void setting_OnSettingChanged(int screen, Setting setting)
@@ -1444,6 +1447,11 @@ namespace OMRadio_MonkeyBoard
 
             try
             {
+                // Deactivate audio route
+                var inputDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(_AudioInputDeviceName);
+                var outputDevice = zone.AudioDevice;
+                OM.Host.AudioDeviceHandler.DeactivateRoute(inputDevice, outputDevice);
+
                 HW_Monkeyboard.StopStream();
                 RadioThread_Stop();
                 HW_Monkeyboard.CloseRadioPort();
@@ -1479,6 +1487,13 @@ namespace OMRadio_MonkeyBoard
                     // Connect radio and set initial radio values
                     if (HW_Monkeyboard.OpenRadioPort(String.Format(@"\\.\{0}", _RadioComPort), false))
                     {
+                        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
+
+                        // Activate audio route
+                        var inputDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(_AudioInputDeviceName);
+                        var outputDevice = zone.AudioDevice;
+                        OM.Host.AudioDeviceHandler.ActivateRoute(inputDevice, outputDevice);
+
                         RadioThread_Start();
 
                         //HW_Monkeyboard.SetStereoMode(HW_Monkeyboard.StereoMode.Stereo);
@@ -1490,9 +1505,10 @@ namespace OMRadio_MonkeyBoard
                     {
                         OM.Host.DebugMsg(DebugMessageType.Error, String.Format("Unable to connect to radio at {0}", _RadioComPort));
                         base.MediaProviderData_ReportMediaText(zone, "Failed to start radio", "Unable to connect to radio device");
+                        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
+
                         return "Unable to connect to radio";
                     }
-                    OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
                 }
                 else
                 {

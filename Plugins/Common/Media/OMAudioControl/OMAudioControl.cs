@@ -24,17 +24,14 @@ using OpenMobile.Plugin;
 using OpenMobile.Data;
 using System.Collections.Generic;
 using System.Linq;
-//using VistaAudio.CoreAudioApi;
-using CoreAudioApi;
 
-namespace OMDataSourceSample
+
+namespace OMAudioControl
 {
     [SupportedOSConfigurations(OSConfigurationFlags.Windows)]
     public sealed class OMAudioControl : BasePluginCode, IAudioDeviceProvider
     {
-        private MMDeviceEnumerator _AudioDeviceFactory = new MMDeviceEnumerator();
-        private AudioDevice _DefaultAudioDevice;
-        private List<AudioDevice> _OMAudioDevices = new List<AudioDevice>();
+        private AudioRouteHandler _AudioRouteHandler;
 
         public OMAudioControl()
             : base("OMAudioControl", OM.Host.getSkinImage("Icons|Icon-OM"), 1f, "Audio control provider", "OM Dev team", "")
@@ -51,121 +48,44 @@ namespace OMDataSourceSample
             if (Environment.OSVersion.Version.Major < 6)
                 return eLoadStatus.LoadFailedGracefulUnloadRequested;
 
-            // Enumerate audio devices
-            InitAudioDevices();
+            // Start audio handler
+            _AudioRouteHandler = new AudioRouteHandler();
 
             return eLoadStatus.LoadSuccessful;
         }
 
-        private void InitAudioDevices()
+        public override void Dispose()
         {
-            string info = "OMAudioControl detected the following devices:\r\n";
+            _AudioRouteHandler.Dispose();
 
-            _OMAudioDevices = new List<AudioDevice>();
-
-            // Add default device
-            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, "trying to detect the default audio device");
-            var defaultEndpoint = _AudioDeviceFactory.GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eMultimedia);
-            // Try to get the name of the device
-            string friendlyNameDefaultUnit = defaultEndpoint.FriendlyName;
-            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("Default audio device detected as {0}", friendlyNameDefaultUnit));
-            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("Trying to hook events on device {0}", friendlyNameDefaultUnit));
-            AudioDevice_HookEvents(defaultEndpoint);
-            AudioDevice device = new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, defaultEndpoint, true);
-            info += device.Name + "(" + friendlyNameDefaultUnit + ")\r\n";
-            _OMAudioDevices.Add(device);
-            OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("OM successfully created AudioDevice for device {0}", friendlyNameDefaultUnit));
-
-            // Add other devices
-            var audioDevices = _AudioDeviceFactory.EnumerateAudioEndPoints(EDataFlow.eRender, EDeviceState.DEVICE_STATE_ACTIVE);
-            for (int i = 0; i < audioDevices.Count; i++)
-            {
-                // Try to get the name of the device
-                string friendlyName = audioDevices[i].FriendlyName;
-                OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("Trying to hook events on device {0}", friendlyName));
-                AudioDevice_HookEvents(audioDevices[i]);
-
-                device = new AudioDevice(friendlyName, i + 1, AudioDevice_Get, AudioDevice_Set, audioDevices[i]);
-                info += device.Name + "\r\n";
-                _OMAudioDevices.Add(device);
-
-                OM.Host.DebugMsg(DebugMessageType.Info, this.pluginName, String.Format("OM successfully created AudioDevice for device {0}", friendlyName));
-            }
-            OM.Host.DebugMsg(DebugMessageType.Info, info);
+            base.Dispose();
         }
 
-        private void AudioDevice_HookEvents(MMDevice device)
-        {
-            device.AudioEndpointVolume.OnVolumeNotification += (AudioVolumeNotificationData data) =>
-            {
-                AudioEndpointVolume_OnVolumeNotification(device, data);
-            };
-        }
-
-        void AudioEndpointVolume_OnVolumeNotification(MMDevice device, AudioVolumeNotificationData data)
-        {
-            var omDevice = _OMAudioDevices.FirstOrDefault(x => ((MMDevice)x.Tag).Equals(device));
-            if (omDevice != null)
-            {
-                // Match found, raise event on audiodevice (we raise both the mute and the volume event as separating between them is not easy)
-                omDevice.Raise_DataUpdated(AudioDevice.Actions.Mute, data.Muted);
-                omDevice.Raise_DataUpdated(AudioDevice.Actions.Volume, ((int)Math.Round(data.MasterVolume * 100)));
-            }
-        }
-
-        private void AudioDevice_Set(AudioDevice audioDevice, AudioDevice.Actions action, object value)
-        {
-            MMDevice device = audioDevice.Tag as MMDevice;
-            if (device == null)
-                return;
-
-            switch (action)
-            {
-                case AudioDevice.Actions.Mute:
-                    device.AudioEndpointVolume.Mute = (bool)value;
-                    break;
-                case AudioDevice.Actions.Volume:
-                    {
-                        double volumeLevel = Convert.ToDouble(value);
-                        device.AudioEndpointVolume.MasterVolumeLevelScalar = ((float)volumeLevel / 100.0f);
-                        device.AudioEndpointVolume.Mute = false;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        private object AudioDevice_Get(AudioDevice audioDevice, AudioDevice.Actions action)
-        {
-            MMDevice device = audioDevice.Tag as MMDevice;
-
-            switch (action)
-            {
-                case AudioDevice.Actions.Mute:
-                    {
-                        if (device == null)
-                            return false;
-                        return device.AudioEndpointVolume.Mute;
-                    }
-
-                case AudioDevice.Actions.Volume:
-                    {
-                        if (device == null)
-                            return 0;
-                        return (int)Math.Round(device.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
-                    }
-                default:
-                    break;
-            }
-
-            return null;
-        }
 
         public AudioDevice[] OutputDevices
         {
-            get { return _OMAudioDevices.ToArray(); }
+            get 
+            {
+                return _AudioRouteHandler.OutputDevices.ToArray();
+            }
         }
 
+        public AudioDevice[] InputDevices
+        {
+            get 
+            {
+                return _AudioRouteHandler.InputDevices.ToArray();
+            }
+        }
 
+        public bool ActivateRoute(AudioDevice sourceDevice, AudioDevice targetDevice)
+        {
+            return _AudioRouteHandler.ActivateRoute(sourceDevice, targetDevice);
+        }
+
+        public bool DeactivateRoute(AudioDevice sourceDevice, AudioDevice targetDevice)
+        {
+            return _AudioRouteHandler.DeactivateRoute(sourceDevice, targetDevice);
+        }
     }
 }
