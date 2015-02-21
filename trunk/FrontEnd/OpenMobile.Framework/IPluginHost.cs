@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using OpenMobile.Graphics;
 using OpenMobile.Controls;
 using OpenMobile.Zones;
+using OpenMobile.Media;
 
 namespace OpenMobile.Plugin
 {
@@ -707,7 +708,12 @@ namespace OpenMobile.Plugin
         ZoneHandler ZoneHandler { get; }
 
         /// <summary>
-        /// Statusbarhandler
+        /// Audio device handler
+        /// </summary>
+        AudioDeviceHandler AudioDeviceHandler { get; }
+
+        /// <summary>
+        /// Statusbar handler
         /// </summary>
         OpenMobile.UI.UIHandler UIHandler { get; }
 

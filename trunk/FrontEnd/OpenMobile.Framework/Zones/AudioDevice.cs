@@ -311,7 +311,8 @@ namespace OpenMobile
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0}:[{1}]", _Name, _Instance);
+            //return string.Format("{0}:[{1}]", _Name, _Instance);
+            return string.Format("{0}", _Name);
         }
 
         #endregion

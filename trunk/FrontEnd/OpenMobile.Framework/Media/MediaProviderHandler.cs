@@ -704,19 +704,19 @@ namespace OpenMobile.Media
             {
                 Zone zone = OM.Host.ZoneHandler.Zones[i];
                 OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Play", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Stop", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Pause", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Next", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Previous", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "SeekForward", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "SeekBackward", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Shuffle", "Enable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Shuffle", "Disable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Shuffle", "Toggle", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Repeat", "Enable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Repeat", "Disable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Repeat", "Toggle", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Playlist", "Set", CommandExecutor, 0, false, "Activates media playback"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Stop", "", CommandExecutor, 0, false, "Stops media playback"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Pause", "", CommandExecutor, 0, false, "Pause media playback"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Next", "", CommandExecutor, 0, false, "Goto to next media"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Previous", "", CommandExecutor, 0, false, "Goto previous media"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "SeekForward", "", CommandExecutor, 0, false, "Seek forward"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "SeekBackward", "", CommandExecutor, 0, false, "Seek backward"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Shuffle", "Enable", CommandExecutor, 0, false, "Enable shuffle"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Shuffle", "Disable", CommandExecutor, 0, false, "Disable shuffle"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Shuffle", "Toggle", CommandExecutor, 0, false, "Toggle shuffle"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Repeat", "Enable", CommandExecutor, 0, false, "Enable repeat"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Repeat", "Disable", CommandExecutor, 0, false, "Disable repeat"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Repeat", "Toggle", CommandExecutor, 0, false, "Toggle repeat"));
+                OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "Playlist", "Set", CommandExecutor, 0, false, "Set current playlist"));
                 OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "MediaProvider", "Activate", CommandExecutor, 1, false, "Activate a media provider, Param0: plugin name of media provider"));
                 OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "MediaProvider", "Deactivate", CommandExecutor, 0, false, "Deactivates the current media provider"));
                 OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "MediaSource", "Activate", CommandExecutor, 1, false, "Activate a media source, Param0: Name of media source (available names can be found in the MediaSources datasource)"));
@@ -726,19 +726,19 @@ namespace OpenMobile.Media
             for (int i = 0; i < OM.Host.ScreenCount; i++)
             {
                 OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Play", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Stop", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Pause", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Next", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Previous", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "SeekForward", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "SeekBackward", "", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Shuffle", "Enable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Shuffle", "Disable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Shuffle", "Toggle", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Repeat", "Enable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Repeat", "Disable", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Repeat", "Toggle", CommandExecutor, 0, false, "Activates media playback"));
-                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Playlist", "Set", CommandExecutor, 0, false, "Activates media playback"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Stop", "", CommandExecutor, 0, false, "Stops media playback"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Pause", "", CommandExecutor, 0, false, "Pause media playback"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Next", "", CommandExecutor, 0, false, "Goto to next media"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Previous", "", CommandExecutor, 0, false, "Goto previous media"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "SeekForward", "", CommandExecutor, 0, false, "Seek forward"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "SeekBackward", "", CommandExecutor, 0, false, "Seek backward"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Shuffle", "Enable", CommandExecutor, 0, false, "Enable shuffle"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Shuffle", "Disable", CommandExecutor, 0, false, "Disable shuffle"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Shuffle", "Toggle", CommandExecutor, 0, false, "Toggle shuffle"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Repeat", "Enable", CommandExecutor, 0, false, "Enable repeat"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Repeat", "Disable", CommandExecutor, 0, false, "Disable repeat"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Repeat", "Toggle", CommandExecutor, 0, false, "Toggle repeat"));
+                OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "Playlist", "Set", CommandExecutor, 0, false, "Set current playlist"));
                 OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "MediaProvider", "Activate", CommandExecutor, 1, false, "Activate a media provider, Param0: plugin name of media provider"));
                 OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "MediaProvider", "Deactivate", CommandExecutor, 0, false, "Deactivates the current media provider"));
                 OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "MediaSource", "Activate", CommandExecutor, 1, false, "Activate a media source, Param0: Name of media source (available names can be found in the MediaSources datasource)"));
@@ -754,12 +754,12 @@ namespace OpenMobile.Media
                 for (int i = 0; i < OM.Host.ZoneHandler.Zones.Count; i++)
                 {
                     Zone zone = OM.Host.ZoneHandler.Zones[i];
-                    OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "MediaSource", String.Format("Command.{0}", key), CommandExecutor, 0, false, "Additional command from media source"));
+                    OM.Host.CommandHandler.AddCommand(new Command(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "MediaSource", String.Format("Command.{0}", key), CommandExecutor, 0, false, "Additional commands from media source"));
                 }
                 // Create one set of datasources per screen
                 for (int i = 0; i < OM.Host.ScreenCount; i++)
                 {
-                    OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "MediaSource", String.Format("Command.{0}", key), CommandExecutor, 0, false, "Additional command from media source"));
+                    OM.Host.CommandHandler.AddCommand(new Command(true, BuiltInComponents.OMInternalPlugin, "Zone", "MediaSource", String.Format("Command.{0}", key), CommandExecutor, 0, false, "Additional commands from media source"));
                 }
             }
         }
