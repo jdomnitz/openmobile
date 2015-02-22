@@ -87,27 +87,48 @@ Public Class RadioComm
             Return eLoadStatus.LoadFailedGracefulUnloadRequested
         End If
 
+        m_Host = host
+
+        m_verbose = GetSetting("OMVisteonRadio.VerboseDebug", False)
+        m_ComPort = GetSetting("OMVisteonRadio.ComPort", m_ComPort)
+
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Initializing..."))
+        End If
+
         ' Register media sources 
         m_Radio_AM_MediaSource = New MediaSource_TunedContent(Me, "AM", "AM Radio", OM.Host.getSkinImage("Radio"))
-        m_MediaSources.Add(m_Radio_FM_MediaSource)
+        m_MediaSources.Add(m_Radio_AM_MediaSource)
         m_Radio_FM_MediaSource = New MediaSource_TunedContent(Me, "FM", "FM Radio", OM.Host.getSkinImage("Radio"))
         m_MediaSources.Add(m_Radio_FM_MediaSource)
 
         Array.Sort(available_ports)
 
-        m_Host = host
-
         m_Host.UIHandler.AddNotification(myNotification)
         myNotification.Text = "Plugin initializing..."
 
-        m_ComPort = GetSetting("OMVisteonRadio.ComPort", m_ComPort)
+        'If m_verbose Then
+        'm_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Invoking background loading..."))
+        'End If
+        'SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
 
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Invoking background loading..."))
+        find_radio()
+
+        If Not m_Radio.IsOpen Then
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Unloading..."))
+            End If
+            Return eLoadStatus.LoadFailedGracefulUnloadRequested
         End If
-        SafeThread.Asynchronous(AddressOf BackgroundLoad, host)
+        If Not m_Radio.IsPowered Then
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Unloading..."))
+            End If
+            Return eLoadStatus.LoadFailedGracefulUnloadRequested
+        End If
 
         Return eLoadStatus.LoadSuccessful
+
 
     End Function
 
@@ -157,6 +178,10 @@ Public Class RadioComm
 
         'Dim mediaProviders As OpenMobile.Plugin.IBasePlugin = OM.Host.MediaProviderHandler.MediaProviders
 
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Locating radio."))
+        End If
+
         m_Radio.AutoSearch = False
 
         If String.IsNullOrEmpty(m_ComPort) Then
@@ -166,10 +191,13 @@ Public Class RadioComm
         If m_ComPort <> "Auto" Then
             ' Try the user specified COM port
             myNotification.Text = String.Format("Waiting for lock on {0}", m_ComPort)
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Searching on last used port {0}.", m_ComPort))
+            End If
             ' Try a couple times to get serial access
             For x = 1 To m_Retries
                 If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Waiting for serial access."))
+                    m_Host.DebugMsg("OMVisteonRadio - find_radio()", String.Format("Waiting for serial access lock."))
                 End If
                 access_granted = OpenMobile.helperFunctions.SerialAccess.GetAccess(Me)
                 If access_granted Then
@@ -295,7 +323,6 @@ Public Class RadioComm
 
     End Sub
 
-
     Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
 
         If m_Settings Is Nothing Then
@@ -415,6 +442,10 @@ Public Class RadioComm
     Public Overrides Function MediaProviderCommand_Activate(zone As OpenMobile.Zone) As String
         ' Radio is turned on at plugin initialize
 
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Activate()", String.Format("Invoking background loading..."))
+        End If
+
         If Not m_Radio.IsPowered Then
             ' Radio is not already on
             If m_Radio.IsOpen Then
@@ -422,6 +453,9 @@ Public Class RadioComm
                 m_Radio.PowerOn()
                 If pwrWaitHandle.WaitOne(4000) = False Then
                     ' Timed out waiting for radio to power on
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Activate()", String.Format("HDRadio did not power on."))
+                    End If
                     Return "HDRadio did not power on"
                 End If
             Else
@@ -432,6 +466,7 @@ Public Class RadioComm
 
         If Not m_Radio.IsPowered Then
             ' Not connected to a radio
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Activate()", String.Format("HDRadio did not power on."))
             Return "HDRadio did not power on"
         End If
 
@@ -448,16 +483,25 @@ Public Class RadioComm
 
         If mediaSourceName = "AM" Then
             ' helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastAMstation")
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_ActivateMediaSource()", String.Format("Selecting AM band."))
+            End If
             m_Radio.TuneToChannel(0, HDRadio.HDRadioBands.AM)
         ElseIf mediaSourceName = "FM" Or mediaSourceName = "HD" Then
             ' helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastFMstation")
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_ActivateMediaSource()", String.Format("Selecting FM band."))
+            End If
             m_Radio.TuneToChannel(0, HDRadio.HDRadioBands.FM)
         Else
             ' helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastFMstation")
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_ActivateMediaSource()", String.Format("Selecting FM band by default."))
+            End If
             m_Radio.TuneToChannel(0, HDRadio.HDRadioBands.FM)
-        End If
+            End If
 
-        Return ""
+            Return ""
 
     End Function
 
@@ -465,6 +509,9 @@ Public Class RadioComm
         ' Turns radio off (we actually leave radio powered up, just mute the output
 
         If m_Radio.IsPowered Then
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Deactivate()", String.Format("Deselecting HDRadio."))
+            End If
             m_Radio.MuteOn()
         End If
 
@@ -474,53 +521,88 @@ Public Class RadioComm
 
     Public Overrides Function MediaProviderCommand_Playback_Next(zone As OpenMobile.Zone, param() As Object) As String
         ' Next preset
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Playback_Next()", String.Format("Select Next Preset."))
+        End If
         Return ""
     End Function
 
     Public Overrides Function MediaProviderCommand_Playback_Pause(zone As OpenMobile.Zone, param() As Object) As String
         ' Radio mute toggle
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Playback_Pause()", String.Format("Select Pause/Mute."))
+        End If
         Return ""
     End Function
 
     Public Overrides Function MediaProviderCommand_Playback_Previous(zone As OpenMobile.Zone, param() As Object) As String
         ' Previous preset
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Playback_Previous()", String.Format("Select Previous Preset."))
+        End If
         Return ""
     End Function
 
     Public Overrides Function MediaProviderCommand_Playback_SeekBackward(zone As OpenMobile.Zone, param() As Object) As String
         ' Previous available channel
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Playback_SeekBackward()", String.Format("Seek Back to previous live channel."))
+        End If
         Return ""
     End Function
 
     Public Overrides Function MediaProviderCommand_Playback_SeekForward(zone As OpenMobile.Zone, param() As Object) As String
         ' Next available channel
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Playback_SeekForward()", String.Format("Seek forward to next live channel."))
+        End If
         Return ""
     End Function
 
     Public Overrides Function MediaProviderCommand_Playback_Start(zone As OpenMobile.Zone, param() As Object) As String
         ' Un-mute radio
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Playback_Start()", String.Format("Unmute radio playback."))
+        End If
         Return ""
     End Function
 
     Public Overrides Function MediaProviderCommand_Playback_Stop(zone As OpenMobile.Zone, param() As Object) As String
         ' Mute radio
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Playback_Stop()", String.Format("Mute radio playback."))
+        End If
         Return ""
     End Function
 
     Public Overrides Function MediaProviderData_GetMediaSource(zone As OpenMobile.Zone) As OpenMobile.Media.MediaSource
         ' Return current Band
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSource()", String.Format("Report on current band."))
+        End If
         Return m_Radio_FM_MediaSource
     End Function
 
     Public Overrides Function MediaProviderData_GetMediaSourceAbilities(mediaSource As String) As OpenMobile.Media.MediaProviderAbilities
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSourceAbilities()", String.Format("Report on our capabilities."))
+        End If
         Return Nothing
     End Function
 
     Public Overrides Function MediaProviderData_GetMediaSources() As List(Of OpenMobile.Media.MediaSource)
+        ' Return available bands
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSources()", String.Format("Report on available bands."))
+        End If
         Return m_MediaSources
     End Function
 
     Public Overrides Function MediaProviderData_GetPlaylist(zone As OpenMobile.Zone) As OpenMobile.Media.Playlist
+        ' Return current Presets/Live
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetPlaylist()", String.Format("Return playlist (presets/live)."))
+        End If
         Return Nothing
     End Function
 
@@ -533,14 +615,17 @@ Public Class RadioComm
     End Function
 
     Public Overrides Function MediaProviderData_SetPlaylist(zone As OpenMobile.Zone, playlist As OpenMobile.Media.Playlist) As OpenMobile.Media.Playlist
-
+        ' Accept playlist (presets)
+        Return Nothing
     End Function
 
     Public Overrides Function MediaProviderData_SetRepeat(zone As OpenMobile.Zone, state As Boolean) As Boolean
-
+        ' N/A
+        Return False
     End Function
 
     Public Overrides Function MediaProviderData_SetShuffle(zone As OpenMobile.Zone, state As Boolean) As Boolean
+        ' N/A
         Return False
     End Function
 
