@@ -102,19 +102,25 @@ Public Class RadioComm
         m_ComPort = GetSetting("OMVisteonRadio.ComPort", m_ComPort)
 
         ' Register media sources 
+        ' AM media source
         m_Radio_AM_MediaSource = New MediaSource_TunedContent(Me, "AM", "AM Radio", OM.Host.getSkinImage("Radio"))
+        m_Radio_AM_MediaSource.AdditionalCommands("PresetSet") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_Handler)
+        m_Radio_AM_MediaSource.AdditionalCommands("PresetRemove") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_Handler)
+        m_Radio_AM_MediaSource.AdditionalCommands("PresetRename") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_Handler)
+        m_Radio_AM_MediaSource.AdditionalCommands("DirectTune") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_Handler)
+        m_Radio_AM_MediaSource.AdditionalCommands("SearchChannels") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_Handler)
         m_MediaSources.Add(m_Radio_AM_MediaSource)
+        ' FM media source
         m_Radio_FM_MediaSource = New MediaSource_TunedContent(Me, "FM", "FM Radio", OM.Host.getSkinImage("Radio"))
+        m_Radio_FM_MediaSource.AdditionalCommands("PresetSet") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_handler)
+        m_Radio_FM_MediaSource.AdditionalCommands("PresetRemove") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_Handler)
+        m_Radio_FM_MediaSource.AdditionalCommands("PresetRename") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_Handler)
+        m_Radio_FM_MediaSource.AdditionalCommands("DirectTune") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_Handler)
+        m_Radio_FM_MediaSource.AdditionalCommands("SearchChannels") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_Handler)
         m_MediaSources.Add(m_Radio_FM_MediaSource)
 
-        'm_Radio_AM_MediaSource.OnCommand_PresetSet += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_PresetSet);
-        '_MediaSource_FM.OnCommand_SetListSource += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_SetListSource);
-        '_MediaSource_FM.OnCommand_DirectTune += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_DirectTune);
-        '_MediaSource_FM.OnCommand_PresetRemove += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_PresetRemove);
-        '_MediaSource_FM.OnCommand_PresetRename += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_PresetRename);
         '_MediaSource_FM.OnCommand_SearchChannels += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_SearchChannels);
         '_MediaSource_FM.OnCommand_PresetSetCoverArt += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_PresetSetCoverArt);
-        '_MediaSources.Add(_MediaSource_FM);
 
 
         ' Initialize playlists
@@ -685,6 +691,18 @@ Public Class RadioComm
         Return Nothing
     End Function
 
+    Public Overrides Function MediaProviderData_SetPlaylist(zone As OpenMobile.Zone, playlist As OpenMobile.Media.Playlist) As OpenMobile.Media.Playlist
+        ' Accept playlist (live / presets)
+        Return Nothing
+    End Function
+    Public Function MediaSource_AM_OnCommand_handler(zone As Zone, param() As Object)
+
+    End Function
+
+    Public Function MediaSource_FM_OnCommand_handler(zone As Zone, param() As Object)
+
+    End Function
+
     Public Overrides Function MediaProviderData_GetRepeat(zone As OpenMobile.Zone) As Boolean
         Return False
     End Function
@@ -692,15 +710,6 @@ Public Class RadioComm
     Public Overrides Function MediaProviderData_GetShuffle(zone As OpenMobile.Zone) As Boolean
         Return False
     End Function
-
-    Public Overrides Function MediaProviderData_SetPlaylist(zone As OpenMobile.Zone, playlist As OpenMobile.Media.Playlist) As OpenMobile.Media.Playlist
-        ' Accept playlist (live / presets)
-        Return Nothing
-    End Function
-
-    'Public Function MediaProviderData_SetPlaylist2(zone As OpenMobile.Zone, playlist As OpenMobile.Media.Playlist) As OpenMobile.Media.Playlist
-
-    'End Function
 
     Public Overrides Function MediaProviderData_SetRepeat(zone As OpenMobile.Zone, state As Boolean) As Boolean
         ' N/A
