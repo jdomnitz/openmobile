@@ -212,36 +212,38 @@ namespace OMMusicSkin
             PopUpMenuStrip.OnShowing += new ButtonStrip.MenuEventHandler(PopUpMenuStrip_OnShowing);
             panel.PopUpMenu = PopUpMenuStrip;
 
-            panel.Entering += delegate(OMPanel sender, int screen)
-            {
-                OM.Host.UIHandler.ControlButtons_Show(screen, false);
-
-                // Subscribe to changes to rating datasource
-                if (!dataSourcesSubscribed)
-                {
-                    dataSourcesSubscribed = true;
-                    OM.Host.DataHandler.SubscribeToDataSource("Zone.MediaInfo.Rating", (x) =>
-                    {
-                        OMPanel localPanel = _MainPlugin.PanelManager[x.Screen, panel.Name];
-                        if (localPanel != null)
-                        {
-                            OMImage imgRating = localPanel["img_Rating"] as OMImage;
-                            if (imgRating != null && (int)x.Value >= 0)
-                                imgRating.Image = OM.Host.getSkinImage(String.Format("Icons|Icon-Ratings-{0}", (int)x.Value));
-                            else
-                                imgRating.Image = imageItem.NONE;
-                        }
-                    });
-                }
-            };
-            panel.Leaving += delegate(OMPanel sender, int screen)
-            {
-                OM.Host.UIHandler.ControlButtons_Hide(screen, false);
-            };
-            // Load the panel into the local manager for panels
-            //PanelManager.loadPanel(panel);
+            panel.Entering += new PanelEvent(panel_Entering);
+            panel.Leaving += new PanelEvent(panel_Leaving);
 
             return panel;
+        }
+
+        void panel_Leaving(OMPanel sender, int screen)
+        {
+            OM.Host.UIHandler.ControlButtons_Hide(screen, false);
+        }
+
+        void panel_Entering(OMPanel sender, int screen)
+        {
+            OM.Host.UIHandler.ControlButtons_Show(screen, false);
+
+            // Subscribe to changes to rating datasource
+            if (!dataSourcesSubscribed)
+            {
+                dataSourcesSubscribed = true;
+                OM.Host.DataHandler.SubscribeToDataSource("Zone.MediaInfo.Rating", (x) =>
+                {
+                    OMPanel localPanel = _MainPlugin.PanelManager[x.Screen, PanelName];
+                    if (localPanel != null)
+                    {
+                        OMImage imgRating = localPanel["img_Rating"] as OMImage;
+                        if (imgRating != null && (int)x.Value >= 0)
+                            imgRating.Image = OM.Host.getSkinImage(String.Format("Icons|Icon-Ratings-{0}", (int)x.Value));
+                        else
+                            imgRating.Image = imageItem.NONE;
+                    }
+                });
+            }
         }
 
         void mnuItem_ShuffleToggle_OnClick(OMControl sender, int screen)

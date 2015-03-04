@@ -72,7 +72,6 @@
   <ItemGroup>
     <Compile Include="AudioRoute.cs" />
     <Compile Include="AudioRouteHandler.cs" />
-    <Compile Include="AudioRoute_Org.cs" />
     <Compile Include="OMAudioControl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
