@@ -63,7 +63,8 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CSCore">
+    <Reference Include="CSCore, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>References\CSCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -71,6 +72,7 @@
   <ItemGroup>
     <Compile Include="AudioRoute.cs" />
     <Compile Include="AudioRouteHandler.cs" />
+    <Compile Include="AudioRoute_Org.cs" />
     <Compile Include="OMAudioControl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -119,8 +121,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="References\CSCore.dll" />
-    <Content Include="References\CSCore.XML" />
+    <Folder Include="References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

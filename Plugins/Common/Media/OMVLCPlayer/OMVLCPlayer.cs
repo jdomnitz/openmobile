@@ -949,28 +949,30 @@ namespace OMVLCPlayer
                     // Save playlists
                     foreach (var zone in _Zone_Playlist.Keys)
                     {
-                        if (_Zone_Playlist.ContainsKey(zone))
-                        {
-                            _Zone_Playlist[zone].Save();
-                            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving playlist {2}", zone, zone.Name, _Zone_Playlist[zone].Name));
-                        }
+                        //if (_Zone_Playlist.ContainsKey(zone))
+                        //{
+                        //    _Zone_Playlist[zone].Save();
+                        //    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving playlist {2}", zone, zone.Name, _Zone_Playlist[zone].Name));
+                        //}
 
-                        // Save current playback pos
-                        if (_Zone_PlaybackPos.ContainsKey(zone) && _ZonePlayer.ContainsKey(zone))
-                        {
-                            StoredData.Set(this, String.Format("{0}_PlaybackPos", zone), _Zone_PlaybackPos[zone].ToString().Replace(",", "."));
-                            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving playback position {2}%", zone, zone.Name, _Zone_PlaybackPos[zone].ToString()));
-                        }
+                        //// Save current playback pos
+                        //if (_Zone_PlaybackPos.ContainsKey(zone) && _ZonePlayer.ContainsKey(zone))
+                        //{
+                        //    StoredData.Set(this, String.Format("{0}_PlaybackPos", zone), _Zone_PlaybackPos[zone].ToString().Replace(",", "."));
+                        //    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving playback position {2}%", zone, zone.Name, _Zone_PlaybackPos[zone].ToString()));
+                        //}
 
-                        // Save playback mode to DB
-                        if (_Zone_PlaybackMode.ContainsKey(zone))
-                        {
-                            if (_Zone_PlaybackMode[zone] == PlaybackModes.Play || _Zone_PlaybackMode[zone] == PlaybackModes.Pause)
-                                StoredData.Set(this, String.Format("{0}_PlaybackMode", zone), (int)PlaybackModes.Restart);
-                            else
-                                StoredData.Set(this, String.Format("{0}_PlaybackMode", zone), (int)_Zone_PlaybackMode[zone]);
-                            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving PlaybackMode {2}", zone, zone.Name, _Zone_PlaybackMode[zone]));
-                        }
+                        //// Save playback mode to DB
+                        //if (_Zone_PlaybackMode.ContainsKey(zone))
+                        //{
+                        //    if (_Zone_PlaybackMode[zone] == PlaybackModes.Play || _Zone_PlaybackMode[zone] == PlaybackModes.Pause)
+                        //        StoredData.Set(this, String.Format("{0}_PlaybackMode", zone), (int)PlaybackModes.Restart);
+                        //    else
+                        //        StoredData.Set(this, String.Format("{0}_PlaybackMode", zone), (int)_Zone_PlaybackMode[zone]);
+                        //    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving PlaybackMode {2}", zone, zone.Name, _Zone_PlaybackMode[zone]));
+                        //}
+
+                        SavePlayerStates(zone);
                     }
                 }
             }
@@ -979,6 +981,43 @@ namespace OMVLCPlayer
                 OM.Host.DebugMsg("Exception while saving player states", ex);
             }
         }
+
+        private void SavePlayerStates(Zone zone)
+        {
+            try
+            {
+                lock (_ZonePlayer)
+                {
+                    if (_Zone_Playlist.ContainsKey(zone))
+                    {
+                        _Zone_Playlist[zone].Save();
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving playlist {2}", zone, zone.Name, _Zone_Playlist[zone].Name));
+                    }
+
+                    // Save current playback pos
+                    if (_Zone_PlaybackPos.ContainsKey(zone) && _ZonePlayer.ContainsKey(zone))
+                    {
+                        StoredData.Set(this, String.Format("{0}_PlaybackPos", zone), _Zone_PlaybackPos[zone].ToString().Replace(",", "."));
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving playback position {2}%", zone, zone.Name, _Zone_PlaybackPos[zone].ToString()));
+                    }
+
+                    // Save playback mode to DB
+                    if (_Zone_PlaybackMode.ContainsKey(zone))
+                    {
+                        if (_Zone_PlaybackMode[zone] == PlaybackModes.Play || _Zone_PlaybackMode[zone] == PlaybackModes.Pause)
+                            StoredData.Set(this, String.Format("{0}_PlaybackMode", zone), (int)PlaybackModes.Restart);
+                        else
+                            StoredData.Set(this, String.Format("{0}_PlaybackMode", zone), (int)_Zone_PlaybackMode[zone]);
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Saving PlaybackMode {2}", zone, zone.Name, _Zone_PlaybackMode[zone]));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                OM.Host.DebugMsg("Exception while saving player states", ex);
+            }
+        }
+
 
         #region Dispose
         private bool _Disposing = false;
@@ -1080,7 +1119,7 @@ namespace OMVLCPlayer
             base.MediaProviderData_ReportState_Playback(zone, PlaybackState.Stopped);
             base.MediaProviderData_ReportMediaText(zone, String.Format("Deactivating {0}", this.pluginName), "");
 
-            SavePlayerStates();
+            SavePlayerStates(zone);
 
             MediaProviderCommand_Playback_Stop(zone, null);
             base.MediaProviderData_ReportMediaText(zone, String.Format("Deactivated {0}", this.pluginName), "");

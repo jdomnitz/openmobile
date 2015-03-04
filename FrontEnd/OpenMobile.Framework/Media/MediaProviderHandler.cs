@@ -173,7 +173,8 @@ namespace OpenMobile.Media
         {
             if (function == eFunction.closeProgram)
             {
-                foreach (var provider in _CurrentMediaProviders)
+                Dictionary<Zone, IBasePlugin> currentMediaProviders = new Dictionary<Zone, IBasePlugin>(_CurrentMediaProviders);
+                foreach (var provider in currentMediaProviders)
                 {
                     DeactivateMediaProvider(provider.Value, provider.Key);
 

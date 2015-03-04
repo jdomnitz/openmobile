@@ -61,6 +61,7 @@ namespace OMRadio_MonkeyBoard
         }
 
         private string _AudioInputDeviceName;
+        private Dictionary<Zone, AudioRoute> _AudioRoutes = new Dictionary<Zone, AudioRoute>();
         private int _RadioVolume = 50;
         private string _RadioComPort = "COM15";
         private Thread _RadioThread;
@@ -1448,19 +1449,29 @@ namespace OMRadio_MonkeyBoard
             try
             {
                 // Deactivate audio route
-                var inputDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(_AudioInputDeviceName);
-                var outputDevice = zone.AudioDevice;
-                OM.Host.AudioDeviceHandler.DeactivateRoute(inputDevice, outputDevice);
+                //var inputDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(_AudioInputDeviceName);
+                //var outputDevice = zone.AudioDevice;
+                //OM.Host.AudioDeviceHandler.DeactivateRoute(inputDevice, outputDevice);
 
-                HW_Monkeyboard.StopStream();
-                RadioThread_Stop();
-                HW_Monkeyboard.CloseRadioPort();
+                // Deactivate audio route
+                if (_AudioRoutes.ContainsKey(zone))
+                {
+                    OM.Host.AudioDeviceHandler.DeactivateRoute(_AudioRoutes[zone]);
+                    _AudioRoutes.Remove(zone);
+                }
 
-                // Save radio data
-                StoredData.Set(this, "_Radio_DAB_LastChannel", _Radio_DAB_LastChannel);
-                StoredData.Set(this, "_Radio_FM_LastChannel", _Radio_FM_LastChannel);
-                StoredData.Set(this, "_Radio_MediaSource", _Radio_MediaSource.Name);
+                // Should we stop radio? We can't stop radio if any zones are still using it
+                if (_ActiveZonesForRadio.Count == 0)
+                {   // No zones active, stop radio
+                    HW_Monkeyboard.StopStream();
+                    RadioThread_Stop();
+                    HW_Monkeyboard.CloseRadioPort();
 
+                    // Save radio data
+                    StoredData.Set(this, "_Radio_DAB_LastChannel", _Radio_DAB_LastChannel);
+                    StoredData.Set(this, "_Radio_FM_LastChannel", _Radio_FM_LastChannel);
+                    StoredData.Set(this, "_Radio_MediaSource", _Radio_MediaSource.Name);
+                }
                 return "";
             }
             catch
@@ -1474,6 +1485,15 @@ namespace OMRadio_MonkeyBoard
             // Register radio as used for this zone
             if (!_ActiveZonesForRadio.Contains(zone))
                 _ActiveZonesForRadio.Add(zone);
+
+            // Check if radio is already active
+            if (_RadioThread != null)
+            {
+                // Just add a new audio route and exit
+                if (!_AudioRoutes.ContainsKey(zone))
+                    _AudioRoutes.Add(zone, OM.Host.AudioDeviceHandler.ActivateRoute(_AudioInputDeviceName, zone));
+                return "";
+            }
 
             base.MediaProviderData_ReportMediaText(zone, "Starting radio", "Please wait...");
 
@@ -1489,10 +1509,14 @@ namespace OMRadio_MonkeyBoard
                     {
                         OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
 
+                        //// Activate audio route
+                        //var inputDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(_AudioInputDeviceName);
+                        //var outputDevice = zone.AudioDevice;
+                        //OM.Host.AudioDeviceHandler.ActivateRoute(inputDevice, outputDevice);
+
                         // Activate audio route
-                        var inputDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(_AudioInputDeviceName);
-                        var outputDevice = zone.AudioDevice;
-                        OM.Host.AudioDeviceHandler.ActivateRoute(inputDevice, outputDevice);
+                        if (!_AudioRoutes.ContainsKey(zone))
+                            _AudioRoutes.Add(zone, OM.Host.AudioDeviceHandler.ActivateRoute(_AudioInputDeviceName, zone));
 
                         RadioThread_Start();
 
