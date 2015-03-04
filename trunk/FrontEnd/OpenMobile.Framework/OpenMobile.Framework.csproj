@@ -113,6 +113,7 @@
   <ItemGroup>
     <Compile Include="Animator.cs" />
     <Compile Include="Audio\AudioDeviceHandler.cs" />
+    <Compile Include="Audio\AudioRoute.cs" />
     <Compile Include="BuiltInComponents.cs" />
     <Compile Include="CommandHandler\Command.cs" />
     <Compile Include="CommandHandler\CommandGroup.cs" />
@@ -342,7 +343,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

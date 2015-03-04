@@ -37,12 +37,9 @@ namespace OMAudioControl
     /// <summary>
     /// An audio route
     /// </summary>
-    public class AudioRoute : IDisposable
+    public class AudioRoute_Org : IDisposable
     {
-        private WasapiCapture _SoundIn;
-        private WasapiOut _SoundOut;
-        private SoundInSource _SoundInSource;
-        private bool _BlockEvents = false;
+        private EventWaitHandle _CancelThread = new EventWaitHandle(false, EventResetMode.AutoReset);
 
         /// <summary>
         /// The source device
@@ -83,15 +80,34 @@ namespace OMAudioControl
         private MMDevice _TargetDevice;
 
         /// <summary>
+        /// The processing thread for this route
+        /// </summary>
+        public Thread ProcessingThread
+        {
+            get
+            {
+                return this._ProcessingThread;
+            }
+            set
+            {
+                if (this._ProcessingThread != value)
+                {
+                    this._ProcessingThread = value;
+                }
+            }
+        }
+        private Thread _ProcessingThread;
+
+        /// <summary>
         /// Returns true if this route is active
         /// </summary>
         public bool IsActive 
         {
             get
             {
-                if (_SoundOut == null)
+                if (_ProcessingThread == null)
                     return false;
-                return _SoundOut.PlaybackState == PlaybackState.Playing;
+                return _ProcessingThread.IsAlive;
             }
         }
 
@@ -100,7 +116,7 @@ namespace OMAudioControl
         /// </summary>
         /// <param name="sourceDevice"></param>
         /// <param name="targetDevice"></param>
-        public AudioRoute(MMDevice sourceDevice, MMDevice targetDevice)
+        public AudioRoute_Org(MMDevice sourceDevice, MMDevice targetDevice)
         {
             _SourceDevice = sourceDevice;
             _TargetDevice = targetDevice;
@@ -117,51 +133,41 @@ namespace OMAudioControl
             if (_SourceDevice == null || _TargetDevice == null)
                 throw new Exception("A route needs both source and target device");
 
-            _BlockEvents = false;
-
-            try
+            _ProcessingThread = new Thread(() =>
             {
-                // Declare audio input device
-                _SoundIn = new WasapiCapture();
-                _SoundIn.Device = _SourceDevice;
-                _SoundIn.Initialize();
+                try
+                {
+                    _CancelThread.Reset();
 
-                _SoundInSource = new SoundInSource(_SoundIn);
-                _SoundOut = new WasapiOut();
-                _SoundIn.Start();
+                    using (var capture = new WasapiCapture())
+                    {
+                        capture.Device = _SourceDevice;
+                        capture.Initialize();
 
-                // Declare and start audio output device
-                _SoundOut.Device = _TargetDevice;
-                _SoundOut.Initialize(_SoundInSource);
-                _SoundOut.Play();
+                        using (var source = new SoundInSource(capture))
+                        {
+                            using (var soundOut = new WasapiOut())
+                            {
+                                capture.Start();
 
-                _SoundIn.Stopped += new EventHandler<RecordingStoppedEventArgs>(_SoundIn_Stopped);
-                _SoundOut.Stopped += new EventHandler<PlaybackStoppedEventArgs>(_SoundOut_Stopped);
-            }
-            catch (Exception ex)
-            {
-                OM.Host.DebugMsg("Exception in AudioDevice Thread", ex);
-            }
-        }
+                                soundOut.Device = _TargetDevice;
+                                soundOut.Initialize(source);
+                                soundOut.Play();
 
-        void _SoundIn_Stopped(object sender, RecordingStoppedEventArgs e)
-        {
-            if (e.HasError)
-                OM.Host.DebugMsg("Sound input stopped unexpectedly", e.Exception);
-            else
-                if (!_BlockEvents)
-                    OM.Host.DebugMsg(DebugMessageType.Info, "Sound input stopped unexpectedly");
-        }
-
-        void _SoundOut_Stopped(object sender, PlaybackStoppedEventArgs e)
-        {
-            if (e.HasError)
-                OM.Host.DebugMsg("Sound output stopped unexpectedly", e.Exception);
-            else
-            {
-                if (!_BlockEvents)
-                    OM.Host.DebugMsg(DebugMessageType.Info, "Sound output stopped unexpectedly");
-            }
+                                _CancelThread.WaitOne();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    OM.Host.DebugMsg("Exception in AudioDevice Thread", ex);
+                }
+            });
+            _ProcessingThread.Name = "OM_AudioRoute_Processing";
+            _ProcessingThread.IsBackground = true;
+            _ProcessingThread.SetApartmentState(ApartmentState.STA);
+            _ProcessingThread.Start();
         }
 
         /// <summary>
@@ -169,13 +175,13 @@ namespace OMAudioControl
         /// </summary>
         public void Deactivate()
         {
-            _BlockEvents = true;
-            _SoundOut.Dispose();
-            _SoundOut = null;
-            _SoundInSource.Dispose();
-            _SoundInSource = null;
-            _SoundIn.Dispose();
-            _SoundIn = null;
+            _CancelThread.Set();
+            if (_ProcessingThread != null)
+            {
+                if (!_ProcessingThread.Join(1000))
+                    _ProcessingThread.Abort();
+                _ProcessingThread = null;
+            }
         }
 
         /// <summary>
