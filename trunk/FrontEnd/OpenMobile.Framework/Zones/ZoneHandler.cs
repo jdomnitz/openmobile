@@ -1131,6 +1131,10 @@ namespace OpenMobile.Zones
             {
                 if (_ActiveZones[i] == zone.ID)
                 {
+                    // Push data sources
+                    OM.Host.DataHandler.PushDataSourceValue(i, BuiltInComponents.OMInternalPlugin, "Zone.Device.Volume", audioDevice.Volume, true);
+                    OM.Host.DataHandler.PushDataSourceValue(i, BuiltInComponents.OMInternalPlugin, "Zone.Device.Volume.Mute", audioDevice.Mute, true);
+                    
                     Raise_OnZoneUpdated(zone, i, false);
                 }
             }
