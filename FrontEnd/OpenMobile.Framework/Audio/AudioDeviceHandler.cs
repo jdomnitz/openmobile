@@ -181,14 +181,18 @@ namespace OpenMobile.Media
         }
 
         /// <summary>
-        /// Activates a route from a input audio device specified by name to a zone
+        /// Activates a route from a input audio device specified by name to a zone. If source name is empty then the default input device is used.
         /// </summary>
         /// <param name="sourceDeviceName"></param>
         /// <param name="zone"></param>
         /// <returns></returns>
         public AudioRoute ActivateRoute(string sourceDeviceName, Zone zone)
         {
-            AudioDevice sourceDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(sourceDeviceName);
+            AudioDevice sourceDevice = null;
+            if (String.IsNullOrWhiteSpace(sourceDeviceName))
+                sourceDevice = DefaultInputDevice;
+            else
+                sourceDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(sourceDeviceName);
             if (sourceDevice == null)
                 return null;
             

@@ -99,7 +99,11 @@ namespace OMRadio_MonkeyBoard
 
         protected override void Settings()
         {
-            base.Setting_Add(Setting.TextEntry(String.Format("{0}.ComPort", this.pluginName), String.Empty, "Enter comport for MonkeyBoard", StoredData.Get(this, String.Format("{0}.ComPort", this.pluginName))), "COM1");
+            var ports = OpenMobile.helperFunctions.SerialAccess.GetPortNames();
+            string defaultPort = "";
+            if (ports != null && ports.Count() > 0)
+                defaultPort = ports[0];
+            base.Setting_Add(Setting.TextList<string>(String.Format("{0}.ComPort", this.pluginName), String.Empty, "Select comport for MonkeyBoard", StoredData.Get(this, String.Format("{0}.ComPort", this.pluginName)), ports), defaultPort);
             base.Setting_Add(Setting.TextList<AudioDevice>("AudioInputDevice", "Select input device", "Audio input device", StoredData.Get(this, "AudioInputDevice"), OM.Host.AudioDeviceHandler.InputDevices));
         }
 
@@ -107,6 +111,14 @@ namespace OMRadio_MonkeyBoard
         {
             _RadioComPort = StoredData.Get(this, String.Format("{0}.ComPort", this.pluginName));
             _AudioInputDeviceName = StoredData.Get(this, "AudioInputDevice");
+        }
+
+        private void Settings_SetDefaultValues()
+        {
+            StoredData.SetDefaultValue(this, String.Format("{0}.ComPort", this.pluginName), "COM1");
+            StoredData.SetDefaultValue(this, "AudioInputDevice", "");
+
+            Settings_MapVariables();
         }
 
         protected override void setting_OnSettingChanged(int screen, Setting setting)
@@ -134,7 +146,7 @@ namespace OMRadio_MonkeyBoard
             // Do async startup so we don't block the main OM thread
             OpenMobile.Threading.SafeThread.Asynchronous(() =>
             {
-                Settings_MapVariables();
+                Settings_SetDefaultValues();
 
                 // Load playlists from DB
                 string playlistName = String.Format("{0}.Channels.DAB.Preset", this.pluginName);
@@ -1482,6 +1494,13 @@ namespace OMRadio_MonkeyBoard
 
         private string ActivateRadio(Zone zone)
         {
+            // Check for missing serial port name
+            if (String.IsNullOrWhiteSpace(_RadioComPort))
+            {
+                OM.Host.DebugMsg(DebugMessageType.Error, "Unable to activate radio. No serial port specified!");
+                return "Unable to activate radio. No serial port specified!";
+            }
+
             // Register radio as used for this zone
             if (!_ActiveZonesForRadio.Contains(zone))
                 _ActiveZonesForRadio.Add(zone);
@@ -1504,10 +1523,13 @@ namespace OMRadio_MonkeyBoard
                 {
                     OM.Host.DebugMsg(DebugMessageType.Info, "Serial port access granted...");
 
+                    OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Trying to connect to radio at {0}...", _RadioComPort));
                     // Connect radio and set initial radio values
                     if (HW_Monkeyboard.OpenRadioPort(String.Format(@"\\.\{0}", _RadioComPort), false))
                     {
                         OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
+
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Successfully connected to radio at {0}!", _RadioComPort));
 
                         //// Activate audio route
                         //var inputDevice = OM.Host.AudioDeviceHandler.GetInputDeviceByName(_AudioInputDeviceName);
