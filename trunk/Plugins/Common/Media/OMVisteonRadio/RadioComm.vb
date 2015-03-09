@@ -122,7 +122,6 @@ Public Class RadioComm
         '_MediaSource_FM.OnCommand_SearchChannels += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_SearchChannels);
         '_MediaSource_FM.OnCommand_PresetSetCoverArt += new MediaSourceCommandDelegate(_MediaSource_FM_OnCommand_PresetSetCoverArt);
 
-
         ' Initialize playlists
 
         ' Init FM
