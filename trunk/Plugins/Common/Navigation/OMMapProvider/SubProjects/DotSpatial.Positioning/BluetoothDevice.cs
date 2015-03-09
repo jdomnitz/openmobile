@@ -504,6 +504,8 @@ namespace DotSpatial.Positioning
             }
             catch (UnauthorizedAccessException)
             { }
+            catch (ArgumentException)
+            { }
             finally
             {
                 // Reset the cache properties

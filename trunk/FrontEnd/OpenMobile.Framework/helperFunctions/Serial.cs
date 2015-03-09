@@ -106,5 +106,14 @@ namespace OpenMobile.helperFunctions
                 }
             }
         }
+
+        /// <summary>
+        /// Returns an string array with port names
+        /// </summary>
+        /// <returns></returns>
+        static public string[] GetPortNames()
+        {
+            return System.IO.Ports.SerialPort.GetPortNames();
+        }
     }
 }

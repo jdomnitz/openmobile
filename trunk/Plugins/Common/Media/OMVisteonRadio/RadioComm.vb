@@ -275,6 +275,7 @@ Public Class RadioComm
                 starttime = Now()
                 If comWaitHandle.WaitOne(2000) = False Then
                     ' comm port did not open
+                    m_Radio.Close()
                     OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
                     If m_verbose Then
                         m_Host.DebugMsg("OMVisteonRadio - find_radio()", "Com Port did not open.")
