@@ -113,7 +113,17 @@ namespace OpenMobile.helperFunctions
         /// <returns></returns>
         static public string[] GetPortNames()
         {
-            return System.IO.Ports.SerialPort.GetPortNames();
+            try
+            {
+                var ports = System.IO.Ports.SerialPort.GetPortNames();
+                if (ports == null)
+                    return new string[] { "No ports available" };
+                return ports;
+            }
+            catch
+            {
+                return new string[] { "No ports available" };
+            }
         }
     }
 }

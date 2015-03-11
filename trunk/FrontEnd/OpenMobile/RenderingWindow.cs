@@ -349,7 +349,11 @@ namespace OpenMobile
         {
             try
             {
-                Run(0);
+                base.Run(0);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Mask out disposed errors as this happens at shutdown
             }
             catch (Exception e)
             {
@@ -980,7 +984,14 @@ namespace OpenMobile
             OMControl control = FocusedControl;
 
             // Verify that control under mouse is still the same
-            OMControl controlAtMouseLocation = FindControlAtLocation(MouseMoveStartPoint, out ParentControl);
+            OMControl controlAtMouseLocation = null;
+            try
+            {
+                controlAtMouseLocation = FindControlAtLocation(MouseMoveStartPoint, out ParentControl);
+            }
+            catch
+            {
+            }
 
             // If nothing is selected then try to select something
             if (FocusedControl == null || controlAtMouseLocation != control)

@@ -148,24 +148,56 @@ namespace OMAudioControl
         {
             List<AudioDevice> devices = new List<AudioDevice>();
 
-            // Add default device
-            var defaultEndpoint = _AudioDeviceFactory.GetDefaultAudioEndpoint(audioType, Role.Multimedia);
-            // Try to get the name of the device
-            string friendlyNameDefaultUnit = defaultEndpoint.FriendlyName;
-            AudioDevice device = new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, defaultEndpoint, true);
-            devices.Add(device);
+            // Element zero of the devices list should be the default audio device
+
+            //// Add default device
+            //var defaultEndpoint = _AudioDeviceFactory.GetDefaultAudioEndpoint(audioType, Role.Multimedia);
+            //// Try to get the name of the device
+            //string friendlyNameDefaultUnit = defaultEndpoint.FriendlyName;
+            //AudioDevice device = new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, defaultEndpoint, true);
+            //devices.Add(device);
 
             // Add other devices
             var audioDevices = _AudioDeviceFactory.EnumAudioEndpoints(audioType, DeviceState.Active);
             for (int i = 0; i < audioDevices.Count; i++)
             {
-                // Try to get the name of the device
-                string friendlyName = audioDevices[i].FriendlyName;
+                try
+                {
+                    // Try to get the name of the device
+                    string friendlyName = audioDevices[i].FriendlyName;
 
-                device = new AudioDevice(friendlyName, i + 1, AudioDevice_Get, AudioDevice_Set, audioDevices[i]);
-                devices.Add(device);
+                    AudioDevice deviceLoop = new AudioDevice(friendlyName, i + 1, AudioDevice_Get, AudioDevice_Set, audioDevices[i]);
+                    devices.Add(deviceLoop);
+                }
+                catch (Exception ex)
+                {
+                    OM.Host.DebugMsg(String.Format("OMAudioControl.GetAudioDevices -> Exception while getting info for audio device (type: {0})", audioType), ex);
+                }
             }
 
+            // Add default device
+            try
+            {   // Try to detect default device
+                var defaultEndpoint = _AudioDeviceFactory.GetDefaultAudioEndpoint(audioType, Role.Multimedia);
+                // Try to get the name of the device
+                string friendlyNameDefaultUnit = defaultEndpoint.FriendlyName;
+                AudioDevice device = new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, defaultEndpoint, true);
+                devices.Insert(0, device);
+                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Detected default audio device: {0}", friendlyNameDefaultUnit));
+            }
+            catch
+            {   // Default device detection failed, let's set the first detected device as default
+                if (audioDevices.Count >= 1)
+                {
+                    AudioDevice defaultDevice = new AudioDevice(0, AudioDevice_Get, AudioDevice_Set, audioDevices[0], true);
+                    devices.Insert(0, defaultDevice);
+                    OM.Host.DebugMsg(DebugMessageType.Warning, String.Format("Failed to detect default audio device, using first device instead: {0}", audioDevices[0].FriendlyName));
+                }
+                else
+                {   // No audio devices available
+                    OM.Host.DebugMsg(DebugMessageType.Warning, "No audio devices available, failed to set default device");
+                }
+            }
             return devices;
         }
 

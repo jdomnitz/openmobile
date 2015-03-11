@@ -63,7 +63,7 @@ namespace OMRadio_MonkeyBoard
         private string _AudioInputDeviceName;
         private Dictionary<Zone, AudioRoute> _AudioRoutes = new Dictionary<Zone, AudioRoute>();
         private int _RadioVolume = 50;
-        private string _RadioComPort = "COM15";
+        private string _RadioComPort = "COM1";
         private Thread _RadioThread;
         private bool _RadioThread_Enable = true;
         private RadioCommands _RadioCommand = RadioCommands.None;

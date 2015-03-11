@@ -618,7 +618,7 @@ namespace OMDebug
             {
                 int startIndex = text.IndexOf("/Users/") + 7;
                 int endIndex = text.IndexOf("/", startIndex + 1);
-                int length = text.Length - endIndex;
+                int length = endIndex - startIndex;
                 var userString = text.Substring(startIndex, length);
                 text = text.Replace(userString, new String('*', length));
             }
