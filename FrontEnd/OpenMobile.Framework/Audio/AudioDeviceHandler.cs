@@ -79,7 +79,7 @@ namespace OpenMobile.Media
         {
             get
             {
-                if (_AudioDeviceProvider != null)
+                if (_AudioDeviceProvider != null && _AudioDeviceProvider.InputDevices != null && _AudioDeviceProvider.InputDevices.Length >= 1)
                     return _AudioDeviceProvider.InputDevices[0];
                 else
                     return null;
@@ -107,7 +107,7 @@ namespace OpenMobile.Media
         {
             get
             {
-                if (_AudioDeviceProvider != null)
+                if (_AudioDeviceProvider != null && _AudioDeviceProvider.OutputDevices != null && _AudioDeviceProvider.OutputDevices.Length >= 1)
                     return _AudioDeviceProvider.OutputDevices[0];
                 else
                     return null;
