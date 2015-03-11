@@ -86,7 +86,7 @@ Public Class RadioComm
 
     Public Sub New()
 
-        MyBase.New("OMVisteonRadio", OM.Host.getSkinImage("Icons|Icon-Radio"), 2.0, "Visteon/Directed Radio Hardware Interface", "jmullan", "jmullan99@gmail.com")
+        MyBase.New("OMVisteonRadio", OM.Host.getSkinImage("HDRadio"), 2.0, "Visteon/Directed Radio Hardware Interface", "jmullan", "jmullan99@gmail.com")
 
     End Sub
 
