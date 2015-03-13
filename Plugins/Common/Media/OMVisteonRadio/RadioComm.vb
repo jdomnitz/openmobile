@@ -82,13 +82,15 @@ Public Class RadioComm
     Private m_LastAMstation As String = "AM:54000"
     Private m_LastFMstation As String = "FM:88100"
 
+    Private myImage As imageItem = OM.Host.getImageFromFile("Icon-HDRadio")
+
     Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
     Private comWaitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
     Private pwrWaitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
 
     Public Sub New()
 
-        MyBase.New("OMVisteonRadio", OM.Host.getSkinImage("HDRadio"), 2.0, "Visteon/Directed Radio Hardware Interface", "jmullan", "jmullan99@gmail.com")
+        MyBase.New("OMVisteonRadio", OM.Host.getPluginImage(Of RadioComm)("Icon-HDRadio"), 2.0, "Visteon/Directed Radio Hardware Interface", "jmullan", "jmullan99@gmail.com")
 
     End Sub
 
@@ -109,17 +111,13 @@ Public Class RadioComm
 
         m_verbose = GetSetting("OMVisteonRadio.VerboseDebug", False)
         m_ComPort = GetSetting("OMVisteonRadio.ComPort", m_ComPort)
+        m_InputDevice = GetSetting("OMVisteoRadio.SourceDevice", "Default Device")
 
         ' Register media sources 
 
         ' AM media source
         m_Radio_AM_MediaSource = New MediaSource_TunedContent(Me, "AM", "AM Radio", OM.Host.getSkinImage("HDRadio"))
         m_Radio_AM_MediaSource.ListSource = 1
-        m_Radio_AM_MediaSource.AdditionalCommands("PresetSet") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_handler)
-        m_Radio_AM_MediaSource.AdditionalCommands("PresetRemove") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_handler)
-        m_Radio_AM_MediaSource.AdditionalCommands("PresetRename") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_handler)
-        m_Radio_AM_MediaSource.AdditionalCommands("DirectTune") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_handler)
-        m_Radio_AM_MediaSource.AdditionalCommands("SearchChannels") = New MediaSourceCommandDelegate(AddressOf MediaSource_AM_OnCommand_handler)
         m_Radio_AM_MediaSource.HD = False
         m_Radio_AM_MediaSource.Icon = Nothing
         m_Radio_AM_MediaSource.MediaSourceType = MediaSourceTypes.TunedContent
@@ -131,13 +129,14 @@ Public Class RadioComm
         m_Radio_AM_MediaSource.Stereo = False
         m_MediaSources.Add(m_Radio_AM_MediaSource)
 
+        AddHandler m_Radio_AM_MediaSource.OnCommand_PresetSet, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_AM_MediaSource.OnCommand_PresetRemove, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_AM_MediaSource.OnCommand_PresetRename, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_AM_MediaSource.OnCommand_DirectTune, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_AM_MediaSource.OnCommand_SearchChannels, AddressOf MediaSource_AM_OnCommand_handler
+
         ' FM media source
         m_Radio_FM_MediaSource = New MediaSource_TunedContent(Me, "FM", "FM Radio", OM.Host.getSkinImage("HDRadio"))
-        m_Radio_FM_MediaSource.AdditionalCommands("PresetSet") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_handler)
-        m_Radio_FM_MediaSource.AdditionalCommands("PresetRemove") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_handler)
-        m_Radio_FM_MediaSource.AdditionalCommands("PresetRename") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_handler)
-        m_Radio_FM_MediaSource.AdditionalCommands("DirectTune") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_handler)
-        m_Radio_FM_MediaSource.AdditionalCommands("SearchChannels") = New MediaSourceCommandDelegate(AddressOf MediaSource_FM_OnCommand_handler)
         m_Radio_FM_MediaSource.ListSource = 1
         m_Radio_FM_MediaSource.HD = False
         m_Radio_FM_MediaSource.Icon = Nothing
@@ -148,8 +147,13 @@ Public Class RadioComm
         m_Radio_FM_MediaSource.SignalBitRate = ""
         m_Radio_FM_MediaSource.SignalStrength = 0
         m_Radio_FM_MediaSource.Stereo = False
-        m_MediaSources.Add(m_Radio_AM_MediaSource)
         m_MediaSources.Add(m_Radio_FM_MediaSource)
+
+        AddHandler m_Radio_FM_MediaSource.OnCommand_PresetSet, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_FM_MediaSource.OnCommand_PresetRemove, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_FM_MediaSource.OnCommand_PresetRename, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_FM_MediaSource.OnCommand_DirectTune, AddressOf MediaSource_AM_OnCommand_handler
+        AddHandler m_Radio_FM_MediaSource.OnCommand_SearchChannels, AddressOf MediaSource_AM_OnCommand_handler
 
         ' Set FM as default media source
         m_Radio_MediaSource = m_Radio_FM_MediaSource
@@ -199,6 +203,7 @@ Public Class RadioComm
     Private Function SetSetting(ByVal Name As String, ByVal Value As String) As Boolean
         Return helperFunctions.StoredData.Set(Me, Name, Value)
     End Function
+
     Private Function GetSetting(ByVal Name As String, ByVal DefaultValue As String) As String
 
         If String.IsNullOrEmpty(helperFunctions.StoredData.Get(Me, Name)) Then
@@ -222,7 +227,7 @@ Public Class RadioComm
 
             m_Settings.Add(New Setting(SettingTypes.MultiChoice, "OMVisteonRadio.ComPort", "COM", "Com Port", COMOptions, COMOptions, m_ComPort))
 
-            m_Settings.Add(Setting.TextList("OMVisteonRadio.SourceDevice", "Select input device", "Audio input device", StoredData.Get(Me, "AudioInputDevice"), OM.Host.AudioDeviceHandler.InputDevices))
+            m_Settings.Add(Setting.TextList("OMVisteonRadio.SourceDevice", "Select input device", "Audio input device", StoredData.Get(Me, "SourceDevice"), OM.Host.AudioDeviceHandler.InputDevices))
 
             m_Settings.Add(New Setting(SettingTypes.MultiChoice, "OMVisteonRadio.FadeAudio", "Fade", "Fade Audio", Setting.BooleanList, Setting.BooleanList, m_Fade))
 
@@ -243,13 +248,11 @@ Public Class RadioComm
 
     Private Sub Changed(ByVal screen As Integer, ByVal St As Setting)
 
-        helperFunctions.StoredData.Set(Me, St.Name, St.Value)
-
         Select Case St.Name
             Case "OMVisteonRadio.ComPort"
                 m_ComPort = St.Value
             Case "OMVisteonRadio.SourceDevice"
-                m_InputDevice = OM.Host.AudioDeviceHandler.InputDevices(St.Value).Name
+                m_InputDevice = St.Value
             Case "OMVisteonRadio.FadeAudio"
                 m_Fade = St.Value
             Case "OMVisteonRadio.VerboseDebug"
@@ -258,6 +261,8 @@ Public Class RadioComm
             Case "OMVisteonRadio.LastAMstation"
             Case "OMVisteonRadio.LastFMstation"
         End Select
+
+        helperFunctions.StoredData.Set(Me, St.Name, St.Value)
 
     End Sub
 
@@ -468,7 +473,7 @@ Public Class RadioComm
 
         If m_Radio.PowerState <> HDRadio.PowerStatus.PowerOn Then
             If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio did not power on"))
+                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Radio did not power on"))
             End If
             myNotification.Text = String.Format("Radio on {0} did not power on", m_ComPort)
             m_Radio.Close()
@@ -512,7 +517,7 @@ Public Class RadioComm
         End If
 
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Activate()", String.Format("Requested: Activate HDRadio."))
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_Activate()", String.Format("Requested: Activate HDRadio zone {0}.", zone.Name))
         End If
 
         Return ""
