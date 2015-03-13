@@ -418,13 +418,14 @@ Public Class RadioComm
         End If
 
         m_Radio.Open()
+        System.Threading.Thread.Sleep(50)
 
         myCounter = 0
         startTime = Now()
-        Do Until m_Radio.IsOpen
+        Do While m_Radio.PowerState = HDRadio.PowerStatus.FindingRadio
             System.Threading.Thread.Sleep(100)
             myCounter += 1
-            myNotification.Text = String.Format("Open({1}) - Power State = {0}", m_Radio.PowerState, myCounter)
+            myNotification.Text = String.Format("{0}", m_Radio.PowerState)
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Open() - Power State = {0}", m_Radio.PowerState))
             End If
@@ -455,7 +456,7 @@ Public Class RadioComm
         Do While m_Radio.PowerState <> HDRadio.PowerStatus.PowerOn
             System.Threading.Thread.Sleep(500)
             myCounter += 1
-            myNotification.Text = String.Format("PowerOn({1}) - Power State = {0}", m_Radio.PowerState, myCounter)
+            myNotification.Text = String.Format("{0}", m_Radio.PowerState)
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("PowerOn() - Power State = {0}", m_Radio.PowerState))
             End If
@@ -467,7 +468,7 @@ Public Class RadioComm
 
         If m_Radio.PowerState <> HDRadio.PowerStatus.PowerOn Then
             If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Did not power on.  State = {0}", m_Radio.PowerState))
+                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio did not power on"))
             End If
             myNotification.Text = String.Format("Radio on {0} did not power on", m_ComPort)
             m_Radio.Close()
@@ -498,6 +499,8 @@ Public Class RadioComm
                 m_Radio_FM_MediaSource.HD = False
                 m_Radio_MediaSource = m_Radio_FM_MediaSource
         End Select
+
+        myNotification.Text = String.Format("HD Radio ready on {0}", m_ComPort)
 
     End Sub
 
