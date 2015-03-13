@@ -109,7 +109,7 @@
     <Content Include="HDRadioComm.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Icon-Radio.png">
+    <Content Include="Icon-HDRadio.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="WindowsAudio.dll">
