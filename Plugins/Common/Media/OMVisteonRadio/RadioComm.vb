@@ -429,19 +429,20 @@ Public Class RadioComm
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Open() - Power State = {0}", m_Radio.PowerState))
             End If
             elapsedTime = Now().Subtract(startTime)
-            If elapsedTime.Milliseconds > 5000 Then
+            If elapsedTime.Seconds > 5 Then
                 Exit Do
             End If
         Loop
+
+        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
 
         If Not m_Radio.IsOpen Then
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio not found using {0}", m_ComPort))
             End If
+            myNotification.Text = String.Format("HD Radio not found using {0}", m_ComPort)
             Exit Sub
         End If
-
-        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio found on {0}", m_ComPort))
@@ -459,7 +460,7 @@ Public Class RadioComm
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("PowerOn() - Power State = {0}", m_Radio.PowerState))
             End If
             elapsedTime = Now().Subtract(startTime)
-            If elapsedTime.Milliseconds > 5000 Then
+            If elapsedTime.Seconds > 5 Then
                 Exit Do
             End If
         Loop
@@ -468,6 +469,8 @@ Public Class RadioComm
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Did not power on.  State = {0}", m_Radio.PowerState))
             End If
+            myNotification.Text = String.Format("Radio on {0} did not power on", m_ComPort)
+            m_Radio.Close()
             Exit Sub
         End If
 
