@@ -362,6 +362,9 @@ Public Class RadioComm
     Private Sub BackgroundLoad()
 
         Dim access_granted As Boolean = False
+        Dim startTime As DateTime
+        Dim elapsedTime As TimeSpan
+        Dim myCounter As Integer = 0
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Searching: {0}", m_ComPort))
@@ -408,87 +411,67 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Obtained serial lock, attempting connection."))
         End If
 
-        myNotification.Text = String.Format("Searching for HD Radio")
+        If m_ComPort = "Auto" Then
+            myNotification.Text = String.Format("Searching for HD Radio")
+        Else
+            myNotification.Text = String.Format("Checking for HD Radio on {0}", m_ComPort)
+        End If
 
         m_Radio.Open()
 
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Powerstate : {0}", m_Radio.PowerState))
-        End If
-
-        If comWaitHandle.WaitOne(2000) Then
+        myCounter = 0
+        startTime = Now()
+        Do Until m_Radio.IsOpen
+            System.Threading.Thread.Sleep(100)
+            myCounter += 1
+            myNotification.Text = String.Format("Open({1}) - Power State = {0}", m_Radio.PowerState, myCounter)
             If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Issues locating an HDRadio."))
+                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Open() - Power State = {0}", m_Radio.PowerState))
             End If
-            myNotification.Text = String.Format("No HD Radio found")
-            m_Radio.Close()
-            OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
-            Exit Sub
-        End If
+            elapsedTime = Now().Subtract(startTime)
+            If elapsedTime.Milliseconds > 5000 Then
+                Exit Do
+            End If
+        Loop
 
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Powerstate : {0}", m_Radio.PowerState))
-        End If
-
-        If m_CommError Then
+        If Not m_Radio.IsOpen Then
             If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", "Communication error while attempting to find HDRadio.")
+                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio not found using {0}", m_ComPort))
             End If
-            m_Radio.Close()
-            OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
-            Exit Sub
-        End If
-
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Powerstate : {0}", m_Radio.PowerState))
-        End If
-
-        If m_NotFound Then
-            If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("No HDRadio was found."))
-            End If
-            m_Radio.Close()
-            OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
             Exit Sub
         End If
 
         OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
 
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Powerstate : {0}", m_Radio.PowerState))
+            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio found on {0}", m_ComPort))
         End If
 
-        ' We must be connected so lets try to power it on
-        If Not m_Radio.PowerState = HDRadio.PowerStatus.PowerOn Then
-            m_Radio.PowerOn() ' Apparently not required unless explicitly powered off first
-            If pwrWaitHandle.WaitOne(2000) Then
-                If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", "HD Radio did not power on.")
-                End If
-                myNotification.Text = String.Format("Found on {0} but did not power on", m_ComPort)
-                Exit Sub
-            End If
-        Else
+        m_Radio.PowerOn()
+
+        myCounter = 0
+        startTime = Now()
+        Do While m_Radio.PowerState <> HDRadio.PowerStatus.PowerOn
+            System.Threading.Thread.Sleep(500)
+            myCounter += 1
+            myNotification.Text = String.Format("PowerOn({1}) - Power State = {0}", m_Radio.PowerState, myCounter)
             If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", "HD Radio is already powered on.")
+                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("PowerOn() - Power State = {0}", m_Radio.PowerState))
             End If
-        End If
+            elapsedTime = Now().Subtract(startTime)
+            If elapsedTime.Milliseconds > 5000 Then
+                Exit Do
+            End If
+        Loop
 
-        myNotification.Text = String.Format("Connected to HD Radio on {0}", m_ComPort)
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio -BackgroundLoad()", String.Format("Connected to HD Radio on {0}", m_ComPort))
+        If m_Radio.PowerState <> HDRadio.PowerStatus.PowerOn Then
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Did not power on.  State = {0}", m_Radio.PowerState))
+            End If
+            Exit Sub
         End If
-        myNotification.Text = String.Format("Found HDRadio on {0}", m_ComPort)
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Found HDRadio on {0}", m_ComPort))
-        End If
-        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
 
         SetSetting("OMVisteonRadio.ComPort", m_ComPort)
-
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Powerstate : {0}", m_Radio.PowerState))
-        End If
 
         ' Capture the com port we connected on
         helperFunctions.StoredData.Set(Me, Me.pluginName & ".ComPort", m_Radio.ComPortString)
