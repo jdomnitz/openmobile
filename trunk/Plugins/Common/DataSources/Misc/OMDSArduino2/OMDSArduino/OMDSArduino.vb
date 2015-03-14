@@ -721,7 +721,7 @@ Namespace OMDSArduino
                 myNotification.Text = String.Format("Error: {0}", ex.Message)
                 theHost.DebugMsg(OpenMobile.DebugMessageType.Error, "OMDSArduino.BackgroundLoad()", String.Format("Error: {0}", ex.Message))
                 If Not Arduino Is Nothing Then
-                    Arduino.Dispose()
+                    'Arduino.Dispose()
                     Arduino = Nothing
                 End If
             Finally
@@ -958,7 +958,7 @@ Namespace OMDSArduino
                             Arduino.Reset()
                             System.Threading.Thread.Sleep(500)
                             'Arduino.SetDO(Sharpduino.Constants.ArduinoUnoPins.D13, False)
-                            Arduino.Dispose()
+                            'Arduino.Dispose()
                         Catch ex As Exception
                             ' Problem with ARDUINO
                             If m_Verbose Then
@@ -1086,7 +1086,7 @@ Namespace OMDSArduino
             Try
                 Firmata.SendMessage(New Sharpduino.Messages.Send.ResetMessage)
                 System.Threading.Thread.Sleep(300)
-                Arduino.Dispose()
+                'Arduino.Dispose()
             Catch ex As Exception
                 If m_Verbose Then
                     theHost.DebugMsg(OpenMobile.DebugMessageType.Info, "OMDSArduino.Dispose()", "No object to dispose - " + ex.Message)
