@@ -82,6 +82,7 @@ Public Class RadioComm
     Private m_LastFMStation As String = "FM:88100"
 
     Private myImage As imageItem = OM.Host.getImageFromFile("Icon-HDRadio")
+    Private theZones As List(Of Zone)
 
     Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
     Private comWaitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
@@ -368,6 +369,10 @@ Public Class RadioComm
         m_Radio_MediaSource.ChannelID = freq
         m_Radio_MediaSource.ChannelNameShort = m_Radio.CurrentFormattedChannel
 
+        For Each Zone In theZones
+            MyBase.MediaProviderData_ReportMediaInfo(Zone, m_CurrentMedia)
+        Next
+
         'End If
 
     End Sub
@@ -521,6 +526,10 @@ Public Class RadioComm
     Public Overrides Function MediaProviderCommand_Activate(zone As OpenMobile.Zone) As String
         ' Radio is turned on at plugin initialize
 
+        If Not theZones.Contains(zone) Then
+            theZones.Add(zone)
+        End If
+
         If Not m_Routes.ContainsKey(zone) Then
             m_Routes.Add(zone, OM.Host.AudioDeviceHandler.ActivateRoute(GetData("OMVisteonRadio.SourceDevice", m_InputDevice), zone))
         End If
@@ -575,6 +584,10 @@ Public Class RadioComm
     Public Overrides Function MediaProviderCommand_Deactivate(zone As OpenMobile.Zone) As String
         ' Turns radio off (we actually leave radio powered up, just disconnect the audio route set up for this zone
         ' This saves us from having find and power on the radio if user switches back
+
+        If theZones.Contains(zone) Then
+            theZones.Remove(zone)
+        End If
 
         If m_Radio.IsPowered Then
             If m_verbose Then
@@ -1080,6 +1093,14 @@ Public Class RadioComm
     Public Function getStationList(ByVal zone As OpenMobile.Zone) As Object
         Return m_StationList
     End Function
+
+    Private Sub push_media_info()
+
+        For Each zone In theZones
+            MyBase.MediaProviderData_ReportMediaInfo(zone, m_CurrentMedia)
+        Next
+
+    End Sub
 
     Private Sub m_Radio_HDRadioEventHDSubChannel(ByVal State As Integer) Handles m_Radio.HDRadioEventHDSubChannel
 
