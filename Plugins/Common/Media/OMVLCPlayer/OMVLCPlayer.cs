@@ -147,6 +147,8 @@ namespace OMVLCPlayer
             // Do async startup so we don't block the main OM thread
             OpenMobile.Threading.SafeThread.Asynchronous(() =>
                 {
+                    OM.Host.DebugMsg(DebugMessageType.Info, "Starting initialization");
+
                     // Initialize media sources
                     _MediaSources.Add(new MediaSource_FileBasedMedia(this, "File", "File based media", OM.Host.getSkinImage("Icons|Icon-File")));
                     _MediaSources.Add(new MediaSource_DiscBasedMedia(this, "CD", "CompactDisc", OM.Host.getSkinImage("Icons|Icon-CD")));
@@ -171,8 +173,11 @@ namespace OMVLCPlayer
                         }
                     }
 
+                    OM.Host.DebugMsg(DebugMessageType.Info, "Starting initialization of zone specific data");
                     foreach (var zone in OM.Host.ZoneHandler.Zones)
                     {
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Starting initialization of zone specific data (Zone:{0})", zone.Name));
+                        
                         // Initialize local variables
                         _Zone_MediaInfo.Add(zone, new mediaInfo());
                        
@@ -202,13 +207,22 @@ namespace OMVLCPlayer
                         string playlistName = String.Format("{0}.Zone{1}.PlayList_Current", this.pluginName, zone.Index);
                         Playlist.SetDisplayName(ref playlistName, String.Format("[{0}] Current playlist ({1})", zone.Name, this.pluginName));
                         Playlist playlist = new Playlist(playlistName);
-                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Starting to loading items for playlist {0} from DB", playlistName));
-                        playlist.Load();
-                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Loaded {1} items for playlist {0} from DB", playlistName, playlist.Count));
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Playlist initialized ({0})", playlistName));
                         _Zone_Playlist.Add(zone, playlist);
 
                         // Preload one player per zone
                         ZonePlayer_CheckInstance(zone);
+
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Completed initialization of zone specific data (Zone:{0})", zone.Name));
+                    }
+
+                    // Load playlists
+                    OM.Host.DebugMsg(DebugMessageType.Info, "Starting to load playlist items");
+                    foreach (var playlist in _Zone_Playlist.Values)
+                    {
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Starting to loading items for playlist {0} from DB", playlist.Name));
+                        playlist.Load();
+                        OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Loaded {1} items for playlist {0} from DB", playlist.Name, playlist.Count));
                     }
                 });
 
