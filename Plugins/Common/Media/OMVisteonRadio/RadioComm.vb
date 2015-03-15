@@ -915,6 +915,11 @@ Public Class RadioComm
 
             End If
 
+            Return "Invalid parameters"
+        Else
+
+            Return "Invalid parameters"
+
         End If
 
         Return ""
