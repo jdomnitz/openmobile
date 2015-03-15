@@ -152,7 +152,7 @@ namespace OpenMobile.Media
         private IMediaProvider _Provider;
 
         /// <summary>
-        /// Type of media source (Can be one of the types defined in MediaSourceTypes or a custom string identifying a media source)
+        /// Type of media source (Can be one of the types defined in MediaSourceTypes (as a string representation) or a custom string identifying a media source)
         /// </summary>
         public string MediaSourceType
         {

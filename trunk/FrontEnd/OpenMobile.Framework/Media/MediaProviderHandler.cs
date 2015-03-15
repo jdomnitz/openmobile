@@ -156,6 +156,9 @@ namespace OpenMobile.Media
 
         public bool IsMediaSourceOfType(MediaSource mediaSource, params string[] mediaSourceTypes)
         {
+            if (mediaSource == null)
+                return false;
+
             foreach (var mediaSourceType in mediaSourceTypes)
             {
                 if (mediaSource.MediaSourceType == mediaSourceType)

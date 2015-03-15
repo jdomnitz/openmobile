@@ -122,7 +122,7 @@ namespace OMAudioControl
             try
             {
                 // Declare audio input device
-                _SoundIn = new WasapiCapture();
+                _SoundIn = new WasapiCapture(false, AudioClientShareMode.Shared, 100, null, ThreadPriority.Highest);
                 _SoundIn.Device = _SourceDevice;
                 _SoundIn.Initialize();
 
@@ -169,13 +169,22 @@ namespace OMAudioControl
         /// </summary>
         public void Deactivate()
         {
-            _BlockEvents = true;
-            _SoundOut.Dispose();
-            _SoundOut = null;
-            _SoundInSource.Dispose();
-            _SoundInSource = null;
-            _SoundIn.Dispose();
-            _SoundIn = null;
+            try
+            {
+                _BlockEvents = true;
+                if (_SoundOut != null)
+                    _SoundOut.Dispose();
+                _SoundOut = null;
+                if (_SoundInSource != null)
+                    _SoundInSource.Dispose();
+                _SoundInSource = null;
+                if (_SoundIn != null)
+                    _SoundIn.Dispose();
+                _SoundIn = null;
+            }
+            catch
+            {
+            }
         }
 
         /// <summary>

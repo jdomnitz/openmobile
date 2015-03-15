@@ -4,76 +4,6 @@
         <name>CSCore</name>
     </assembly>
     <members>
-        <member name="T:CSCore.MmException">
-            <summary>
-                Exception class for all MM-APIs like waveOut or ACM.
-            </summary>
-        </member>
-        <member name="M:CSCore.MmException.Try(CSCore.MmResult,System.String)">
-            <summary>
-                Throws an <see cref="T:CSCore.MmException"/> if the <paramref name="result"/> is not
-                <see cref="F:CSCore.MmResult.MMSYSERR_NOERROR"/>.
-            </summary>
-            <param name="result">Errorcode.</param>
-            <param name="function">Name of the function which returned the specified <paramref name="result"/>.</param>
-        </member>
-        <member name="M:CSCore.MmException.#ctor(CSCore.MmResult,System.String)">
-            <summary>
-                Initializes a new instance of the <see cref="T:CSCore.MmException"/> class.
-            </summary>
-            <param name="result">Errorcode.</param>
-            <param name="function">Name of the function which returned the specified <paramref name="result"/>.</param>
-        </member>
-        <member name="P:CSCore.MmException.Result">
-            <summary>
-                Gets the <see cref="T:CSCore.MmResult"/> which describes the error.
-            </summary>
-        </member>
-        <member name="P:CSCore.MmException.Target">
-            <summary>
-                Gets the name of the function which caused the error.
-            </summary>
-        </member>
-        <member name="P:CSCore.MmException.Function">
-            <summary>
-                Gets the name of the function which caused the error.
-            </summary>
-        </member>
-        <member name="F:CSCore.ACM.AcmDriverDetails.FourCCType">
-            <summary>
-            Must be ACMDRIVERDETAILS_FCCTYPE_AUDIOCODEC for acm drivers
-            </summary>
-        </member>
-        <member name="F:CSCore.ACM.AcmDriverDetails.FourCCComp">
-            <summary>
-            Currently not used. Default value = ACMDRIVERDETAILS_FCCCOMP_UNDEFINED 
-            </summary>
-        </member>
-        <member name="F:CSCore.ACM.AcmDriverDetails.ShortName">
-            <summary>
-            Length = ACMDRIVERDETAILS_SHORTNAME_CHARS = 32 chars
-            </summary>
-        </member>
-        <member name="F:CSCore.ACM.AcmDriverDetails.LongName">
-            <summary>
-            Length = ACMDRIVERDETAILS_LONGNAME_CHARS = 128 chars
-            </summary>
-        </member>
-        <member name="F:CSCore.ACM.AcmDriverDetails.Copyright">
-            <summary>
-            Length = ACMDRIVERDETAILS_COPYRIGHT_CHARS = 80 chars
-            </summary>
-        </member>
-        <member name="F:CSCore.ACM.AcmDriverDetails.Licensing">
-            <summary>
-            Length = ACMDRIVERDETAILS_LICENSING_CHARS = 128 chars
-            </summary>
-        </member>
-        <member name="F:CSCore.ACM.AcmDriverDetails.Features">
-            <summary>
-            Length = ACMDRIVERDETAILS_FEATURES_CHARS = 512 chars
-            </summary>
-        </member>
         <member name="T:CSCore.AudioSubTypes">
             <summary>
             Contains defined MediaTypes and provides methods to convert between AudioEncoding and MediaType.
@@ -1020,6 +950,11 @@
                 Defines the base for all audio streams.
             </summary>
         </member>
+        <member name="P:CSCore.IWaveStream.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="P:CSCore.IWaveStream.WaveFormat">
             <summary>
                 Gets the <see cref="P:CSCore.IWaveStream.WaveFormat"/> of the waveform-audio data.
@@ -1028,13 +963,13 @@
         <member name="P:CSCore.IWaveStream.Position">
             <summary>
                 Gets or sets the current position. The unit of this property depends on the implementation of this interface. Some
-                implementations may don't support this property.
+                implementations may not support this property.
             </summary>
         </member>
         <member name="P:CSCore.IWaveStream.Length">
             <summary>
                 Gets the length of the waveform-audio data. The unit of this property depends on the implementation of this
-                interface. Some implementations may don't support this property.
+                interface. Some implementations may not support this property.
             </summary>
         </member>
         <member name="M:CSCore.IWaveSource.Read(System.Byte[],System.Int32,System.Int32)">
@@ -1206,18 +1141,103 @@
                 That means that it can be possible that some files with the file extension abc can be decoded but other a few files
                 with the file extension abc can't be decoded.
             </summary>
-            <returns></returns>
+            <returns>Supported file extensions.</returns>
         </member>
         <member name="P:CSCore.Codecs.CodecFactory.Instance">
             <summary>
                 Gets the default singleton instance of the <see cref="T:CSCore.Codecs.CodecFactory"/> class.
             </summary>
-            <remarks>Singleton implementation is not threadsafe.</remarks>
         </member>
         <member name="P:CSCore.Codecs.CodecFactory.SupportedFilesFilterEn">
             <summary>
                 Gets the file filter in English. This filter can be used e.g. in combination with an OpenFileDialog.
             </summary>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.BlockingStrategy">
+            <summary>
+            Defines the blocking strategy of the a flac frame.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.BlockingStrategy.VariableBlockSize">
+            <summary>
+            The <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.BlockSize"/> of flac frames is variable.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.BlockingStrategy.FixedBlockSize">
+            <summary>
+            Each flac frame uses the same <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.BlockSize"/>.
+            </summary>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.ChannelAssignment">
+            <summary>
+            Defines the channel assignments.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.ChannelAssignment.Independent">
+            <summary>
+            Independent assignment. 
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.ChannelAssignment.LeftSide">
+            <summary>
+            Left/side stereo. Channel 0 becomes the left channel while channel 1 becomes the side channel.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.ChannelAssignment.RightSide">
+            <summary>
+            Right/side stereo. Channel 0 becomes the right channel while channel 1 becomes the side channel.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.ChannelAssignment.MidSide">
+            <summary>
+            Mid/side stereo. Channel 0 becomes the mid channel while channel 1 becomes the side channel. 
+            </summary>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacException">
+            <summary>
+            FLAC Exception.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacException.#ctor(System.String,CSCore.Codecs.FLAC.FlacLayer)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacException"/> class.
+            </summary>
+            <param name="message">A message which describes the error.</param>
+            <param name="layer">The layer of the flac stream the exception got thrown.</param>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacException.#ctor(System.Exception,CSCore.Codecs.FLAC.FlacLayer)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacException"/> class.
+            </summary>
+            <param name="innerException">The InnerException which caused the error.</param>
+            <param name="layer">The layer.The layer of the flac stream the exception got thrown.</param>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacException"/> class from serialization data.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> object that holds the serialized object data.</param>
+            <param name="context">
+                The StreamingContext object that supplies the contextual information about the source or
+                destination.
+            </param>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            When overridden in a derived class, sets the <see cref="T:System.Runtime.Serialization.SerializationInfo" /> with information about the exception.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext" /> that contains contextual information about the source or destination.</param>
+            <PermissionSet>
+              <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Read="*AllFiles*" PathDiscovery="*AllFiles*" />
+              <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="SerializationFormatter" />
+            </PermissionSet>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacException.Layer">
+            <summary>
+            Gets the layer of the flac stream the exception got thrown.
+            </summary>
+            <remarks>Used for debugging purposes.</remarks>
         </member>
         <member name="T:CSCore.Codecs.FLAC.FlacFile">
             <summary>
@@ -1236,14 +1256,14 @@
             </summary>
             <param name="stream">Stream which contains flac data which should be decoded.</param>
         </member>
-        <member name="M:CSCore.Codecs.FLAC.FlacFile.#ctor(System.IO.Stream,CSCore.Codecs.FLAC.FlacPreScanMethodMode)">
+        <member name="M:CSCore.Codecs.FLAC.FlacFile.#ctor(System.IO.Stream,CSCore.Codecs.FLAC.FlacPreScanMode)">
             <summary>
                 Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFile"/> class.
             </summary>
             <param name="stream">Stream which contains flac data which should be decoded.</param>
             <param name="scanFlag">Scan mode which defines how to scan the flac data for frames.</param>
         </member>
-        <member name="M:CSCore.Codecs.FLAC.FlacFile.#ctor(System.IO.Stream,CSCore.Codecs.FLAC.FlacPreScanMethodMode,System.Action{CSCore.Codecs.FLAC.FlacPreScanFinishedEventArgs})">
+        <member name="M:CSCore.Codecs.FLAC.FlacFile.#ctor(System.IO.Stream,CSCore.Codecs.FLAC.FlacPreScanMode,System.Action{CSCore.Codecs.FLAC.FlacPreScanFinishedEventArgs})">
             <summary>
                 Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFile"/> class.
             </summary>
@@ -1251,7 +1271,7 @@
             <param name="scanFlag">Scan mode which defines how to scan the flac data for frames.</param>
             <param name="onscanFinished">
                 Callback which gets called when the pre scan processes finished. Should be used if the
-                <paramref name="scanFlag"/> argument is set the <see cref="F:CSCore.Codecs.FLAC.FlacPreScanMethodMode.Async"/>.
+                <paramref name="scanFlag"/> argument is set the <see cref="F:CSCore.Codecs.FLAC.FlacPreScanMode.Async"/>.
             </param>
         </member>
         <member name="M:CSCore.Codecs.FLAC.FlacFile.Read(System.Byte[],System.Int32,System.Int32)">
@@ -1316,6 +1336,188 @@
                 Gets the length of the <see cref="T:CSCore.Codecs.FLAC.FlacFile"/> in bytes.
             </summary>
         </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacFrame">
+            <summary>
+            Represents a frame inside of an Flac-Stream.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrame.FromStream(System.IO.Stream)">
+            <summary>
+            Creates a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrame"/> class based on the specified <paramref name="stream"/>.
+            </summary>
+            <param name="stream">The stream which contains the flac frame.</param>
+            <returns>A new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrame"/> class.</returns>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrame.FromStream(System.IO.Stream,CSCore.Codecs.FLAC.FlacMetadataStreamInfo)">
+            <summary>
+            Creates a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrame"/> class based on the specified <paramref name="stream"/> and some basic stream information.
+            </summary>
+            <param name="stream">The stream which contains the flac frame.</param>
+            <param name="streamInfo">Some basic information about the flac stream.</param>
+            <returns>A new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrame"/> class.</returns>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrame.NextFrame">
+            <summary>
+            Tries to read the next flac frame inside of the specified stream and returns a value which indicates whether the next flac frame could be successfully read.
+            </summary>
+            <returns>True if the next flac frame could be successfully read; false if not.</returns>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrame.GetBuffer(System.Byte[]@)">
+            <summary>
+            Gets the raw pcm data of the flac frame.
+            </summary>
+            <param name="buffer">The buffer which should be used to store the data in. This value can be null.</param>
+            <returns>The number of read bytes.</returns>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrame.Header">
+            <summary>
+            Gets the header of the flac frame.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrame.Crc16">
+            <summary>
+            Gets the CRC16-checksum.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrame.HasError">
+            <summary>
+            Gets a value indicating whether the decoder has encountered an error with this frame.
+            </summary>
+            <value>
+              <c>true</c> if this frame contains an error; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacFrameHeader">
+            <summary>
+            Represents the header of a <see cref="T:CSCore.Codecs.FLAC.FlacFrame"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrameHeader.#ctor(System.IO.Stream)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> class.
+            </summary>
+            <param name="stream">The underlying stream which contains the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/>.</param>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrameHeader.#ctor(System.IO.Stream,CSCore.Codecs.FLAC.FlacMetadataStreamInfo)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> class.
+            </summary>
+            <param name="stream">The underlying stream which contains the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/>.</param>
+            <param name="streamInfo">The stream-info-metadata-block of the flac stream which provides some basic information about the flac framestream. Can be set to null.</param>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrameHeader.#ctor(System.IO.Stream,CSCore.Codecs.FLAC.FlacMetadataStreamInfo,System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> class.
+            </summary>
+            <param name="stream">The underlying stream which contains the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/>.</param>
+            <param name="streamInfo">The stream-info-metadata-block of the flac stream which provides some basic information about the flac framestream. Can be set to null.</param>
+            <param name="doCrc">A value which indicates whether the crc8 checksum of the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> should be calculated.</param>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrameHeader.#ctor(System.Byte*@,CSCore.Codecs.FLAC.FlacMetadataStreamInfo,System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> class.
+            </summary>
+            <param name="buffer">The raw byte-data which contains the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/>.</param>
+            <param name="streamInfo">The stream-info-metadata-block of the flac stream which provides some basic information about the flac framestream. Can be set to null.</param>
+            <param name="doCrc">A value which indicates whether the crc8 checksum of the <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> should be calculated.</param>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacFrameHeader.IsFormatEqualTo(CSCore.Codecs.FLAC.FlacFrameHeader)">
+            <summary>
+            Indicates whether the format of the current <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> is equal to the format of another <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/>.
+            </summary>
+            <param name="other">A <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> which provides the format to compare with the format of the current <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/>.</param>
+            <returns><c>true</c> if the format of the current <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/> is equal to the format of the <paramref name="other"/> <see cref="T:CSCore.Codecs.FLAC.FlacFrameHeader"/>.</returns>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.BlockSize">
+            <summary>
+            Gets number of samples, the frame contains.
+            </summary>
+            <value>
+            The number of samples, the frame contains.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.SampleRate">
+            <summary>
+            Gets the sample rate in Hz.
+            </summary>
+            <value>
+            The sample rate in Hz.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.Channels">
+            <summary>
+            Gets the number of channels.
+            </summary>
+            <value>
+            The number of channels.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.ChannelAssignment">
+            <summary>
+            Gets the channel assignment.
+            </summary>
+            <value>
+            The channel assignment.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.BitsPerSample">
+            <summary>
+            Gets the bits per sample.
+            </summary>
+            <value>
+            The bits per sample.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.BlockingStrategy">
+            <summary>
+            Gets a value which indicates whether the frame provides the <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.SampleNumber"/> or the <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.FrameNumber"/>.
+            </summary>
+            <value>
+            A value which indicates whether the frame provides the <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.SampleNumber"/> or the <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.FrameNumber"/>.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.SampleNumber">
+            <summary>
+            Gets the frame's starting sample number.
+            </summary>
+            <value>
+            The frame's starting sample number.
+            </value>
+            <remarks>Only available if the <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.BlockingStrategy"/> is set to <see cref="F:CSCore.Codecs.FLAC.BlockingStrategy.VariableBlockSize"/>.</remarks>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.FrameNumber">
+            <summary>
+            Gets the frame's number.
+            </summary>
+            <value>
+            The frame's number.
+            </value>
+            <remarks>Only available if the <see cref="P:CSCore.Codecs.FLAC.FlacFrameHeader.BlockingStrategy"/> is set to <see cref="F:CSCore.Codecs.FLAC.BlockingStrategy.FixedBlockSize"/>.</remarks>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.Crc8">
+            <summary>
+            Gets the 8-bit crc checksum of the frame header.
+            </summary>
+            <value>
+            The 8-bit crc checksum of the frame header.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.HasError">
+            <summary>
+            Gets a value indicating whether this instance has error.
+            </summary>
+            <value>
+              <c>true</c> if this instance has error; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacFrameHeader.StreamPosition">
+            <summary>
+            Gets the stream position.
+            </summary>
+            <value>
+            The stream position.
+            </value>
+        </member>
         <member name="T:CSCore.Codecs.FLAC.FlacFrameInformation">
             <summary>
             Provides some basic information about a flac frame. This structure is typically used for implementing a seeking algorithm. 
@@ -1341,6 +1543,32 @@
             Gets the number samples which are contained by other frames before this frame occurs.
             </summary>
         </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacLayer">
+            <summary>
+            Splits a flac file into a few basic layers and defines them. Mainly used for debugging purposes.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.FlacLayer.OutSideOfFrame">
+            <summary>
+            Everything which is not part of a flac frame.
+            </summary>
+            <remarks>For example the "fLaC" sync code.</remarks>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.FlacLayer.Metadata">
+            <summary>
+            Everything metadata related.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.FlacLayer.Frame">
+            <summary>
+            Everything which is part of a frame but not part of its subframes.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.FlacLayer.SubFrame">
+            <summary>
+            Everything subframe related.
+            </summary>
+        </member>
         <member name="T:CSCore.Codecs.FLAC.FlacPreScanFinishedEventArgs">
             <summary>
             FlacPreScanFinishedEventArgs
@@ -1357,35 +1585,200 @@
             Gets the a list of found frames by the scan.
             </summary>
         </member>
-        <member name="T:CSCore.Codecs.FLAC.FlacPreScanMethodMode">
+        <member name="T:CSCore.Codecs.FLAC.FlacPreScanMode">
             <summary>
             Defines how to scan a flac stream.
             </summary>
         </member>
-        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMethodMode.None">
+        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMode.None">
             <summary>
-            Don't scan the flac stream. This typically will cause a stream to be not seekable.
+            Don't scan the flac stream. This will cause a stream to be not seekable.
             </summary>
         </member>
-        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMethodMode.Default">
-            <summary>
-            Default value.
-            </summary>
-        </member>
-        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMethodMode.Sync">
+        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMode.Sync">
             <summary>
             Scan synchronously.
             </summary>
         </member>
-        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMethodMode.Async">
+        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMode.Async">
             <summary>
-            Scan async BUT don't use the stream while scan is running because the stream position
-            will change while scanning. If you playback the stream, it will cause an error!
+            Scan async. 
             </summary>
+            <remarks>
+            Don't use the stream while scan is running because the stream position
+            will change while scanning. If you playback the stream, it will cause an error!
+            </remarks>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.FlacPreScanMode.Default">
+            <summary>
+            Default value.
+            </summary>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacMetadata">
+            <summary>
+            Represents a flac metadata block.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacMetadata.FromStream(System.IO.Stream)">
+            <summary>
+            Reads and returns a single <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> from the specified <paramref name="stream"/>.
+            </summary>
+            <param name="stream">The stream which contains the <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/>.</param>
+            <returns>Returns the read <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/>.</returns>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacMetadata.ReadAllMetadataFromStream(System.IO.Stream)">
+            <summary>
+            Reads all <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> from the specified <paramref name="stream"/>.
+            </summary>
+            <param name="stream">The stream which contains the <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/>.</param>
+            <returns>All <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/>.</returns>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacMetadata.#ctor(CSCore.Codecs.FLAC.FlacMetaDataType,System.Boolean,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> class.
+            </summary>
+            <param name="type">The type of the metadata.</param>
+            <param name="lastBlock">A value which indicates whether this is the last <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of the stream. <c>true</c> means that this is the last <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of the stream.</param>
+            <param name="length">The length of <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of the stream in bytes. Does not include the metadata header.</param>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadata.MetaDataType">
+            <summary>
+            Gets the type of the <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/>.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadata.IsLastMetaBlock">
+            <summary>
+            Gets a value indicating whether this instance is the last <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadata.Length">
+            <summary>
+            Gets the length of the <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of the stream in bytes.
+            </summary>
+            <remarks>The length does not include the metadata header.</remarks>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacMetadataSeekTable">
+            <summary>
+            Represents a flac seektable.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacMetadataSeekTable.#ctor(System.IO.Stream,System.Int32,System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacMetadataSeekTable"/> class.
+            </summary>
+            <param name="stream">The stream which contains the seektable.</param>
+            <param name="length">The length of the seektable inside of the stream in bytes. Does not include the metadata header.</param>
+            <param name="lastBlock">A value which indicates whether this is the last <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of the stream. <c>true</c> means that this is the last <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of the stream.</param>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataSeekTable.EntryCount">
+            <summary>
+            Gets the number of entries, the seektable offers.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataSeekTable.SeekPoints">
+            <summary>
+            Gets the seek points.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataSeekTable.Item(System.Int32)">
+            <summary>
+            Gets the <see cref="T:CSCore.Codecs.FLAC.FlacSeekPoint"/> at the specified <paramref name="index"/>.
+            </summary>
+            <value>
+            The <see cref="T:CSCore.Codecs.FLAC.FlacSeekPoint"/>.
+            </value>
+            <param name="index">The index.</param>
+            <returns>The <see cref="T:CSCore.Codecs.FLAC.FlacSeekPoint"/> at the specified <paramref name="index"/>.</returns>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacMetadataStreamInfo">
+            <summary>
+                Represents the streaminfo metadata flac which provides general information about the flac stream.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.#ctor(System.IO.Stream,System.Int32,System.Boolean)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacMetadataStreamInfo"/> class.
+            </summary>
+            <param name="stream">The stream which contains the <see cref="T:CSCore.Codecs.FLAC.FlacMetadataStreamInfo"/>.</param>
+            <param name="length">The length of the <see cref="T:CSCore.Codecs.FLAC.FlacMetadataStreamInfo"/> inside of the stream in bytes. Does not include the metadata header.</param>
+            <param name="lastBlock">
+                A value which indicates whether this is the last <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of
+                the stream. <c>true</c> means that this is the last <see cref="T:CSCore.Codecs.FLAC.FlacMetadata"/> block inside of the stream.
+            </param>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.MinBlockSize">
+            <summary>
+            Gets the minimum size of the block in samples.
+            </summary>
+            <value>
+            The minimum size of the block in samples.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.MaxBlockSize">
+            <summary>
+            Gets the maximum size of the block in samples.
+            </summary>
+            <value>
+            The maximum size of the block in samples.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.MaxFrameSize">
+            <summary>
+            Gets the maximum size of the frame in bytes.
+            </summary>
+            <value>
+            The maximum size of the frame in bytes.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.MinFrameSize">
+            <summary>
+            Gets the minimum size of the frame in bytes.
+            </summary>
+            <value>
+            The minimum size of the frame in bytes.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.SampleRate">
+            <summary>
+            Gets the sample rate in Hz.
+            </summary>
+            <value>
+            The sample rate.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.Channels">
+            <summary>
+            Gets the number of channels.
+            </summary>
+            <value>
+            The number of channels.
+            </value>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.BitsPerSample">
+            <summary>
+            Gets the number of bits per sample.
+            </summary>
+            <value>
+            The number of bits per sample.
+            </value>
         </member>
         <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.TotalSamples">
             <summary>
-            0 = Unknown
+            Gets the total number of samples inside of the stream.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacMetadataStreamInfo.Md5">
+            <summary>
+            Gets MD5 signature of the unencoded audio data.
+            </summary>
+            <value>
+            The MD5 signature of the unencoded audio data.
+            </value>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacPartitionedRice.ReadFlacRiceBlock(CSCore.Codecs.FLAC.FlacBitReader,System.Int32,System.Int32,System.Int32*)">
+            <summary>
+            This method is based on the CUETools.NET BitReader (see http://sourceforge.net/p/cuetoolsnet/code/ci/default/tree/CUETools.Codecs/BitReader.cs)
+            The author "Grigory Chudov" explicitly gave the permission to use the source as part of the cscore source code which got licensed under the ms-pl.
             </summary>
         </member>
         <member name="T:CSCore.Codecs.FLAC.FlacMetaDataType">
@@ -1431,6 +1824,61 @@
         <member name="F:CSCore.Codecs.FLAC.FlacMetaDataType.Undef">
             <summary>
             Undefined metadata. Used for custom metadata fields.
+            </summary>
+        </member>
+        <member name="T:CSCore.Codecs.FLAC.FlacSeekPoint">
+            <summary>
+            Represents a single flac seek point.
+            </summary>
+        </member>
+        <member name="F:CSCore.Codecs.FLAC.FlacSeekPoint.PlaceHolderPointSampleNumber">
+            <summary>
+            The sample number for a placeholder point.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacSeekPoint.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacSeekPoint"/> class.
+            </summary>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacSeekPoint.#ctor(System.Int64,System.Int64,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Codecs.FLAC.FlacSeekPoint"/> class.
+            </summary>
+            <param name="sampleNumber">The <see cref="P:CSCore.Codecs.FLAC.FlacSeekPoint.SampleNumber"/> of the target frame.</param>
+            <param name="offset">The <see cref="P:CSCore.Codecs.FLAC.FlacSeekPoint.Offset"/> of the target frame.</param>
+            <param name="frameSize">The <see cref="P:CSCore.Codecs.FLAC.FlacSeekPoint.FrameSize"/> of the target frame.</param>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacSeekPoint.SampleNumber">
+            <summary>
+            Gets the sample number of the first sample in the target frame, or <see cref="F:CSCore.Codecs.FLAC.FlacSeekPoint.PlaceHolderPointSampleNumber"/> for a placeholder point.
+            </summary>
+            <value>
+            The sample number of the first sample in the target frame.
+            </value>
+            <remarks>According to https://xiph.org/flac/format.html#metadata_block_seektable.</remarks>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacSeekPoint.Offset">
+            <summary>
+            Gets the offset (in bytes) from the first byte of the first frame header to the first byte of the target frame's header.
+            </summary>
+            <value>
+            The offset (in bytes) from the first byte of the first frame header to the first byte of the target frame's header.
+            </value>"/>
+            <remarks>According to https://xiph.org/flac/format.html#metadata_block_seektable.</remarks>
+        </member>
+        <member name="P:CSCore.Codecs.FLAC.FlacSeekPoint.FrameSize">
+            <summary>
+            Gets the number of samples in the target frame.
+            </summary>
+            <value>
+            The number of samples in the target frame.
+            </value>
+            <remarks>According to https://xiph.org/flac/format.html#metadata_block_seektable.</remarks>
+        </member>
+        <member name="M:CSCore.Codecs.FLAC.FlacSubFrameLPC.Log2(System.Int32)">
+            <summary>
+            Copied from http://stackoverflow.com/questions/8970101/whats-the-quickest-way-to-compute-log2-of-an-integer-in-c 14.01.2015
             </summary>
         </member>
         <member name="T:CSCore.Codecs.GetCodecAction">
@@ -1590,6 +2038,11 @@
                 Gets the length of the stream.
             </summary>
         </member>
+        <member name="P:CSCore.DMO.DmoStream.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="P:CSCore.DMO.DmoStream.WaveFormat">
             <summary>
                 Gets the output format of the <see cref="T:CSCore.DMO.DmoStream"/>.
@@ -1658,6 +2111,11 @@
         <member name="P:CSCore.Codecs.MP3.DmoMp3Decoder.Length">
             <summary>
             Gets the length of the <see cref="T:CSCore.Codecs.MP3.DmoMp3Decoder"/> in bytes.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.MP3.DmoMp3Decoder.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
             </summary>
         </member>
         <member name="T:CSCore.Codecs.MP3.Mp3ChannelMode">
@@ -1753,6 +2211,13 @@
             <param name="bytes">Duration in bytes to convert to a duration in milliseconds.</param>
             <returns>Duration in milliseconds.</returns>
         </member>
+        <member name="M:CSCore.WaveFormat.Equals(CSCore.WaveFormat)">
+            <summary>
+            Indicates whether the current object is equal to another object of the same type.
+            </summary>
+            <param name="other">The <see cref="T:CSCore.WaveFormat"/> to compare with this <see cref="T:CSCore.WaveFormat"/>.</param>
+            <returns>true if the current object is equal to the other parameter; otherwise, false.</returns>
+        </member>
         <member name="M:CSCore.WaveFormat.ToString">
             <summary>
                 Returns a string which describes the <see cref="T:CSCore.WaveFormat"/>.
@@ -1761,9 +2226,14 @@
         </member>
         <member name="M:CSCore.WaveFormat.Clone">
             <summary>
-            Creates a new <see cref="T:CSCore.WaveFormat"/> object that is a copy of the current instance.
+                Creates a new <see cref="T:CSCore.WaveFormat"/> object that is a copy of the current instance.
             </summary>
             <returns>A copy of the current instance.</returns>
+        </member>
+        <member name="M:CSCore.WaveFormat.UpdateProperties">
+            <summary>
+            Updates the <see cref="P:CSCore.WaveFormat.BlockAlign"/>- and the <see cref="P:CSCore.WaveFormat.BytesPerSecond"/>-property.
+            </summary>
         </member>
         <member name="P:CSCore.WaveFormat.Channels">
             <summary>
@@ -2271,6 +2741,11 @@
             </summary>
             <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         </member>
+        <member name="P:CSCore.Win32.ComObject.IsDisposed">
+            <summary>
+            Gets a value which indicates whether the <see cref="T:CSCore.Win32.ComObject"/> got already disposed.
+            </summary>
+        </member>
         <member name="P:CSCore.Win32.ComObject.BasePtr">
             <summary>
             Native pointer to the COM object.
@@ -2291,9 +2766,9 @@
                 <see cref="T:CSCore.CoreAudioAPI.AudioClient"/> which should be used to create the <see cref="T:CSCore.CoreAudioAPI.AudioCaptureClient"/>-instance
                 with.
             </param>
-            <returns></returns>
+            <returns>A new <see cref="T:CSCore.CoreAudioAPI.AudioCaptureClient"/>.</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetBufferNative(System.IntPtr@,System.UInt32@,CSCore.CoreAudioAPI.AudioClientBufferFlags@,System.UInt64@,System.UInt64@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetBufferNative(System.IntPtr@,System.Int32@,CSCore.CoreAudioAPI.AudioClientBufferFlags@,System.Int64@,System.Int64@)">
             <summary>
                 Retrieves a pointer to the next available packet of data in the capture endpoint buffer.
                 http: //msdn.microsoft.com/en-us/library/dd370859(v=vs.85).aspx
@@ -2317,7 +2792,7 @@
             </param>
             <returns>HRESULT</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetBuffer(System.UInt32@,CSCore.CoreAudioAPI.AudioClientBufferFlags@,System.UInt64@,System.UInt64@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetBuffer(System.Int32@,CSCore.CoreAudioAPI.AudioClientBufferFlags@,System.Int64@,System.Int64@)">
             <summary>
                 Retrieves a pointer to the next available packet of data in the capture endpoint buffer.
                 For more information see
@@ -2344,7 +2819,7 @@
                 Use Marshal.Copy to convert the pointer to the buffer into an array.
             </remarks>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetBuffer(System.UInt32@,CSCore.CoreAudioAPI.AudioClientBufferFlags@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetBuffer(System.Int32@,CSCore.CoreAudioAPI.AudioClientBufferFlags@)">
             <summary>
                 Retrieves a pointer to the next available packet of data in the capture endpoint buffer.
                 http: //msdn.microsoft.com/en-us/library/dd370859(v=vs.85).aspx
@@ -2353,7 +2828,7 @@
                 Use Marshal.Copy to convert the pointer to the buffer into an array.
             </remarks>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.ReleaseBufferNative(System.UInt32)">
+        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.ReleaseBufferNative(System.Int32)">
             <summary>
                 The ReleaseBuffer method releases the buffer.
                 http: //msdn.microsoft.com/en-us/library/dd370861(v=vs.85).aspx
@@ -2365,7 +2840,7 @@
             </param>
             <returns>HRESULT</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.ReleaseBuffer(System.UInt32)">
+        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.ReleaseBuffer(System.Int32)">
             <summary>
                 The ReleaseBuffer method releases the buffer.
                 http: //msdn.microsoft.com/en-us/library/dd370861(v=vs.85).aspx
@@ -2376,7 +2851,7 @@
                 previously acquired data packet or 0.
             </param>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetNextPacketSizeNative(System.UInt32@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioCaptureClient.GetNextPacketSizeNative(System.Int32@)">
             <summary>
                 The GetNextPacketSize method retrieves the number of frames in the next data packet in
                 the capture endpoint buffer.
@@ -2434,6 +2909,139 @@
             <summary>
             Supported since Windows 7
             </summary>
+        </member>
+        <member name="T:CSCore.CoreAudioAPI.AudioClock">
+            <summary>
+                The <see cref="T:CSCore.CoreAudioAPI.AudioClock"/> class enables a client to monitor a stream's data rate and the current position in
+                the stream.
+            </summary>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock.#ctor(System.IntPtr)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.CoreAudioAPI.AudioClock"/> class.
+            </summary>
+            <param name="ptr">The native pointer of the IAudioClock COM Object.</param>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock.FromAudioClient(CSCore.CoreAudioAPI.AudioClient)">
+            <summary>
+                Creates a new <see cref="T:CSCore.CoreAudioAPI.AudioCaptureClient"/> by calling the <see cref="M:CSCore.CoreAudioAPI.AudioClient.GetService(System.Guid)"/> method of the
+                specified <paramref name="audioClient"/>.
+            </summary>
+            <param name="audioClient">
+                <see cref="T:CSCore.CoreAudioAPI.AudioClient"/> which should be used to create the <see cref="T:CSCore.CoreAudioAPI.AudioCaptureClient"/>-instance
+                with.
+            </param>
+            <returns>A new <see cref="T:CSCore.CoreAudioAPI.AudioCaptureClient"/>.</returns>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock.GetFrequencyNative(System.Int64@)">
+            <summary>
+                The GetFrequency method gets the device frequency.
+            </summary>
+            <param name="pu64Frequency">
+                The device frequency. For more information, see
+                <see href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889(v=vs.85).aspx" />.
+            </param>
+            <returns>HRESULT</returns>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock.GetPositionNative(System.Int64@,System.Int64@)">
+            <summary>
+                The GetPosition method gets the current device position.
+            </summary>
+            <param name="pu64Position">
+                The device position is the offset from the start of the stream to the current position in the stream. However, the
+                units in which this offset is expressed are undefined—the device position value has meaning only in relation to the
+                <see cref="P:CSCore.CoreAudioAPI.AudioClock.Pu64Frequency"/>. For more information, see
+                <see href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889(v=vs.85).aspx"/>.
+            </param>
+            <param name="pu64QPCPosition">
+                The value of the performance counter at the time that the audio endpoint device read the device position
+                (<paramref name="pu64Position"/>) in response to the <see cref="M:CSCore.CoreAudioAPI.AudioClock.GetPositionNative(System.Int64@,System.Int64@)"/> call. The method converts
+                the counter value to 100-nanosecond time
+                units before writing it to <paramref name="pu64QPCPosition"/>.
+            </param>
+            <returns>HRESULT</returns>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock.GetCharacteristicsNative(System.Int32@)">
+            <summary>
+                The GetCharacteristics method is reserved for future use.
+            </summary>
+            <param name="characteristics">Value that indicates the characteristics of the audio clock.</param>
+            <returns>HREUSLT</returns>
+        </member>
+        <member name="P:CSCore.CoreAudioAPI.AudioClock.Pu64Frequency">
+            <summary>
+                Gets the device frequency. For more information, see
+                <see href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889(v=vs.85).aspx" />.
+            </summary>
+        </member>
+        <member name="P:CSCore.CoreAudioAPI.AudioClock.Pu64Position">
+            <summary>
+                Gets the device position.
+            </summary>
+        </member>
+        <member name="T:CSCore.CoreAudioAPI.AudioClock2">
+            <summary>
+                Used to get the device position.
+            </summary>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock2.#ctor(System.IntPtr)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.CoreAudioAPI.AudioClock2"/> class.
+            </summary>
+            <param name="ptr">The native pointer of the IAudioClock2 COM object.</param>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock2.#ctor(CSCore.CoreAudioAPI.AudioClock)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.CoreAudioAPI.AudioClock2"/> class.
+            </summary>
+            <param name="audioClock">
+                An <see cref="T:CSCore.CoreAudioAPI.AudioClock"/> instance which should be used to query the
+                <see cref="T:CSCore.CoreAudioAPI.AudioClock2"/> object.
+            </param>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="audioClock"/> argument is null.</exception>
+            <exception cref="T:System.NotSupportedException">
+                The <see cref="T:CSCore.CoreAudioAPI.AudioClock2"/> COM object is not supported on the current platform. Only supported on Windows
+                7/Windows Server 2008 R2 and above.
+                For more information, see
+                <see href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd370883(v=vs.85).aspx"/>.
+            </exception>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePositionNative(System.Int64@,System.Int64@)">
+            <summary>
+                The <see cref="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePositionNative(System.Int64@,System.Int64@)"/> method gets the current device position, in frames, directly from the
+                hardware.
+            </summary>
+            <param name="devicePosition">
+                Receives the device position, in frames. The received position is an unprocessed value
+                that the method obtains directly from the hardware. For more information, see
+                <see href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd370883(v=vs.85).aspx"/>.
+            </param>
+            <param name="qpcPosition">
+                Receives the value of the performance counter at the time that the audio endpoint device read
+                the device position retrieved in the <paramref name="devicePosition"/> parameter in response to the
+                <see cref="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePositionNative(System.Int64@,System.Int64@)"/> call.
+                <see cref="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePositionNative(System.Int64@,System.Int64@)"/> converts the counter value to 100-nanosecond time units before writing it to
+                QPCPosition.
+            </param>
+            <returns>HRESULT</returns>
+        </member>
+        <member name="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePosition(System.Int64@,System.Int64@)">
+            <summary>
+                The <see cref="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePosition(System.Int64@,System.Int64@)"/> method gets the current device position, in frames, directly from the
+                hardware.
+            </summary>
+            <param name="devicePosition">
+                Receives the device position, in frames. The received position is an unprocessed value
+                that the method obtains directly from the hardware. For more information, see
+                <see href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd370883(v=vs.85).aspx"/>.
+            </param>
+            <param name="qpcPosition">
+                Receives the value of the performance counter at the time that the audio endpoint device read
+                the device position retrieved in the <paramref name="devicePosition"/> parameter in response to the
+                <see cref="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePosition(System.Int64@,System.Int64@)"/> call.
+                <see cref="M:CSCore.CoreAudioAPI.AudioClock2.GetDevicePosition(System.Int64@,System.Int64@)"/> converts the counter value to 100-nanosecond time units before writing it to
+                QPCPosition.
+            </param>
         </member>
         <member name="T:CSCore.CoreAudioAPI.AudioMeterInformation">
             <summary>
@@ -2783,7 +3391,7 @@
         </member>
         <member name="F:CSCore.CoreAudioAPI.AudioSessionDisconnectReason.DisconnectReasonServerShutdown">
             <summary>
-            The Windows audio service has stopped.
+            The Windows audio service has _stopped.
             </summary>
         </member>
         <member name="F:CSCore.CoreAudioAPI.AudioSessionDisconnectReason.DisconnectReasonFormatChanged">
@@ -3215,6 +3823,23 @@
             </summary>
             <param name="source">Base source of the <see cref="T:CSCore.DMO.DmoAggregator"/>.</param>
         </member>
+        <member name="M:CSCore.DMO.DmoAggregator.GetInputData(System.Byte[]@,System.Int32)">
+            <summary>
+                Gets inputData to feed the Dmo MediaObject with.
+            </summary>
+            <param name="inputDataBuffer">
+                InputDataBuffer which receives the inputData.
+                If this parameter is null or the length is less than the amount of inputData, a new byte array will be applied.
+            </param>
+            <param name="requested">The requested number of bytes.</param>
+            <returns>The number of bytes read. The number of actually read bytes does not have to be the number of requested bytes.</returns>
+        </member>
+        <member name="M:CSCore.DMO.DmoAggregator.GetInputFormat">
+            <summary>
+                Gets the input format to use.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:CSCore.DMO.DmoAggregator.Position">
             <summary>
                 Gets or sets the position of the stream.
@@ -3223,6 +3848,11 @@
         <member name="P:CSCore.DMO.DmoAggregator.Length">
             <summary>
                 Gets the length of the stream.
+            </summary>
+        </member>
+        <member name="P:CSCore.DMO.DmoAggregator.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
             </summary>
         </member>
         <member name="P:CSCore.DMO.DmoAggregator.BaseStream">
@@ -3927,6 +4557,35 @@
                 Clear the media type that was set for the stream.
             </summary>
         </member>
+        <member name="T:CSCore.DSP.BiQuad">
+            <summary>
+            Represents a biquad-filter.
+            </summary>
+        </member>
+        <member name="M:CSCore.DSP.BiQuad.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.DSP.BiQuad"/> class.
+            </summary>
+        </member>
+        <member name="M:CSCore.DSP.BiQuad.Process(System.Single)">
+            <summary>
+            Processes a single <paramref name="input"/> sample and returns the result.
+            </summary>
+            <param name="input">The input sample to process.</param>
+            <returns>The result of the processed <paramref name="input"/> sample.</returns>
+        </member>
+        <member name="M:CSCore.DSP.BiQuad.Process(System.Single[])">
+            <summary>
+            Processes multiple <paramref name="input"/> samples.
+            </summary>
+            <param name="input">The input samples to process.</param>
+            <remarks>The result of the calculation gets stored within the <paramref name="input"/> array.</remarks>
+        </member>
+        <member name="M:CSCore.DSP.BiQuad.CalculateBiQuadCoefficients">
+            <summary>
+            Calculates all coefficients.
+            </summary>
+        </member>
         <member name="T:CSCore.DSP.ChannelMatrixElement">
             <summary>
             Represents an element inside of a <see cref="T:CSCore.DSP.ChannelMatrix"/>.
@@ -3952,6 +4611,40 @@
         <member name="P:CSCore.DSP.ChannelMatrixElement.Value">
             <summary>
             Gets or sets the coefficient in the range from 0.0f to 1.0f.
+            </summary>
+        </member>
+        <member name="T:CSCore.DSP.EqualizerBiQuadFilter">
+            <summary>
+            Represents an BiQuad filter with a equalizer configuration.
+            </summary>
+        </member>
+        <member name="M:CSCore.DSP.EqualizerBiQuadFilter.#ctor(System.Int32,System.Double,System.Double,System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.DSP.EqualizerBiQuadFilter"/> class.
+            </summary>
+            <param name="sampleRate">The sampleRate of the audio data to process.</param>
+            <param name="frequency">The center frequency to adjust.</param>
+            <param name="bandWidth">The bandWidth.</param>
+            <param name="peakGainDB">The gain value in dB.</param>
+        </member>
+        <member name="P:CSCore.DSP.EqualizerBiQuadFilter.BandWidth">
+            <summary>
+            Gets or sets the bandwidth.
+            </summary>
+        </member>
+        <member name="P:CSCore.DSP.EqualizerBiQuadFilter.GainDB">
+            <summary>
+            Gets or sets the gain value in dB.
+            </summary>
+        </member>
+        <member name="P:CSCore.DSP.EqualizerBiQuadFilter.Frequency">
+            <summary>
+            Gets the frequency.
+            </summary>
+        </member>
+        <member name="P:CSCore.DSP.EqualizerBiQuadFilter.SampleRate">
+            <summary>
+            Gets the samplerate.
             </summary>
         </member>
         <member name="T:CSCore.DSP.FastFourierTransformation">
@@ -3999,6 +4692,10 @@
             <summary>
             Provides FFT calculations.
             </summary>
+            <remarks>
+            Usage: Use the <see cref="M:CSCore.DSP.FftProvider.Add(System.Single[],System.Int32)"/>-method to input samples to the <see cref="T:CSCore.DSP.FftProvider"/>. Use the <see cref="M:CSCore.DSP.FftProvider.GetFftData(System.Single[])"/> method to 
+            calculate the Fast Fourier Transform.
+            </remarks>
         </member>
         <member name="M:CSCore.DSP.FftProvider.#ctor(System.Int32,CSCore.DSP.FftSize)">
             <summary>
@@ -4039,6 +4736,11 @@
         <member name="P:CSCore.DSP.FftProvider.FftSize">
             <summary>
             Gets the specified fft size.
+            </summary>
+        </member>
+        <member name="P:CSCore.DSP.FftProvider.IsNewDataAvailable">
+            <summary>
+            Gets a value which indicates whether new data is available.
             </summary>
         </member>
         <member name="T:CSCore.DSP.FftMode">
@@ -4180,6 +4882,13 @@
             </summary>
             <param name="input">Already existing sample source.</param>
             <returns><see cref="T:CSCore.ISampleSource"/> instance with one channels</returns>
+        </member>
+        <member name="M:CSCore.FluentExtensions.Loop(CSCore.IWaveSource)">
+            <summary>
+            Appends a new instance of the <see cref="T:CSCore.Streams.LoopStream"/> class to the audio chain.
+            </summary>
+            <param name="input">The underlying <see cref="T:CSCore.IWaveSource"/> which should be looped.</param>
+            <returns>The new instance <see cref="T:CSCore.Streams.LoopStream"/> instance.</returns>
         </member>
         <member name="F:CSCore.MediaFoundation.CommonAudioDecoderGuids.DolbyDigitalPlusDecoder">
             <summary>
@@ -4385,7 +5094,7 @@
         </member>
         <member name="F:CSCore.MediaFoundation.MediaEventType.MEBufferingStopped">
             <summary>
-            A media source stopped buffering data.
+            A media source _stopped buffering data.
             </summary>
         </member>
         <member name="F:CSCore.MediaFoundation.MediaEventType.MEConnectStart">
@@ -4549,7 +5258,7 @@
         </member>
         <member name="F:CSCore.MediaFoundation.MediaEventType.MEStreamSinkStopped">
             <summary>
-            Raised by a stream sink when it completes the transition to the stopped state.
+            Raised by a stream sink when it completes the transition to the _stopped state.
             </summary>
         </member>
         <member name="F:CSCore.MediaFoundation.MediaEventType.MEStreamSinkPaused">
@@ -5595,7 +6304,7 @@
         </member>
         <member name="E:CSCore.SoundIn.ISoundIn.Stopped">
             <summary>
-            Occurs when the recording stopped.
+            Occurs when the recording _stopped.
             </summary>
         </member>
         <member name="P:CSCore.SoundIn.ISoundIn.WaveFormat">
@@ -5615,7 +6324,7 @@
         </member>
         <member name="T:CSCore.StoppedEventArgs">
             <summary>
-                Provides data for any stopped operations.
+                Provides data for any _stopped operations.
             </summary>
         </member>
         <member name="M:CSCore.StoppedEventArgs.#ctor">
@@ -5631,8 +6340,8 @@
         </member>
         <member name="P:CSCore.StoppedEventArgs.HasError">
             <summary>
-                Gets a value which indicates whether the operation stopped due to an error. True means that that the operation
-                stopped due to an error. False means that the operation did not stop due to an error.
+                Gets a value which indicates whether the operation _stopped due to an error. True means that that the operation
+                _stopped due to an error. False means that the operation did not stop due to an error.
             </summary>
         </member>
         <member name="P:CSCore.StoppedEventArgs.Exception">
@@ -5654,8 +6363,8 @@
         </member>
         <member name="P:CSCore.SoundIn.RecordingStoppedEventArgs.HasError">
             <summary>
-                Gets a value which indicates whether the recording stopped due to an error. True means that that the recording
-                stopped due to an error. False means that the recording did not stop due to an error.
+                Gets a value which indicates whether the recording _stopped due to an error. True means that that the recording
+                _stopped due to an error. False means that the recording did not stop due to an error.
             </summary>
         </member>
         <member name="P:CSCore.SoundIn.RecordingStoppedEventArgs.Exception">
@@ -5682,7 +6391,7 @@
         </member>
         <member name="M:CSCore.SoundIn.WasapiCapture.#ctor">
             <summary>
-            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class..
+            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class.
             CaptureThreadPriority = AboveNormal. 
             DefaultFormat = null. 
             Latency = 100ms. 
@@ -5692,7 +6401,7 @@
         </member>
         <member name="M:CSCore.SoundIn.WasapiCapture.#ctor(System.Boolean,CSCore.CoreAudioAPI.AudioClientShareMode)">
             <summary>
-            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class..
+            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class.
             CaptureThreadPriority = AboveNormal. 
             DefaultFormat = null.
             Latency = 100ms.
@@ -5702,7 +6411,7 @@
         </member>
         <member name="M:CSCore.SoundIn.WasapiCapture.#ctor(System.Boolean,CSCore.CoreAudioAPI.AudioClientShareMode,System.Int32)">
             <summary>
-            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class..
+            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class.
             CaptureThreadPriority = AboveNormal. 
             DefaultFormat = null.
             </summary>
@@ -5712,7 +6421,7 @@
         </member>
         <member name="M:CSCore.SoundIn.WasapiCapture.#ctor(System.Boolean,CSCore.CoreAudioAPI.AudioClientShareMode,System.Int32,CSCore.WaveFormat)">
             <summary>
-            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class..
+            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class.
             CaptureThreadPriority = AboveNormal.
             </summary>
             <param name="eventSync">True, to use eventsynchronization instead of a simple loop and sleep behavior. Don't use this in combination with exclusive mode.</param>
@@ -5722,13 +6431,26 @@
         </member>
         <member name="M:CSCore.SoundIn.WasapiCapture.#ctor(System.Boolean,CSCore.CoreAudioAPI.AudioClientShareMode,System.Int32,CSCore.WaveFormat,System.Threading.ThreadPriority)">
             <summary>
-            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class..
+            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class.
             </summary>
             <param name="eventSync">True, to use eventsynchronization instead of a simple loop and sleep behavior. Don't use this in combination with exclusive mode.</param>
             <param name="shareMode">Specifies how to open the audio device. Note that if exclusive mode is used, the device can only be used once on the whole system. Don't use exclusive mode in combination with eventSync.</param>
             <param name="latency">Latency of the capture specified in milliseconds.</param>
             <param name="captureThreadPriority">ThreadPriority of the capturethread which runs in background and provides the audiocapture itself.</param>
             <param name="defaultFormat">The default WaveFormat to use for the capture. If this parameter is set to null, the best available format will be chosen automatically.</param>
+        </member>
+        <member name="M:CSCore.SoundIn.WasapiCapture.#ctor(System.Boolean,CSCore.CoreAudioAPI.AudioClientShareMode,System.Int32,CSCore.WaveFormat,System.Threading.ThreadPriority,System.Threading.SynchronizationContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.SoundIn.WasapiCapture"/> class.
+            </summary>
+            <param name="eventSync">True, to use eventsynchronization instead of a simple loop and sleep behavior. Don't use this in combination with exclusive mode.</param>
+            <param name="shareMode">Specifies how to open the audio device. Note that if exclusive mode is used, the device can only be used once on the whole system. Don't use exclusive mode in combination with eventSync.</param>
+            <param name="latency">Latency of the capture specified in milliseconds.</param>
+            <param name="captureThreadPriority">ThreadPriority of the capturethread which runs in background and provides the audiocapture itself.</param>
+            <param name="defaultFormat">The default WaveFormat to use for the capture. If this parameter is set to null, the best available format will be chosen automatically.</param>
+            <param name="synchronizationContext">The <see cref="T:System.Threading.SynchronizationContext"/> to use to fire events on.</param>
+            <exception cref="T:System.PlatformNotSupportedException">The current platform does not support Wasapi. For more details see: <see cref="P:CSCore.SoundIn.WasapiCapture.IsSupportedOnCurrentPlatform"/>.</exception>
+            <exception cref="T:System.ArgumentException">The <paramref name="eventSync"/> parameter is set to true while the <paramref name="shareMode"/> is set to <see cref="F:CSCore.CoreAudioAPI.AudioClientShareMode.Exclusive"/>.</exception>
         </member>
         <member name="M:CSCore.SoundIn.WasapiCapture.Initialize">
             <summary>
@@ -5763,7 +6485,7 @@
         </member>
         <member name="E:CSCore.SoundIn.WasapiCapture.Stopped">
             <summary>
-            Occurs when capturing stopped.
+            Occurs when capturing _stopped.
             </summary>
         </member>
         <member name="P:CSCore.SoundIn.WasapiCapture.RecordingState">
@@ -5859,7 +6581,7 @@
         </member>
         <member name="P:CSCore.SoundOut.ISoundOut.PlaybackState">
             <summary>
-            Gets the <see cref="T:CSCore.SoundOut.PlaybackState"/> of the <see cref="T:CSCore.SoundOut.ISoundOut"/>. The playback state indicates whether the playback is currently playing, paused or stopped.
+            Gets the <see cref="T:CSCore.SoundOut.PlaybackState"/> of the <see cref="T:CSCore.SoundOut.ISoundOut"/>. The playback state indicates whether the playback is currently playing, paused or _stopped.
             </summary>
         </member>
         <member name="E:CSCore.SoundOut.ISoundOut.Stopped">
@@ -5977,7 +6699,7 @@
         </member>
         <member name="E:CSCore.SoundOut.DirectSoundOut.Stopped">
             <summary>
-                Occurs when the playback gets stopped.
+                Occurs when the playback gets _stopped.
             </summary>
         </member>
         <member name="P:CSCore.SoundOut.DirectSoundOut.PlaybackState">
@@ -6142,8 +6864,8 @@
         </member>
         <member name="P:CSCore.SoundOut.PlaybackStoppedEventArgs.HasError">
             <summary>
-                Gets a value which indicates whether the playback stopped due to an error. True means that that the playback
-                stopped due to an error. False means that the playback did not stop due to an error.
+                Gets a value which indicates whether the playback _stopped due to an error. True means that that the playback
+                _stopped due to an error. False means that the playback did not stop due to an error.
             </summary>
         </member>
         <member name="P:CSCore.SoundOut.PlaybackStoppedEventArgs.Exception">
@@ -6367,6 +7089,11 @@
             Gets or sets the position.
             </summary>
         </member>
+        <member name="P:CSCore.Streams.CachedSoundSource.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="P:CSCore.Streams.CachedSoundSource.Length">
             <summary>
             Gets the amount of bytes stored in the cache.
@@ -6414,6 +7141,11 @@
             Default value for <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Waveform"/>.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.ChorusWaveform.WaveformTriangle">
+            <summary>
+            Trinagle
+            </summary>
+        </member>
         <member name="T:CSCore.Streams.Effects.DmoChorusEffect">
             <summary>
             Chorus Effect.
@@ -6434,9 +7166,9 @@
         </member>
         <member name="M:CSCore.Streams.Effects.DmoEffectBase`2.CreateComObject">
             <summary>
-            Returns a new instance of the DMO effect.
+            Creates and returns a new instance of the native COM object.
             </summary>
-            <returns>DMO effect.</returns>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="M:CSCore.Streams.Effects.DmoEffectBase`2.CreateMediaObject(CSCore.WaveFormat,CSCore.WaveFormat)">
             <summary>
@@ -6447,15 +7179,24 @@
             <summary>
             Gets the output format of the effect.
             </summary>
-            <returns></returns>
+            <returns>The output format of the effect.</returns>
         </member>
         <member name="M:CSCore.Streams.Effects.DmoEffectBase`2.SetValue``1(System.String,``0)">
             <summary>
             Sets the value for one of the effects parameter and updates the effect.
             </summary>
-            <typeparam name="T"></typeparam>
-            <param name="fieldname"></param>
-            <param name="value"></param>
+            <typeparam name="T">Type of the <paramref name="value"/>.</typeparam>
+            <param name="fieldname">Name of the field to set the value for.</param>
+            <param name="value">Value to set.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoEffectBase`2.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of bytes from the stream and applies the Dmo effect to them (only if the <see cref="P:CSCore.Streams.Effects.DmoEffectBase`2.IsEnabled"/> property is set to true).
+            </summary>
+            <param name="buffer">An array of bytes. When this method returns, the buffer contains the read bytes.</param>
+            <param name="offset">The zero-based byte offset in buffer at which to begin storing the data read from the stream.</param>
+            <param name="count">The maximum number of bytes to be read from the stream</param>
+            <returns>The actual number of read bytes.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoEffectBase`2.Effect">
             <summary>
@@ -6467,11 +7208,147 @@
             Gets or sets whether the effect is enabled.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.DelayDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Delay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.DelayMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Delay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.DelayMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Delay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.DepthDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Depth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.DepthMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Depth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.DepthMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Depth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.FeedbackDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.FeedbackMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.FeedbackMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.FrequencyDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Frequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.FrequencyMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Frequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.FrequencyMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Frequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.Phase180">
+            <summary>
+            180° Phase
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.Phase90">
+            <summary>
+            90° Phase
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.PhaseDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Phase"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.PhaseMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Phase"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.PhaseMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Phase"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.PhaseNegative180">
+            <summary>
+            -180° Phase
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.PhaseNegative90">
+            <summary>
+            -90° Phase
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.PhaseZero">
+            <summary>
+            0° Phase
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.WaveformDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.Waveform"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.WaveformSin">
+            <summary>
+            Sine waveform
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.WaveformTriangle">
+            <summary>
+            Triangle waveform
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.WetDryMixDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.WetDryMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.WetDryMixMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.WetDryMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoChorusEffect.WetDryMixMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoChorusEffect.WetDryMix"/> property.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.Effects.DmoChorusEffect.#ctor(CSCore.IWaveSource)">
             <summary>
             Creates a new instance of the <see cref="T:CSCore.Streams.Effects.DmoChorusEffect"/> class.
             </summary>
             <param name="source">The base source, which feeds the effect with data.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoChorusEffect.CreateComObject">
+            <summary>
+            Creates and returns a new instance of the native COM object.
+            </summary>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoChorusEffect.Delay">
             <summary>
@@ -6513,11 +7390,107 @@
             Compressor Effect.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.AttackDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Attack"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.AttackMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Attack"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.AttackMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Attack"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.GainDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Gain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.GainMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Gain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.GainMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Gain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.PredelayDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Predelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.PredelayMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Predelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.PredelayMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Predelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.RatioDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Ratio"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.RatioMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Ratio"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.RatioMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Ratio"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.ReleaseDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Release"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.ReleaseMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Release"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.ReleaseMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Release"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.ThresholdDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Threshold"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.ThresholdMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Threshold"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoCompressorEffect.ThresholdMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoCompressorEffect.Threshold"/> property.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.Effects.DmoCompressorEffect.#ctor(CSCore.IWaveSource)">
             <summary>
             Creates a new instance of the <see cref="T:CSCore.Streams.Effects.DmoCompressorEffect"/> class.
             </summary>
             <param name="source">The base source, which feeds the effect with data.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoCompressorEffect.CreateComObject">
+            <summary>
+            Creates and returns a new instance of the native COM object.
+            </summary>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoCompressorEffect.Attack">
             <summary>
@@ -6541,7 +7514,7 @@
         </member>
         <member name="P:CSCore.Streams.Effects.DmoCompressorEffect.Release">
             <summary>
-            Speed at which compression is stopped after input drops below fThreshold, in the range from 50 ms to 3000 ms. The default value is 200 ms.
+            Speed at which compression is _stopped after input drops below fThreshold, in the range from 50 ms to 3000 ms. The default value is 200 ms.
             </summary>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoCompressorEffect.Threshold">
@@ -6554,11 +7527,92 @@
             DistortionEffect.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.EdgeDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.Edge"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.EdgeMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.Edge"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.EdgeMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.Edge"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.GainDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.Gain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.GainMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.Gain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.GainMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.Gain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PostEQBandwidthDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PostEQBandwidth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PostEQBandwidthMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PostEQBandwidth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PostEQBandwidthMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PostEQBandwidth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PostEQCenterFrequencyDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PostEQCenterFrequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PostEQCenterFrequencyMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PostEQCenterFrequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PostEQCenterFrequencyMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PostEQCenterFrequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PreLowPassCutoffDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PreLowpassCutoff"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PreLowPassCutoffMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PreLowpassCutoff"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoDistortionEffect.PreLowPassCutoffMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoDistortionEffect.PreLowpassCutoff"/> property.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.Effects.DmoDistortionEffect.#ctor(CSCore.IWaveSource)">
             <summary>
             Creates a new instance of the <see cref="T:CSCore.Streams.Effects.DmoDistortionEffect"/> class.
             </summary>
             <param name="source">The base source, which feeds the effect with data.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoDistortionEffect.CreateComObject">
+            <summary>
+            Creates and returns a new instance of the native COM object.
+            </summary>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoDistortionEffect.Gain">
             <summary>
@@ -6590,11 +7644,92 @@
             Echo Effect.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.FeedbackDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.FeedbackMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.FeedbackMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.LeftDelayDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.LeftDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.LeftDelayMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.LeftDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.LeftDelayMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.LeftDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.PanDelayDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.PanDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.PanDelayMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.PanDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.PanDelayMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.PanDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.RightDelayDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.RightDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.RightDelayMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.RightDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.RightDelayMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.RightDelay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.WetDryMixDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.WetDryMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.WetDryMixMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.WetDryMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoEchoEffect.WetDryMixMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoEchoEffect.WetDryMix"/> property.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.Effects.DmoEchoEffect.#ctor(CSCore.IWaveSource)">
             <summary>
             Creates a new instance of the <see cref="T:CSCore.Streams.Effects.DmoEchoEffect"/> class.
             </summary>
             <param name="source">The base source, which feeds the effect with data.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoEchoEffect.CreateComObject">
+            <summary>
+            Creates and returns a new instance of the native COM object.
+            </summary>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoEchoEffect.WetDryMix">
             <summary>
@@ -6631,11 +7766,92 @@
             Flanger Effect.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.DelayDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Delay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.DelayMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Delay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.DelayMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Delay"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.DepthDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Depth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.DepthMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Depth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.DepthMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Depth"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.FeedbackDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.FeedbackMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.FeedbackMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Feedback"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.FrequencyDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Frequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.FrequencyMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Frequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.FrequencyMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.Frequency"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.WetDryMixDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.WetDryMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.WetDryMixMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.WetDryMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoFlangerEffect.WetDryMixMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoFlangerEffect.WetDryMix"/> property.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.Effects.DmoFlangerEffect.#ctor(CSCore.IWaveSource)">
             <summary>
             Creates a new instance of the <see cref="T:CSCore.Streams.Effects.DmoFlangerEffect"/> class.
             </summary>
             <param name="source">The base source, which feeds the effect with data.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoFlangerEffect.CreateComObject">
+            <summary>
+            Creates and returns a new instance of the native COM object.
+            </summary>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoFlangerEffect.WetDryMix">
             <summary>
@@ -6677,11 +7893,50 @@
             Gargle Effect.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.DmoGargleEffect.RateDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoGargleEffect.RateHz"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoGargleEffect.RateMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoGargleEffect.RateHz"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoGargleEffect.RateMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoGargleEffect.RateHz"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoGargleEffect.WaveShapeDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoGargleEffect.WaveShape"/> property.
+            </summary>
+            <remarks>Use the <see cref="T:CSCore.Streams.Effects.GargleWaveShape"/> enumeration instead.</remarks>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoGargleEffect.WaveShapeSquare">
+            <summary>
+            Square Waveform.
+            </summary>
+            <remarks>Use the <see cref="T:CSCore.Streams.Effects.GargleWaveShape"/> enumeration instead.</remarks>        
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoGargleEffect.WaveShapeTriangle">
+            <summary>
+            Triangle Waveform
+            </summary>
+            <remarks>Use the <see cref="T:CSCore.Streams.Effects.GargleWaveShape"/> enumeration instead.</remarks>        
+        </member>
         <member name="M:CSCore.Streams.Effects.DmoGargleEffect.#ctor(CSCore.IWaveSource)">
             <summary>
             Creates a new instance of the <see cref="T:CSCore.Streams.Effects.DmoGargleEffect"/> class.
             </summary>
             <param name="source">The base source, which feeds the effect with data.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoGargleEffect.CreateComObject">
+            <summary>
+            Creates and returns a new instance of the native COM object.
+            </summary>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoGargleEffect.RateHz">
             <summary>
@@ -6698,11 +7953,77 @@
             WavesReverb Effect.
             </summary>
         </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.HighFrequencyRTRatioDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.HighFrequencyRTRatio"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.HighFrequencyRTRatioMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.HighFrequencyRTRatio"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.HighFrequencyRTRatioMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.HighFrequencyRTRatio"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.InGainDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.InGain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.InGainMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.InGain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.InGainMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.InGain"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbMixDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbMixMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbMixMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbMix"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbTimeDefault">
+            <summary>
+            Default value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbTime"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbTimeMax">
+            <summary>
+            Maximum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbTime"/> property.
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbTimeMin">
+            <summary>
+            Minimum value for the <see cref="P:CSCore.Streams.Effects.DmoWavesReverbEffect.ReverbTime"/> property.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.Effects.DmoWavesReverbEffect.#ctor(CSCore.IWaveSource)">
             <summary>
             Creates a new instance of the <see cref="T:CSCore.Streams.Effects.DmoWavesReverbEffect"/> class.
             </summary>
             <param name="source">The base source, which feeds the effect with data.</param>
+        </member>
+        <member name="M:CSCore.Streams.Effects.DmoWavesReverbEffect.CreateComObject">
+            <summary>
+            Creates and returns a new instance of the native COM object.
+            </summary>
+            <returns>A new instance of the native COM object.</returns>
         </member>
         <member name="P:CSCore.Streams.Effects.DmoWavesReverbEffect.InGain">
             <summary>
@@ -6772,12 +8093,17 @@
         </member>
         <member name="T:CSCore.Streams.Effects.GargleWaveShape">
             <summary>
-            Default value is Triangle (used for <see cref="P:CSCore.Streams.Effects.DmoGargleEffect.WaveShape"/>).
+            Default value is <see cref="F:CSCore.Streams.Effects.GargleWaveShape.Triangle"/> (used for <see cref="P:CSCore.Streams.Effects.DmoGargleEffect.WaveShape"/>).
             </summary>
         </member>
         <member name="F:CSCore.Streams.Effects.GargleWaveShape.Triangle">
             <summary>
-            Default value. 
+            Triangle - Default value. 
+            </summary>
+        </member>
+        <member name="F:CSCore.Streams.Effects.GargleWaveShape.Square">
+            <summary>
+            Square
             </summary>
         </member>
         <member name="T:CSCore.Streams.FadeInOut">
@@ -6797,8 +8123,7 @@
         </member>
         <member name="M:CSCore.ISampleSource.Read(System.Single[],System.Int32,System.Int32)">
             <summary>
-                Reads a sequence of samples from the <see cref="T:CSCore.ISampleSource"/> and advances the position within the stream by
-                the
+                Reads a sequence of samples from the <see cref="T:CSCore.ISampleSource"/> and advances the position within the stream by the
                 number of samples read.
             </summary>
             <param name="buffer">
@@ -6873,6 +8198,11 @@
         <member name="P:CSCore.SampleSourceBase.Length">
             <summary>
                 Gets the length in samples.
+            </summary>
+        </member>
+        <member name="P:CSCore.SampleSourceBase.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
             </summary>
         </member>
         <member name="M:CSCore.Streams.FadeInOut.#ctor(CSCore.IWaveStream)">
@@ -7082,6 +8412,11 @@
             Gets the peak values for all channels. 
             </summary>
         </member>
+        <member name="P:CSCore.Streams.PeakMeter.BlocksToProcess">
+            <summary>
+            Obsolete
+            </summary>
+        </member>
         <member name="P:CSCore.Streams.PeakMeter.Interval">
             <summary>
             Gets or sets the interval at which to raise the <see cref="E:CSCore.Streams.PeakMeter.PeakCalculated"/> event. 
@@ -7173,6 +8508,11 @@
                 Gets the length of the source.
             </summary>
         </member>
+        <member name="P:CSCore.WaveAggregatorBase.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.SynchronizedWaveSource`1.#ctor(`0)">
             <summary>
                 Initializes a new synchronizedWaveSource of the <see cref="T:CSCore.Streams.SynchronizedWaveSource`1"/> class.
@@ -7220,19 +8560,24 @@
                 Gets the length of the underlying <see cref="P:CSCore.WaveAggregatorBase.BaseStream"/>.
             </summary>
         </member>
+        <member name="P:CSCore.Streams.SynchronizedWaveSource`1.CanSeek">
+            <summary>
+            Gets a value indicating whether the underlying <see cref="P:CSCore.WaveAggregatorBase.BaseStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="P:CSCore.Streams.SynchronizedWaveSource`1.BaseStream">
             <summary>
-                Gets or sets the underlying base stream.
+                Gets or sets the underlying <see cref="P:CSCore.WaveAggregatorBase.BaseStream"/>.
             </summary>
         </member>
         <member name="T:CSCore.Streams.WriteableBufferingSource">
             <summary>
-            Buffered WaveSource which overrides the allocated memory after the buffer got full. 
+            Buffered WaveSource which overrides the allocated memory after the internal buffer got full. 
             </summary>
         </member>
         <member name="M:CSCore.Streams.WriteableBufferingSource.#ctor(CSCore.WaveFormat)">
             <summary>
-            Creates an new instance of the WriteableBufferingSource class with a default Buffersize of 5 seconds.
+            Creates an new instance of the WriteableBufferingSource class with a default buffersize of 5 seconds.
             </summary>
             <param name="waveFormat">The WaveFormat of the source.</param>
         </member>
@@ -7243,14 +8588,231 @@
             <param name="waveFormat">The WaveFormat of the source.</param>
             <param name="bufferSize">Buffersize in bytes</param>
         </member>
+        <member name="M:CSCore.Streams.WriteableBufferingSource.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Adds new data to the internal buffer.
+            </summary>
+            <param name="buffer">Bytearray which contains the data.</param>
+            <param name="offset">Zero-based offset in the <paramref name="buffer"/> (specified in bytes).</param>
+            <param name="count">Number of bytes to add to the internal buffer.</param>
+            <returns>Number of added bytes.</returns>
+        </member>
+        <member name="M:CSCore.Streams.WriteableBufferingSource.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of bytes from the internal buffer of the <see cref="T:CSCore.Streams.WriteableBufferingSource"/> and advances the position within the internal buffer by the
+                number of bytes read.
+            </summary>
+            <param name="buffer">
+                An array of bytes. When this method returns, the <paramref name="buffer"/> contains the specified
+                byte array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the bytes read from the internal buffer.
+            </param>
+            <param name="offset">
+                The zero-based byte offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the internal buffer.
+            </param>
+            <param name="count">The maximum number of bytes to read from the internal buffer.</param>
+            <returns>The total number of bytes read into the <paramref name="buffer"/>.</returns>
+        </member>
+        <member name="M:CSCore.Streams.WriteableBufferingSource.Dispose">
+            <summary>
+            Disposes the <see cref="T:CSCore.Streams.WriteableBufferingSource"/> and its internal buffer.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.WriteableBufferingSource.Dispose(System.Boolean)">
+            <summary>
+            Disposes the <see cref="T:CSCore.Streams.WriteableBufferingSource"/> and its internal buffer.
+            </summary>
+            <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        </member>
+        <member name="M:CSCore.Streams.WriteableBufferingSource.Finalize">
+            <summary>
+            Default destructor which calls <see cref="M:CSCore.Streams.WriteableBufferingSource.Dispose(System.Boolean)"/>.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.WriteableBufferingSource.FillWithZeros">
+            <summary>
+            Gets or sets a value which specifies whether the <see cref="M:CSCore.Streams.WriteableBufferingSource.Read(System.Byte[],System.Int32,System.Int32)"/> method should clear the specified buffer with zeros before reading any data.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.WriteableBufferingSource.WaveFormat">
+            <summary>
+                Gets the <see cref="P:CSCore.IWaveStream.WaveFormat"/> of the waveform-audio data.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.WriteableBufferingSource.Position">
+            <summary>
+                Not supported.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.WriteableBufferingSource.Length">
+            <summary>
+                Gets the number of stored bytes inside of the internal buffer.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.WriteableBufferingSource.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.BufferSource.#ctor(CSCore.IWaveSource,System.Int32)">
             <param name="source"></param>
             <param name="bufferSize">Buffersize in bytes.</param>
         </member>
-        <member name="P:CSCore.Streams.EqFilterEntry.Filters">
+        <member name="T:CSCore.Streams.EqualizerChannelFilter">
             <summary>
-            Key: Channel; Value: Filter
+                Represents an EqualizerFilter for a single channel.
             </summary>
+        </member>
+        <member name="M:CSCore.Streams.EqualizerChannelFilter.#ctor(System.Int32,System.Double,System.Double,System.Double)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.Streams.EqualizerChannelFilter"/> class.
+            </summary>
+            <param name="sampleRate">The sampleRate of the audio data to process.</param>
+            <param name="centerFrequency">The center frequency to adjust.</param>
+            <param name="bandWidth">The bandWidth.</param>
+            <param name="gain">The gain value in dB.</param>
+        </member>
+        <member name="M:CSCore.Streams.EqualizerChannelFilter.Clone">
+            <summary>
+                Returns a copy of the <see cref="T:CSCore.Streams.EqualizerChannelFilter"/>.
+            </summary>
+            <returns>A copy of the <see cref="T:CSCore.Streams.EqualizerChannelFilter"/></returns>
+        </member>
+        <member name="M:CSCore.Streams.EqualizerChannelFilter.Process(System.Single[],System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+                Processes an array of input samples.
+            </summary>
+            <param name="input">The input samples to process.</param>
+            <param name="offset">The zero-based offset in the <paramref name="input" /> buffer to start at.</param>
+            <param name="count">The number of samples to process.</param>
+            <param name="channelIndex">Specifies the channel to process as a zero-based index.</param>
+            <param name="channelCount">The total number of channels.</param>
+        </member>
+        <member name="P:CSCore.Streams.EqualizerChannelFilter.GainDB">
+            <summary>
+                Gets or sets the gain value in dB.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.EqualizerChannelFilter.BandWidth">
+            <summary>
+                Gets or sets the bandwidth.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.EqualizerChannelFilter.Frequency">
+            <summary>
+                Gets the frequency.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.EqualizerChannelFilter.SampleRate">
+            <summary>
+                Gets the samplerate.
+            </summary>
+        </member>
+        <member name="T:CSCore.Streams.EqualizerFilter">
+            <summary>
+                Represents an EqualizerFilter which holds an <see cref="T:CSCore.Streams.EqualizerChannelFilter"/> for each channel.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.EqualizerFilter.#ctor">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.Streams.EqualizerFilter"/> class.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.EqualizerFilter.#ctor(System.Int32,CSCore.Streams.EqualizerChannelFilter)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.Streams.EqualizerFilter"/> class.
+            </summary>
+            <param name="channels">The number of channels to use.</param>
+            <param name="filter">The channel filter which should be used for all channels.</param>
+        </member>
+        <member name="M:CSCore.Streams.EqualizerFilter.CreateFilter(System.Int32,System.Int32,System.Double,System.Int32,System.Single)">
+            <summary>
+                Returns a new instance of the <see cref="T:CSCore.Streams.EqualizerFilter"/> class.
+            </summary>
+            <param name="channels">The number of channels to use.</param>
+            <param name="sampleRate">The samplerate of the data to process.</param>
+            <param name="frequency">The frequency of the filter.</param>
+            <param name="bandWidth">The bandwidth.</param>
+            <param name="gain">The gain value.</param>
+            <returns>A new instance of the <see cref="T:CSCore.Streams.EqualizerFilter"/> class.</returns>
+        </member>
+        <member name="P:CSCore.Streams.EqualizerFilter.Filters">
+            <summary>
+                Gets all underlying <see cref="T:CSCore.Streams.EqualizerChannelFilter"/> as a dictionary where the key represents the channel
+                index and the value to <see cref="T:CSCore.Streams.EqualizerChannelFilter"/> itself.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.EqualizerFilter.AverageFrequency">
+            <summary>
+                Gets the average frequency of all <see cref="P:CSCore.Streams.EqualizerFilter.Filters"/>.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.EqualizerFilter.AverageGainDB">
+            <summary>
+                Gets or sets the average gain value of all <see cref="P:CSCore.Streams.EqualizerFilter.Filters"/>.
+            </summary>
+            <remarks>
+                When using the setter of the <see cref="P:CSCore.Streams.EqualizerFilter.AverageGainDB"/> property, the new gain value will be applied to all
+                <see cref="P:CSCore.Streams.EqualizerFilter.Filters"/>.
+            </remarks>
+        </member>
+        <member name="T:CSCore.Streams.Equalizer">
+            <summary>
+                Represents an equalizer which can be dynamically modified by adding, removing or modifying
+                <see cref="T:CSCore.Streams.EqualizerFilter"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.Equalizer.#ctor(CSCore.IWaveStream)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.Streams.Equalizer"/> class based on an underlying wave stream.
+            </summary>
+            <param name="source">The underlying wave stream.</param>
+        </member>
+        <member name="M:CSCore.Streams.Equalizer.Create10BandEqualizer(CSCore.IWaveStream)">
+            <summary>
+                Returns a new instance of the <see cref="T:CSCore.Streams.Equalizer"/> class with 10 preset <see cref="T:CSCore.Streams.EqualizerFilter"/>.
+            </summary>
+            <param name="source">The underlying wave stream which provides the data for the equalizer.</param>
+            <returns>A new instance of the <see cref="T:CSCore.Streams.Equalizer"/> class with 10 preset <see cref="T:CSCore.Streams.EqualizerFilter"/>.</returns>
+        </member>
+        <member name="M:CSCore.Streams.Equalizer.Create10BandEqualizer(CSCore.IWaveStream,System.Int32,System.Int32)">
+            <summary>
+                Returns a new instance of the <see cref="T:CSCore.Streams.Equalizer"/> class with 10 preset <see cref="T:CSCore.Streams.EqualizerFilter"/>.
+            </summary>
+            <param name="source">The underlying wave stream which provides the data for the equalizer.</param>
+            <param name="bandWidth">The bandwidth to use for the 10 <see cref="T:CSCore.Streams.EqualizerFilter"/>. The default value is 18.</param>
+            <param name="defaultGain">
+                The default gain to use for the 10 <see cref="T:CSCore.Streams.EqualizerFilter"/>. The default value is zero
+                which means that the data, passed through the equalizer won't be affected by the <see cref="T:CSCore.Streams.EqualizerFilter"/>.
+            </param>
+            <returns>A new instance of the <see cref="T:CSCore.Streams.Equalizer"/> class with 10 preset <see cref="T:CSCore.Streams.EqualizerFilter"/>.</returns>
+        </member>
+        <member name="M:CSCore.Streams.Equalizer.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the underlying <see cref="F:CSCore.SampleSourceBase.Source"/>, applies the equalizer
+                effect and advances the position within the stream by
+                the number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="P:CSCore.Streams.Equalizer.SampleFilters">
+            <summary>
+                Gets a list which contains all <see cref="T:CSCore.Streams.EqualizerFilter"/> used by the equalizer.
+            </summary>
+            <remarks>
+                None of the <see cref="T:CSCore.Streams.EqualizerFilter"/>
+            </remarks>
         </member>
         <member name="P:CSCore.Streams.SingleBlockReadEventArgs.Samples">
             <summary>
@@ -8745,7 +10307,7 @@
         </member>
         <member name="T:CSCore.XAudio2.SourceVoiceStopFlags">
             <summary>
-                Flags that specify how a <see cref="T:CSCore.XAudio2.XAudio2SourceVoice"/> is stopped.
+                Flags that specify how a <see cref="T:CSCore.XAudio2.XAudio2SourceVoice"/> is _stopped.
             </summary>
         </member>
         <member name="F:CSCore.XAudio2.SourceVoiceStopFlags.None">
@@ -8755,7 +10317,7 @@
         </member>
         <member name="F:CSCore.XAudio2.SourceVoiceStopFlags.PlayTails">
             <summary>
-                Continue emitting effect output after the voice is stopped.
+                Continue emitting effect output after the voice is _stopped.
             </summary>
         </member>
         <member name="T:CSCore.XAudio2.StreamingSourceVoice">
@@ -9442,7 +11004,7 @@
                 Stops consumption of audio by the current voice.
             </summary>
             <param name="flags">
-                Flags that control how the voice is stopped. Can be <see cref="F:CSCore.XAudio2.SourceVoiceStopFlags.None"/> or
+                Flags that control how the voice is _stopped. Can be <see cref="F:CSCore.XAudio2.SourceVoiceStopFlags.None"/> or
                 <see cref="F:CSCore.XAudio2.SourceVoiceStopFlags.PlayTails"/>.
             </param>
             <param name="operationSet">
@@ -9461,7 +11023,7 @@
                 Stops consumption of audio by the current voice.
             </summary>
             <param name="flags">
-                Flags that control how the voice is stopped. Can be <see cref="F:CSCore.XAudio2.SourceVoiceStopFlags.None"/> or
+                Flags that control how the voice is _stopped. Can be <see cref="F:CSCore.XAudio2.SourceVoiceStopFlags.None"/> or
                 <see cref="F:CSCore.XAudio2.SourceVoiceStopFlags.PlayTails"/>.
             </param>
             <param name="operationSet">
@@ -9936,7 +11498,7 @@
         <member name="F:CSCore.XAudio2.VoiceState.CurrentBufferContextPtr">
             <summary>
                 Pointer to a buffer context provided in the <see cref="T:CSCore.XAudio2.XAudio2Buffer"/> that is processed currently, or,
-                if the voice is stopped currently, to the next buffer due to be processed.
+                if the voice is _stopped currently, to the next buffer due to be processed.
                 <see cref="F:CSCore.XAudio2.VoiceState.CurrentBufferContextPtr"/> is NULL if there are no buffers in the queue.
             </summary>
         </member>
@@ -12171,6 +13733,11 @@
             Destructor which calls the <see cref="M:CSCore.Codecs.RAW.RawDataReader.Dispose(System.Boolean)"/> method.
             </summary>
         </member>
+        <member name="P:CSCore.Codecs.RAW.RawDataReader.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="P:CSCore.Codecs.RAW.RawDataReader.WaveFormat">
             <summary>
                 Gets the format of the raw data.
@@ -12246,7 +13813,7 @@
             </summary>
             <param name="notify">Notificationprovider</param>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelCountNative(System.UInt32@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelCountNative(System.Int32@)">
             <summary>
             The GetChannelCount method gets a count of the channels in the audio stream that enters
             or leaves the audio endpoint device.
@@ -12340,7 +13907,7 @@
             <returns>Volume level. The level is expressed as a normalized value in the range from
             0.0 to 1.0.</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevelNative(System.UInt32,System.Single,System.Guid)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevelNative(System.Int32,System.Single,System.Guid)">
             <summary>
             The SetChannelVolumeLevel method sets the volume level, in decibels, of the specified
             channel of the audio stream that enters or leaves the audio endpoint device.
@@ -12352,7 +13919,7 @@
             <param name="channel">The channel number. If the audio stream contains n channels, the channels are numbered from 0 to n– 1. </param>
             <returns>HRESULT</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevel(System.UInt32,System.Single,System.Guid)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevel(System.Int32,System.Single,System.Guid)">
             <summary>
             The SetChannelVolumeLevel method sets the volume level, in decibels, of the specified
             channel of the audio stream that enters or leaves the audio endpoint device.
@@ -12363,7 +13930,7 @@
             <param name="eventContext">EventContext which can be accessed in the event handler.</param>
             <param name="channel">The channel number. If the audio stream contains n channels, the channels are numbered from 0 to n– 1. </param>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevelScalarNative(System.UInt32,System.Single,System.Guid)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevelScalarNative(System.Int32,System.Single,System.Guid)">
             <summary>
             The SetChannelVolumeLevelScalar method sets the normalized, audio-tapered volume level
             of the specified channel in the audio stream that enters or leaves the audio endpoint
@@ -12375,7 +13942,7 @@
             <param name="channel">The channel number. If the audio stream contains n channels, the channels are numbered from 0 to n– 1. </param>
             <returns>HRESULT</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevelScalar(System.UInt32,System.Single,System.Guid)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.SetChannelVolumeLevelScalar(System.Int32,System.Single,System.Guid)">
             <summary>
             The SetChannelVolumeLevelScalar method sets the normalized, audio-tapered volume level
             of the specified channel in the audio stream that enters or leaves the audio endpoint
@@ -12386,7 +13953,7 @@
             <param name="eventContext">EventContext which can be accessed in the event handler.</param>
             <param name="channel">The channel number. If the audio stream contains n channels, the channels are numbered from 0 to n– 1. </param>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevelNative(System.UInt32,System.Single@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevelNative(System.Int32,System.Single@)">
             <summary>
             The GetChannelVolumeLevel method gets the volume level, in decibels, of the specified
             channel in the audio stream that enters or leaves the audio endpoint device.
@@ -12397,7 +13964,7 @@
             <param name="channel">The channel number. If the audio stream contains n channels, the channels are numbered from 0 to n– 1. </param>
             <returns>HRESULT</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevel(System.UInt32)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevel(System.Int32)">
             <summary>
             The GetChannelVolumeLevel method gets the volume level, in decibels, of the specified
             channel in the audio stream that enters or leaves the audio endpoint device.
@@ -12406,7 +13973,7 @@
             <returns>Volume level in decibels. To get the range of volume levels obtained from this
             method, call the IAudioEndpointVolume::GetVolumeRange method.</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevelScalarNative(System.UInt32,System.Single@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevelScalarNative(System.Int32,System.Single@)">
             <summary>
             The GetChannelVolumeLevelScalar method gets the normalized, audio-tapered volume level
             of the specified channel of the audio stream that enters or leaves the audio endpoint
@@ -12418,7 +13985,7 @@
             <param name="channel">The channel number. If the audio stream contains n channels, the channels are numbered from 0 to n– 1. </param>
             <returns>HRESULT</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevelScalar(System.UInt32)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetChannelVolumeLevelScalar(System.Int32)">
             <summary>
             The GetChannelVolumeLevelScalar method gets the normalized, audio-tapered volume level
             of the specified channel of the audio stream that enters or leaves the audio endpoint
@@ -12460,7 +14027,7 @@
             </summary>
             <returns>True = Stream is muted. False = Stream is not muted.</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetVolumeStepInfoNative(System.UInt32@,System.UInt32@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetVolumeStepInfoNative(System.Int32@,System.Int32@)">
             <summary>
             The GetVolumeStepInfo method gets information about the current step in the volume
             range.
@@ -12470,7 +14037,7 @@
             <param name="stepCount">Number of steps in the volume range.</param>
             <returns>HRESULT</returns>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetVolumeStepInfo(System.UInt32@,System.UInt32@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioEndpointVolume.GetVolumeStepInfo(System.Int32@,System.Int32@)">
             <summary>
             The GetVolumeStepInfo method gets information about the current step in the volume
             range.
@@ -12674,7 +14241,7 @@
             The Initialize method initializes the audio stream.
             </summary>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioClient.GetBufferSize(System.UInt32@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioClient.GetBufferSize(System.Int32@)">
             <summary>
             The GetBufferSize method retrieves the size (maximum capacity) of the endpoint buffer.
             </summary>
@@ -12723,7 +14290,7 @@
             IAudioRenderClient::GetBuffer.
             </remarks>
         </member>
-        <member name="M:CSCore.CoreAudioAPI.AudioClient.GetCurrentPaddingNative(System.UInt32@)">
+        <member name="M:CSCore.CoreAudioAPI.AudioClient.GetCurrentPaddingNative(System.Int32@)">
             <summary>
             The GetCurrentPadding method retrieves the number of frames of padding in the endpoint
             buffer.
@@ -13729,14 +15296,59 @@
                 Defines a stereo to 5.1 surround (with rear) channel conversion matrix.
             </summary>
         </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.FiveDotOneSurroundWithRearToStereo">
+            <summary>
+                Defines a 5.1 surround (with rear) to stereo channel conversion matrix.
+            </summary>
+        </member>
         <member name="F:CSCore.DSP.ChannelMatrix.StereoToFiveDotOneSurroundWithSide">
             <summary>
                 Defines a stereo to 5.1 surround (with side) channel conversion matrix.
             </summary>
         </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.FiveDotOneSurroundWithSideToStereo">
+            <summary>
+                Defines a 5.1 surround (with side) to stereo channel conversion matrix.
+            </summary>
+        </member>
         <member name="F:CSCore.DSP.ChannelMatrix.StereoToSevenDotOneSurround">
             <summary>
                 Defines a stereo to 7.1 surround channel conversion matrix.
+            </summary>
+        </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.SevenDotOneSurroundToStereo">
+            <summary>
+                Defines a 7.1 surround to stereo channel conversion matrix.
+            </summary>
+        </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.MonoToFiveDotOneSurroundWithRear">
+            <summary>
+                Defines a mono to 5.1 surround (with rear) channel conversion matrix.
+            </summary>
+        </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.FiveDotOneSurroundWithRearToMono">
+            <summary>
+                Defines a 5.1 surround (with rear) to mono channel conversion matrix.
+            </summary>
+        </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.MonoToFiveDotOneSurroundWithSide">
+            <summary>
+                Defines a mono to 5.1 surround (with side) channel conversion matrix.
+            </summary>
+        </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.FiveDotOneSurroundWithSideToMono">
+            <summary>
+                Defines a 5.1 surround (with side) to mono channel conversion matrix.
+            </summary>
+        </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.MonoToSevenDotOneSurround">
+            <summary>
+                Defines a mono to 7.1 surround channel conversion matrix.
+            </summary>
+        </member>
+        <member name="F:CSCore.DSP.ChannelMatrix.SevenDotOneSurroundToMono">
+            <summary>
+                Defines a 7.1 surround channel to mono conversion matrix.
             </summary>
         </member>
         <member name="F:CSCore.DSP.ChannelMatrix.StereoToMonoMatrix">
@@ -13751,7 +15363,7 @@
         </member>
         <member name="M:CSCore.DSP.ChannelMatrix.#ctor(CSCore.ChannelMask,CSCore.ChannelMask)">
             <summary>
-            Initializes a new instance of the <see cref="T:CSCore.DSP.ChannelMatrix"/> class.
+                Initializes a new instance of the <see cref="T:CSCore.DSP.ChannelMatrix"/> class.
             </summary>
             <param name="inputMask">The <see cref="T:CSCore.ChannelMask"/> of the input signal.</param>
             <param name="outputMask">The <see cref="T:CSCore.ChannelMask"/> of the output signal.</param>
@@ -13759,18 +15371,32 @@
         </member>
         <member name="M:CSCore.DSP.ChannelMatrix.SetMatrix(System.Single[0:,0:])">
             <summary>
-            Sets the channel conversion matrix. 
-            The x-axis of the <paramref name="matrix"/> specifies the output channels. The y-axis 
-            of the <paramref name="matrix"/> specifies the input channels. 
+                Sets the channel conversion matrix.
+                The x-axis of the <paramref name="matrix" /> specifies the output channels. The y-axis
+                of the <paramref name="matrix" /> specifies the input channels.
             </summary>
             <param name="matrix">Channel conversion matrix to use.</param>
         </member>
         <member name="M:CSCore.DSP.ChannelMatrix.GetOneDimensionalMatrix">
             <summary>
-            Returns a one dimensional array which contains the channel conversion matrix coefficients.
+                Returns a one dimensional array which contains the channel conversion matrix coefficients.
             </summary>
             <returns>A one dimensional array which contains the channel conversion matrix coefficients</returns>
-            <remarks>This method is primarily used in combination with the <see cref="M:CSCore.DMO.WMResamplerProps.SetUserChannelMtx(System.Single[])"/> method.</remarks>
+            <remarks>
+                This method is primarily used in combination with the <see cref="M:CSCore.DMO.WMResamplerProps.SetUserChannelMtx(System.Single[])"/>
+                method.
+            </remarks>
+        </member>
+        <member name="M:CSCore.DSP.ChannelMatrix.Flip">
+            <summary>
+                Flips the axis of the matrix and returns the new matrix with the flipped axis.
+            </summary>
+            <returns>A matrix with flipped axis.</returns>
+            <remarks>
+                This could be typically used in the following scenario: There is a
+                5.1 to stereo matrix. By using the <see cref="M:CSCore.DSP.ChannelMatrix.Flip"/> method the 5.1 to stereo matrix can be
+                converted into a stereo to 5.1 matrix.
+            </remarks>
         </member>
         <member name="P:CSCore.DSP.ChannelMatrix.InputMask">
             <summary>
@@ -13784,29 +15410,35 @@
         </member>
         <member name="P:CSCore.DSP.ChannelMatrix.Height">
             <summary>
-            Gets the number of rows of the channel conversion matrix.
+                Gets the number of rows of the channel conversion matrix.
             </summary>
         </member>
         <member name="P:CSCore.DSP.ChannelMatrix.Width">
             <summary>
-            Gets the number of columns of the channel conversion matrix.
+                Gets the number of columns of the channel conversion matrix.
             </summary>
         </member>
         <member name="P:CSCore.DSP.ChannelMatrix.InputChannelCount">
             <summary>
                 Gets the input signals number of channels.
             </summary>
-            <remarks>The <see cref="P:CSCore.DSP.ChannelMatrix.InputChannelCount"/> property always returns the same value as the <see cref="P:CSCore.DSP.ChannelMatrix.Height"/> property.</remarks>
+            <remarks>
+                The <see cref="P:CSCore.DSP.ChannelMatrix.InputChannelCount"/> property always returns the same value as the <see cref="P:CSCore.DSP.ChannelMatrix.Height"/>
+                property.
+            </remarks>
         </member>
         <member name="P:CSCore.DSP.ChannelMatrix.OutputChannelCount">
             <summary>
                 Gets the output signals number of channels.
             </summary>
-            <remarks>The <see cref="P:CSCore.DSP.ChannelMatrix.OutputChannelCount"/> property always returns the same value as the <see cref="P:CSCore.DSP.ChannelMatrix.Width"/> property.</remarks>
+            <remarks>
+                The <see cref="P:CSCore.DSP.ChannelMatrix.OutputChannelCount"/> property always returns the same value as the <see cref="P:CSCore.DSP.ChannelMatrix.Width"/>
+                property.
+            </remarks>
         </member>
         <member name="P:CSCore.DSP.ChannelMatrix.Item(System.Int32,System.Int32)">
             <summary>
-            Gets a <see cref="T:CSCore.DSP.ChannelMatrixElement"/> of the <see cref="T:CSCore.DSP.ChannelMatrix"/>.
+                Gets or sets a <see cref="T:CSCore.DSP.ChannelMatrixElement"/> of the <see cref="T:CSCore.DSP.ChannelMatrix"/>.
             </summary>
             <param name="input">The zero-based index of the input channel.</param>
             <param name="output">The zero-based index of the output channel.</param>
@@ -13908,7 +15540,7 @@
         <member name="P:CSCore.CoreAudioAPI.MMDevice.PropertyStore">
             <summary>
             Warning: This PropertyStore is just Readable. Use the OpenPropertyStore-Method to get
-                     writeable PropertyStore.
+            writeable PropertyStore.
             </summary>
         </member>
         <member name="P:CSCore.CoreAudioAPI.MMDevice.DeviceID">
@@ -13931,6 +15563,7 @@
             <summary>
             See "Functiondiscoverykeys_devpkey.h" for different keys like FriendlyName, DeviceDesc,...
             </summary>
+            <remarks>For a list of all Core Audio Properties see: http://msdn.microsoft.com/en-us/library/windows/desktop/dd370806(v=vs.85).aspx </remarks>
         </member>
         <member name="T:CSCore.MediaFoundation.MediaFoundationException">
             <summary>
@@ -14080,32 +15713,37 @@
         </member>
         <member name="P:CSCore.MediaFoundation.MFMediaType.Channels">
             <summary>
-            Number of channels
+            Gets or sets the number of channels.
             </summary>
         </member>
         <member name="P:CSCore.MediaFoundation.MFMediaType.BitsPerSample">
             <summary>
-            Bits per sample
+            Gets or sets the number of bits per sample.
             </summary>
         </member>
         <member name="P:CSCore.MediaFoundation.MFMediaType.SampleRate">
             <summary>
-            Samples per second(for one channel each)
+            Gets or sets the number of samples per second (for one channel each).
+            </summary>
+        </member>
+        <member name="P:CSCore.MediaFoundation.MFMediaType.ChannelMask">
+            <summary>
+            Gets or sets the channelmask.
             </summary>
         </member>
         <member name="P:CSCore.MediaFoundation.MFMediaType.AverageBytesPerSecond">
             <summary>
-            AVG bytes per second
+            Gets or sets the average number of bytes per second.
             </summary>
         </member>
         <member name="P:CSCore.MediaFoundation.MFMediaType.SubType">
             <summary>
-            Audiosubtype
+            Gets or sets the audio subtype.
             </summary>
         </member>
         <member name="P:CSCore.MediaFoundation.MFMediaType.MajorType">
             <summary>
-            Majortype
+            Gets or sets the major type.
             </summary>
         </member>
         <member name="P:CSCore.MediaFoundation.MFMediaType.IsCompressed">
@@ -14297,6 +15935,59 @@
             Gets the array which contains the read data.
             </summary>
         </member>
+        <member name="T:CSCore.Streams.MonoToStereoSource">
+            <summary>
+            Converts a mono source to a stereo source.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.MonoToStereoSource.#ctor(CSCore.IWaveStream)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.MonoToStereoSource"/> class.
+            </summary>
+            <param name="source">The underlying mono source.</param>
+            <exception cref="T:System.ArgumentException">The <paramref name="source"/> has more or less than one channel.</exception>
+        </member>
+        <member name="M:CSCore.Streams.MonoToStereoSource.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.MonoToStereoSource"/> and advances the position within the stream by
+                the number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="M:CSCore.Streams.MonoToStereoSource.Dispose(System.Boolean)">
+            <summary>
+                Disposes the <see cref="T:CSCore.Streams.MonoToStereoSource"/> and the underlying <see cref="F:CSCore.SampleSourceBase.Source"/>.
+            </summary>
+            <param name="disposing">
+                True to release both managed and unmanaged resources; false to release only unmanaged
+                resources.
+            </param>
+        </member>
+        <member name="P:CSCore.Streams.MonoToStereoSource.Position">
+            <summary>
+                Gets or sets the position in samples.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.MonoToStereoSource.Length">
+            <summary>
+                Gets the length in samples.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.MonoToStereoSource.WaveFormat">
+            <summary>
+                Gets the <see cref="P:CSCore.IWaveStream.WaveFormat"/> of the waveform-audio data.
+            </summary>
+        </member>
         <member name="P:CSCore.Streams.NotificationSource.BlockCount">
             <summary>
             Interval in blocks. One block equals on sample for each channel -> (channels *
@@ -14307,6 +15998,161 @@
             <summary>
             Interval in milliseconds.
             </summary>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.SampleToIeeeFloat32">
+            <summary>
+            Converts a <see cref="T:CSCore.ISampleSource"/> to a 32-bit IeeeFloat <see cref="T:CSCore.IWaveSource"/>.
+            </summary>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.SampleToWaveBase">
+            <summary>
+            Converts a <see cref="T:CSCore.ISampleSource"/> to a <see cref="T:CSCore.IWaveSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToWaveBase.#ctor(CSCore.ISampleSource,System.Int32,CSCore.AudioEncoding)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.SampleToWaveBase"/> class.
+            </summary>
+            <param name="source">The underlying <see cref="T:CSCore.ISampleSource"/> which has to get converted to a <see cref="T:CSCore.IWaveSource"/>.</param>
+            <param name="bits">The <see cref="P:CSCore.WaveFormat.BitsPerSample"/> of the Output-<see cref="P:CSCore.Streams.SampleConverter.SampleToWaveBase.WaveFormat"/>.</param>
+            <param name="encoding">The <see cref="P:CSCore.WaveFormat.WaveFormatTag"/> of the Output-<see cref="P:CSCore.Streams.SampleConverter.SampleToWaveBase.WaveFormat"/>.</param>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="source"/> is null.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Invalid number of bits per sample specified by the <paramref name="bits"/> argument.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToWaveBase.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of bytes from the <see cref="T:CSCore.Streams.SampleConverter.SampleToWaveBase"/> and advances the position within the stream by the
+                number of bytes read.
+            </summary>
+            <param name="buffer">
+                An array of bytes. When this method returns, the <paramref name="buffer"/> contains the specified
+                byte array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the bytes read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based byte offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of bytes to read from the current source.</param>
+            <returns>The total number of bytes read into the buffer.</returns>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToWaveBase.Dispose">
+            <summary>
+            Disposes the <see cref="T:CSCore.Streams.SampleConverter.SampleToWaveBase"/> instance.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToWaveBase.Dispose(System.Boolean)">
+            <summary>
+            Disposes the underlying <see cref="F:CSCore.Streams.SampleConverter.SampleToWaveBase.Source"/>.
+            </summary>
+            <param name="disposing">Not used.</param>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToWaveBase.Finalize">
+            <summary>
+            Calls <see cref="M:CSCore.Streams.SampleConverter.SampleToWaveBase.Dispose(System.Boolean)"/>.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.SampleToWaveBase.WaveFormat">
+            <summary>
+                Gets the <see cref="T:CSCore.WaveFormat"/> of the output waveform-audio data.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.SampleToWaveBase.Position">
+            <summary>
+                Gets or sets the current position.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.SampleToWaveBase.Length">
+            <summary>
+                Gets the length of the waveform-audio data.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.SampleToWaveBase.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToIeeeFloat32.#ctor(CSCore.ISampleSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.SampleToIeeeFloat32"/> class.
+            </summary>
+            <param name="source">The underlying <see cref="T:CSCore.ISampleSource"/> which has to get converted to a 32-bit IeeeFloat <see cref="T:CSCore.IWaveSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToIeeeFloat32.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of bytes from the <see cref="T:CSCore.Streams.SampleConverter.SampleToIeeeFloat32"/> and advances the position within the stream by the
+                number of bytes read.
+            </summary>
+            <param name="buffer">
+                An array of bytes. When this method returns, the <paramref name="buffer"/> contains the specified
+                byte array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the bytes read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based byte offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of bytes to read from the current source.</param>
+            <returns>The total number of bytes read into the buffer.</returns>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.SampleToPcm24">
+            <summary>
+            Converts a <see cref="T:CSCore.ISampleSource"/> to a 24-bit PCM <see cref="T:CSCore.IWaveSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToPcm24.#ctor(CSCore.ISampleSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.SampleToPcm24"/> class.
+            </summary>
+            <param name="source">The underlying <see cref="T:CSCore.ISampleSource"/> which has to get converted to a 24-bit PCM <see cref="T:CSCore.IWaveSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToPcm24.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of bytes from the <see cref="T:CSCore.Streams.SampleConverter.SampleToPcm24"/> and advances the position within the stream by the
+                number of bytes read.
+            </summary>
+            <param name="buffer">
+                An array of bytes. When this method returns, the <paramref name="buffer"/> contains the specified
+                byte array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the bytes read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based byte offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of bytes to read from the current source.</param>
+            <returns>The total number of bytes read into the buffer.</returns>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.SampleToPcm8">
+            <summary>
+            Converts a <see cref="T:CSCore.ISampleSource"/> to a 8-bit PCM <see cref="T:CSCore.IWaveSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToPcm8.#ctor(CSCore.ISampleSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.SampleToPcm8"/> class.
+            </summary>
+            <param name="source">The underlying <see cref="T:CSCore.ISampleSource"/> which has to get converted to a 8-bit PCM <see cref="T:CSCore.IWaveSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToPcm8.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of bytes from the <see cref="T:CSCore.Streams.SampleConverter.SampleToPcm8"/> and advances the position within the stream by the
+                number of bytes read.
+            </summary>
+            <param name="buffer">
+                An array of bytes. When this method returns, the <paramref name="buffer"/> contains the specified
+                byte array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the bytes read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based byte offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of bytes to read from the current source.</param>
+            <returns>The total number of bytes read into the buffer.</returns>
         </member>
         <member name="E:CSCore.Streams.SimpleNotificationSource.DataRead">
             <summary>
@@ -14448,6 +16294,11 @@
             Gets the length in bytes. This property is currently not supported.
             </summary>
         </member>
+        <member name="P:CSCore.Streams.SoundInSource.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
         <member name="P:CSCore.Streams.SoundInSource.FillWithZeros">
             <summary>
             Gets or sets a value which indicates whether the <see cref="M:CSCore.Streams.SoundInSource.Read(System.Byte[],System.Int32,System.Int32)"/> method should always provide the requested amount of data.
@@ -14483,6 +16334,48 @@
             <summary>
             Represents a native 4 byte boolean value.
             </summary>
+        </member>
+        <member name="F:CSCore.Win32.NativeBool.True">
+            <summary>
+            Represents the boolean value true as a <see cref="T:CSCore.Win32.NativeBool"/>.
+            </summary>
+        </member>
+        <member name="F:CSCore.Win32.NativeBool.False">
+            <summary>
+            Represents the boolean value false as a <see cref="T:CSCore.Win32.NativeBool"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Win32.NativeBool.#ctor(System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Win32.NativeBool"/> structure based on a boolean value.
+            </summary>
+            <param name="value">The boolean value.</param>
+        </member>
+        <member name="M:CSCore.Win32.NativeBool.Equals(CSCore.Win32.NativeBool)">
+            <summary>
+            Returns a value indicating whether this instance is equal to a <see cref="T:CSCore.Win32.NativeBool"/> object.
+            </summary>
+            <param name="obj">A <see cref="T:CSCore.Win32.NativeBool"/> value to compare to this instance.</param>
+            <returns>true if obj has the same value as this instance; otherwise, false.</returns>
+        </member>
+        <member name="M:CSCore.Win32.NativeBool.Equals(System.Object)">
+            <summary>
+            Returns a value indicating whether this instance is equal to a specified object.
+            </summary>
+            <param name="obj">An object to compare to this instance.</param>
+            <returns>true if obj is a <see cref="T:CSCore.Win32.NativeBool"/> and has the same value as this instance; otherwise, false.</returns>
+        </member>
+        <member name="M:CSCore.Win32.NativeBool.GetHashCode">
+            <summary>
+            Returns the hash code for this instance.
+            </summary>
+            <returns>A hash code for the current <see cref="T:CSCore.Win32.NativeBool"/>.</returns>
+        </member>
+        <member name="M:CSCore.Win32.NativeBool.ToString">
+            <summary>
+            Converts the value of this instance to its equivalent string representation (either "True" or "False").
+            </summary>
+            <returns>String representation of this instance.</returns>
         </member>
         <member name="T:CSCore.Win32.HResult">
             <summary>
@@ -14553,6 +16446,12 @@
                 the <see cref="P:CSCore.WaveFormatExtensible.SubFormat"/> to the equal <see cref="P:CSCore.WaveFormat.WaveFormatTag"/>.
             </summary>
             <returns>A simple <see cref="T:CSCore.WaveFormat"/> instance.</returns>
+        </member>
+        <member name="M:CSCore.WaveFormatExtensible.ToString">
+            <summary>
+                Returns a string which describes the <see cref="T:CSCore.WaveFormatExtensible"/>.
+            </summary>
+            <returns>A string which describes the <see cref="T:CSCore.WaveFormatExtensible"/>.</returns>
         </member>
         <member name="P:CSCore.WaveFormatExtensible.ValidBitsPerSample">
             <summary>
@@ -14642,6 +16541,11 @@
                 Initializes a new instance of the <see cref="T:CSCore.Codecs.WAV.DataChunk"/> class.
             </summary>
             <param name="reader"><see cref="T:System.IO.BinaryReader"/> which should be used to read the data chunk.</param>
+        </member>
+        <member name="P:CSCore.Codecs.WAV.DataChunk.DataStartPosition">
+            <summary>
+            Gets the zero-based position inside of the stream at which the audio data starts.
+            </summary>
         </member>
         <member name="T:CSCore.Codecs.WAV.FmtChunk">
             <summary>
@@ -14741,6 +16645,11 @@
         <member name="P:CSCore.Codecs.WAV.WaveFileReader.Length">
             <summary>
                 Gets the length of the <see cref="T:CSCore.Codecs.WAV.WaveFileReader"/> in bytes.
+            </summary>
+        </member>
+        <member name="P:CSCore.Codecs.WAV.WaveFileReader.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.Codecs.WAV.WaveFileReader"/> supports seeking.
             </summary>
         </member>
         <member name="T:CSCore.Codecs.WAV.WaveWriter">
@@ -15635,9 +17544,225 @@
             Notifies the MFT that the first sample is about to be processed.
             </summary>
         </member>
+        <member name="T:CSCore.MmException">
+            <summary>
+                Exception class for all MM-APIs like waveOut or ACM.
+            </summary>
+        </member>
+        <member name="M:CSCore.MmException.Try(CSCore.MmResult,System.String)">
+            <summary>
+                Throws an <see cref="T:CSCore.MmException"/> if the <paramref name="result"/> is not
+                <see cref="F:CSCore.MmResult.MMSYSERR_NOERROR"/>.
+            </summary>
+            <param name="result">Errorcode.</param>
+            <param name="function">Name of the function which returned the specified <paramref name="result"/>.</param>
+        </member>
+        <member name="M:CSCore.MmException.#ctor(CSCore.MmResult,System.String)">
+            <summary>
+                Initializes a new instance of the <see cref="T:CSCore.MmException"/> class.
+            </summary>
+            <param name="result">Errorcode.</param>
+            <param name="function">Name of the function which returned the specified <paramref name="result"/>.</param>
+        </member>
+        <member name="P:CSCore.MmException.Result">
+            <summary>
+                Gets the <see cref="T:CSCore.MmResult"/> which describes the error.
+            </summary>
+        </member>
+        <member name="P:CSCore.MmException.Target">
+            <summary>
+                Gets the name of the function which caused the error.
+            </summary>
+        </member>
+        <member name="P:CSCore.MmException.Function">
+            <summary>
+                Gets the name of the function which caused the error.
+            </summary>
+        </member>
         <member name="P:CSCore.SoundOut.DirectSound.DirectSoundNotifyEventArgs.RequestStopPlayback">
             <summary>
             Set this to stop the notification thread
+            </summary>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.IeeeFloatToSample">
+            <summary>
+            Converts a 32-bit IeeeFloat <see cref="T:CSCore.IWaveSource"/> to a <see cref="T:CSCore.ISampleSource"/>.
+            </summary>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.WaveToSampleBase">
+            <summary>
+            Converts a <see cref="T:CSCore.ISampleSource"/> to a <see cref="T:CSCore.IWaveSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.WaveToSampleBase.#ctor(CSCore.IWaveSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.WaveToSampleBase"/> class.
+            </summary>
+            <param name="source">The underlying <see cref="T:CSCore.IWaveSource"/> instance which has to get converted to a <see cref="T:CSCore.ISampleSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="source"/> argument is null.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.WaveToSampleBase.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.SampleConverter.WaveToSampleBase"/> and advances the position within the stream by the
+                number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.WaveToSampleBase.Dispose">
+            <summary>
+            Disposes the <see cref="T:CSCore.Streams.SampleConverter.WaveToSampleBase"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.WaveToSampleBase.Dispose(System.Boolean)">
+            <summary>
+            Disposes the <see cref="F:CSCore.Streams.SampleConverter.WaveToSampleBase.Source"/>.
+            </summary>
+            <param name="disposing">Not used.</param>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.WaveToSampleBase.CreateConverter(CSCore.IWaveSource)">
+            <summary>
+            Returns an implementation of the <see cref="T:CSCore.ISampleSource"/> interface which converts the specified <paramref name="source"/> to a <see cref="T:CSCore.ISampleSource"/>.
+            </summary>
+            <param name="source">The <see cref="T:CSCore.IWaveSource"/> instance to convert.</param>
+            <returns>Returns an implementation of the <see cref="T:CSCore.ISampleSource"/> interface which converts the specified <paramref name="source"/> to a <see cref="T:CSCore.ISampleSource"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="P:CSCore.IWaveStream.WaveFormat"/> of the <paramref name="source"/> is not supported.</exception>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.WaveToSampleBase.WaveFormat">
+            <summary>
+                Gets the <see cref="T:CSCore.WaveFormat"/> of the waveform-audio data.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.WaveToSampleBase.Position">
+            <summary>
+                Gets or sets the current position in samples.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.WaveToSampleBase.Length">
+            <summary>
+                Gets the length of the waveform-audio data in samples.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SampleConverter.WaveToSampleBase.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.IeeeFloatToSample.#ctor(CSCore.IWaveSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.IeeeFloatToSample"/> class.
+            </summary>
+            <param name="source">The underlying 32-bit IeeeFloat <see cref="T:CSCore.IWaveSource"/> instance which has to get converted to a <see cref="T:CSCore.ISampleSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">The format of the <paramref name="source"/> is not 32-bit IeeeFloat.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.IeeeFloatToSample.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.SampleConverter.IeeeFloatToSample"/> and advances the position within the stream by the
+                number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.SampleToPcm16">
+            <summary>
+            Converts a <see cref="T:CSCore.ISampleSource"/> to a 16-bit PCM <see cref="T:CSCore.IWaveSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToPcm16.#ctor(CSCore.ISampleSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.SampleToPcm16"/> class.
+            </summary>
+            <param name="source">The underlying <see cref="T:CSCore.ISampleSource"/> which has to get converted to a 16-bit PCM <see cref="T:CSCore.IWaveSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.SampleToPcm16.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of bytes from the <see cref="T:CSCore.Streams.SampleConverter.SampleToPcm16"/> and advances the position within the stream by the
+                number of bytes read.
+            </summary>
+            <param name="buffer">
+                An array of bytes. When this method returns, the <paramref name="buffer"/> contains the specified
+                byte array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the bytes read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based byte offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of bytes to read from the current source.</param>
+            <returns>The total number of bytes read into the buffer.</returns>
+        </member>
+        <member name="T:CSCore.Streams.StereoToMonoSource">
+            <summary>
+            Converts a stereo source to a mono source.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.StereoToMonoSource.#ctor(CSCore.IWaveStream)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.StereoToMonoSource"/> class.
+            </summary>
+            <param name="source">The underlying stereo source.</param>
+            <exception cref="T:System.ArgumentException">The <paramref name="source"/> has more or less than two channels.</exception>
+        </member>
+        <member name="M:CSCore.Streams.StereoToMonoSource.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.StereoToMonoSource"/> and advances the position within the stream by
+                the number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="M:CSCore.Streams.StereoToMonoSource.Dispose(System.Boolean)">
+            <summary>
+                Disposes the <see cref="T:CSCore.Streams.StereoToMonoSource"/> and the underlying <see cref="F:CSCore.SampleSourceBase.Source"/>.
+            </summary>
+            <param name="disposing">
+                True to release both managed and unmanaged resources; false to release only unmanaged
+                resources.
+            </param>
+        </member>
+        <member name="P:CSCore.Streams.StereoToMonoSource.Position">
+            <summary>
+                Gets or sets the position in samples.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.StereoToMonoSource.Length">
+            <summary>
+                Gets the length in samples.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.StereoToMonoSource.WaveFormat">
+            <summary>
+                Gets the <see cref="P:CSCore.IWaveStream.WaveFormat"/> of the waveform-audio data.
             </summary>
         </member>
         <member name="F:CSCore.Tags.ID3.ID3v2TextEncodingRestriction.IsoOrUTF8">
@@ -15662,7 +17787,7 @@
             TODO: finish
             </summary>
         </member>
-        <member name="T:CSCore.SoundOut.MMInterop.MMInterops.WaveCallback">
+        <member name="T:CSCore.SoundOut.MMInterop.WaveCallback">
             <summary>
             http: //msdn.microsoft.com/en-us/library/dd743869%28VS.85%29.aspx
             </summary>
@@ -15725,7 +17850,7 @@
         </member>
         <member name="F:CSCore.SoundOut.PlaybackState.Stopped">
             <summary>
-                Playback is stopped.
+                Playback is _stopped.
             </summary>
         </member>
         <member name="F:CSCore.SoundOut.PlaybackState.Playing">
@@ -15766,12 +17891,247 @@
         </member>
         <member name="E:CSCore.Streams.LoopStream.StreamFinished">
             <summary>
-            Occurs when the position of the <see cref="P:CSCore.WaveAggregatorBase.BaseStream"/> gets reseted to zero and the next loop begins.
+                Occurs when the underlying <see cref="P:CSCore.WaveAggregatorBase.BaseStream"/> reaches its end.
+                If the <see cref="P:CSCore.Streams.LoopStream.EnableLoop"/> property is set to true, the Position of the
+                <see cref="P:CSCore.WaveAggregatorBase.BaseStream"/> will be reseted to zero.
+            </summary>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.Pcm16BitToSample">
+            <summary>
+            Converts a 16-bit PCM <see cref="T:CSCore.IWaveSource"/> to a <see cref="T:CSCore.ISampleSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.Pcm16BitToSample.#ctor(CSCore.IWaveSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.Pcm16BitToSample"/> class.
+            </summary>
+            <param name="source">The underlying 16-bit POCM <see cref="T:CSCore.IWaveSource"/> instance which has to get converted to a <see cref="T:CSCore.ISampleSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">The format of the <paramref name="source"/> is not 16-bit PCM.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.Pcm16BitToSample.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.SampleConverter.Pcm16BitToSample"/> and advances the position within the stream by the
+                number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.Pcm24BitToSample">
+            <summary>
+            Converts a 24-bit PCM <see cref="T:CSCore.IWaveSource"/> to a <see cref="T:CSCore.ISampleSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.Pcm24BitToSample.#ctor(CSCore.IWaveSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.Pcm24BitToSample"/> class.
+            </summary>
+            <param name="source">The underlying 24-bit POCM <see cref="T:CSCore.IWaveSource"/> instance which has to get converted to a <see cref="T:CSCore.ISampleSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">The format of the <paramref name="source"/> is not 24-bit PCM.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.Pcm24BitToSample.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.SampleConverter.Pcm24BitToSample"/> and advances the position within the stream by the
+                number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="T:CSCore.Streams.SampleConverter.Pcm8BitToSample">
+            <summary>
+            Converts a 8-bit PCM <see cref="T:CSCore.IWaveSource"/> to a <see cref="T:CSCore.ISampleSource"/>.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.Pcm8BitToSample.#ctor(CSCore.IWaveSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SampleConverter.Pcm8BitToSample"/> class.
+            </summary>
+            <param name="source">The underlying 8-bit POCM <see cref="T:CSCore.IWaveSource"/> instance which has to get converted to a <see cref="T:CSCore.ISampleSource"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="source"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">The format of the <paramref name="source"/> is not 8-bit PCM.</exception>
+        </member>
+        <member name="M:CSCore.Streams.SampleConverter.Pcm8BitToSample.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.SampleConverter.Pcm8BitToSample"/> and advances the position within the stream by the
+                number of samples read.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="T:CSCore.Streams.SineGenerator">
+            <summary>
+            Generates a sine wave.
             </summary>
         </member>
         <member name="M:CSCore.Streams.SineGenerator.#ctor">
             <summary>
-            1000Hz, 0.5 Amplitude, 0.0 phase
+            1000Hz, 0.5 amplitude, 0.0 phase
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SineGenerator.#ctor(System.Double,System.Double,System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Streams.SineGenerator"/> class.
+            </summary>
+            <param name="frequency">Specifies the frequency of the sine wave in Hz.</param>
+            <param name="amplitude">Specifies the amplitude of the sine wave. Use a value between 0 and 1.</param>
+            <param name="phase">Specifies the initial phase. Use a value between 0 and 1.</param>
+        </member>
+        <member name="M:CSCore.Streams.SineGenerator.Read(System.Single[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of samples from the <see cref="T:CSCore.Streams.SineGenerator"/>.
+            </summary>
+            <param name="buffer">
+                An array of floats. When this method returns, the <paramref name="buffer"/> contains the specified
+                float array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the floats read from the current source.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the current stream.
+            </param>
+            <param name="count">The maximum number of samples to read from the current source.</param>
+            <returns>The total number of samples read into the buffer.</returns>
+        </member>
+        <member name="M:CSCore.Streams.SineGenerator.Dispose">
+            <summary>
+            Not used.
+            </summary>
+        </member>
+        <member name="M:CSCore.Streams.SineGenerator.Dispose(System.Boolean)">
+            <summary>
+            Not used.
+            </summary>
+            <param name="disposing">Not used.</param>
+        </member>
+        <member name="P:CSCore.Streams.SineGenerator.Frequency">
+            <summary>
+            Gets or sets the frequency of the sine wave.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SineGenerator.Amplitude">
+            <summary>
+            Gets or sets the amplitude of the sine wave.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SineGenerator.Phase">
+            <summary>
+            Gets or sets the phase of the sine wave.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SineGenerator.WaveFormat">
+            <summary>
+                Gets the <see cref="P:CSCore.IWaveStream.WaveFormat"/> of the waveform-audio data.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SineGenerator.Position">
+            <summary>
+            Not supported.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SineGenerator.Length">
+            <summary>
+            Not supported.
+            </summary>
+        </member>
+        <member name="P:CSCore.Streams.SineGenerator.CanSeek">
+            <summary>
+            Gets a value indicating whether the <see cref="T:CSCore.IWaveStream"/> supports seeking.
+            </summary>
+        </member>
+        <member name="T:CSCore.Utils.Buffer.FixedSizeBuffer`1">
+            <summary>
+            Represents a read- and writeable buffer which can hold a specified number of elements. 
+            </summary>
+            <typeparam name="T">Specifies the type of the elements to store.</typeparam>
+        </member>
+        <member name="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:CSCore.Utils.Buffer.FixedSizeBuffer`1"/> class.
+            </summary>
+            <param name="bufferSize">Size of the buffer.</param>
+        </member>
+        <member name="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.Write(`0[],System.Int32,System.Int32)">
+            <summary>
+            Adds new data to the internal buffer.
+            </summary>
+            <param name="buffer">Array which contains the data.</param>
+            <param name="offset">Zero-based offset in the <paramref name="buffer"/> (specified in "elements").</param>
+            <param name="count">Number of elements to add to the internal buffer.</param>
+            <returns>Number of added elements.</returns>
+        </member>
+        <member name="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.Read(`0[],System.Int32,System.Int32)">
+            <summary>
+                Reads a sequence of elements from the internal buffer of the <see cref="T:CSCore.Utils.Buffer.FixedSizeBuffer`1"/>.
+            </summary>
+            <param name="buffer">
+                An array of elements. When this method returns, the <paramref name="buffer"/> contains the specified
+                array with the values between <paramref name="offset"/> and (<paramref name="offset"/> +
+                <paramref name="count"/> - 1) replaced by the elements read from the internal buffer.
+            </param>
+            <param name="offset">
+                The zero-based offset in the <paramref name="buffer"/> at which to begin storing the data
+                read from the internal buffer.
+            </param>
+            <param name="count">The maximum number of elements to read from the internal buffer.</param>
+            <returns>The total number of elements read into the <paramref name="buffer"/>.</returns>
+        </member>
+        <member name="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.Clear">
+            <summary>
+            Clears the internal buffer.
+            </summary>
+        </member>
+        <member name="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.Dispose">
+            <summary>
+            Disposes the <see cref="T:CSCore.Utils.Buffer.FixedSizeBuffer`1"/> and releases the internal used buffer.
+            </summary>
+        </member>
+        <member name="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.Dispose(System.Boolean)">
+            <summary>
+            Disposes the <see cref="T:CSCore.Utils.Buffer.FixedSizeBuffer`1"/> and releases the internal used buffer.
+            </summary>
+            <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        </member>
+        <member name="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.Finalize">
+            <summary>
+            Default destructor which calls the <see cref="M:CSCore.Utils.Buffer.FixedSizeBuffer`1.Dispose(System.Boolean)"/> method.
+            </summary>
+        </member>
+        <member name="P:CSCore.Utils.Buffer.FixedSizeBuffer`1.Length">
+            <summary>
+            Gets the size of the internal buffer.
+            </summary>
+        </member>
+        <member name="P:CSCore.Utils.Buffer.FixedSizeBuffer`1.Buffered">
+            <summary>
+            Gets the number of buffered elements.
             </summary>
         </member>
         <member name="T:CSCore.Utils.Complex">

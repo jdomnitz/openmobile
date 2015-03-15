@@ -213,7 +213,7 @@ namespace OpenMobile.Media
                 return false;
             }
 
-            if (_AudioDeviceProvider.DeactivateRoute(sourceDevice, targetDevice))
+            if (!_AudioDeviceProvider.DeactivateRoute(sourceDevice, targetDevice))
             {
                 OM.Host.DebugMsg(DebugMessageType.Error, String.Format("Failed to deactivate audio route from {0} to {1}", sourceDevice, targetDevice));
                 return true;
