@@ -416,15 +416,23 @@ namespace OMVLCPlayer
 
             // Update media info
             mediaInfo media = _Zone_Playlist[zone].CurrentItem;
-            base.MediaProviderData_ReportMediaInfo(zone, media);
 
-            // Start playback of new media
-            PlayerControl_Play(zone, media);
+            if (media != null)
+            {
+                base.MediaProviderData_ReportMediaInfo(zone, media);
 
-            // Goto to restart point
-            _ZonePlayer[zone].Position = playbackPos;
+                // Start playback of new media
+                PlayerControl_Play(zone, media);
 
-            OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Restarted playback of '{2}' from position {3}%", zone, zone.Name, media, playbackPos));
+                // Goto to restart point
+                _ZonePlayer[zone].Position = playbackPos;
+
+                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Zone: {0}({1}) -> Restarted playback of '{2}' from position {3}%", zone, zone.Name, media, playbackPos));
+            }
+            else
+            {
+                OM.Host.DebugMsg(DebugMessageType.Error, String.Format("Zone: {0}({1}) -> Unable to restart playback. No media item", zone, zone.Name));
+            }
         }
 
         private void PlayerControl_DelayedPlay_Cancel(Zone zone)
@@ -440,6 +448,9 @@ namespace OMVLCPlayer
 
         private string PlayerControl_Play(Zone zone, mediaInfo media)
         {
+            if (media == null)
+                return "No media to play";
+
             System.Diagnostics.Debug.Write(String.Format("Sending play {0}\r\n", media));
             if (media != null)
             {

@@ -1752,13 +1752,14 @@ namespace OpenMobile
                 // Hibernate computer
                 case eFunction.hibernate:
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
-                    Core.CloseProgram(ShutdownModes.Hibernate);
+                    //Core.CloseProgram(ShutdownModes.Hibernate);
+                    OSFunctions.OS.Hibernate();
                     return true;
 
                 // Set computer in standby
                 case eFunction.standby:
                     raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
-                    Core.CloseProgram(ShutdownModes.Suspend);
+                    //Core.CloseProgram(ShutdownModes.Suspend);
                    return true;
 
                 // Connect to internet
