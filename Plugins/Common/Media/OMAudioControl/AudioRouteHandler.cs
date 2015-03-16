@@ -106,6 +106,59 @@ namespace OMAudioControl
         public AudioRouteHandler()
         {
             InitAudioDevices();
+
+            OM.Host.OnPowerChange += new OpenMobile.Plugin.PowerEvent(Host_OnPowerChange);
+        }
+
+        void Host_OnPowerChange(ePowerEvent type)
+        {
+            switch (type)
+            {
+                case ePowerEvent.Unknown:
+                    break;
+                case ePowerEvent.ShutdownPending:
+                    break;
+                case ePowerEvent.LogoffPending:
+                    break;
+                case ePowerEvent.SleepOrHibernatePending:
+                    // Stop all routes
+                    OM.Host.DebugMsg(DebugMessageType.Info, "Hibernate pending, pausing audio routes");
+                    PauseRoutes();
+                    break;
+                case ePowerEvent.SystemResumed:
+                    OM.Host.DebugMsg(DebugMessageType.Info, "System resuming, starting audio routes");
+                    ResumeRoutes();
+                    break;
+                case ePowerEvent.BatteryLow:
+                    break;
+                case ePowerEvent.BatteryCritical:
+                    break;
+                case ePowerEvent.SystemOnBattery:
+                    break;
+                case ePowerEvent.SystemPluggedIn:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void PauseRoutes()
+        {
+            OM.Host.DebugMsg(DebugMessageType.Info, "Pauses audio routes");
+            foreach (var route in _AudioRoutes)
+            {
+                route.Deactivate();
+                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Stopped audio route {0}", route));
+            }
+        }
+        private void ResumeRoutes()
+        {
+            OM.Host.DebugMsg(DebugMessageType.Info, "Resumes audio routes");
+            foreach (var route in _AudioRoutes)
+            {
+                route.Activate();
+                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Resumed audio route {0}", route));
+            }
         }
 
         private void InitAudioDevices()
@@ -331,6 +384,8 @@ namespace OMAudioControl
 
                 // Deactivate the audio route
                 audioRoute.Deactivate();
+
+                _AudioRoutes.Remove(audioRoute);
 
                 return true;
             }
