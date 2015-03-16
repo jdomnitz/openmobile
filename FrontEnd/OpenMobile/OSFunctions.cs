@@ -62,7 +62,7 @@ namespace OpenMobile
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.System_SystemResumed:
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.System_SleepOrHibernatePending:
-                    Core.CloseProgram(ShutdownModes.Normal);    
+                    //Core.CloseProgram(ShutdownModes.Normal);    
                     //Core.theHost.execute(eFunction.closeProgram);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.Power_Battery_Low:
