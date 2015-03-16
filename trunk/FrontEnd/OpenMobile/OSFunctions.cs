@@ -54,24 +54,32 @@ namespace OpenMobile
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.System_LogOffPending:
                     Core.CloseProgram(ShutdownModes.Normal);    
                     //Core.theHost.execute(eFunction.closeProgram);
+                    Core.theHost.raisePowerEvent(ePowerEvent.LogoffPending);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.System_ShutdownPending:
                     Core.CloseProgram(ShutdownModes.Normal);    
                     //Core.theHost.execute(eFunction.closeProgram);
+                    Core.theHost.raisePowerEvent(ePowerEvent.ShutdownPending);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.System_SystemResumed:
+                    Core.theHost.raisePowerEvent(ePowerEvent.SystemResumed);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.System_SleepOrHibernatePending:
                     //Core.CloseProgram(ShutdownModes.Normal);    
                     //Core.theHost.execute(eFunction.closeProgram);
+                    Core.theHost.raisePowerEvent(ePowerEvent.SleepOrHibernatePending);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.Power_Battery_Low:
+                    Core.theHost.raisePowerEvent(ePowerEvent.BatteryLow);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.Power_Battery_Critical:
+                    Core.theHost.raisePowerEvent(ePowerEvent.BatteryCritical);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.Power_Battery_RunningOnBattery:
+                    Core.theHost.raisePowerEvent(ePowerEvent.SystemOnBattery);
                     break;
                 case OpenMobile.Framework.OSInteractionBase.CallbackEvents.Power_Battery_RunningOnLine:
+                    Core.theHost.raisePowerEvent(ePowerEvent.SystemPluggedIn);
                     break;
                 default:
                     break;

@@ -205,5 +205,10 @@ namespace OMAudioControl
         {
             return (_SourceDevice == sourceDevice && _TargetDevice == targetDevice);
         }
+
+        public override string ToString()
+        {
+            return String.Format("AudioRoute {0} -> {1}", _SourceDevice.FriendlyName, _TargetDevice.FriendlyName);
+        }
     }
 }
