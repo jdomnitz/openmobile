@@ -360,9 +360,6 @@ Public Class RadioComm
         If band = "AM" Then
             m_Radio_AM_Live.AddDistinct(m_CurrentMedia)
             m_Radio_AM_Live.Save()
-            For Each zone In theZones
-                MediaProviderData_RefreshPlaylist(zone)
-            Next
         Else
             m_Radio_FM_Live.AddDistinct(m_CurrentMedia)
             m_Radio_FM_Live.Save()
@@ -966,11 +963,26 @@ Public Class RadioComm
                 m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_SetListSource()", String.Format("Select list source {0}", param(0)))
             End If
 
+            For Each zone In theZones
+                MediaProviderData_RefreshPlaylist(zone)
+            Next
+
             Return True
 
         Else
 
-            Return False
+            ' Invalid param() so just toggle
+            If m_Radio_MediaSource.ListSource = 1 Then
+                m_Radio_MediaSource.ListSource = 0
+            Else
+                m_Radio_MediaSource.ListSource = 1
+            End If
+
+            For Each zone In theZones
+                MediaProviderData_RefreshPlaylist(zone)
+            Next
+
+            Return True
 
         End If
 
@@ -981,6 +993,11 @@ Public Class RadioComm
 
         m_Radio_AM_Presets.AddDistinct(m_CurrentMedia)
         m_Radio_AM_Presets.Save()
+
+        For Each zone In theZones
+            MediaProviderData_RefreshPlaylist(zone)
+        Next
+
         Return True
 
     End Function
@@ -990,6 +1007,11 @@ Public Class RadioComm
 
         m_Radio_FM_Presets.AddDistinct(m_CurrentMedia)
         m_Radio_FM_Presets.Save()
+
+        For Each zone In theZones
+            MediaProviderData_RefreshPlaylist(zone)
+        Next
+
         Return True
 
     End Function
@@ -997,6 +1019,9 @@ Public Class RadioComm
     Public Function MediaSource_AM_OnCommand_PresetRemove(zone As Zone, param() As Object)
         ' Remove AM preset
 
+        For Each zone In theZones
+            MediaProviderData_RefreshPlaylist(zone)
+        Next
 
         Return ""
 
@@ -1005,6 +1030,9 @@ Public Class RadioComm
     Public Function MediaSource_FM_OnCommand_PresetRemove(zone As Zone, param() As Object)
         ' Remove FM preset
 
+        For Each zone In theZones
+            MediaProviderData_RefreshPlaylist(zone)
+        Next
 
         Return ""
 
@@ -1013,6 +1041,9 @@ Public Class RadioComm
     Public Function MediaSource_AM_OnCommand_PresetRename(zone As Zone, param() As Object)
         ' Rename AM preset
 
+        For Each zone In theZones
+            MediaProviderData_RefreshPlaylist(zone)
+        Next
 
         Return ""
 
@@ -1021,6 +1052,9 @@ Public Class RadioComm
     Public Function MediaSource_FM_OnCommand_PresetRename(zone As Zone, param() As Object)
         ' Rename FM preset
 
+        For Each zone In theZones
+            MediaProviderData_RefreshPlaylist(zone)
+        Next
 
         Return ""
 
@@ -1278,6 +1312,8 @@ Public Class RadioComm
         End If
 
         m_Radio_MediaSource.ChannelID = Message
+
+        'push_media_info()
 
     End Sub
 
