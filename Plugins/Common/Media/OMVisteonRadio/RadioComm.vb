@@ -74,12 +74,12 @@ Public Class RadioComm
 
     ' Defines the FM media source
     Private m_Radio_FM_MediaSource As MediaSource_TunedContent
-    Private m_Radio_FM_Live As OpenMobile.Media.Playlist = New Playlist("Channels.FM.Live")
-    Private m_Radio_FM_Presets As OpenMobile.Media.Playlist = New Playlist("Channels.FM.Presets")
+    Private m_Radio_FM_Live As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.FM.Live", Me.pluginName))
+    Private m_Radio_FM_Presets As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.FM.Presets", Me.pluginName))
     ' Defines the AM media source
     Private m_Radio_AM_MediaSource As MediaSource_TunedContent
-    Private m_Radio_AM_Live As OpenMobile.Media.Playlist = New Playlist("Channels.AM.Live")
-    Private m_Radio_AM_Presets As OpenMobile.Media.Playlist = New Playlist("Channels.AM.Presets")
+    Private m_Radio_AM_Live As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.AM.Live", Me.pluginName))
+    Private m_Radio_AM_Presets As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.AM.Presets", Me.pluginName))
 
     Private m_LastAMStation As String = "AM:54000"
     Private m_LastFMStation As String = "FM:88100"
@@ -123,13 +123,12 @@ Public Class RadioComm
         ' Init FM
         m_Radio_FM_Live.Name = String.Format("{0}.Channels.FM.Live", Me.pluginName)
         m_Radio_FM_Live.DisplayName = "FM Live"
-        ' Load FM presets from database
-        m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_FM_Presets.Name))
-        If Not m_Radio_FM_Presets.Load() Then
-            m_Radio_FM_Presets.Name = String.Format("{0}.Channels.FM.Presets", Me.pluginName)
-            m_Radio_FM_Presets.DisplayName = "FM Presets"
-            m_Radio_FM_Presets.Save()
-        End If
+        ' FM presets
+        m_Radio_FM_Presets.Name = String.Format("{0}.Channels.FM.Presets", Me.pluginName)
+        m_Radio_FM_Presets.DisplayName = "FM Presets"
+        m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_FM_Presets.DisplayName))
+        m_Radio_FM_Presets.Load()
+
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Loaded {1} items for playlist {0} from DB", m_Radio_FM_Presets.DisplayName, m_Radio_FM_Presets.Count))
 
         ' FM defaults
@@ -139,7 +138,7 @@ Public Class RadioComm
 
         ' FM media source
         m_Radio_FM_MediaSource = New MediaSource_TunedContent(Me, "FM", "FM Radio", OM.Host.getSkinImage("HDRadio"))
-        m_Radio_FM_MediaSource.ListSource = helperFunctions.StoredData.GetInt(Me, Me.pluginName & ".LastFMListSource")
+        m_Radio_FM_MediaSource.ListSource = helperFunctions.StoredData.GetInt(Me, Me.pluginName & ".LastFMListSource", 1)
         m_Radio_FM_MediaSource.HD = False
         m_Radio_FM_MediaSource.Icon = Nothing
         m_Radio_FM_MediaSource.ProgramText = ""
@@ -165,11 +164,10 @@ Public Class RadioComm
         m_Radio_AM_Live.Name = String.Format("{0}.Channels.AM.Live", Me.pluginName)
         m_Radio_AM_Live.DisplayName = "AM Live"
         ' AM Presets
-
+        m_Radio_AM_Presets.Name = String.Format("{0}.Channels.AM.Presets", Me.pluginName)
+        m_Radio_AM_Presets.DisplayName = "AM Presets"
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_AM_Presets.DisplayName))
         If Not m_Radio_FM_Presets.Load() Then
-            m_Radio_AM_Presets.Name = String.Format("{0}.Channels.AM.Presets", Me.pluginName)
-            m_Radio_AM_Presets.DisplayName = "AM Presets"
             m_Radio_AM_Presets.Save()
         End If
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Loaded {1} items for playlist {0} from DB", m_Radio_AM_Presets.DisplayName, m_Radio_AM_Presets.Count))
@@ -181,7 +179,7 @@ Public Class RadioComm
 
         ' AM media source
         m_Radio_AM_MediaSource = New MediaSource_TunedContent(Me, "AM", "AM Radio", OM.Host.getSkinImage("HDRadio"))
-        m_Radio_AM_MediaSource.ListSource = helperFunctions.StoredData.GetInt(Me, Me.pluginName & ".LastAMListSource")
+        m_Radio_AM_MediaSource.ListSource = helperFunctions.StoredData.GetInt(Me, Me.pluginName & ".LastAMListSource", 1)
         m_Radio_AM_MediaSource.HD = False
         m_Radio_AM_MediaSource.Icon = Nothing
         m_Radio_AM_MediaSource.ProgramText = ""
@@ -329,6 +327,7 @@ Public Class RadioComm
     Private Sub m_Radio_HDRadioEventTunerTuned(ByVal Message As String) Handles m_Radio.HDRadioEventTunerTuned
 
         Dim freq As String = m_LastFMStation
+        Dim zone As Zone
 
         If m_verbose Then
             m_Host.DebugMsg(String.Format("OMVisteonRadio - HDRadioEventTunerTuned({0})", Message), String.Format("Tuner tuned to {0}.", m_Radio.CurrentFormattedChannel))
@@ -354,10 +353,16 @@ Public Class RadioComm
         If m_Radio_MediaSource.Name = "AM" Then
             m_Radio_AM_Live.AddDistinct(m_CurrentMedia)
             m_Radio_AM_Live.Save()
+            For Each zone In theZones
+                MediaProviderData_RefreshPlaylist(zone)
+            Next
         Else
             m_Radio_FM_Live.AddDistinct(m_CurrentMedia)
             m_Radio_FM_Live.Save()
         End If
+        For Each zone In theZones
+            MediaProviderData_RefreshPlaylist(zone)
+        Next
 
         m_Radio_MediaSource.ChannelNameShort = m_Radio.CurrentFormattedChannel
 
@@ -560,21 +565,21 @@ Public Class RadioComm
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_ActivateMediaSource()", String.Format("Selecting AM band."))
             End If
-            tuneTo(helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastAMStation"))
             m_Radio_MediaSource = m_Radio_AM_MediaSource
+            tuneTo(helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastAMStation"))
         ElseIf mediaSourceName = "FM" Or mediaSourceName = "HD" Then
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_ActivateMediaSource()", String.Format("Selecting FM band."))
             End If
-            tuneTo(helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastFMStation"))
             m_Radio_MediaSource = m_Radio_FM_MediaSource
+            tuneTo(helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastFMStation"))
         Else
             ' Invalid media source selected (not likely)
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - MediaProviderCommand_ActivateMediaSource()", String.Format("Selecting FM band (by default)."))
             End If
-            tuneTo(helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastFMStation"))
             m_Radio_MediaSource = m_Radio_FM_MediaSource
+            tuneTo(helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastFMStation"))
         End If
 
         Return ""
@@ -846,7 +851,7 @@ Public Class RadioComm
                     Return m_Radio_FM_Presets
                 End If
             Case Else
-                Return Nothing
+                Return m_Radio_FM_Live
         End Select
 
     End Function
@@ -854,7 +859,22 @@ Public Class RadioComm
     Public Overrides Function MediaProviderData_SetPlaylist(zone As OpenMobile.Zone, playlist As OpenMobile.Media.Playlist) As OpenMobile.Media.Playlist
         ' Not implemented
 
-        Return Nothing
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_SetPlaylist()", String.Format("Not implemented."))
+        End If
+
+        Select Case playlist.DisplayName
+            Case "AM Live"
+                Return m_Radio_AM_Live
+            Case "AM Presets"
+                Return m_Radio_AM_Presets
+            Case "FM Live"
+                Return m_Radio_FM_Live
+            Case "FM Presets"
+                Return m_Radio_FM_Presets
+            Case Else
+                Return m_Radio_FM_Live
+        End Select
 
     End Function
 
@@ -878,7 +898,7 @@ Public Class RadioComm
         ' Direct tune FM band
 
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("{0}", param(0)))
+            m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("Direct tune to {0}", param(0)))
         End If
 
         Dim freq As String
@@ -900,17 +920,23 @@ Public Class RadioComm
                 Select Case param(0)
                     Case 0
                         m_Radio_AM_MediaSource.ListSource = 0
-                    Case 1
-                        m_Radio_AM_MediaSource.ListSource = 1
                     Case Else
-                        Return "Invalid parameters"
+                        m_Radio_AM_MediaSource.ListSource = 1
                 End Select
 
             End If
 
-        End If
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_SetListSource()", String.Format("Select list source {0}", param(0)))
+            End If
 
-        Return ""
+            Return True
+
+        Else
+
+            Return False
+
+        End If
 
     End Function
 
@@ -924,22 +950,23 @@ Public Class RadioComm
                 Select Case param(0)
                     Case 0
                         m_Radio_FM_MediaSource.ListSource = 0
-                    Case 1
-                        m_Radio_FM_MediaSource.ListSource = 1
                     Case Else
-                        Return "Invalid parameters"
+                        m_Radio_FM_MediaSource.ListSource = 1
                 End Select
 
             End If
 
-            Return "Invalid parameters"
+            If m_verbose Then
+                m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_SetListSource()", String.Format("Select list source {0}", param(0)))
+            End If
+
+            Return True
+
         Else
 
-            Return "Invalid parameters"
+            Return False
 
         End If
-
-        Return ""
 
     End Function
 
@@ -1320,7 +1347,7 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - HDRadioEventTunerSignalStrength()", String.Format("Signal Strength received: {0}.", State))
         End If
 
-        m_Radio_MediaSource.SignalStrength = State
+        m_Radio_MediaSource.SignalStrength = Int(State / 30)
 
     End Sub
 
@@ -1329,7 +1356,7 @@ Public Class RadioComm
         ' Current HD signal strength
 
         If m_Radio_MediaSource.Name = "FM" Then
-            m_Radio_FM_MediaSource.SignalStrength = State
+            m_Radio_FM_MediaSource.SignalStrength = Int(State / 30)
         End If
 
     End Sub
