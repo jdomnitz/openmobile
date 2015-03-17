@@ -326,7 +326,8 @@ Public Class RadioComm
 
     Private Sub m_Radio_HDRadioEventTunerTuned(ByVal Message As String) Handles m_Radio.HDRadioEventTunerTuned
 
-        Dim freq As String = m_LastFMStation
+        Dim freq As String
+        Dim band As String
         Dim zone As Zone
 
         If m_verbose Then
@@ -334,6 +335,12 @@ Public Class RadioComm
         End If
 
         'If m_Radio.CurrentFrequency > 100 Then
+        If m_Radio.CurrentBand = HDRadio.HDRadioBands.AM Then
+            band = "AM"
+        Else
+            band = "FM"
+        End If
+        freq = String.Format("{0}:{1}", band, m_Radio.CurrentFrequency * 100)
 
         m_CurrentMedia = New mediaInfo
         m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
@@ -350,7 +357,7 @@ Public Class RadioComm
         helperFunctions.StoredData.Set(Me, Me.pluginName & ".LastPlaying", freq)
 
         ' Add channel to LIVE playlist
-        If m_Radio_MediaSource.Name = "AM" Then
+        If band = "AM" Then
             m_Radio_AM_Live.AddDistinct(m_CurrentMedia)
             m_Radio_AM_Live.Save()
             For Each zone In theZones
@@ -380,7 +387,6 @@ Public Class RadioComm
         Dim startTime As DateTime
         Dim elapsedTime As TimeSpan
         Dim myCounter As Integer = 0
-        Dim freq As String
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Searching: {0}", m_ComPort))
