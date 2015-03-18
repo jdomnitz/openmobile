@@ -350,16 +350,35 @@ namespace OpenMobile.Media
             if (item == null)
                 return false;
 
-            if (!_Items.Any(x => x == item))
+            //if (!_Items.Any(x => x == item))
+            if (!_Items.Any(x => x.IsContentEqual(item)))
             {
                 Add(item);
                 return true;
             }
             return false;
         }
+
+        public bool AddDistinct(mediaInfo item, Func<mediaInfo, bool> predicate)
+        {
+            if (item == null)
+                return false;
+
+            if (!_Items.Any(predicate))
+            {
+                Add(item);
+                return true;
+            }
+            return false;
+        }
+
         public void AddRangeDistinct(IEnumerable<mediaInfo> items)
         {
             AddRange(items.Where(x => !_Items.Any(y => y == x)));
+        }
+        public void AddRangeDistinct(IEnumerable<mediaInfo> items, Func<mediaInfo, bool> predicate)
+        {
+            AddRange(items.Where(x => !_Items.Any(predicate)));
         }
 
         public void Remove(mediaInfo item)
