@@ -346,7 +346,9 @@ Public Class RadioComm
         m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
         m_CurrentMedia.Artist = ""
         m_CurrentMedia.Album = ""
+        m_CurrentMedia.Genre = ""
         m_CurrentMedia.Type = OpenMobile.eMediaType.Radio
+
 
         SyncLock m_SubStationData
             m_SubStationData.Clear()
@@ -373,8 +375,7 @@ Public Class RadioComm
         push_media_info()
 
         ' Puts text on bottom of radio window
-
-        'End If
+        '   MediaProviderData_ReportMediaText
 
     End Sub
 
@@ -1019,6 +1020,9 @@ Public Class RadioComm
     Public Function MediaSource_AM_OnCommand_PresetRemove(zone As Zone, param() As Object)
         ' Remove AM preset
 
+        m_Radio_AM_Presets.Remove(param(0))
+        m_Radio_AM_Presets.Save()
+
         For Each zone In theZones
             MediaProviderData_RefreshPlaylist(zone)
         Next
@@ -1029,6 +1033,9 @@ Public Class RadioComm
 
     Public Function MediaSource_FM_OnCommand_PresetRemove(zone As Zone, param() As Object)
         ' Remove FM preset
+
+        m_Radio_FM_Presets.Remove(param(0))
+        m_Radio_FM_Presets.Save()
 
         For Each zone In theZones
             MediaProviderData_RefreshPlaylist(zone)
@@ -1155,7 +1162,6 @@ Public Class RadioComm
 
     Private Sub push_media_info()
 
-        m_CurrentMedia.Genre = "[Genre]"
         m_CurrentMedia.Album = "[Album]"
         m_CurrentMedia.Location = "[Location]"
         m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
