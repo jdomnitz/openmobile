@@ -83,6 +83,7 @@ Public Class RadioComm
 
     Private m_LastAMStation As String = "AM:54000"
     Private m_LastFMStation As String = "FM:88100"
+    Private m_LastStation As String = m_LastFMStation
 
     Private myImage As imageItem = OM.Host.getImageFromFile("Icon-HDRadio")
     Private theZones As List(Of Zone) = New List(Of Zone)
@@ -103,12 +104,13 @@ Public Class RadioComm
             Return eLoadStatus.LoadFailedGracefulUnloadRequested
         End If
 
+        Dim chan() As String = ""
+
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Initializing..."))
         End If
 
         m_Host = host
-
         m_Host.UIHandler.AddNotification(myNotification)
         myNotification.Text = "Plugin initializing..."
 
@@ -117,14 +119,15 @@ Public Class RadioComm
         m_InputDevice = GetData("OMVisteoRadio.SourceDevice", "Default Device")
 
         m_LastFMStation = GetData(Me.pluginName & ".LastFMStation", m_LastFMStation)
-        m_LastAMstation = GetData(Me.pluginName & ".LastAMStation", m_LastAMstation)
+        m_LastAMStation = GetData(Me.pluginName & ".LastAMStation", m_LastAMStation)
+        m_LastStation = GetData(Me.pluginName & ".LastStation", m_LastStation)
+        chan = m_LastStation.Split(":")
 
         ' Register media sources 
 
-        ' Init FM
+        ' Init FM Playlists
         m_Radio_FM_Live.Name = String.Format("{0}.Channels.FM.Live", Me.pluginName)
-        m_Radio_FM_Live.DisplayName = "FM Live"
-        ' FM presets
+        m_Radio_FM_Live.Name = "FM Live"
         m_Radio_FM_Presets.Name = String.Format("{0}.Channels.FM.Presets", Me.pluginName)
         m_Radio_FM_Presets.DisplayName = "FM Presets"
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_FM_Presets.DisplayName))
@@ -157,10 +160,9 @@ Public Class RadioComm
         AddHandler m_Radio_FM_MediaSource.OnCommand_DirectTune, AddressOf MediaSource_FM_OnCommand_DirectTune
         'AddHandler m_Radio_FM_MediaSource.OnCommand_SearchChannels, AddressOf MediaSource_FM_OnCommand_handler
 
-        ' Init AM
+        ' Init AM Playlists
         m_Radio_AM_Live.Name = String.Format("{0}.Channels.AM.Live", Me.pluginName)
         m_Radio_AM_Live.DisplayName = "AM Live"
-        ' AM Presets
         m_Radio_AM_Presets.Name = String.Format("{0}.Channels.AM.Presets", Me.pluginName)
         m_Radio_AM_Presets.DisplayName = "AM Presets"
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_AM_Presets.DisplayName))
@@ -191,6 +193,14 @@ Public Class RadioComm
         AddHandler m_Radio_AM_MediaSource.OnCommand_PresetRename, AddressOf MediaSource_AM_OnCommand_PresetRename
         AddHandler m_Radio_AM_MediaSource.OnCommand_DirectTune, AddressOf MediaSource_AM_OnCommand_DirectTune
         'AddHandler m_Radio_AM_MediaSource.OnCommand_SearchChannels, AddressOf MediaSource_AM_OnCommand_handler
+
+        If chan.Length > 1 Then
+            If chan(0) = "FM" OrElse chan(0) = "HD" Then
+                m_Radio_MediaSource = m_Radio_FM_MediaSource
+            Else
+                m_Radio_MediaSource = m_Radio_AM_MediaSource
+            End If
+        End If
 
         Array.Sort(available_ports)
 
