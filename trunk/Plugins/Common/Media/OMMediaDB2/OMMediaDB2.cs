@@ -355,7 +355,15 @@ namespace OMMediaDB2
             if (!DB_ConnectAndOpen())
                 return false;
 
-            mediaInfo info = TagReader.getInfo(filepath);
+            mediaInfo info = null;
+            try
+            {
+                info = TagReader.getInfo(filepath);
+            }
+            catch (Exception ex)
+            {
+                OM.Host.DebugMsg(String.Format("Exception while reading tag data for file: {0}", filepath), ex);
+            }
             if (info == null)
                 return false;
 
