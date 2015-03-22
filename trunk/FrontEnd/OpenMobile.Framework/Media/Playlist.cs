@@ -420,7 +420,7 @@ namespace OpenMobile.Media
             if (item == null)
                 return false;
 
-            if (_Items.Any(predicate))
+            if (!_Items.Any(predicate))
             {
                 Add(item);
                 return true;
@@ -453,7 +453,7 @@ namespace OpenMobile.Media
         /// <param name="predicate"></param>
         public void AddRangeDistinct(IEnumerable<mediaInfo> items, Func<mediaInfo, bool> predicate)
         {
-            AddRange(items.Where(x => _Items.Any(predicate)));
+            AddRange(items.Where(x => !_Items.Any(predicate)));
         }
 
         /// <summary>
