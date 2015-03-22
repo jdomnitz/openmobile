@@ -410,7 +410,7 @@ namespace OpenMobile.Media
         }
 
         /// <summary>
-        /// Adds an item to the playlist. Uses a function to evaluate whether it should add the item. Item is added if function returns true.
+        /// Adds an item to the playlist. Uses a function to evaluate whether it should add the item. Item is NOT added if function returns true.
         /// </summary>
         /// <param name="item"></param>
         /// <param name="predicate"></param>
@@ -447,7 +447,7 @@ namespace OpenMobile.Media
         }
 
         /// <summary>
-        /// Adds a range of items. Uses a function to evaluate whether it should add the item. Item is added if function returns true.
+        /// Adds a range of items. Uses a function to evaluate whether it should add the item. Item is NOT added if function returns true.
         /// </summary>
         /// <param name="items"></param>
         /// <param name="predicate"></param>
