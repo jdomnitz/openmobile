@@ -64,6 +64,9 @@ namespace OpenMobile.Media
         PCAST
     }
 
+    /// <summary>
+    /// A playlist class
+    /// </summary>
     public class Playlist : INotifyPropertyChanged
     {
         /// <summary>
@@ -76,6 +79,11 @@ namespace OpenMobile.Media
             return name;
         }
 
+        /// <summary>
+        /// Set's the display name for this playlist
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="displayName"></param>
         static public void SetDisplayName(ref string name, string displayName)
         {
             string currentDisplayName = GetDisplayName(name);
@@ -292,12 +300,20 @@ namespace OpenMobile.Media
 
         #region Constructor
 
+        /// <summary>
+        /// Creates a new playlist
+        /// </summary>
         public Playlist()
         {
             _ListChangedEventHandler = new ListChangedEventHandler(_Items_ListChanged);
             SetItemsList(new BindingList<mediaInfo>());
             _BufferItems = new BindingList<mediaInfo>();
         }
+
+        /// <summary>
+        /// Creates a new playlist
+        /// </summary>
+        /// <param name="name"></param>
         public Playlist(string name)
             : this()
         {
@@ -306,6 +322,12 @@ namespace OpenMobile.Media
 
         #endregion        
 
+        #region Playlist item control
+
+        /// <summary>
+        /// Adds an item to the playlist
+        /// </summary>
+        /// <param name="item"></param>
         public void Add(mediaInfo item)
         {
             if (item == null)
@@ -330,6 +352,11 @@ namespace OpenMobile.Media
             this.OnPropertyChanged("CurrentItem");
 
         }
+
+        /// <summary>
+        /// Adds a range of items to the playlist
+        /// </summary>
+        /// <param name="items"></param>
         public void AddRange(IEnumerable<mediaInfo> items)
         {
             _BlockListUpdateEvents = true;
@@ -345,12 +372,17 @@ namespace OpenMobile.Media
             RegenerateQueue();
             this.OnPropertyChanged("CurrentItem");
         }
+
+        /// <summary>
+        /// Adds an item to the playlist. If an item is already contained in the playlist it's skipped
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public bool AddDistinct(mediaInfo item)
         {
             if (item == null)
                 return false;
 
-            //if (!_Items.Any(x => x == item))
             if (!_Items.Any(x => x.IsContentEqual(item)))
             {
                 Add(item);
@@ -359,12 +391,17 @@ namespace OpenMobile.Media
             return false;
         }
 
-        public bool AddDistinct(mediaInfo item, Func<mediaInfo, bool> predicate)
+        /// <summary>
+        /// Adds an item to the playlist. If an item has the same name as one already in the playlist it's skipped.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool AddDistinctName(mediaInfo item)
         {
             if (item == null)
                 return false;
 
-            if (!_Items.Any(predicate))
+            if (!_Items.Any(x => x.Name == item.Name))
             {
                 Add(item);
                 return true;
@@ -372,22 +409,74 @@ namespace OpenMobile.Media
             return false;
         }
 
+        /// <summary>
+        /// Adds an item to the playlist. Uses a function to evaluate whether it should add the item. Item is added if function returns true.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public bool AddDistinct(mediaInfo item, Func<mediaInfo, bool> predicate)
+        {
+            if (item == null)
+                return false;
+
+            if (_Items.Any(predicate))
+            {
+                Add(item);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Adds a range of items. If an item is already contained in the playlist it's skipped
+        /// </summary>
+        /// <param name="items"></param>
         public void AddRangeDistinct(IEnumerable<mediaInfo> items)
         {
             AddRange(items.Where(x => !_Items.Any(y => y == x)));
         }
-        public void AddRangeDistinct(IEnumerable<mediaInfo> items, Func<mediaInfo, bool> predicate)
+
+        /// <summary>
+        /// Adds a range of items. If an item has the same name as one already in the playlist it's skipped.
+        /// </summary>
+        /// <param name="items"></param>
+        public void AddRangeDistinctName(IEnumerable<mediaInfo> items)
         {
-            AddRange(items.Where(x => !_Items.Any(predicate)));
+            AddRange(items.Where(x => !_Items.Any(y => y.Name == x.Name)));
         }
 
+        /// <summary>
+        /// Adds a range of items. Uses a function to evaluate whether it should add the item. Item is added if function returns true.
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="predicate"></param>
+        public void AddRangeDistinct(IEnumerable<mediaInfo> items, Func<mediaInfo, bool> predicate)
+        {
+            AddRange(items.Where(x => _Items.Any(predicate)));
+        }
+
+        /// <summary>
+        /// Removes an item from this playlist
+        /// </summary>
+        /// <param name="item"></param>
         public void Remove(mediaInfo item)
         {
-            _Items.Remove(item);
+            if (!_Items.Remove(item))
+            {
+                var itemToRemove = _Items.Where(x => x.IsContentEqual(item)).FirstOrDefault();
+                if (itemToRemove != null)
+                    _Items.Remove(itemToRemove);                
+            }
 
             if (_Items.Count < BufferItems_QueueMaxCount)
                 BufferItems_DecrementCurrentItemIndex();
         }
+
+        /// <summary>
+        /// Removes the item at the specified index
+        /// </summary>
+        /// <param name="index"></param>
         public void RemoveAt(int index)
         {
             _Items.RemoveAt(index);
@@ -396,6 +485,9 @@ namespace OpenMobile.Media
                 BufferItems_DecrementCurrentItemIndex();
         }
 
+        /// <summary>
+        /// Removes all items from this playlist
+        /// </summary>
         public void Clear()
         {
             _Items.Clear();
@@ -421,7 +513,7 @@ namespace OpenMobile.Media
             }
         }
         private BindingList<mediaInfo> _Items = new BindingList<mediaInfo>();
-
+        
         private void SetItemsList(BindingList<mediaInfo> list)
         {
             if (_Items != null)
@@ -471,6 +563,9 @@ namespace OpenMobile.Media
             }
         }
 
+        /// <summary>
+        /// Amount of items in the buffer items queue
+        /// </summary>
         public int BufferItems_QueueCount
         {
             get
@@ -478,6 +573,10 @@ namespace OpenMobile.Media
                 return (BufferItems_CurrentItemIndex - BufferItems_QueueStartIndex);
             }
         }
+
+        /// <summary>
+        /// The start index of the buffer items queue
+        /// </summary>
         public int BufferItems_QueueStartIndex
         {
             get
@@ -485,6 +584,10 @@ namespace OpenMobile.Media
                 return 0;
             }
         }
+
+        /// <summary>
+        /// The end index of the buffer items queue
+        /// </summary>
         public int BufferItems_QueueEndIndex
         {
             get
@@ -492,6 +595,10 @@ namespace OpenMobile.Media
                 return BufferItems_CurrentItemIndex - 1;
             }
         }
+
+        /// <summary>
+        /// The maximum amount of items that can be placed in the buffer queue
+        /// </summary>
         public int BufferItems_QueueMaxCount
         {
             get
@@ -499,21 +606,6 @@ namespace OpenMobile.Media
                 return _BufferSize;
             }
         }
-
-        /*
-        public int BufferItems_CurrentItemIndex
-        {
-            get
-            {
-                if (_BufferItems.Count > BufferItems_MaxCount)
-                    return (int)System.Math.Floor((float)_BufferItems.Count / 2.0f);
-                else if (_BufferItems.Count > _BufferSize)
-                    return _BufferSize;
-                else
-                    return _BufferItems.Count - 1;
-            }
-        }
-        */
 
         /// <summary>
         /// The index of the currently active item in the buffer
@@ -534,6 +626,9 @@ namespace OpenMobile.Media
         }
         private int _BufferItems_CurrentItemIndex = -1;
 
+        /// <summary>
+        /// Amount of items in the history buffer
+        /// </summary>
         public int BufferItems_HistoryCount
         {
             get
@@ -541,6 +636,10 @@ namespace OpenMobile.Media
                 return (BufferItems_HistoryEndIndex - BufferItems_HistoryStartIndex) + 1;
             }
         }
+
+        /// <summary>
+        /// The start index of the history items queue
+        /// </summary>
         public int BufferItems_HistoryStartIndex
         {
             get
@@ -548,6 +647,10 @@ namespace OpenMobile.Media
                 return BufferItems_CurrentItemIndex + 1;
             }
         }
+
+        /// <summary>
+        /// The end index of the history items queue
+        /// </summary>
         public int BufferItems_HistoryEndIndex
         {
             get
@@ -556,6 +659,9 @@ namespace OpenMobile.Media
             }
         }
 
+        /// <summary>
+        /// The maximum amount of items that can be placed in the history queue
+        /// </summary>
         public int BufferItems_MaxCount
         {
             get
@@ -564,6 +670,9 @@ namespace OpenMobile.Media
             }
         }
 
+        /// <summary>
+        /// The index of the currently selected item in the playlist
+        /// </summary>
         public int Items_CurrentItemIndex
         {
             get
@@ -592,7 +701,6 @@ namespace OpenMobile.Media
                 _BufferItems_CurrentItemIndex--;
             this.OnPropertyChanged("CurrentItem");
         }
-
 
         private mediaInfo GetNextQueueItem(bool listContentChanged)
         {
@@ -635,8 +743,6 @@ namespace OpenMobile.Media
 
             return _Items[indexOfNextItem];
         }
-
-        
 
         private void RegenerateQueue()
         {
@@ -795,6 +901,9 @@ namespace OpenMobile.Media
                 _BufferItems.RemoveAt(_BufferItems.Count - 1);
         }
 
+        /// <summary>
+        /// Shifts to the next media index in the playlist
+        /// </summary>
         public void GotoNextMedia()
         {
             // Push a new item to the queue to move to the next index
@@ -803,6 +912,9 @@ namespace OpenMobile.Media
             this.OnPropertyChanged("CurrentItem");
         }
 
+        /// <summary>
+        /// Shifts to the previous media index in the playlist (first history items)
+        /// </summary>
         public void GotoPreviousMedia()
         {
             // Remove the oldest item in queue to go back in history
@@ -812,18 +924,11 @@ namespace OpenMobile.Media
             this.OnPropertyChanged("CurrentItem");
         }
 
-        //public void SetCurrentStartIndex(int index)
-        //{
-        //    if (index >= 0 && index < _Items.Count)
-        //    {
-        //        if (BufferItems_CurrentItemIndex >= 0)
-        //            _BufferItems[BufferItems_CurrentItemIndex] = _Items[index];
-        //        else
-        //            _BufferItems.Add(_Items[index]);
-        //    }
-        //    this.OnPropertyChanged("CurrentItem");
-        //}
-
+        /// <summary>
+        /// Sets the index of the next item to play
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public bool SetNextMedia(int index)
         {
             if (index < 0 || index >= _Items.Count)
@@ -836,6 +941,8 @@ namespace OpenMobile.Media
             }
             return false;
         }
+
+        #endregion
 
         #region Playlist handling
 
@@ -1111,6 +1218,12 @@ namespace OpenMobile.Media
             return db.writePlaylist(playlist, name, false);
         }
 
+        /// <summary>
+        /// Writes the playlist to the database as an object by serialization
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="playlist"></param>
+        /// <returns></returns>
         public static bool writePlaylistToDBasObject(string name, List<mediaInfo> playlist)
         {
             if (playlist.Count == 0)
