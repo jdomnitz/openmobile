@@ -872,52 +872,48 @@ Public Class RadioComm
     Public Function MediaSource_AM_OnCommand_DirectTune(zone As Zone, param() As Object)
         ' Direct tune AM band
 
-        If Not param Is Nothing Then
-            If Not param(0).Location Is Nothing Then
+        If Params.IsParamsValid(param, 1) Then
+            If param.GetType() Is GetType(mediaInfo) Then
                 If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("Direct tune to {0}", param(0).Location))
+                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_DirectTune()", String.Format("Direct tune to {0}", param(0).Location))
                 End If
                 tuneTo(param(0).Location)
+                Return True
             Else
-                ' Format the parameter to tune to
+                ' Format the parameter to tune to (could test for string)
                 If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("AM:{0}", param(0)))
+                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_DirectTune()", String.Format("AM:{0}", param(0)))
                 End If
                 tuneTo(String.Format("AM:{0}", param(0)))
+                Return True
             End If
-            Return True
         Else
             Return False
         End If
-
-        Return True
 
     End Function
 
     Public Function MediaSource_FM_OnCommand_DirectTune(zone As Zone, param() As Object)
         ' Direct tune FM band
 
-        Dim chan() As String
-
-        If Not param Is Nothing Then
-            If Not param(0).Location Is Nothing Then
+        If Params.IsParamsValid(param, 1) Then
+            If param.GetType() Is GetType(mediaInfo) Then
                 If m_verbose Then
                     m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("Direct tune to {0}", param(0).Location))
                 End If
                 tuneTo(param(0).Location)
+                Return True
             Else
-                ' Format the parameter to tune to
+                ' Format the parameter to tune to (could test for string)
                 If m_verbose Then
                     m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("FM:{0}", param(0)))
                 End If
                 tuneTo(String.Format("FM:{0}", param(0)))
+                Return True
             End If
-            Return True
         Else
             Return False
         End If
-
-        Return True
 
     End Function
 
