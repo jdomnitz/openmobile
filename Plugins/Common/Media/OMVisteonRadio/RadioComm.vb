@@ -127,11 +127,12 @@ Public Class RadioComm
 
         ' Init FM Playlists
         m_Radio_FM_Live.Name = String.Format("{0}.Channels.FM.Live", Me.pluginName)
-        m_Radio_FM_Live.Name = "FM Live"
+        m_Radio_FM_Live.DisplayName = "FM Live"
         m_Radio_FM_Presets.Name = String.Format("{0}.Channels.FM.Presets", Me.pluginName)
         m_Radio_FM_Presets.DisplayName = "FM Presets"
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_FM_Presets.DisplayName))
-        m_Radio_FM_Presets.Load()
+        Dim test As Boolean = False
+        test = m_Radio_FM_Presets.Load()
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Loaded {1} items for playlist {0} from DB", m_Radio_FM_Presets.DisplayName, m_Radio_FM_Presets.Count))
 
         ' FM defaults
@@ -803,6 +804,7 @@ Public Class RadioComm
     Public Overrides Function MediaProviderData_GetPlaylist(zone As OpenMobile.Zone) As OpenMobile.Media.Playlist
 
         ' Return current (toggle? Presets/Live)
+        ' I think the toggle has already been done?
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetPlaylist()", String.Format("Requesting playlist (presets/live)."))
@@ -810,35 +812,35 @@ Public Class RadioComm
 
         Select Case m_Radio_MediaSource.Name
             Case m_Radio_AM_MediaSource.Name
-                If m_Radio_AM_MediaSource.ListSource = 1 Then
+                If m_Radio_AM_MediaSource.ListSource = 0 Then
                     If m_verbose Then
                         m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetPlaylist()", String.Format("Serving up AM Live."))
                     End If
                     helperFunctions.StoredData.Set(Me, Me.pluginName & ".LastAMListSource", 0)
-                    m_Radio_MediaSource.ListSource = 0
+                    'm_Radio_MediaSource.ListSource = 1
                     Return m_Radio_AM_Live
                 Else
                     If m_verbose Then
                         m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetPlaylist()", String.Format("Serving up AM Presets."))
                     End If
                     helperFunctions.StoredData.Set(Me, Me.pluginName & ".LastAMListSource", 1)
-                    m_Radio_MediaSource.ListSource = 1
+                    'm_Radio_MediaSource.ListSource = 0
                     Return m_Radio_AM_Presets
                 End If
             Case m_Radio_FM_MediaSource.Name
-                If m_Radio_FM_MediaSource.ListSource = 1 Then
+                If m_Radio_FM_MediaSource.ListSource = 0 Then
                     If m_verbose Then
                         m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetPlaylist()", String.Format("Serving up FM Live."))
                     End If
                     helperFunctions.StoredData.Set(Me, Me.pluginName & ".LastFMListSource", 0)
-                    m_Radio_MediaSource.ListSource = 0
+                    'm_Radio_MediaSource.ListSource = 1
                     Return m_Radio_FM_Live
                 Else
                     If m_verbose Then
                         m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetPlaylist()", String.Format("Serving up FM Presets."))
                     End If
                     helperFunctions.StoredData.Set(Me, Me.pluginName & ".LastFMListSource", 1)
-                    m_Radio_MediaSource.ListSource = 1
+                    'm_Radio_MediaSource.ListSource = 0
                     Return m_Radio_FM_Presets
                 End If
             Case Else
@@ -854,7 +856,7 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_SetPlaylist()", String.Format("Not implemented."))
         End If
 
-        Select Case playlist.DisplayName
+        Select Case playlist.Name 
             Case "AM Live"
                 Return m_Radio_AM_Live
             Case "AM Presets"
@@ -873,7 +875,7 @@ Public Class RadioComm
         ' Direct tune AM band
 
         If Params.IsParamsValid(param, 1) Then
-            If param.GetType() Is GetType(mediaInfo) Then
+            If param.GetType() Is GetType(OpenMobile.mediaInfo) Then
                 If m_verbose Then
                     m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_DirectTune()", String.Format("Direct tune to {0}", param(0).Location))
                 End If
@@ -897,23 +899,23 @@ Public Class RadioComm
         ' Direct tune FM band
 
         If Params.IsParamsValid(param, 1) Then
-            If param.GetType() Is GetType(mediaInfo) Then
-                If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("Direct tune to {0}", param(0).Location))
+                If TypeOf param(0) Is OpenMobile.mediaInfo Then
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("Direct tune to {0}", param(0).Location))
+                    End If
+                    tuneTo(param(0).Location)
+                    Return True
+                Else
+                    ' Format the parameter to tune to (could test for string)
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("FM:{0}", param(0)))
+                    End If
+                    tuneTo(String.Format("FM:{0}", param(0)))
+                    Return True
                 End If
-                tuneTo(param(0).Location)
-                Return True
             Else
-                ' Format the parameter to tune to (could test for string)
-                If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_DirectTune()", String.Format("FM:{0}", param(0)))
-                End If
-                tuneTo(String.Format("FM:{0}", param(0)))
-                Return True
+                Return False
             End If
-        Else
-            Return False
-        End If
 
     End Function
 
@@ -1187,13 +1189,14 @@ Public Class RadioComm
                     For i As Integer = 1 To State
                         If Not m_StationList.ContainsKey(m_Radio.CurrentFrequency) Then
                             Dim Info As New stationInfo
-                            Info.stationID = "HD" + ":" + (m_Radio.CurrentFrequency * 100) + ":" + i
+                            Info.stationID = String.Format("HD:{0}:{1}", (m_Radio.CurrentFrequency * 100), i)
                             Info.stationName = m_Radio.CurrentFormattedChannel & "HD-" & i
                             Info.Bitrate = 0
                             Info.Channels = 2
                             Info.stationGenre = ""
                             Info.signal = 1
-                            m_StationList.Add(m_Radio.CurrentFrequency & ":" & i, Info)
+                            'm_StationList.Add(m_Radio.CurrentFrequency & ":" & i, Info)
+                            m_StationList.Add(m_Radio.CurrentFrequency, Info)
                             m_SubStationData.Add(i, New SubChannelData)
                         End If
                     Next
