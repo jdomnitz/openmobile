@@ -111,14 +111,11 @@ namespace OpenMobile.Media
         {
             get
             {
-                return this._DisplayName;
+                return _DisplayName;
             }
             set
             {
-                if (this._DisplayName != value)
-                {
-                    this._DisplayName = value;
-                }
+                _DisplayName = value;
             }
         }
         private string _DisplayName;
@@ -326,11 +323,9 @@ namespace OpenMobile.Media
         /// <param name="name"></param>
         /// <param name="displayName"></param>
         public Playlist(string name, string displayName)
-            : this()
+            : this(name)
         {
-            string internalName = name;
-            SetDisplayName(ref internalName, displayName);
-            _Name = internalName;
+            _DisplayName = displayName;   
         }
 
 
@@ -967,6 +962,9 @@ namespace OpenMobile.Media
         public bool Save()
         {   // Save current playlist order to the DB
 
+            var name = _Name;
+            SetDisplayName(ref name, _DisplayName);
+            
             // Convert current queue to list of indexes to save to the db
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < _BufferItems.Count; i++)
@@ -976,13 +974,13 @@ namespace OpenMobile.Media
                 sb.Append(_Items.IndexOf(_BufferItems[i]));
                 sb.Append("|");
             }
-            writePlayListSettingToDB(_Name, "Queue", sb.ToString());
+            writePlayListSettingToDB(name, "Queue", sb.ToString());
 
             // Save settings to database
-            writePlayListSettingToDB(_Name, "Random", Shuffle.ToString());
+            writePlayListSettingToDB(name, "Random", Shuffle.ToString());
 
             // Save actual items to the database
-            return writePlaylistToDB(_Name, _Items.ToList());
+            return writePlaylistToDB(name, _Items.ToList());
         }
 
         /// <summary>
@@ -993,14 +991,17 @@ namespace OpenMobile.Media
         {
             try
             {
-                SetItemsList(new BindingList<mediaInfo>(readPlaylistFromDB(_Name)));
+                var name = _Name;
+                SetDisplayName(ref name, _DisplayName);
+
+                SetItemsList(new BindingList<mediaInfo>(readPlaylistFromDB(name)));
 
                 Shuffle = false;
 
                 try
                 {
                     // Load queue from DB
-                    string gueueString = readPlayListSettingFromDB(_Name, "Queue");
+                    string gueueString = readPlayListSettingFromDB(name, "Queue");
                     if (gueueString != null)
                     {
                         string[] gueueStringSplit = gueueString.Split('|');
@@ -1031,7 +1032,7 @@ namespace OpenMobile.Media
 
                 // Load settings from database
                 bool result = false;
-                bool.TryParse(readPlayListSettingFromDB(_Name, "Random"), out result);
+                bool.TryParse(readPlayListSettingFromDB(name, "Random"), out result);
                 if (result)
                     _QueueMode = QueueModes.Shuffle;
                 else
