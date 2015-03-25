@@ -154,20 +154,10 @@ namespace OMRadio_MonkeyBoard
                 _Radio_DAB_Channels_Preset.Load();
                 OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Loaded {1} items for playlist {0} from DB", _Radio_DAB_Channels_Preset.Name, _Radio_DAB_Channels_Preset.Count));
 
-
-                //string playlistName = String.Format("{0}.Channels.DAB.Preset", this.pluginName);
-                //Playlist.SetDisplayName(ref playlistName, String.Format("DAB Channels presets ({0})", this.pluginName));
-                //_Radio_DAB_Channels_Preset = new Playlist(playlistName);
-                //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Starting to loading items for playlist {0} from DB", playlistName));
-                //_Radio_DAB_Channels_Preset.Load();
-                //OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Loaded {1} items for playlist {0} from DB", playlistName, _Radio_DAB_Channels_Preset.Count));
-
-                var playlistName = String.Format("{0}.Channels.FM.Preset", this.pluginName);
-                Playlist.SetDisplayName(ref playlistName, String.Format("FM Channels presets ({0})", this.pluginName));
-                _Radio_FM_Channels_Preset = new Playlist(playlistName);
-                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Starting to loading items for playlist {0} from DB", playlistName));
+                _Radio_FM_Channels_Preset = new Playlist(String.Format("{0}.Channels.FM.Preset", this.pluginName), String.Format("FM Channels presets ({0})", this.pluginName));
+                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Starting to loading items for playlist {0} from DB", _Radio_FM_Channels_Preset.Name));
                 _Radio_FM_Channels_Preset.Load();
-                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Loaded {1} items for playlist {0} from DB", playlistName, _Radio_FM_Channels_Preset.Count));
+                OM.Host.DebugMsg(DebugMessageType.Info, String.Format("Loaded {1} items for playlist {0} from DB", _Radio_FM_Channels_Preset.Name, _Radio_FM_Channels_Preset.Count));
 
                 // Check for updated cover art for items in the FM preset list
                 foreach (var media in _Radio_FM_Channels_Preset.Items)
