@@ -57,12 +57,12 @@ Public Class RadioComm
 
     ' Defines the FM media source
     Private m_Radio_FM_MediaSource As MediaSource_TunedContent
-    Private m_Radio_FM_Live As OpenMobile.Media.Playlist = New Playlist()
-    Private m_Radio_FM_Presets As OpenMobile.Media.Playlist = New Playlist()
+    Private m_Radio_FM_Live As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.FM.Live", Me.pluginName), "FM Live")
+    Private m_Radio_FM_Presets As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.FM.Presets", Me.pluginName), "FM Presets")
     ' Defines the AM media source
     Private m_Radio_AM_MediaSource As MediaSource_TunedContent
-    Private m_Radio_AM_Live As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.AM.Live", Me.pluginName))
-    Private m_Radio_AM_Presets As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.AM.Presets", Me.pluginName))
+    Private m_Radio_AM_Live As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.AM.Live", Me.pluginName), "AM Live")
+    Private m_Radio_AM_Presets As OpenMobile.Media.Playlist = New Playlist(String.Format("{0}.Channels.AM.Presets", Me.pluginName), "AM Presets")
 
     Private m_LastAMStation As String = "AM:61000"
     Private m_LastFMStation As String = "FM:105700"
@@ -117,10 +117,6 @@ Public Class RadioComm
         ' Register media sources 
 
         ' Init FM Playlists
-        m_Radio_FM_Live.Name = String.Format("{0}.Channels.FM.Live", Me.pluginName)
-        m_Radio_FM_Live.DisplayName = "FM Live"
-        m_Radio_FM_Presets.Name = String.Format("{0}.Channels.FM.Presets", Me.pluginName)
-        m_Radio_FM_Presets.DisplayName = "FM Presets"
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_FM_Presets.Name))
         test = m_Radio_FM_Presets.Load()
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Loaded {1} items for playlist {0} from DB", m_Radio_FM_Presets.Name, m_Radio_FM_Presets.Count))
@@ -154,10 +150,6 @@ Public Class RadioComm
         'AddHandler m_Radio_FM_MediaSource.OnCommand_SearchChannels, AddressOf MediaSource_FM_OnCommand_handler
 
         ' Init AM Playlists
-        m_Radio_AM_Live.Name = String.Format("{0}.Channels.AM.Live", Me.pluginName)
-        m_Radio_AM_Live.DisplayName = "AM Live"
-        m_Radio_AM_Presets.Name = String.Format("{0}.Channels.AM.Presets", Me.pluginName)
-        m_Radio_AM_Presets.DisplayName = "AM Presets"
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Starting to loading items for playlist {0} from DB", m_Radio_AM_Presets.Name))
         m_Radio_AM_Presets.Load()
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Loaded {1} items for playlist {0} from DB", m_Radio_AM_Presets.Name, m_Radio_AM_Presets.Count))
