@@ -56,7 +56,13 @@ namespace OpenMobile.Media
                 i.Name = Path.GetFileNameWithoutExtension(filename).Replace('_', ' ');
                 return i;
             }
-            catch (Exception)
+            catch (CorruptFileException)
+            {
+                mediaInfo i = new mediaInfo(filename);
+                i.Name = Path.GetFileNameWithoutExtension(filename).Replace('_', ' ');
+                return i;
+            }
+            catch 
             {
                 return null;
             }
