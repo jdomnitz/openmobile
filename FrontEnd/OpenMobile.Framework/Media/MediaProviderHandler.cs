@@ -377,20 +377,28 @@ namespace OpenMobile.Media
 
         private void CreateDataSourceFromDictionary(Dictionary<string, object> dictionary)
         {
-            foreach (var key in dictionary.Keys)
+            Dictionary<string, object> dictCopy = new Dictionary<string, object>(dictionary);
+            try
             {
-                // Create one set of datasources per zone
-                for (int i = 0; i < OM.Host.ZoneHandler.Zones.Count; i++)
+                foreach (var key in dictCopy.Keys)
                 {
-                    Zone zone = OM.Host.ZoneHandler.Zones[i];
-                    OM.Host.DataHandler.AddDataSource(new DataSource(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "MediaSource", String.Format("Data.{0}", key), 1000, DataSource.DataTypes.raw, DataSourceGetter, "Additional data from media source"), dictionary[key]);
-                }
-            // Create one set of datasources per screen
-                for (int i = 0; i < OM.Host.ScreenCount; i++)
-                {
-                    OM.Host.DataHandler.AddDataSource(new DataSource(true, BuiltInComponents.OMInternalPlugin, "Zone", "MediaSource", String.Format("Data.{0}", key), 1000, DataSource.DataTypes.raw, DataSourceGetter, "Additional data from media source"), dictionary[key]);
+                    // Create one set of datasources per zone
+                    for (int i = 0; i < OM.Host.ZoneHandler.Zones.Count; i++)
+                    {
+                        Zone zone = OM.Host.ZoneHandler.Zones[i];
+                        OM.Host.DataHandler.AddDataSource(new DataSource(BuiltInComponents.OMInternalPlugin, String.Format("Zone{0}", i), "MediaSource", String.Format("Data.{0}", key), 1000, DataSource.DataTypes.raw, DataSourceGetter, "Additional data from media source"), dictionary[key]);
+                    }
+                    // Create one set of datasources per screen
+                    for (int i = 0; i < OM.Host.ScreenCount; i++)
+                    {
+                        OM.Host.DataHandler.AddDataSource(new DataSource(true, BuiltInComponents.OMInternalPlugin, "Zone", "MediaSource", String.Format("Data.{0}", key), 1000, DataSource.DataTypes.raw, DataSourceGetter, "Additional data from media source"), dictionary[key]);
+                    }
                 }
             }
+            catch
+            {
+            }
+
         }
 
         private object DataSourceGetter(DataSource datasource, out bool result, object[] param)
