@@ -463,6 +463,8 @@ Public Class RadioComm
         m_LastStation = String.Format("{0}:{1}", m_Radio_MediaSource.Name, m_Radio.CurrentFrequency * 100)
         helperFunctions.StoredData.Set(Me, Me.pluginName & ".LastPlaying", m_LastStation)
 
+        m_CurrentMedia = New mediaInfo()
+        m_CurrentMedia.Type = eMediaType.Radio
         m_CurrentMedia.Location = m_LastStation
         m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
         m_CurrentMedia.Artist = ""
@@ -470,7 +472,6 @@ Public Class RadioComm
         m_CurrentMedia.Genre = ""
         m_CurrentMedia.Lyrics = ""
         m_CurrentMedia.Rating = 0
-        m_CurrentMedia.Type = OpenMobile.eMediaType.Radio
 
         ' Which info has to match between MediaInfo and MediaSource????
         m_Radio_MediaSource.ChannelID = m_Radio.CurrentFormattedChannel
