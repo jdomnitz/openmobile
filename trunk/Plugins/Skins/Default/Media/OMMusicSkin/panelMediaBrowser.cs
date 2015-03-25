@@ -1137,9 +1137,9 @@ namespace OMMusicSkin
             // Check if current media provider is a file based content provider
             var currentProvider = OM.Host.MediaProviderHandler.GetMediaProviderForZoneOrScreen(screen);
             var zone = OM.Host.ZoneHandler.GetActiveZone(screen);
-            var isTunedContentProvider = OM.Host.MediaProviderHandler.IsMediaSourceOfType(currentProvider.GetMediaSource(zone), MediaSourceTypes.FileBasedMedia.ToString());
-            if (!isTunedContentProvider)
-            {   // Tuned content provider is not active, show dialog to activate provider
+            var isProperContentProvider = OM.Host.MediaProviderHandler.IsMediaSourceOfType(currentProvider.GetMediaSource(zone), MediaSourceTypes.FileBasedMedia.ToString());
+            if (!isProperContentProvider)
+            {   // Proper content provider is not active, show dialog to activate provider
                 SelectMediaProvider(sender, screen, "Select audio player", MediaSourceTypes.FileBasedMedia.ToString());
             }
             AccessBlock_ShowHide(sender, screen);

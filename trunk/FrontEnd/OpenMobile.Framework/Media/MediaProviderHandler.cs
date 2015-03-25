@@ -127,11 +127,17 @@ namespace OpenMobile.Media
         {
             var providers = _MediaProviders.Where(x => 
                 {
-                    var mediaSources = ((IMediaProvider)x).GetMediaSources();
-                    if (mediaSources == null)
+                    try
+                    {
+                        var mediaSources = ((IMediaProvider)x).GetMediaSources();
+                        if (mediaSources == null)
+                            return false;
+                        return mediaSources.Any(y => y.MediaSourceType == mediaSourceType);
+                    }
+                    catch
+                    {
                         return false;
-
-                    return mediaSources.Any(y => y.MediaSourceType == mediaSourceType);
+                    }
                 }                
                 );
             return providers.Cast<IMediaProvider>().ToList();
