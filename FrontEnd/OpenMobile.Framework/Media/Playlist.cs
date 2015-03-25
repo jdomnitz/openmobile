@@ -320,6 +320,20 @@ namespace OpenMobile.Media
             _Name = name;
         }
 
+        /// <summary>
+        /// Creates a new playlist
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="displayName"></param>
+        public Playlist(string name, string displayName)
+            : this()
+        {
+            string internalName = name;
+            SetDisplayName(ref internalName, displayName);
+            _Name = internalName;
+        }
+
+
         #endregion        
 
         #region Playlist item control
