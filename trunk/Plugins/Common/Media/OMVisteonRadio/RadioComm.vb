@@ -472,6 +472,8 @@ Public Class RadioComm
         m_CurrentMedia.Genre = ""
         m_CurrentMedia.Lyrics = ""
         m_CurrentMedia.Rating = 0
+        ' Fetch or create Cover Art
+        updateCover(m_CurrentMedia)
 
         ' Which info has to match between MediaInfo and MediaSource????
         SyncLock m_Radio_MediaSource
@@ -505,6 +507,33 @@ Public Class RadioComm
         Next
 
     End Sub
+    Private Function updateCover(theMedia As mediaInfo)
+
+        Dim chan() As String
+        Dim station As String
+        Dim theImage As OImage
+
+        chan = theMedia.Location.Split(":")
+        station = Left(theMedia.Name, theMedia.Name.IndexOf(" "))
+        theImage = OM.Host.getPluginImage(Me, String.Format("Graphics|{0}", chan(1))).image
+        If theImage Is Nothing Then
+            ' Create an image
+            theImage = OM.Host.getPluginImage(Me, "Graphics|RadioBase").image.Copy
+            Dim bandfont = OpenMobile.Graphics.Font.Arial
+            bandfont.Size = 100
+            theImage.RenderText(0, 0, theImage.Width, theImage.Height, chan(0), bandfont, eTextFormat.Normal, Alignment.CenterCenter + Alignment.WordWrap, OpenMobile.Graphics.Color.DarkGray, OpenMobile.Graphics.Color.DarkGray, FitModes.FitFillSingleLine)
+            Dim font = OpenMobile.Graphics.Font.Arial
+            font.Size = 100
+            theImage.RenderText(0, 0, theImage.Width, theImage.Height, station, font, eTextFormat.Bold, Alignment.CenterCenter + Alignment.WordWrap, OpenMobile.Graphics.Color.Black, OpenMobile.Graphics.Color.White, FitModes.FitFillSingleLine)
+        End If
+
+        SyncLock theMedia
+            theMedia.coverArt = theImage
+        End SyncLock
+
+        Return True
+
+    End Function
 
     Private Sub display_message(message1 As String, messag2 As String)
         ' Puts a text message at the bottom of the media scren
@@ -954,14 +983,30 @@ Public Class RadioComm
                 If m_verbose Then
                     m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetSet()", String.Format("Saving preset {0} to {1}", param(0).Location, m_Radio_AM_Presets.Name))
                 End If
-                test = m_Radio_AM_Presets.AddDistinct(param(0), Function(m_Radio_AM_Presets) m_Radio_AM_Presets.Location = param(0).Location)
+                If m_Radio_AM_Presets.AddDistinct(param(0), Function(m_Radio_AM_Presets) m_Radio_AM_Presets.Location = param(0).Location) Then
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetSet()", String.Format("Preset added."))
+                    End If
+                Else
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetSet()", String.Format("Preset was not added."))
+                    End If
+                End If
             End If
         Else
             ' Must be coming from MediaInfo
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetSet()", String.Format("Saving preset {0} to {1}", m_CurrentMedia.Location, m_Radio_AM_Presets.Name))
             End If
-            test = m_Radio_AM_Presets.AddDistinct(m_CurrentMedia, Function(m_Radio_AM_Presets) m_Radio_AM_Presets.Location = m_CurrentMedia.Location)
+            If m_Radio_AM_Presets.AddDistinct(m_CurrentMedia, Function(m_Radio_AM_Presets) m_Radio_AM_Presets.Location = m_CurrentMedia.Location) Then
+                If m_verbose Then
+                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetSet()", String.Format("Preset added."))
+                End If
+            Else
+                If m_verbose Then
+                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetSet()", String.Format("Preset was not added."))
+                End If
+            End If
         End If
 
         test = m_Radio_AM_Presets.Save()
@@ -987,7 +1032,11 @@ Public Class RadioComm
                 End If
                 If m_Radio_FM_Presets.AddDistinct(param(0), Function(m_Radio_FM_Presets) m_Radio_FM_Presets.Location = param(0).Location) Then
                     If m_verbose Then
-                        m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetSet()", String.Format("Save successful"))
+                        m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetSet()", String.Format("Preset addded."))
+                    End If
+                Else
+                    If m_verbose Then
+                        m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetSet()", String.Format("Preset was not added."))
                     End If
                 End If
             End If
@@ -998,7 +1047,11 @@ Public Class RadioComm
             End If
             If m_Radio_FM_Presets.AddDistinct(m_CurrentMedia, Function(m_Radio_FM_Presets) m_Radio_FM_Presets.Location = m_CurrentMedia.Location) Then
                 If m_verbose Then
-                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetSet()", String.Format("Save successful"))
+                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetSet()", String.Format("Preset added."))
+                End If
+            Else
+                If m_verbose Then
+                    m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetSet()", String.Format("Preset was not added."))
                 End If
             End If
         End If
@@ -1023,7 +1076,11 @@ Public Class RadioComm
             MediaProviderData_RefreshPlaylist(zone)
         Next
 
-        Return ""
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetRemove()", String.Format("Preset {0} removed.", param(0).Name))
+        End If
+
+        Return String.Format("Preset {0} removed.", param(0).Name)
 
     End Function
 
@@ -1037,7 +1094,11 @@ Public Class RadioComm
             MediaProviderData_RefreshPlaylist(zone)
         Next
 
-        Return ""
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetRemove()", String.Format("Preset {0} removed.", param(0).Name))
+        End If
+
+        Return String.Format("Preset {0} removed.", param(0).Name)
 
     End Function
 
