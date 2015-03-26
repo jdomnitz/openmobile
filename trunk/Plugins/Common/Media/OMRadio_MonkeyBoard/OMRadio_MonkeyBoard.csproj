@@ -124,6 +124,9 @@
     <Content Include="Graphics\Description.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Graphics\RadioBase.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="keystonecomm.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

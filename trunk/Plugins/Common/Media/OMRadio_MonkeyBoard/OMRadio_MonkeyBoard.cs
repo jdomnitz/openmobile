@@ -1624,9 +1624,35 @@ namespace OMRadio_MonkeyBoard
                 var mediaString = String.IsNullOrWhiteSpace(media.Name) ? media.Artist : media.Name;
                 if (!String.IsNullOrWhiteSpace(mediaString))
                 {
-                    var font = OpenMobile.Graphics.Font.Arial;
-                    font.Size = 28;
-                    image.RenderText(0, 0, image.Width, image.Height, mediaString, font, eTextFormat.Bold, Alignment.CenterCenter | Alignment.WordWrap, OpenMobile.Graphics.Color.Black, OpenMobile.Graphics.Color.Black, FitModes.FitFill);
+                    if (mediaString.Contains(':'))
+                    {
+                        if (media.Location.Contains(":"))
+                        {
+                            var band = media.Location.Substring(0, media.Location.IndexOf(':'));
+                            var freqString = mediaString.Replace("DAB: ", "").Replace("FM: ", "").Replace("MHz", "");
+                            //"FM: {0:0.00}MHz"
+
+                            var bandfont = OpenMobile.Graphics.Font.Arial;
+                            bandfont.Size = 100;
+                            image.RenderText(0, 0, image.Width, image.Height, band, bandfont, eTextFormat.Normal, Alignment.CenterCenter | Alignment.WordWrap, OpenMobile.Graphics.Color.DarkGray, OpenMobile.Graphics.Color.DarkGray, FitModes.FitFillSingleLine);
+
+                            var font = OpenMobile.Graphics.Font.Arial;
+                            font.Size = 100;
+                            image.RenderText(0, 0, image.Width, image.Height, freqString, font, eTextFormat.Bold, Alignment.CenterCenter | Alignment.WordWrap, OpenMobile.Graphics.Color.Black, OpenMobile.Graphics.Color.White, FitModes.FitFillSingleLine);
+                        }
+                        else
+                        {
+                            var font = OpenMobile.Graphics.Font.Arial;
+                            font.Size = 28;
+                            image.RenderText(0, 0, image.Width, image.Height, mediaString, font, eTextFormat.Bold, Alignment.CenterCenter | Alignment.WordWrap, OpenMobile.Graphics.Color.Black, OpenMobile.Graphics.Color.Black, FitModes.FitFill);
+                        }
+                    }
+                    else
+                    {
+                        var font = OpenMobile.Graphics.Font.Arial;
+                        font.Size = 28;
+                        image.RenderText(0, 0, image.Width, image.Height, mediaString, font, eTextFormat.Bold, Alignment.CenterCenter | Alignment.WordWrap, OpenMobile.Graphics.Color.Black, OpenMobile.Graphics.Color.Black, FitModes.FitFill);
+                    }
                 }
                 else
                 {   // Use default image
