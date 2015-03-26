@@ -561,7 +561,7 @@ namespace OMMediaDB2
         /// <returns></returns>
         private string DB_GetMediaInfoSQLBase(DBObjectTypes objectType)
         {
-            return String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArt FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType='{0}' ", (int)objectType);
+            return String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArt FROM tblMediaInfo LEFT JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType='{0}' ", (int)objectType);
             //return String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type FROM tblMediaInfo WHERE ObjectType='{0}' ", (int)objectType);
         }
 
@@ -576,7 +576,7 @@ namespace OMMediaDB2
             {
                 using (SQLiteCommand cmd = new SQLiteCommand(_DBConnection))
                 {
-                    cmd.CommandText = "SELECT Artist, CoverArt, CoverArtID FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType =@ObjectType AND Artist =@Artist GROUP BY CoverArtID";
+                    cmd.CommandText = "SELECT Artist, CoverArt, CoverArtID FROM tblMediaInfo LEFT JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType =@ObjectType AND Artist =@Artist GROUP BY CoverArtID";
                     if (limit > 0)
                         cmd.CommandText += " LIMIT " + limit.ToString();
                     cmd.Parameters.AddWithValue("@ObjectType", (int)DBObjectTypes.IndexedItem);
@@ -1168,7 +1168,7 @@ namespace OMMediaDB2
             if (!DB_ConnectAndOpen())
                 return new List<mediaInfo>();
 
-            string SQL = String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArt AS CoverArtBytes FROM tblMediaInfo JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType='{0}' ", (int)DBObjectTypes.IndexedItem);
+            string SQL = String.Format("SELECT Name, Artist, Album, Location, TrackNumber, Genre, Lyrics, Length, Rating, Type, CoverArt AS CoverArtBytes FROM tblMediaInfo LEFT JOIN tblMediaInfoCoverArt ON ID=CoverArtID WHERE ObjectType='{0}' ", (int)DBObjectTypes.IndexedItem);
 
             if (!String.IsNullOrEmpty(songFilter))
                 SQL += " AND Name LIKE @Name";
