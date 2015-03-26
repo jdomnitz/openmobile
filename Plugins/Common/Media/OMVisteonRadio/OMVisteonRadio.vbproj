@@ -106,9 +106,12 @@
     <Content Include="AudioRouter.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Graphics\102500.png" />
     <Content Include="Graphics\105700.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Graphics\97700.png" />
+    <Content Include="Graphics\98500.png" />
     <Content Include="Graphics\RadioBase.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
