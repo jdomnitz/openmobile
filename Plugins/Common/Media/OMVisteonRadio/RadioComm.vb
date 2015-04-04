@@ -49,6 +49,8 @@ Public Class RadioComm
     Private m_InputDevice As String = ""
     Private m_MediaSources As New List(Of MediaSource)
     Private m_DefaultListSource As Integer = 1
+    Private textLine1 As String = ""
+    Private textLine2 As String = ""
 
     ' Refers to the current media source
     Private m_Radio_MediaSource As MediaSource_TunedContent
@@ -465,20 +467,28 @@ Public Class RadioComm
 
         m_CurrentMedia = New mediaInfo()
         m_CurrentMedia.Type = eMediaType.Radio
+        ' List key
         m_CurrentMedia.Location = m_LastStation
+        ' Display name
         m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
+        ' Main text
         m_CurrentMedia.Artist = ""
+        ' Only on Now Playing
         m_CurrentMedia.Album = ""
+        ' Genre
         m_CurrentMedia.Genre = ""
+        ' Not supported
         m_CurrentMedia.Lyrics = ""
+        ' Not supported
         m_CurrentMedia.Rating = 0
+        ' Track length - not supported
+        m_CurrentMedia.Length = 0
         ' Fetch or create Cover Art
         updateCover(m_CurrentMedia)
 
         ' Which info has to match between MediaInfo and MediaSource????
         SyncLock m_Radio_MediaSource
-            m_Radio_MediaSource.ChannelID = m_Radio.CurrentFormattedChannel
-            m_Radio_MediaSource.ChannelID = m_LastStation
+            m_Radio_MediaSource.ChannelID = ""
             m_Radio_MediaSource.ChannelNameLong = m_Radio.CurrentFormattedChannel
             m_Radio_MediaSource.ChannelNameShort = m_Radio.CurrentFormattedChannel
         End SyncLock
@@ -663,15 +673,19 @@ Public Class RadioComm
         Select Case m_Radio_MediaSource.Name
             Case m_Radio_FM_MediaSource.Name
                 If m_Radio_FM_MediaSource.ListSource = 1 Then
-                    ' FM presets are active
                     ' Get next preset
-                    '  or wrap around to 1st
+                    m_Radio_FM_Presets.GotoNextMedia()
+                Else
+                    ' Get next live
+                    m_Radio_FM_Live.GotoNextMedia()
                 End If
             Case m_Radio_AM_MediaSource.Name
                 If m_Radio_AM_MediaSource.ListSource = 1 Then
                     ' AM presets are active
-                    ' Get next preset
-                    '  or wrap around to 1st
+                    m_Radio_AM_Presets.GotoNextMedia()
+                Else
+                    ' Get next live
+                    m_Radio_AM_Live.GotoNextMedia()
                 End If
         End Select
 
@@ -704,18 +718,23 @@ Public Class RadioComm
         ' What is the current mediaSource and it's listSource
         '  if listSource = 1, then it's a preset and we can go to the next one
         '  if there is a next one
+
         Select Case m_Radio_MediaSource.Name
             Case m_Radio_FM_MediaSource.Name
                 If m_Radio_FM_MediaSource.ListSource = 1 Then
-                    ' FM presets are active
                     ' Get next preset
-                    '  or wrap around to 1st
+                    m_Radio_FM_Presets.GotoPreviousMedia()
+                Else
+                    ' Get next live
+                    m_Radio_FM_Live.GotoPreviousMedia()
                 End If
             Case m_Radio_AM_MediaSource.Name
                 If m_Radio_AM_MediaSource.ListSource = 1 Then
                     ' AM presets are active
-                    ' Get next preset
-                    '  or wrap around to it
+                    m_Radio_AM_Presets.GotoPreviousMedia()
+                Else
+                    ' Get next live
+                    m_Radio_AM_Live.GotoPreviousMedia()
                 End If
         End Select
 
@@ -1353,6 +1372,7 @@ Public Class RadioComm
     Private Sub m_Radio_HDRadioEventRDSGenre(ByVal Message As String) Handles m_Radio.HDRadioEventRDSGenre
 
         ' Track/Station Genre
+        Dim inList As Boolean = False
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - HDRadioEventRDSGenre()", String.Format("Genre received: {0}.", Message))
@@ -1361,9 +1381,34 @@ Public Class RadioComm
         SyncLock m_Radio_MediaSource
             m_Radio_MediaSource.ProgramType = Message
         End SyncLock
-        m_CurrentMedia.Genre = Message
+        SyncLock m_CurrentMedia
+            m_CurrentMedia.Genre = Message
+        End SyncLock
+
+        ' Search playlists to find current station and update genre
+
+        If m_Radio_MediaSource.Name = m_Radio_FM_MediaSource.Name Then
+            For x = 0 To m_Radio_FM_Presets.Count - 1
+                If m_Radio_FM_Presets.Items(x).Location = m_LastStation Then
+                    m_Radio_FM_Presets.Items(x).Genre = Message
+                    m_Radio_FM_Presets.Save()
+                End If
+            Next
+            For x = 0 To m_Radio_FM_Live.Count - 1
+                If m_Radio_FM_Live.Items(x).Location = m_LastStation Then
+                    m_Radio_FM_Live.Items(x).Genre = Message
+                    m_Radio_FM_Live.Save()
+                End If
+            Next
+        End If
 
         push_media_info()
+
+        textLine2 = String.Format("{0}", Message)
+
+        For Each Zone In theZones
+            MediaProviderData_ReportMediaText(Zone, textLine1, textLine2)
+        Next
 
     End Sub
 
@@ -1376,9 +1421,21 @@ Public Class RadioComm
 
         SyncLock m_Radio_MediaSource
             m_Radio_MediaSource.ChannelNameLong = Message
+            'Top right corner of media info
+            m_Radio_MediaSource.ChannelID = Message
+        End SyncLock
+
+        SyncLock m_CurrentMedia
+            m_CurrentMedia.Album = String.Format("PI: {0}", Message)
         End SyncLock
 
         'push_media_info()
+
+        textLine1 = String.Format("PI: {0}", Message)
+
+        For Each Zone In theZones
+            MediaProviderData_ReportMediaText(Zone, textLine1, textLine2)
+        Next
 
     End Sub
 
@@ -1393,7 +1450,17 @@ Public Class RadioComm
             m_Radio_MediaSource.ChannelNameShort = Message
         End SyncLock
 
+        SyncLock m_CurrentMedia
+            m_CurrentMedia.Album = String.Format("{0}", Message)
+        End SyncLock
+
         push_media_info()
+
+        textLine1 = String.Format("{0}", Message)
+
+        For Each Zone In theZones
+            MediaProviderData_ReportMediaText(Zone, textLine1, textLine2)
+        Next
 
     End Sub
 
@@ -1408,7 +1475,10 @@ Public Class RadioComm
             m_Radio_MediaSource.ProgramText = Message
         End SyncLock
 
-        m_CurrentMedia.Album = Message
+        SyncLock m_CurrentMedia
+            ' Large middle line in media info box
+            m_CurrentMedia.Artist = String.Format("{0}", Message)
+        End SyncLock
 
         push_media_info()
 
