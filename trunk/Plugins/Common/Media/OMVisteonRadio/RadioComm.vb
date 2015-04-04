@@ -51,6 +51,9 @@ Public Class RadioComm
     Private m_DefaultListSource As Integer = 1
     Private textLine1 As String = ""
     Private textLine2 As String = ""
+    Private m_artist As String = ""
+    Private m_album As String = ""
+    Private m_track As String = ""
 
     ' Refers to the current media source
     Private m_Radio_MediaSource As MediaSource_TunedContent
@@ -195,8 +198,8 @@ Public Class RadioComm
 
         Array.Sort(available_ports)
 
-        'SafeThread.Asynchronous(AddressOf BackgroundLoad, m_Host)
-        BackgroundLoad()
+        SafeThread.Asynchronous(AddressOf BackgroundLoad, m_Host)
+        'BackgroundLoad()
 
         Return eLoadStatus.LoadSuccessful
 
@@ -465,26 +468,35 @@ Public Class RadioComm
         m_LastStation = String.Format("{0}:{1}", m_Radio_MediaSource.Name, m_Radio.CurrentFrequency * 100)
         helperFunctions.StoredData.Set(Me, Me.pluginName & ".LastPlaying", m_LastStation)
 
-        m_CurrentMedia = New mediaInfo()
-        m_CurrentMedia.Type = eMediaType.Radio
-        ' List key
-        m_CurrentMedia.Location = m_LastStation
-        ' Display name
-        m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
-        ' Main text
-        m_CurrentMedia.Artist = ""
-        ' Only on Now Playing
-        m_CurrentMedia.Album = ""
-        ' Genre
-        m_CurrentMedia.Genre = ""
-        ' Not supported
-        m_CurrentMedia.Lyrics = ""
-        ' Not supported
-        m_CurrentMedia.Rating = 0
-        ' Track length - not supported
-        m_CurrentMedia.Length = 0
-        ' Fetch or create Cover Art
+        SyncLock m_CurrentMedia
+            m_CurrentMedia = New mediaInfo()
+            m_CurrentMedia.Type = eMediaType.Radio
+            ' List key
+            m_CurrentMedia.Location = m_LastStation
+            ' Display name
+            m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
+            ' Main text
+            m_CurrentMedia.Artist = ""
+            ' Only on Now Playing
+            m_CurrentMedia.Album = ""
+            ' Genre
+            m_CurrentMedia.Genre = ""
+            ' Not supported
+            m_CurrentMedia.Lyrics = ""
+            ' Not supported
+            m_CurrentMedia.Rating = 0
+            ' Track length - not supported
+            m_CurrentMedia.Length = 0
+            ' Fetch or create Cover Art
+        End SyncLock
+
         updateCover(m_CurrentMedia)
+
+        m_artist = ""
+        m_album = ""
+        m_track = ""
+        textLine1 = ""
+        textLine2 = ""
 
         ' Which info has to match between MediaInfo and MediaSource????
         SyncLock m_Radio_MediaSource
@@ -621,6 +633,10 @@ Public Class RadioComm
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSource()", String.Format("Requested: Current MediaSource. Responding: {0}", m_Radio_MediaSource.Name))
+        End If
+
+        If m_Radio.IsHDActive Then
+            'm_CurrentMedia.Name = m_Radio.CurrentFormattedChannel.Replace("FM", "HD")
         End If
 
         Return m_Radio_MediaSource
@@ -1099,7 +1115,8 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - MediaSource_AM_OnCommand_PresetRemove()", String.Format("Preset {0} removed.", param(0).Name))
         End If
 
-        Return String.Format("Preset {0} removed.", param(0).Name)
+        'Return String.Format("Preset {0} removed.", param(0).Name)
+        Return ""
 
     End Function
 
@@ -1117,7 +1134,8 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - MediaSource_FM_OnCommand_PresetRemove()", String.Format("Preset {0} removed.", param(0).Name))
         End If
 
-        Return String.Format("Preset {0} removed.", param(0).Name)
+        'Return String.Format("Preset {0} removed.", param(0).Name)
+        Return ""
 
     End Function
 
@@ -1294,12 +1312,9 @@ Public Class RadioComm
                         If Not m_StationList.ContainsKey(m_Radio.CurrentFrequency) Then
                             Dim Info As New stationInfo
                             Info.stationID = String.Format("HD:{0}:{1}", (m_Radio.CurrentFrequency * 100), i)
-                            Info.stationName = m_Radio.CurrentFormattedChannel & "HD-" & i
-                            Info.Bitrate = 0
-                            Info.Channels = 2
-                            Info.stationGenre = ""
-                            Info.signal = 1
-                            'm_StationList.Add(m_Radio.CurrentFrequency & ":" & i, Info)
+                            'm_CurrentMedia.Location = String.Format("FM:{0}", (m_Radio.CurrentFrequency * 100))
+                            Info.stationName = String.Format("{0} HD-{1}", m_Radio.CurrentFormattedChannel, i)
+                            'm_CurrentMedia.Name = Info.stationName
                             m_StationList.Add(m_Radio.CurrentFrequency, Info)
                             m_SubStationData.Add(i, New SubChannelData)
                         End If
@@ -1389,14 +1404,14 @@ Public Class RadioComm
 
         If m_Radio_MediaSource.Name = m_Radio_FM_MediaSource.Name Then
             For x = 0 To m_Radio_FM_Presets.Count - 1
-                If m_Radio_FM_Presets.Items(x).Location = m_LastStation Then
-                    m_Radio_FM_Presets.Items(x).Genre = Message
+                If m_Radio_FM_Presets.Items(x).Location = m_CurrentMedia.Location Then
+                    m_Radio_FM_Presets.Items(x).Genre = m_CurrentMedia.Genre
                     m_Radio_FM_Presets.Save()
                 End If
             Next
             For x = 0 To m_Radio_FM_Live.Count - 1
-                If m_Radio_FM_Live.Items(x).Location = m_LastStation Then
-                    m_Radio_FM_Live.Items(x).Genre = Message
+                If m_Radio_FM_Live.Items(x).Location = m_CurrentMedia.Location Then
+                    m_Radio_FM_Live.Items(x).Genre = m_CurrentMedia.Genre
                     m_Radio_FM_Live.Save()
                 End If
             Next
@@ -1413,7 +1428,7 @@ Public Class RadioComm
     End Sub
 
     Private Sub m_Radio_HDRadioEventRDSProgramIdentification(ByVal Message As String) Handles m_Radio.HDRadioEventRDSProgramIdentification
-        ' PI for station identification
+        ' PI for station identification ? chars?
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - HDRadioEventRDSProgramIdentification()", String.Format("ProgramID received: {0}.", Message))
@@ -1426,12 +1441,12 @@ Public Class RadioComm
         End SyncLock
 
         SyncLock m_CurrentMedia
-            m_CurrentMedia.Album = String.Format("PI: {0}", Message)
+            m_CurrentMedia.Album = String.Format("{0}", Message)
         End SyncLock
 
-        'push_media_info()
+        push_media_info()
 
-        textLine1 = String.Format("PI: {0}", Message)
+        textLine1 = String.Format("{0}", Message)
 
         For Each Zone In theZones
             MediaProviderData_ReportMediaText(Zone, textLine1, textLine2)
@@ -1440,7 +1455,7 @@ Public Class RadioComm
     End Sub
 
     Private Sub m_Radio_HDRadioEventRDSProgramService(ByVal Message As String) Handles m_Radio.HDRadioEventRDSProgramService
-        ' PS 8 character Call leters or ID
+        ' PS 8 character Call letters or ID
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - HDRadioEventRDSProgramService()", String.Format("Program Service received: {0}.", Message))
@@ -1448,6 +1463,8 @@ Public Class RadioComm
 
         SyncLock m_Radio_MediaSource
             m_Radio_MediaSource.ChannelNameShort = Message
+            'Top right corner of media info
+            'm_Radio_MediaSource.ChannelID = Message
         End SyncLock
 
         SyncLock m_CurrentMedia
@@ -1477,7 +1494,7 @@ Public Class RadioComm
 
         SyncLock m_CurrentMedia
             ' Large middle line in media info box
-            m_CurrentMedia.Artist = String.Format("{0}", Message)
+            m_CurrentMedia.Artist = String.Format("{0}", m_Radio_MediaSource.ProgramText)
         End SyncLock
 
         push_media_info()
@@ -1486,11 +1503,29 @@ Public Class RadioComm
 
     Private Sub m_Radio_HDRadioEventHDActive(ByVal State As Integer) Handles m_Radio.HDRadioEventHDActive
 
-        If m_Radio_MediaSource.Name = "FM" Then
-            SyncLock m_Radio_MediaSource
-                m_Radio_FM_MediaSource.HD = State
-            End SyncLock
+        If State Then
+            m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel.Replace("FM", "HD")
+        Else
+            m_CurrentMedia.Name = m_Radio.CurrentFormattedChannel
         End If
+
+        ' Update presets/live lists (only FM required)
+        If m_Radio_MediaSource.Name = m_Radio_FM_MediaSource.Name Then
+            For x = 0 To m_Radio_FM_Presets.Count - 1
+                If m_Radio_FM_Presets.Items(x).Location = m_CurrentMedia.Location Then
+                    m_Radio_FM_Presets.Items(x).Name = m_CurrentMedia.Name
+                    m_Radio_FM_Presets.Save()
+                End If
+            Next
+            For x = 0 To m_Radio_FM_Live.Count - 1
+                If m_Radio_FM_Live.Items(x).Location = m_CurrentMedia.Name Then
+                    m_Radio_FM_Live.Items(x).Name = m_CurrentMedia.Name
+                    m_Radio_FM_Live.Save()
+                End If
+            Next
+        End If
+
+
 
         push_media_info()
 
@@ -1500,29 +1535,60 @@ Public Class RadioComm
 
         ' Put station call sign in ????
 
-        If m_Radio_MediaSource.Name = "FM" Then
-            'm_Radio_FM_MediaSource.AdditionalData.Item("CallSign") = Message
-            SyncLock m_Radio_MediaSource
-                m_Radio_FM_MediaSource.ChannelID = Message
-            End SyncLock
-        End If
+        SyncLock m_Radio_MediaSource
+            m_Radio_FM_MediaSource.ChannelID = String.Format("{0}", Message)
+        End SyncLock
+
+        push_media_info()
 
     End Sub
 
     Private Sub m_Radio_HDRadioEventHDArtist(ByVal Message As String) Handles m_Radio.HDRadioEventHDArtist
 
-        ' Save artist string?
+        Dim data() As String
 
         If m_Radio_MediaSource.Name = "FM" Then
-            'm_Radio_FM_MediaSource.AdditionalData.Item("Artist") = Message
+
+            data = Message.Split("|")
+            m_artist = data(1)
+
+            SyncLock m_Radio_MediaSource
+                m_Radio_FM_MediaSource.Description = String.Format("{0} - {1}", m_artist, m_track)
+            End SyncLock
+
+            push_media_info()
+
+            textLine1 = String.Format("{0}", String.Format("{0} - {1}", m_artist, m_track))
+
+            For Each Zone In theZones
+                MediaProviderData_ReportMediaText(Zone, textLine1, textLine2)
+            Next
+
         End If
 
     End Sub
 
     Private Sub m_Radio_HDRadioEventHDTitle(ByVal Message As String) Handles m_Radio.HDRadioEventHDTitle
 
+        Dim data() As String
+
         If m_Radio_MediaSource.Name = "FM" Then
-            'm_Radio_FM_MediaSource.AdditionalData.Item("Track") = Message
+
+            Data = Message.Split("|")
+            m_track = Data(1)
+
+            SyncLock m_Radio_MediaSource
+                m_Radio_FM_MediaSource.Description = String.Format("{0} - {1}", m_artist, m_track)
+            End SyncLock
+
+            push_media_info()
+
+            textLine1 = String.Format("{0}", String.Format("{0} - {1}", m_artist, m_track))
+
+            For Each Zone In theZones
+                MediaProviderData_ReportMediaText(Zone, textLine1, textLine2)
+            Next
+
         End If
 
     End Sub
