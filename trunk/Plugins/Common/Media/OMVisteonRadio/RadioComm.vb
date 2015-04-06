@@ -54,6 +54,7 @@ Public Class RadioComm
     Private m_artist As String = ""
     Private m_album As String = ""
     Private m_track As String = ""
+    Private access_granted As Boolean = False
 
     ' Refers to the current media source
     Private m_Radio_MediaSource As MediaSource_TunedContent
@@ -76,10 +77,6 @@ Public Class RadioComm
     Private myImage As imageItem = OM.Host.getImageFromFile("Icon-HDRadio")
     Private theZones As List(Of Zone) = New List(Of Zone)
 
-    Private waitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
-    Private comWaitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
-    Private pwrWaitHandle As New System.Threading.EventWaitHandle(False, System.Threading.EventResetMode.AutoReset)
-
     Public Sub New()
 
         MyBase.New("OMVisteonRadio", OM.Host.getPluginImage(Of RadioComm)("Icon-HDRadio"), 2.0, "Visteon/Directed Radio Hardware Interface", "jmullan", "jmullan99@gmail.com")
@@ -99,24 +96,31 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Initializing..."))
         End If
 
-        ' Remove old items here
-        test = helperFunctions.StoredData.Delete(Me, "OMVisteonRadio.Verbose")
-        test = helperFunctions.StoredData.Delete(Me, "OMVisteonRadio.LastStation")
-        test = helperFunctions.StoredData.Delete(Me, "OMVisteonRadio.LastAMListSource")
-        test = helperFunctions.StoredData.Delete(Me, "OMVisteonRadio.LastFMListSource")
-
         m_Host = host
         m_Host.UIHandler.AddNotification(myNotification)
         myNotification.Text = "Plugin initializing..."
 
-        m_verbose = CBool(GetData("OMVisteonRadio.VerboseDebug", False))
-        m_ComPort = GetData("OMVisteonRadio.ComPort", m_ComPort)
-        m_InputDevice = GetData("OMVisteoRadio.SourceDevice", "Default Device")
+        helperFunctions.StoredData.SetDefaultValue(Me, "OMVisteonRadio.VerboseDebug", m_verbose)
+        m_verbose = helperFunctions.StoredData.GetBool(Me, "OMVisteonRadio.VerboseDebug")
 
-        m_LastFMStation = GetData(Me.pluginName & ".LastFMStation", m_LastFMStation)
-        m_LastAMStation = GetData(Me.pluginName & ".LastAMStation", m_LastAMStation)
-        m_LastStation = GetData(Me.pluginName & ".LastPlaying", m_LastStation)
-        m_DefaultListSource = GetData(Me.pluginName & ".DefaultList", m_DefaultListSource)
+        helperFunctions.StoredData.SetDefaultValue(Me, "OMVisteonRadio.ComPort", m_ComPort)
+        m_ComPort = helperFunctions.StoredData.Get(Me, "OMVisteonRadio.ComPort")
+
+        helperFunctions.StoredData.SetDefaultValue(Me, "OMVisteonRadio.SourceDevice", "Default Device")
+        m_InputDevice = helperFunctions.StoredData.Get(Me, "OMVisteonRadio.SourceDevice")
+
+        helperFunctions.StoredData.SetDefaultValue(Me, "OMVisteonRadio.LastFMStation", m_LastFMStation)
+        m_LastFMStation = helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastFMStation")
+
+        helperFunctions.StoredData.SetDefaultValue(Me, "OMVisteonRadio.LastAMStation", m_LastAMStation)
+        m_LastAMStation = helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastAMStation")
+
+        helperFunctions.StoredData.SetDefaultValue(Me, "OMVisteonRadio.LastPlaying", m_LastStation)
+        m_LastStation = helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastPlaying")
+
+        helperFunctions.StoredData.SetDefaultValue(Me, "OMVisteonRadio.DefaultList", m_DefaultListSource)
+        m_DefaultListSource = helperFunctions.StoredData.Get(Me, "OMVisteonRadio.DefaultList")
+
         chan = m_LastStation.Split(":")
 
         ' Register media sources 
@@ -129,8 +133,6 @@ Public Class RadioComm
             End If
         End If
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Loaded {1} items for playlist {0} from DB", m_Radio_FM_Presets.Name, m_Radio_FM_Presets.Count))
-
-        ' FM defaults
 
         ' FM media source
         m_Radio_FM_MediaSource = New MediaSource_TunedContent(Me, "FM", "FM Radio", OM.Host.getPluginImage(Of RadioComm)("Icon-HDRadio"))
@@ -166,9 +168,6 @@ Public Class RadioComm
             End If
         End If
         m_Host.DebugMsg("OMVisteonRadio - initialize()", String.Format("Loaded {1} items for playlist {0} from DB", m_Radio_AM_Presets.Name, m_Radio_AM_Presets.Count))
-
-        ' AM defaults
-        m_LastAMStation = GetData(Me.pluginName & ".LastAMStation", m_LastAMStation)
 
         ' AM media source
         m_Radio_AM_MediaSource = New MediaSource_TunedContent(Me, "AM", "AM Radio", OM.Host.getPluginImage(Of RadioComm)("Icon-HDRadio"))
@@ -207,12 +206,15 @@ Public Class RadioComm
 
     Private Sub BackgroundLoad()
 
-        Dim access_granted As Boolean = False
-        Dim startTime As DateTime
-        Dim elapsedTime As TimeSpan
         Dim myCounter As Integer = 0
         Dim chan() As String
         chan = m_LastStation.Split(":")
+
+        access_granted = False
+
+        If m_Radio.IsOpen Then
+            m_Radio.Close()
+        End If
 
         If m_verbose Then
             m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Searching: {0}", m_ComPort))
@@ -221,8 +223,10 @@ Public Class RadioComm
         ' Let the driver find the radio
         If m_ComPort = "Auto" Then
             m_Radio.AutoSearch = True
+            myNotification.Text = String.Format("Searching for HD Radio")
         Else
             m_Radio.AutoSearch = False
+            myNotification.Text = String.Format("Checking for HD Radio on {0}", m_ComPort)
             m_Radio.ComPortString = m_ComPort
         End If
 
@@ -241,113 +245,19 @@ Public Class RadioComm
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Unable to obtain serial lock."))
             End If
-            'OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
+            OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
             Exit Sub
         End If
 
-        If m_Radio.IsOpen Then
-            ' radio already open
-            If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Radio is already open."))
-            End If
-            m_Radio.Close()
-            comWaitHandle.Reset()
+        If m_verbose Then
+            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Obtained serial lock, proceeding..."))
         End If
 
         ' Open communication with radio
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Obtained serial lock, attempting connection."))
-        End If
-
-        If m_ComPort = "Auto" Then
-            myNotification.Text = String.Format("Searching for HD Radio")
-        Else
-            myNotification.Text = String.Format("Checking for HD Radio on {0}", m_ComPort)
-        End If
 
         m_Radio.Open()
-        System.Threading.Thread.Sleep(50)
-
-        myCounter = 0
-        startTime = Now()
-        Do While m_Radio.PowerState = HDRadio.PowerStatus.FindingRadio
-            System.Threading.Thread.Sleep(100)
-            myCounter += 1
-            myNotification.Text = String.Format("{0}", m_Radio.PowerState)
-            display_message("HDRadio", m_Radio.PowerState)
-            If m_verbose Then
-                'm_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Open() - Power State = {0}", m_Radio.PowerState))
-            End If
-            elapsedTime = Now().Subtract(startTime)
-            If elapsedTime.Seconds > 10 Then
-                Exit Do
-            End If
-        Loop
-
-        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
-
-        If Not m_Radio.IsOpen Then
-            If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio not found using {0}", m_ComPort))
-            End If
-            m_Radio.Close()
-            myNotification.Text = String.Format("HD Radio not found using {0}", m_ComPort)
-            display_message("HDRadio", "Not connected to HDRadio")
-            Exit Sub
-        End If
-
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("HD Radio found on {0}", m_ComPort))
-        End If
-
-        m_Radio.PowerOn()
-
-        myCounter = 0
-        startTime = Now()
-        Do While m_Radio.PowerState <> HDRadio.PowerStatus.PowerOn
-            System.Threading.Thread.Sleep(500)
-            myCounter += 1
-            myNotification.Text = String.Format("{0}", m_Radio.PowerState)
-            If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("{0}", m_Radio.PowerState))
-            End If
-            elapsedTime = Now().Subtract(startTime)
-            If elapsedTime.Seconds > 10 Then
-                Exit Do
-            End If
-        Loop
-
-        If m_Radio.PowerState <> HDRadio.PowerStatus.PowerOn Then
-            If m_verbose Then
-                m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Radio did not power on"))
-            End If
-            myNotification.Text = String.Format("Radio on {0} did not power on", m_ComPort)
-            display_message("HDRadio", "Not connected to HDRadio")
-            m_Radio.Close()
-            Exit Sub
-        End If
-
-        ' Radio is on
-        ' Ensure the audio is not muted
-        m_Radio.MuteOff()
-
-        myNotification.Text = String.Format("HD Radio ready on {0}", m_ComPort)
-        display_message("", "")
 
     End Sub
-
-    Private Function SetData(ByVal Name As String, ByVal Value As String) As Boolean
-        Return helperFunctions.StoredData.Set(Me, Name, Value)
-    End Function
-
-    Private Function GetData(ByVal Name As String, ByVal DefaultValue As String) As String
-
-        If String.IsNullOrEmpty(helperFunctions.StoredData.Get(Me, Name)) Then
-            helperFunctions.StoredData.Set(Me, Name, DefaultValue)
-        End If
-        Return helperFunctions.StoredData.Get(Me, Name)
-
-    End Function
 
     Public Overrides Function loadSettings() As OpenMobile.Plugin.Settings
 
@@ -578,7 +488,7 @@ Public Class RadioComm
         End If
 
         If Not m_Routes.ContainsKey(zone) Then
-            m_Routes.Add(zone, OM.Host.AudioDeviceHandler.ActivateRoute(GetData("OMVisteonRadio.SourceDevice", m_InputDevice), zone))
+            m_Routes.Add(zone, OM.Host.AudioDeviceHandler.ActivateRoute(m_InputDevice, zone))
         End If
 
         m_Radio.MuteOff()
@@ -632,7 +542,7 @@ Public Class RadioComm
         ' Return the Mediasource (Band)
 
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSource()", String.Format("Requested: Current MediaSource. Responding: {0}", m_Radio_MediaSource.Name))
+            'm_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSource()", String.Format("Requested: Current MediaSource. Responding: {0}", m_Radio_MediaSource.Name))
         End If
 
         If m_Radio.IsHDActive Then
@@ -845,7 +755,7 @@ Public Class RadioComm
         ' Return available bands
 
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSources()", String.Format("Requested: available bands."))
+            'm_Host.DebugMsg("OMVisteonRadio - MediaProviderData_GetMediaSources()", String.Format("Requested: available bands."))
         End If
 
         Return m_MediaSources
@@ -1330,8 +1240,12 @@ Public Class RadioComm
     Private Sub m_Radio_HDRadioEventCommError() Handles m_Radio.HDRadioEventCommError
 
         m_Host.DebugMsg(OpenMobile.DebugMessageType.Error, "OMVisteonRadio - m_Radio_HDRadioEventCommError()", String.Format("HD Radio communication error."))
+        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
+        m_Radio.Close()
         m_CommError = True
-        comWaitHandle.Set()
+
+        myNotification.Text = String.Format("Communications error ({0})", m_ComPort)
+        display_message("HD Radio", String.Format("Communications error ({0})", m_ComPort))
 
     End Sub
 
@@ -1339,32 +1253,34 @@ Public Class RadioComm
         ' Radio Not Found
 
         If m_verbose Then
-            m_Host.DebugMsg(OpenMobile.DebugMessageType.Info, "OMVisteonRadio", String.Format("Radio not found. Closing port."))
+            m_Host.DebugMsg(OpenMobile.DebugMessageType.Info, "OMVisteonRadio", String.Format("No radio found using {0}.", m_ComPort))
         End If
+
+        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
 
         m_Radio.Close()
         m_NotFound = True
 
-        ' allow waiting threads to continue
-        comWaitHandle.Set()
-        If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysErrorRadioNotFound()", String.Format("waitHandle signalled."))
-        End If
+        myNotification.Text = String.Format("No radio found using {0}", m_ComPort)
+        display_message("HD Radio", String.Format("No radio found using {0}", m_ComPort))
 
     End Sub
 
     Private Sub m_Radio_HDRadioEventSysPortOpened() Handles m_Radio.HDRadioEventSysPortOpened
 
-        While m_Radio.ComPortString <> ""
-            m_ComPort = m_Radio.ComPortString
-        End While
-        SetData("ComPort", m_ComPort)
+        m_ComPort = m_Radio.ComPortString
+        helperFunctions.StoredData.Set(Me, "OMVisteonRadio.ComPort", m_ComPort)
 
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysPortOpened()", String.Format("Opened on port {0}", m_Radio.ComPortString))
+            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventSysPortOpened()", String.Format("Opened using port {0}", m_Radio.ComPortString))
         End If
 
-        comWaitHandle.Set()
+        OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(Me)
+
+        myNotification.Text = String.Format("HD Radio opened using {0}", m_ComPort)
+        display_message("HD Radio", String.Format("Opened using {0}", m_ComPort))
+
+        m_Radio.PowerOn()
 
     End Sub
 
@@ -1373,14 +1289,15 @@ Public Class RadioComm
         m_Host.DebugMsg("OMVisteonRadio - HDRadioEventHWPoweredOn()", String.Format("HD Radio Powered on."))
 
         If m_verbose Then
-            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventHWPoweredOn()", String.Format("Tuning to last playing: {0}", helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastPlaying")))
+            m_Host.DebugMsg("OMVisteonRadio - HDRadioEventHWPoweredOn()", String.Format("Tuning to last playing: {0}", helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastPlaying")))
         End If
 
-        tuneTo(helperFunctions.StoredData.Get(Me, Me.pluginName & ".LastPlaying"))
+        myNotification.Text = "HD Radio ready"
+        display_message("HD Radio", "HD Radio ready")
+
+        tuneTo(helperFunctions.StoredData.Get(Me, "OMVisteonRadio.LastPlaying"))
 
         m_Radio.SetVolume(&H4B)
-
-        pwrWaitHandle.Set()
 
     End Sub
 
