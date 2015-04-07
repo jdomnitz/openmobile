@@ -1183,10 +1183,12 @@ Public Class RadioComm
             m_Host.DebugMsg("OMVisteonRadio - push_media_info()", String.Format("Pushing mediaInfo."))
         End If
 
-        For Each Zone In theZones
-            MyBase.MediaProviderData_ReportMediaInfo(Zone, m_CurrentMedia)
-            MyBase.MediaProviderData_RefreshPlaylist(Zone)
-        Next
+        SyncLock theZones
+            For Each Zone In theZones
+                MyBase.MediaProviderData_ReportMediaInfo(Zone, m_CurrentMedia)
+                MyBase.MediaProviderData_RefreshPlaylist(Zone)
+            Next
+        End SyncLock
 
     End Sub
 
