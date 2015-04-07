@@ -306,6 +306,7 @@ vec3 target = vec3(0., 0., 0.);
             get
             {
                 return @"
+#version 120
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -330,7 +331,7 @@ void main(void)
 
     //vec2 texcoord = vec2(gl_TexCoord[0]);
     //resolution = texcoord;
-    position = position;
+    //position = position;
     
     vec2 fragCoord = gl_FragCoord.xy;
     //fragCoord.y = -fragCoord.y + (fragCoord.y * 2);
@@ -405,7 +406,7 @@ void main(){
 	
 	/* Distance between the fragment and the light */
 	float dist = distance(gl_FragCoord.xy, light_pos);
-    dist = dist / scale;
+    dist = dist / scale.x;
 	
 	/* Basic light color, change it to your likings */
 	//vec3 light_color = vec3(0.2, 1.0, 1.0);
