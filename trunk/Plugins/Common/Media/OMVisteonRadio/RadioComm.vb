@@ -234,7 +234,7 @@ Public Class RadioComm
             If m_verbose Then
                 m_Host.DebugMsg("OMVisteonRadio - BackgroundLoad()", String.Format("Waiting for serial access (attempt {0}).", y))
             End If
-            access_granted = OpenMobile.helperFunctions.SerialAccess.GetAccess(Me)
+            access_granted = OpenMobile.helperFunctions.SerialAccess.GetAccess(Me, TimeSpan.FromSeconds(30))
             If access_granted Then
                 Exit For
             End If
