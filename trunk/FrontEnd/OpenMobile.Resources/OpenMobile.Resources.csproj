@@ -95,6 +95,17 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="References\EntityFramework.dll" />
+    <Content Include="References\EntityFramework.SqlServer.dll" />
+    <Content Include="References\EntityFramework.SqlServer.xml" />
+    <Content Include="References\EntityFramework.xml" />
+    <Content Include="References\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="References\OpenTK.dll" />
+    <Content Include="References\OpenTK.xml" />
+    <Content Include="References\System.Data.SQLite.dll" />
+    <Content Include="References\System.Data.SQLite.EF6.dll" />
+    <Content Include="References\System.Data.SQLite.Linq.dll" />
+    <Content Include="References\System.Data.SQLite.xml" />
     <Content Include="Skins\Default\9Patch\blue_button.9.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -949,7 +960,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
