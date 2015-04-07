@@ -1150,12 +1150,15 @@ namespace OMMapProvider
                 _Map[screen].Zoom = 15;
 
             int speed = OM.Host.DataHandler.GetDataSourceValue<int>("GPS.Speed.KMH");
-            if (speed <= 50)
-                _Map[screen].Zoom = 17;
-            else if (speed > 50 && speed <= 80)
-                _Map[screen].Zoom = 16;
-            else
-                _Map[screen].Zoom = 15;
+            if (speed > 5)
+            {
+                if (speed <= 50)
+                    _Map[screen].Zoom = 17;
+                else if (speed > 50 && speed <= 80)
+                    _Map[screen].Zoom = 16;
+                else
+                    _Map[screen].Zoom = 15;
+            }
 
             OM.Host.DataHandler.PushDataSourceValue(screen, this, "Map.Zoom.Level", (int)_Map[screen].Zoom);
 

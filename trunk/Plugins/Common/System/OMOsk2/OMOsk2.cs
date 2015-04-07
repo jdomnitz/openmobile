@@ -398,6 +398,13 @@ namespace OMOsk2
                             OSK_TextBox_Text.Text = DT.Text;
                         }
                         OSK_TextBox_Text.Tag = DT.Text;
+
+                        if (DT.MaskInput)
+                        {
+                            OSK_TextBox_Text.Text = "";
+                            OSK_TextBox_Text.Tag = "";
+                        }
+
                         Panel.addControl(OSK_TextBox_Text);
 
                         OMLabel OSK_Label_HelpText = new OMLabel("OSK_Label_HelpText", 17, 40, 966, 60);

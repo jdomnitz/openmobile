@@ -2789,54 +2789,196 @@ namespace OpenMobile
     /// <summary>
     /// Information on the currently playing media
     /// </summary>
-    public sealed class mediaInfo : ICloneable
+    public class mediaInfo : ICloneable
     {
         /// <summary>
-        /// Song/Movie Name
+        /// Media name
         /// </summary>
-        public string Name;
-        /// <summary>
-        /// Artist
-        /// </summary>
-        public string Artist;
-        /// <summary>
-        /// Album
-        /// </summary>
-        public string Album;
-        /// <summary>
-        /// Location (local path, url, etc)
-        /// </summary>
-        public string Location;
-        /// <summary>
-        /// Track Number
-        /// </summary>
-        public int TrackNumber = -1;
-        /// <summary>
-        /// Media Genre
-        /// </summary>
-        public string Genre;
-        /// <summary>
-        /// Lyrics
-        /// </summary>
-        public string Lyrics;
-        /// <summary>
-        /// Length in seconds
-        /// </summary>
-        public int Length = -1;
-        /// <summary>
-        /// Rating 0-5.  -1 for not set.
-        /// </summary>
-        public int Rating = -1;
-
-        /// <summary>
-        /// Optional - The cover art for the selected media
-        /// </summary>
-        public OImage coverArt
+        public virtual string Name
         {
             get
             {
-                if (_coverArt == null && CoverArtBytes != null)
-                    this._coverArt = GetCoverArt(CoverArtBytes);
+                return this._Name;
+            }
+            set
+            {
+                if (this._Name != value)
+                {
+                    this._Name = value;
+                }
+            }
+        }
+        private string _Name;
+
+        /// <summary>
+        /// Artist
+        /// </summary>
+        public virtual string Artist
+        {
+            get
+            {
+                return this._Artist;
+            }
+            set
+            {
+                if (this._Artist != value)
+                {
+                    this._Artist = value;
+                }
+            }
+        }
+        private string _Artist;
+
+        /// <summary>
+        /// Album
+        /// </summary>
+        public virtual string Album
+        {
+            get
+            {
+                return this._Album;
+            }
+            set
+            {
+                if (this._Album != value)
+                {
+                    this._Album = value;
+                }
+            }
+        }
+        private string _Album;
+
+        /// <summary>
+        /// Media location (local path, url, etc)
+        /// </summary>
+        public virtual string Location
+        {
+            get
+            {
+                return this._Location;
+            }
+            set
+            {
+                if (this._Location != value)
+                {
+                    this._Location = value;
+                }
+            }
+        }
+        private string _Location;
+
+        /// <summary>
+        /// Track Number (if any)
+        /// </summary>
+        public virtual int TrackNumber
+        {
+            get
+            {
+                return this._TrackNumber;
+            }
+            set
+            {
+                if (this._TrackNumber != value)
+                {
+                    if (value < -1)
+                        value = -1;
+                    this._TrackNumber = value;
+                }
+            }
+        }
+        private int _TrackNumber = -1;
+
+        /// <summary>
+        /// Media Genre
+        /// </summary>
+        public virtual string Genre
+        {
+            get
+            {
+                return this._Genre;
+            }
+            set
+            {
+                if (this._Genre != value)
+                {
+                    this._Genre = value;
+                }
+            }
+        }
+        private string _Genre;
+
+        /// <summary>
+        /// Lyrics
+        /// </summary>
+        public virtual string Lyrics
+        {
+            get
+            {
+                return this._Lyrics;
+            }
+            set
+            {
+                if (this._Lyrics != value)
+                {
+                    this._Lyrics = value;
+                }
+            }
+        }
+        private string _Lyrics;
+
+        /// <summary>
+        /// Length in seconds
+        /// </summary>
+        public virtual int Length
+        {
+            get
+            {
+                return this._Length;
+            }
+            set
+            {
+                if (this._Length != value)
+                {
+                    if (value < -1)
+                        value = -1;
+                    this._Length = value;
+                }
+            }
+        }
+        private int _Length = -1;
+
+        /// <summary>
+        /// Rating 0-5.  -1 for not set.
+        /// </summary>
+        public virtual int Rating
+        {
+            get
+            {
+                return this._Rating;
+            }
+            set
+            {
+                if (this._Rating != value)
+                {
+                    if (value > 5)
+                        value = 5;
+                    if (value < -1)
+                        value = -1;
+                    this._Rating = value;
+                }
+            }
+        }
+        private int _Rating = -1;
+        
+        /// <summary>
+        /// Optional - The cover art for the selected media
+        /// </summary>
+        public virtual OImage coverArt
+        {
+            get
+            {
+                //if (_coverArt == null && CoverArtBytes != null)
+                //    this._coverArt = GetCoverArt(CoverArtBytes);
                 return this._coverArt;
             }
             set
@@ -2850,29 +2992,28 @@ namespace OpenMobile
         private OImage _coverArt;
 
         /// <summary>
-        /// The bytes of the cover art image
-        /// </summary>
-        public byte[] CoverArtBytes;
-        private OImage GetCoverArt(byte[] bytes)
-        {
-            try
-            {
-                MemoryStream m = new MemoryStream(bytes);
-                return OImage.FromStream(m);
-            }
-            catch (OutOfMemoryException)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
         /// Source Type
         /// </summary>
-        public eMediaType Type = eMediaType.NotSet;
+        public virtual eMediaType Type
+        {
+            get
+            {
+                return this._Type;
+            }
+            set
+            {
+                if (this._Type != value)
+                {
+                    this._Type = value;
+                }
+            }
+        }
+        private eMediaType _Type;
+        
         /// <summary>
         /// Create a new mediaInfo object
         /// </summary>
+        /// <param name="type"></param>
         /// <param name="URL"></param>
         public mediaInfo(eMediaType type, string URL)
         {
@@ -2892,6 +3033,10 @@ namespace OpenMobile
         /// </summary>
         public mediaInfo() { }
 
+        /// <summary>
+        /// A string representation
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return String.Format("{0} - {1} - {2} [{3}]", Artist, Album, Name, Location);
@@ -2902,7 +3047,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="media"></param>
         /// <returns></returns>
-        public bool UpdateMissingInfo(mediaInfo media)
+        public virtual bool UpdateMissingInfo(mediaInfo media)
         {
             return UpdateMissingInfo(media.Album, media.Artist, media.Name, media.Genre, media.Length, media.TrackNumber, media.coverArt, media.Type);
         }
@@ -2917,7 +3062,7 @@ namespace OpenMobile
         /// <param name="length"></param>
         /// <param name="tracknumber"></param>
         /// <returns></returns>
-        public bool UpdateMissingInfo(string album = null, string artist = null, string name = null, string genre = null, int? length = null, int? tracknumber = null, OImage coverArt = null, eMediaType? type = null)
+        public virtual bool UpdateMissingInfo(string album = null, string artist = null, string name = null, string genre = null, int? length = null, int? tracknumber = null, OImage coverArt = null, eMediaType? type = null)
         {
             bool updated = false;
             if (type.HasValue)
@@ -2976,7 +3121,7 @@ namespace OpenMobile
         /// Replaces info in this mediaInfo
         /// </summary>
         /// <param name="media"></param>
-        public void ReplaceMissingInfo(mediaInfo media)
+        public virtual void ReplaceMissingInfo(mediaInfo media)
         {
             ReplaceMissingInfo(media.Album, media.Artist, media.Name, media.Genre, media.Length, media.TrackNumber, media.coverArt, media.Type);
         }
@@ -2992,7 +3137,7 @@ namespace OpenMobile
         /// <param name="tracknumber"></param>
         /// <param name="coverArt"></param>
         /// <param name="type"></param>
-        public void ReplaceMissingInfo(string album = null, string artist = null, string name = null, string genre = null, int? length = null, int? tracknumber = null, OImage coverArt = null, eMediaType? type = null)
+        public virtual void ReplaceMissingInfo(string album = null, string artist = null, string name = null, string genre = null, int? length = null, int? tracknumber = null, OImage coverArt = null, eMediaType? type = null)
         {
             if (type.HasValue)
                 this.Type = type.Value;
@@ -3017,7 +3162,7 @@ namespace OpenMobile
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public bool IsContentEqual(mediaInfo other)
+        public virtual bool IsContentEqual(mediaInfo other)
         {
             if (object.ReferenceEquals(this, null) && object.ReferenceEquals(other, null))
                 return true;
@@ -3099,7 +3244,7 @@ namespace OpenMobile
         /// Clone this object
         /// </summary>
         /// <returns></returns>
-        public object Clone()
+        public virtual object Clone()
         {
             mediaInfo newObject = (mediaInfo)this.MemberwiseClone();
             newObject.coverArt = newObject.coverArt.Copy();
