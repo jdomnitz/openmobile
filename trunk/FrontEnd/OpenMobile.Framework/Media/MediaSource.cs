@@ -646,6 +646,7 @@ namespace OpenMobile.Media
             base.AdditionalData.Add("Playlists", null);
 
             // Add predefined commands
+            base.AdditionalCommands.Add("Playlist.Select", null);
 
         }
 
@@ -663,6 +664,22 @@ namespace OpenMobile.Media
                 base.AdditionalData["Playlists"] = value;
             }
         }
+
+        /// <summary>
+        /// Raised when a select playlist command is executed
+        /// </summary>
+        public event MediaSourceCommandDelegate OnCommand_PlaylistSelect
+        {
+            add
+            {
+                base.AdditionalCommands["Playlist.Select"] = value;
+            }
+            remove
+            {
+                base.AdditionalCommands["Playlist.Select"] = null;
+            }
+        }
+
 
     }
 
