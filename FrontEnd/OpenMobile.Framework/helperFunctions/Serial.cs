@@ -35,19 +35,19 @@ namespace OpenMobile.helperFunctions
 
         static private IBasePlugin _CurrentLockOwner;
         static private DateTime _LockTime;
+        static private TimeSpan _HoldTime;
 
         /// <summary>
         /// Requests serial ports access. Returns true if request was successfull, returns false if request timed out (15 seconds)
         /// <para>Remember to release the request with ReleaseAccess<seealso cref="ReleaseAccess"/></para>
         /// </summary>
         /// <returns></returns>
-        static public bool GetAccess(IBasePlugin requestingPlugin)
+        static public bool GetAccess(IBasePlugin requestingPlugin, TimeSpan? holdTime = null)
         {
-
             // Check if lock has been held to long
             if (!_LockTime.Equals(new DateTime()))
             {
-                if ((DateTime.Now - _LockTime) > new TimeSpan(0, 0, 15))
+                if ((DateTime.Now - _LockTime) > _HoldTime)
                 {
                     // Lock is held to long
                     OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Current lock held by {0} to long, forcing a release", _CurrentLockOwner));
@@ -78,6 +78,11 @@ namespace OpenMobile.helperFunctions
             _CurrentLockOwner = requestingPlugin;
             _LockTime = DateTime.Now;
             _SerialReleased.Reset();
+
+            if (holdTime.HasValue)
+                _HoldTime = holdTime.Value;
+            else
+                _HoldTime = TimeSpan.FromSeconds(15);
 
             OM.Host.DebugMsg(DebugMessageType.Info, String.Format("SerialAccess: Access granted to {0}", requestingPlugin.pluginName));
             return true;

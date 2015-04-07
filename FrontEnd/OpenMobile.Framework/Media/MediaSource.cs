@@ -32,6 +32,11 @@ namespace OpenMobile.Media
         /// Disc based media (like CD, DVD, BluRay etc...)
         /// </summary>
         DiscBasedMedia,
+
+        /// <summary>
+        /// Streaming service (like Spotify, Pandora, Tidal etc)
+        /// </summary>
+        StreamingService
     }
 
 
@@ -621,5 +626,45 @@ namespace OpenMobile.Media
         {
         }
     }
+
+    /// <summary>
+    /// A media source from a streaming service
+    /// </summary>
+    public class MediaSource_StreamingService : MediaSource
+    {
+        /// <summary>
+        /// Creates a new streaming service media source 
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        /// <param name="icon"></param>
+        public MediaSource_StreamingService(IMediaProvider provider, string name, string description, imageItem icon)
+            : base(provider, MediaSourceTypes.StreamingService.ToString(), name, description, icon)
+        {
+            // Add predefined data for this media source
+            base.AdditionalData.Add("Playlists", null);
+
+            // Add predefined commands
+
+        }
+
+        /// <summary>
+        /// A list of all PlayList provided by this provider
+        /// </summary>
+        public List<Playlist> Playlists
+        {
+            get
+            {
+                return (List<Playlist>)base.AdditionalData["Playlists"];
+            }
+            set
+            {
+                base.AdditionalData["Playlists"] = value;
+            }
+        }
+
+    }
+
 
 }

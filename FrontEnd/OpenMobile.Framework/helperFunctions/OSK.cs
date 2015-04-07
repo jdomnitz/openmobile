@@ -107,8 +107,11 @@ namespace OpenMobile.helperFunctions
                 OMTextBox txt = (OMTextBox)osk.Panel.Controls.Find(x => x.Name == "OSK_TextBox_Text");
                 if (txt != null)
                 {
-                    txt.Tag = Text;
-                    txt.Text = Text;
+                    if (!MaskInput)
+                    {
+                        txt.Tag = Text;
+                        txt.Text = Text;
+                    }
                     oskData.Text = Text;
                 }
                 OMLabel lbl = (OMLabel)osk.Panel.Controls.Find(x => x.Name == "OSK_Label_HelpText");

@@ -140,6 +140,25 @@ namespace OpenMobile.Media
         private string _Name;
 
         /// <summary>
+        /// A multi purpose tag object
+        /// </summary>
+        public object Tag
+        {
+            get
+            {
+                return this._Tag;
+            }
+            set
+            {
+                if (this._Tag != value)
+                {
+                    this._Tag = value;
+                }
+            }
+        }
+        private object _Tag;        
+
+        /// <summary>
         /// The items in the buffers. Index 0 to BufferSize is history, index at BufferSize is current item, index BufferSize+1 to (BufferSize * 2 + 1) is queue
         /// </summary>
         public BindingList<mediaInfo> BufferItems

@@ -281,8 +281,8 @@ namespace OMRadio2
 
             panel.Entering += new PanelEvent(panel_Entering);
 
-            // Load the panel into the local manager for panels
-            _MainPlugin.PanelManager.loadPanel(panel, true);
+            //// Load the panel into the local manager for panels
+            //_MainPlugin.PanelManager.loadPanel(panel, true);
 
             // Subscribe to datasources
             OM.Host.ForEachScreen((screen)=>

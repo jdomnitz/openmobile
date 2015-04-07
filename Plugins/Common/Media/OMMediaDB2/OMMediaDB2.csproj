@@ -69,8 +69,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
-      <HintPath>..\..\..\..\FrontEnd\References\System.Data.SQLite.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\FrontEnd\OpenMobile.Resources\References\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
   </ItemGroup>

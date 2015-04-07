@@ -136,6 +136,19 @@ namespace OpenMobile.Plugin
         {
             return new Setting(SettingTypes.MultiChoice, name, header, description, Setting.BooleanList, Setting.BooleanList, currentValue);
         }
+        /// <summary>
+        /// Creates a new boolean setting
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="header"></param>
+        /// <param name="description"></param>
+        /// <param name="currentValue"></param>
+        /// <returns></returns>
+        public static Setting BooleanSetting(string name, string header, string description, bool currentValue)
+        {
+            return new Setting(SettingTypes.MultiChoice, name, header, description, Setting.BooleanList, Setting.BooleanList, currentValue.ToString());
+        }
+
 
         /// <summary>
         /// Creates a new folder selection setting

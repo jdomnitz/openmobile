@@ -1619,7 +1619,7 @@ namespace OMRadio_MonkeyBoard
             if (image == null)
             {
                 //image = OM.Host.getSkinImage("Icons|Icon-Glass-Radio").image;
-                image = OM.Host.getPluginImage(this, String.Format("Graphics|RadioBase", media.Name)).image.Copy();
+                image = OM.Host.getPluginImage(this, "Graphics|RadioBase").image.Copy();
                 //image.RenderText(0, 0, image.Width, image.Height, media.Name, OpenMobile.Graphics.Font.Arial, eTextFormat.Normal, Alignment.CenterCenter, OpenMobile.Graphics.Color.Black, OpenMobile.Graphics.Color.Black, FitModes.Fit);
                 var mediaString = String.IsNullOrWhiteSpace(media.Name) ? media.Artist : media.Name;
                 if (!String.IsNullOrWhiteSpace(mediaString))

@@ -373,7 +373,7 @@ namespace OpenMobile.Controls
                 if (((this.flags & textboxFlags.Password) == textboxFlags.Password) && (_text.Length > 0))
                 {
                     tempStr = "";
-                    tempStr = tempStr.PadRight(_text.Length);
+                    tempStr = tempStr.PadRight(_text.Length, '*');
                 }
 
                 // Regenerate graphics?

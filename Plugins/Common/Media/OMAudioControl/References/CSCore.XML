@@ -8588,6 +8588,11 @@
             <param name="waveFormat">The WaveFormat of the source.</param>
             <param name="bufferSize">Buffersize in bytes</param>
         </member>
+        <member name="M:CSCore.Streams.WriteableBufferingSource.Clear">
+            <summary>
+            Clears all data from the internal buffer
+            </summary>
+        </member>
         <member name="M:CSCore.Streams.WriteableBufferingSource.Write(System.Byte[],System.Int32,System.Int32)">
             <summary>
             Adds new data to the internal buffer.

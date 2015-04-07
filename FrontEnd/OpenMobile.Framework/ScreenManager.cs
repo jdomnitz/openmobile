@@ -169,7 +169,7 @@ namespace OpenMobile.Framework
                     }
 
                     // Exit if no panel is available 
-                    if (panels.Count == 0)
+                    if (panels.Count == 0 && _QueuedPanels.Count == 0)
                         return null;
 
                     if ((screen < 0) || (screen >= screens))

@@ -530,9 +530,9 @@ namespace OpenMobile.Media
                         break;
                 }
             }
-            catch (NotImplementedException ex)
+            catch (NotImplementedException)
             {
-                OM.Host.DebugMsg(String.Format("MediaProviderHandler: DataSource:{0} not implemented in provider:{1}", datasource.FullName, _CurrentMediaProviders[zone]), ex);
+                OM.Host.DebugMsg(DebugMessageType.Warning, String.Format("MediaProviderHandler: DataSource:{0} not implemented in provider:{1}", datasource.FullName, _CurrentMediaProviders[zone]));
             }
             catch
             {

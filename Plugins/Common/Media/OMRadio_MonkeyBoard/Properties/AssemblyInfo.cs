@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("OMRadio_MonkeyBoard")]
-[assembly: AssemblyCopyright("Copyright ©  OpenMobile DevTeam 2009-2014")]
+[assembly: AssemblyCopyright("Copyright ©  OpenMobile DevTeam")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
