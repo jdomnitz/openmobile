@@ -115,6 +115,8 @@
     <Content Include="Graphics\105700.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Graphics\107100.jpg" />
+    <Content Include="Graphics\107700.png" />
     <Content Include="Graphics\92500.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
