@@ -75,7 +75,7 @@ namespace OpenMobile
     public static class Core
     {
         public static PluginHost theHost = new PluginHost();
-        public static List<RenderingWindow> RenderingWindows = null;
+        public static RenderingWindow[] RenderingWindows = null;
         public static List<IBasePlugin> pluginCollection = new List<IBasePlugin>();
         public static List<IBasePlugin> pluginCollectionDisabled = new List<IBasePlugin>();
         public static bool exitTransition = true;
@@ -216,7 +216,7 @@ namespace OpenMobile
             var a = MainMenu.GetType().GetCustomAttributes(typeof(InitialTransition), false);
             //SandboxedThread.Asynchronous(() =>
             {
-                for (int i = 0; i < RenderingWindows.Count; i++)
+                for (int i = 0; i < RenderingWindows.Length; i++)
                 {
                     // Load UI as background
                     theHost.execute(eFunction.TransitionToPanel, i.ToString(), "UI", "background");
@@ -644,7 +644,7 @@ namespace OpenMobile
 
         static private void SetStartupInfoText(string text)
         {
-            for (int i = 0; i < RenderingWindows.Count; i++)
+            for (int i = 0; i < RenderingWindows.Length; i++)
                 RenderingWindows[i].StartupInfoText = text;
         }
 
@@ -721,9 +721,14 @@ namespace OpenMobile
             OSFunctions.Init();
 
             // Initialize screens
-            RenderingWindows = new List<RenderingWindow>(theHost.ScreenCount);
-            for (int i = 0; i < RenderingWindows.Capacity; i++)
-                RenderingWindows.Add(new RenderingWindow(i, InitialScreenSize, Fullscreen));
+            RenderingWindows = new RenderingWindow[theHost.ScreenCount];
+            
+            // Create main screen
+            RenderingWindows[0] = new RenderingWindow(0, InitialScreenSize, Fullscreen);
+
+            // Create additional screens
+            for (int i = 1; i < RenderingWindows.Length; i++)
+                RenderingWindow.CreateAsync(i, InitialScreenSize, Fullscreen);
 
             #region Check for missing database (and create if needed)
 
@@ -756,7 +761,7 @@ namespace OpenMobile
             BuiltInComponents.Host.DebugMsg(DebugMessageType.Info, "Startup arguments:", Args);
 
             // Error check
-            if (RenderingWindows.Count == 0)
+            if (RenderingWindows.Length == 0)
                 throw new Exception("Unable to detect any monitors on this platform!");
 
             InputRouter.Initialize();
@@ -765,8 +770,8 @@ namespace OpenMobile
             rapidMenu.Name = "OpenMobile.Core.rapidMenu";
             rapidMenu.Start();
             
-            for (int i = 1; i < RenderingWindows.Count; i++)
-                RenderingWindows[i].RunAsync();
+            //for (int i = 1; i < RenderingWindows.Count; i++)
+            //    RenderingWindows[i].RunAsync();
             RenderingWindows[0].Run();
 
             // Terminate all windows
@@ -788,7 +793,7 @@ namespace OpenMobile
             _Closing = true;
 
             // Supress exception messages
-            for (int i = RenderingWindows.Count - 1; i >= 0; i--)
+            for (int i = RenderingWindows.Length - 1; i >= 0; i--)
                 RenderingWindows[i].SuppressExceptionMessage = true;
 
             _ShutdownMode = shutdownMode;
@@ -836,7 +841,7 @@ namespace OpenMobile
                 OM.Host.DebugMsg("OpenMobile.Core Exception while disposing", ex);
             }
 
-            for (int i = RenderingWindows.Count - 1; i >= 0; i--)
+            for (int i = RenderingWindows.Length - 1; i >= 0; i--)
             {
                 try
                 {

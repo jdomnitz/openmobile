@@ -373,6 +373,23 @@ namespace OpenMobile
             t.Start();
         }
 
+        public static void CreateAsync(int s, Size initalScreenSize, OpenTK.GameWindowFlags flags)
+        {
+            ManualResetEvent threadSync = new ManualResetEvent(false);
+            Thread t = new Thread(delegate()
+            {
+                Core.RenderingWindows[s] = new RenderingWindow(s, initalScreenSize, flags);
+                threadSync.Set();
+                Core.RenderingWindows[s].Run();
+            });
+            t.TrySetApartmentState(ApartmentState.STA);
+            t.Name = String.Format("RenderingWindow_{0}.RunAsync", s);
+            t.Start();
+
+            // Wait for window creation
+            threadSync.WaitOne(10000);
+        }
+
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
         [System.Security.SecurityCritical]
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -1567,7 +1584,7 @@ namespace OpenMobile
         /// </summary>
         public static void CloseAllWindows()
         {
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
+            for (int i = 0; i < Core.RenderingWindows.Length; i++)
                 Core.RenderingWindows[i].CloseMe();
         }
 
