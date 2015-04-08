@@ -910,7 +910,7 @@ namespace OpenMobile
         /// <returns></returns>
         public object GetWindowHandle(int screen)
         {
-            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
+            if ((screen < 0) || (screen >= Core.RenderingWindows.Length))
                 return (IntPtr)(-1); //Out of bounds
             return Core.RenderingWindows[screen].WindowInfo.Handle;
         }
@@ -2172,7 +2172,7 @@ namespace OpenMobile
                 case eFunction.TransitionFromAny:
                     if (int.TryParse(arg, out ret) == true)
                     {
-                        if ((ret < 0) || (ret >= Core.RenderingWindows.Count))
+                        if ((ret < 0) || (ret >= Core.RenderingWindows.Length))
                             return false;
                         lock (Core.RenderingWindows[ret])
                         {
@@ -4697,7 +4697,7 @@ namespace OpenMobile
 
         public iRenderingWindow RenderingWindowInterface(int screen)
         {
-            if (screen < 0 || screen >= Core.RenderingWindows.Count)
+            if (screen < 0 || screen >= Core.RenderingWindows.Length)
                 return null;
             return Core.RenderingWindows[screen] as iRenderingWindow;
         }

@@ -316,7 +316,7 @@ namespace OpenMobile
         static void SourcKeyPress(object sender, OpenTK.KeyPressEventArgs e)
         {
             // Pass event along
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
+            for (int i = 0; i < Core.RenderingWindows.Length; i++)
             {
                 if (Core.RenderingWindows[i].Focused)
                 {
@@ -331,7 +331,7 @@ namespace OpenMobile
         public static void SourceUp(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
         {
             // Pass event along
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
+            for (int i = 0; i < Core.RenderingWindows.Length; i++)
             {
                 if (Core.RenderingWindows[i].Focused)
                 {
@@ -351,13 +351,13 @@ namespace OpenMobile
             //If an app handles it first don't tell the UI
             if (e.Screen == -1)
             {
-                for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                for (int i = 0; i < Core.RenderingWindows.Length; i++)
                 {
                     Core.RenderingWindows[i].RenderingWindow_KeyUp(sender, e);
                     IdleDetection_Restart(i);
                 }
             }
-            else if (e.Screen < Core.RenderingWindows.Count)
+            else if (e.Screen < Core.RenderingWindows.Length)
             {
                 if (Core.RenderingWindows[e.Screen].WindowState != OpenTK.WindowState.Minimized)
                 {
@@ -369,7 +369,7 @@ namespace OpenMobile
         public static void SourceDown(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
         {
             // Pass event along
-            for (int i = 0; i < Core.RenderingWindows.Count; i++)
+            for (int i = 0; i < Core.RenderingWindows.Length; i++)
             {
                 if (Core.RenderingWindows[i].Focused)
                 {
@@ -390,7 +390,7 @@ namespace OpenMobile
             //If an app handles it first don't tell the UI
             if (e.Screen == -1)
             {
-                for (int i = 0; i < Core.RenderingWindows.Count; i++)
+                for (int i = 0; i < Core.RenderingWindows.Length; i++)
                 {
                     Core.RenderingWindows[i].RenderingWindow_KeyDown(sender, e);
                     IdleDetection_Restart(i);
@@ -407,7 +407,7 @@ namespace OpenMobile
         }
         public static bool SendKeyUp(int screen, string Key)
         {
-            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
+            if ((screen < 0) || (screen >= Core.RenderingWindows.Length))
                 return false;
             Core.RenderingWindows[screen].RenderingWindow_KeyUp(null, new KeyboardKeyEventArgs(getKey(Key)));
             IdleDetection_Restart(screen);
@@ -415,7 +415,7 @@ namespace OpenMobile
         }
         public static bool SendKeyDown(int screen, string Key)
         {
-            if ((screen < 0) || (screen >= Core.RenderingWindows.Count))
+            if ((screen < 0) || (screen >= Core.RenderingWindows.Length))
                 return false;
             Core.RenderingWindows[screen].RenderingWindow_KeyDown(null, new KeyboardKeyEventArgs(getKey(Key)));
             IdleDetection_Restart(screen);
