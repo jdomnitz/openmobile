@@ -380,7 +380,7 @@ namespace OpenMobile
             ManualResetEvent threadSync = new ManualResetEvent(false);
             Thread t = new Thread(delegate()
             {
-                Core.RenderingWindows[s] = new RenderingWindow(s, initalScreenSize, flags);
+                //Core.RenderingWindows[s] = new RenderingWindow(s, initalScreenSize, flags);
                 threadSync.Set();
                 Core.RenderingWindows[s].Run();
             });
