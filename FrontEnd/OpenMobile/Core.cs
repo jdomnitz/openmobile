@@ -722,7 +722,7 @@ namespace OpenMobile
 
             // Initialize screens
             RenderingWindows = new RenderingWindow[theHost.ScreenCount];
-            
+
             // Create main screen
             RenderingWindows[0] = new RenderingWindow(0, InitialScreenSize, Fullscreen);
 
@@ -769,8 +769,8 @@ namespace OpenMobile
             Thread rapidMenu = new Thread(Core.initialize);
             rapidMenu.Name = "OpenMobile.Core.rapidMenu";
             rapidMenu.Start();
-            
-            //for (int i = 1; i < RenderingWindows.Count; i++)
+
+            //for (int i = 1; i < RenderingWindows.Length; i++)
             //    RenderingWindows[i].RunAsync();
             RenderingWindows[0].Run();
 

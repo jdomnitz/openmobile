@@ -256,14 +256,14 @@ namespace OpenMobile
             ReDrawPanel = new ReDrawTrigger(Invalidate);
         }
 
-        public bool IsDisposed = false;
+        public bool IsDisposed;
         public override void Dispose()
         {
             IsDisposed = true;
             if (tmrClickHold != null)
                 tmrClickHold.Dispose();
             base.Dispose();
-                    }
+        }
         protected override void Dispose(bool manual)
         {
             if (tmrClickHold != null)
@@ -375,6 +375,8 @@ namespace OpenMobile
 
         public static void CreateAsync(int s, Size initalScreenSize, OpenTK.GameWindowFlags flags)
         {
+            Core.RenderingWindows[s] = new RenderingWindow(s, initalScreenSize, flags);
+
             ManualResetEvent threadSync = new ManualResetEvent(false);
             Thread t = new Thread(delegate()
             {
@@ -443,6 +445,8 @@ namespace OpenMobile
                         RenderingQueue.Remove(panelStartUp);
                     }
                 }
+
+                //base.MakeCurrent();
 
                 g.Clear(Color.Black);
                 g.ResetClip();

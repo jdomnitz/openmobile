@@ -1089,7 +1089,7 @@ namespace OpenMobile.helperFunctions.Graphics
                 List<Rectangle> rects = GetRectangles(images.Count, width, height);
                 for (int i = 0; i < rects.Count; i++)
 			    {
-                    if (images.Count >= i)
+                    if (images.Count >= i && images[i] != null && images[i].image != null)
                         g.DrawImage(images[i].image, rects[i].ToSystemRectangle(), 0, 0, images[i].image.Width, images[i].image.Height, System.Drawing.GraphicsUnit.Pixel);
 			    }
             }
