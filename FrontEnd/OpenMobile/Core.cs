@@ -82,6 +82,8 @@ namespace OpenMobile
         public static OpenTK.GameWindowFlags Fullscreen;
         public static StartupArguments StartupArgs;
 
+        private static ManualResetEvent _ProgramClosing = new ManualResetEvent(false);
+
         private static ShutdownModes _ShutdownMode = ShutdownModes.Normal;
 
         /// <summary>
@@ -724,12 +726,12 @@ namespace OpenMobile
             RenderingWindows = new RenderingWindow[theHost.ScreenCount];
 
             // Create main screen
-            RenderingWindows[0] = new RenderingWindow(0, InitialScreenSize, Fullscreen);
+            //RenderingWindows[0] = new RenderingWindow(0, InitialScreenSize, Fullscreen);
 
             // Create additional screens
-            for (int i = 1; i < RenderingWindows.Length; i++)
-                //RenderingWindow.CreateAsync(i, InitialScreenSize, Fullscreen);
-                RenderingWindows[i] = new RenderingWindow(i, InitialScreenSize, Fullscreen);
+            for (int i = 0; i < RenderingWindows.Length; i++)
+                RenderingWindow.CreateAsync(i, InitialScreenSize, Fullscreen);
+                //RenderingWindows[i] = new RenderingWindow(i, InitialScreenSize, Fullscreen);
 
             #region Check for missing database (and create if needed)
 
@@ -771,9 +773,12 @@ namespace OpenMobile
             rapidMenu.Name = "OpenMobile.Core.rapidMenu";
             rapidMenu.Start();
 
-            for (int i = 1; i < RenderingWindows.Length; i++)
-                RenderingWindows[i].RunAsync();
-            RenderingWindows[0].Run();
+            //for (int i = 1; i < RenderingWindows.Length; i++)
+            //    RenderingWindows[i].RunAsync();
+            //RenderingWindows[0].Run();
+
+            // Wait for program to close
+            _ProgramClosing.WaitOne();
 
             // Terminate all windows
             CloseProgram(ShutdownModes.Normal);
@@ -853,6 +858,7 @@ namespace OpenMobile
                     OM.Host.DebugMsg(String.Format("OpenMobile.Core Exception while disposing renderingwindow for screen {0}", RenderingWindows[i].Screen), ex);
                 }
             }
+            _ProgramClosing.Set();
         }
 
         internal static void DisposeAndShutdown()
