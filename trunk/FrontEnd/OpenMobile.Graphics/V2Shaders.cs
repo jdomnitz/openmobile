@@ -519,7 +519,6 @@ void main(){
                 {
                     try
                     {
-
                         GL.LinkProgram(_ShaderProgramHandles[(int)shader]);
                         GL.UseProgram(_ShaderProgramHandles[(int)shader]);
 
