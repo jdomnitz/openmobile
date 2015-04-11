@@ -2977,8 +2977,8 @@ namespace OpenMobile
         {
             get
             {
-                //if (_coverArt == null && CoverArtBytes != null)
-                //    this._coverArt = GetCoverArt(CoverArtBytes);
+                if (_coverArt == null && CoverArtBytes != null)
+                    this._coverArt = GetCoverArt(CoverArtBytes);
                 return this._coverArt;
             }
             set
@@ -2990,6 +2990,23 @@ namespace OpenMobile
             }
         }
         private OImage _coverArt;
+
+        /// <summary>
+        /// The bytes of the cover art image
+        /// </summary>
+        public byte[] CoverArtBytes;
+        private OImage GetCoverArt(byte[] bytes)
+        {
+            try
+            {
+                MemoryStream m = new MemoryStream(bytes);
+                return OImage.FromStream(m);
+            }
+            catch (OutOfMemoryException)
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Source Type

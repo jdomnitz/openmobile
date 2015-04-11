@@ -217,6 +217,9 @@
     <Content Include="Skins\Default\9Patch\red_progress_bar_fill.9.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Skins\Default\AIcons\1-navigation-accept.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Skins\Default\AIcons\1-navigation-cancel.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -960,7 +963,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearStamp.MonthAndDayStamp" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

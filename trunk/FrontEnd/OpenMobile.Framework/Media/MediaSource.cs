@@ -644,9 +644,11 @@ namespace OpenMobile.Media
         {
             // Add predefined data for this media source
             base.AdditionalData.Add("Playlists", null);
+            base.AdditionalData.Add("Playlists.InfoStrings", null);
 
             // Add predefined commands
             base.AdditionalCommands.Add("Playlist.Select", null);
+            base.AdditionalCommands.Add("Playlist.Offline.Set", null);
 
         }
 
@@ -666,6 +668,21 @@ namespace OpenMobile.Media
         }
 
         /// <summary>
+        /// A list of infostrings for all playlists
+        /// </summary>
+        public Dictionary<Playlist, string> PlaylistsInfoStrings
+        {
+            get
+            {
+                return (Dictionary<Playlist, string>)base.AdditionalData["Playlists.InfoStrings"];
+            }
+            set
+            {
+                base.AdditionalData["Playlists.InfoStrings"] = value;
+            }
+        }
+
+        /// <summary>
         /// Raised when a select playlist command is executed
         /// </summary>
         public event MediaSourceCommandDelegate OnCommand_PlaylistSelect
@@ -677,6 +694,21 @@ namespace OpenMobile.Media
             remove
             {
                 base.AdditionalCommands["Playlist.Select"] = null;
+            }
+        }
+
+        /// <summary>
+        /// Raised when a set offline playlist command is executed
+        /// </summary>
+        public event MediaSourceCommandDelegate OnCommand_PlaylistOfflineSet
+        {
+            add
+            {
+                base.AdditionalCommands["Playlist.Offline.Set"] = value;
+            }
+            remove
+            {
+                base.AdditionalCommands["Playlist.Offline.Set"] = null;
             }
         }
 

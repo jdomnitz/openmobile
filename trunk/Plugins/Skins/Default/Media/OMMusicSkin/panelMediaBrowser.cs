@@ -1110,11 +1110,11 @@ namespace OMMusicSkin
             if (_DB == null)
                 _DB = OM.Host.getData(eGetData.GetMediaDatabase, "") as IMediaDatabase;
 
-            if (_DBItems == null)
+            if (_DBItems == null || _DBItems.Count() == 0)
             {
                 SafeThread.Asynchronous(() =>
                 {
-                    if (_DBItems == null)
+                    if (_DBItems == null || _DBItems.Count() == 0)
                     {
                         ControlLayout clProgressControls = new ControlLayout(sender, _cgProgress);
                         clProgressControls.Visible = true;
@@ -1398,6 +1398,8 @@ namespace OMMusicSkin
                 _ListUpdate_Cancel = false;
                 foreach (var item in items)
                 {
+                    OImage coverArt = null;
+
                     string artistInfo = "";
                     if (item.albumCount == 0)
                         artistInfo = String.Format("{0} (No albums)", item.artist);
@@ -1405,8 +1407,12 @@ namespace OMMusicSkin
                         artistInfo = String.Format("{0} ({1} album)", item.artist, item.albumCount);
                     else
                         artistInfo = String.Format("{0} ({1} albums)", item.artist, item.albumCount);
-                    var coverArtMosaic = OpenMobile.helperFunctions.Graphics.Images.CreateMosaic(item.covers.ToList(), 200, 200);
-                    lst.Add(new OMListItem(item.artist, artistInfo, coverArtMosaic, _MediaListSubItemFormat, item.albums.First()));
+                    var covers = item.covers.ToList();
+                    if (covers == null || covers.Count == 0)
+                        coverArt = MediaLoader.MissingCoverImage;
+                    else
+                        coverArt = OpenMobile.helperFunctions.Graphics.Images.CreateMosaic(covers, 200, 200);
+                    lst.Add(new OMListItem(item.artist, artistInfo, coverArt, _MediaListSubItemFormat, item.albums.First()));
 
                     // Cancel if requested
                     if (_ListUpdate_Cancel)

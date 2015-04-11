@@ -550,8 +550,13 @@ void main(){
 
         public static void DeactivateShader(OMShaders shader)
         {
-            GL.UseProgram(0);
-            //GL.DeleteProgram(_ShaderProgramHandles[(int)shader]);
+            try
+            {
+                GL.UseProgram(0);
+                //GL.DeleteProgram(_ShaderProgramHandles[(int)shader]);
+            }
+            catch
+            { }
         }
     }
 }
