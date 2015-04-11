@@ -446,7 +446,7 @@ namespace OpenMobile
                     }
                 }
 
-                base.MakeCurrent();
+                //base.MakeCurrent();
 
                 g.Clear(Color.Black);
                 g.ResetClip();
