@@ -728,7 +728,8 @@ namespace OpenMobile
 
             // Create additional screens
             for (int i = 1; i < RenderingWindows.Length; i++)
-                RenderingWindow.CreateAsync(i, InitialScreenSize, Fullscreen);
+                //RenderingWindow.CreateAsync(i, InitialScreenSize, Fullscreen);
+                RenderingWindows[i] = new RenderingWindow(i, InitialScreenSize, Fullscreen);
 
             #region Check for missing database (and create if needed)
 
@@ -770,8 +771,8 @@ namespace OpenMobile
             rapidMenu.Name = "OpenMobile.Core.rapidMenu";
             rapidMenu.Start();
 
-            //for (int i = 1; i < RenderingWindows.Length; i++)
-            //    RenderingWindows[i].RunAsync();
+            for (int i = 1; i < RenderingWindows.Length; i++)
+                RenderingWindows[i].RunAsync();
             RenderingWindows[0].Run();
 
             // Terminate all windows
