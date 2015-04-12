@@ -446,35 +446,53 @@ void main(){
 
     public class V2Shaders
     {
-        public static int[] _ShaderProgramHandles;
-        public static Shader[] _Shaders;
+        public static Dictionary<int, int[]> _ShaderProgramHandlesForScreen = new Dictionary<int, int[]>();
+        //public static int[] _ShaderProgramHandles;
+
+        public static Dictionary<int, Shader[]> _ShadersForScreen = new Dictionary<int, Shader[]>();
+        //public static Shader[] _Shaders;
         public static System.Diagnostics.Stopwatch swTime = new System.Diagnostics.Stopwatch();
 
-        private static void Init()
+        private static void Init(int screen)
         {
-            if (_ShaderProgramHandles == null)
+            if (!_ShaderProgramHandlesForScreen.ContainsKey(screen))
             {
-                _ShaderProgramHandles = new int[Enum.GetValues(typeof(OMShaders)).Length];
-                for (int i = 0; i < _ShaderProgramHandles.Length; i++)
-                    _ShaderProgramHandles[i] = -1;
+                var shaderProgramHandles = new int[Enum.GetValues(typeof(OMShaders)).Length];
+                _ShaderProgramHandlesForScreen.Add(screen, shaderProgramHandles);
+                for (int i = 0; i < shaderProgramHandles.Length; i++)
+                    shaderProgramHandles[i] = -1;
             }
-            if (_Shaders == null)
-                _Shaders = new Shader[Enum.GetValues(typeof(OMShaders)).Length];
+
+            //if (_ShaderProgramHandles == null)
+            //{
+            //    _ShaderProgramHandles = new int[Enum.GetValues(typeof(OMShaders)).Length];
+            //    for (int i = 0; i < _ShaderProgramHandles.Length; i++)
+            //        _ShaderProgramHandles[i] = -1;
+            //}
+
+            if (!_ShadersForScreen.ContainsKey(screen))
+            {
+                _ShadersForScreen.Add(screen, new Shader[Enum.GetValues(typeof(OMShaders)).Length]);
+            }
+
+            //if (_Shaders == null)
+            //    _Shaders = new Shader[Enum.GetValues(typeof(OMShaders)).Length];
 
             swTime.Start();
         }
 
-        public static void ActivateShader(GameWindow targetWindow, MouseData mouseData, OMShaders shader, int effectPosX, int effectPosY, int windowLeft, int windowTop, int windowWidth, int windowHeight, float widthScale, float heightScale)
+        public static void ActivateShader(int screen, GameWindow targetWindow, MouseData mouseData, OMShaders shader, int effectPosX, int effectPosY, int windowLeft, int windowTop, int windowWidth, int windowHeight, float widthScale, float heightScale)
         {
-            Init();
+            Init(screen);
 
             // Do we have to initialize the shader program?
-            if (_ShaderProgramHandles[(int)shader] == -1)
+            if (_ShaderProgramHandlesForScreen[screen][(int)shader] == -1)
+            //if (_ShaderProgramHandles[(int)shader] == -1)
             {   // Yes
 
                 try
                 {
-                    if (_Shaders[(int)shader] == null)
+                    if (_ShadersForScreen[screen][(int)shader] == null)
                     {
                         // Initialize shader code
                         switch (shader)
@@ -482,66 +500,66 @@ void main(){
                             case OMShaders.None:
                                 break;
                             case OMShaders.Negative:
-                                _Shaders[(int)shader] = new Shader_Negative();
+                                _ShadersForScreen[screen][(int)shader] = new Shader_Negative();
                                 break;
                             case OMShaders.Bloom:
-                                _Shaders[(int)shader] = new Shader_Bloom();
+                                _ShadersForScreen[screen][(int)shader] = new Shader_Bloom();
                                 break;
                             case OMShaders.Blurr:
-                                _Shaders[(int)shader] = new Shader_Blurr();
+                                _ShadersForScreen[screen][(int)shader] = new Shader_Blurr();
                                 break;
                             case OMShaders.Radar:
-                                _Shaders[(int)shader] = new Shader_Radar();
+                                _ShadersForScreen[screen][(int)shader] = new Shader_Radar();
                                 break;
                             case OMShaders.MouseDot:
-                                _Shaders[(int)shader] = new Shader_MouseDot();
+                                _ShadersForScreen[screen][(int)shader] = new Shader_MouseDot();
                                 break;
                             default:
                                 break;
                         }
 
                         // Create program
-                        _ShaderProgramHandles[(int)shader] = GL.CreateProgram();
-                        GL.AttachShader(_ShaderProgramHandles[(int)shader], _Shaders[(int)shader].Handle);
-                        System.Diagnostics.Debug.WriteLine(String.Format("Shader [{0}] compiled without problems", _Shaders[(int)shader].ShaderID));
+                        _ShaderProgramHandlesForScreen[screen][(int)shader] = GL.CreateProgram();
+                        GL.AttachShader(_ShaderProgramHandlesForScreen[screen][(int)shader], _ShadersForScreen[screen][(int)shader].Handle);
+                        System.Diagnostics.Debug.WriteLine(String.Format("Shader [{0}] compiled without problems", _ShadersForScreen[screen][(int)shader].ShaderID));
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(String.Format("Error while compiling and loading shader [{0}]\r\n:{1}", _Shaders[(int)shader].ShaderID, ex.Message));
-                    _Shaders[(int)shader].Valid = false;
+                    System.Diagnostics.Debug.WriteLine(String.Format("Error while compiling and loading shader [{0}]\r\n:{1}", _ShadersForScreen[screen][(int)shader].ShaderID, ex.Message));
+                    _ShadersForScreen[screen][(int)shader].Valid = false;
                 }            
             }
 
-            if (_Shaders[(int)shader] != null && _Shaders[(int)shader].Valid)
+            if (_ShadersForScreen[screen][(int)shader] != null && _ShadersForScreen[screen][(int)shader].Valid)
             {
-                if (_ShaderProgramHandles[(int)shader] >= 0)
+                if (_ShaderProgramHandlesForScreen[screen][(int)shader] >= 0)
                 {
                     try
                     {
-                        GL.LinkProgram(_ShaderProgramHandles[(int)shader]);
-                        GL.UseProgram(_ShaderProgramHandles[(int)shader]);
+                        GL.LinkProgram(_ShaderProgramHandlesForScreen[screen][(int)shader]);
+                        GL.UseProgram(_ShaderProgramHandlesForScreen[screen][(int)shader]);
 
                         //// Calculate screen coordinates 
                         //System.Drawing.Point effectPos_Screen = targetWindow.PointToScreen(new System.Drawing.Point(effectPosX, effectPosY));
 
                         GL.ActiveTexture(TextureUnit.Texture0);
-                        GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "u_Texture"), TextureUnit.Texture0 - TextureUnit.Texture0);
-                        GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "time"), (float)swTime.Elapsed.TotalSeconds);
-                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "resolution"), new Vector2(windowWidth, windowHeight));
-                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "scale"), new Vector2(widthScale, heightScale));
-                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "windowpos"), new Vector2(windowLeft, windowTop));
-                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "position"), new Vector2(effectPosX * widthScale, effectPosY * heightScale));
+                        GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandlesForScreen[screen][(int)shader], "u_Texture"), TextureUnit.Texture0 - TextureUnit.Texture0);
+                        GL.Uniform1(GL.GetUniformLocation(_ShaderProgramHandlesForScreen[screen][(int)shader], "time"), (float)swTime.Elapsed.TotalSeconds);
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandlesForScreen[screen][(int)shader], "resolution"), new Vector2(windowWidth, windowHeight));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandlesForScreen[screen][(int)shader], "scale"), new Vector2(widthScale, heightScale));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandlesForScreen[screen][(int)shader], "windowpos"), new Vector2(windowLeft, windowTop));
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandlesForScreen[screen][(int)shader], "position"), new Vector2(effectPosX * widthScale, effectPosY * heightScale));
 
                         Vector2 mouse = new Vector2();
                         mouse.X = ((((float)mouseData.CursorPosition.X) * widthScale) / (float)windowWidth);
                         mouse.Y = 1 - ((((float)mouseData.CursorPosition.Y) * heightScale) / (float)windowHeight);
-                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandles[(int)shader], "mouse"), mouse);
+                        GL.Uniform2(GL.GetUniformLocation(_ShaderProgramHandlesForScreen[screen][(int)shader], "mouse"), mouse);
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine(String.Format("Error while activating shader program [{0}]\r\n:{1}", _Shaders[(int)shader].ShaderID, ex.Message));
-                        _Shaders[(int)shader].Valid = false;
+                        System.Diagnostics.Debug.WriteLine(String.Format("Error while activating shader program [{0}]\r\n:{1}", _ShadersForScreen[screen][(int)shader].ShaderID, ex.Message));
+                        _ShadersForScreen[screen][(int)shader].Valid = false;
                     }
                 }
             }

@@ -315,7 +315,7 @@ namespace OpenMobile.Graphics
             // Should we use a shader effect?
             if (image.ShaderEffect != OMShaders.None)
             {   // Yes
-                V2Shaders.ActivateShader(_TargetWindow, _MouseData, image.ShaderEffect, X + (Width / 2), Y + (Height / 2), _Left, _Top, _Width, _Height, _WidthScale, _HeightScale);
+                V2Shaders.ActivateShader(_Screen, _TargetWindow, _MouseData, image.ShaderEffect, X + (Width / 2), Y + (Height / 2), _Left, _Top, _Width, _Height, _WidthScale, _HeightScale);
             }
 
             if (useReflection)
