@@ -47,6 +47,8 @@ namespace OpenMobile
         //private System.Timers.Timer statusReset = new System.Timers.Timer(2100);
         private Notification notificationInternetOnline;
 
+        private StoredData.ScreenInstanceData _ScreenSpecificData = new StoredData.ScreenInstanceData();
+
         private enum OpacityModes
         {
             None,
@@ -1358,7 +1360,6 @@ namespace OpenMobile
 
         private int ZoneInfo_ShowDelay;
         private SmoothAnimator.AnimatorControl AnimationControl = new SmoothAnimator.AnimatorControl();
-        private bool ZoneInfoVisible = false;
         private void ZoneInfo_ShowHide(int screen, bool fast, Zone zone)
         {
             OMPanel panel = manager[screen, "UI"];
@@ -1368,9 +1369,9 @@ namespace OpenMobile
             ZoneInfo_ShowDelay = 3000;
             AnimationControl.Cancel = true;
 
-            if (!ZoneInfoVisible)
+            if (!_ScreenSpecificData.GetProperty<bool>(screen, "ZoneInfoVisible", false))
             {
-                ZoneInfoVisible = true;
+                _ScreenSpecificData.SetProperty(screen, "ZoneInfoVisible", true);
                 // Spawn a new thread for this animation so we don't block the events thread
                 OpenMobile.Threading.SafeThread.Asynchronous(delegate()
                 {
@@ -1415,7 +1416,7 @@ namespace OpenMobile
                         BottomBar_MediaInfo_Show(screen, true);
                     }
 
-                    ZoneInfoVisible = false;
+                    _ScreenSpecificData.SetProperty(screen, "ZoneInfoVisible", false);
                 });
                 
             }
