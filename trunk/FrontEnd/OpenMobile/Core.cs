@@ -719,6 +719,9 @@ namespace OpenMobile
 
             #endregion
 
+            // Load and initialize debug
+            loadDebug();
+
             // Init os functions
             OSFunctions.Init();
 
@@ -750,9 +753,6 @@ namespace OpenMobile
             }
 
             #endregion
-
-            // Load and initialize debug
-            loadDebug();
 
             // Start all pluginhost features (including HAL)
             theHost.Start();
