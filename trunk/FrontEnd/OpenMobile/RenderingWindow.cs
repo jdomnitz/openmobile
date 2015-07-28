@@ -332,6 +332,9 @@ namespace OpenMobile
 
         protected override void OnLoad(EventArgs e)
         {
+            // Call OS specific init code
+            OSFunctions.MainFormInit(base.WindowInfo.Handle);
+
             InitializeRendering();
             g.Initialize(this, _MouseData, Core.StartupArgs.RequestedGraphicEngine);
             if (_Screen == 0)

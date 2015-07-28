@@ -46,11 +46,25 @@ namespace OpenMobile.Framework
         /// <summary>
         /// The event callback action (set from the main application)
         /// </summary>
-        private Action<CallbackEvents> _EventCallback;        
+        private Action<CallbackEvents> _EventCallback;
 
+        /// <summary>
+        /// Creeates a new OS Interaction base
+        /// </summary>
+        /// <param name="eventCallback"></param>
+        /// <param name="hWnd"></param>
         public OSInteractionBase(Action<CallbackEvents> eventCallback)
         {
             _EventCallback = eventCallback;
+        }
+
+        /// <summary>
+        /// Initializes OS specific code for the main form
+        /// </summary>
+        /// <param name="hWnd"></param>
+        public virtual bool MainFormInit(IntPtr hWnd)
+        {
+            return false;
         }
 
         /// <summary>
