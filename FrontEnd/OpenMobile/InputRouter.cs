@@ -98,30 +98,78 @@ namespace OpenMobile
             for (int i = 0; i < _IdleDetectionEnabled.Length; i++)
                 _IdleDetectionEnabled[i] = true;
 
-            thInput_Run = true;
-            thInput = new Thread(Thread_InputHandler);
-            thInput.IsBackground = true;
-            thInput.Start();
+            //thInput_Run = true;
+            //thInput = new Thread(Thread_InputHandler);
+            //thInput.IsBackground = true;
+            //thInput.Start();
 
             // Connect events
-            //for (int i = 0; i < Core.theHost.ScreenCount; i++)
-            //{
-            //    // Connect mouse events
-            //    Core.RenderingWindows[i].MouseDown += new EventHandler<OpenTK.Input.MouseButtonEventArgs>(dev_ButtonDown);
-            //    Core.RenderingWindows[i].MouseUp += new EventHandler<OpenTK.Input.MouseButtonEventArgs>(dev_ButtonUp);
-            //    Core.RenderingWindows[i].MouseMove += new EventHandler<OpenTK.Input.MouseMoveEventArgs>(dev_Move);
+            for (int i = 0; i < Core.theHost.ScreenCount; i++)
+            {
+                // Connect mouse events
+                Core.RenderingWindows[i].MouseDown += InputRouter_MouseDown;
+                Core.RenderingWindows[i].MouseUp += InputRouter_MouseUp;
+                Core.RenderingWindows[i].MouseMove += InputRouter_MouseMove;
 
-            //    // Connect keyboard events
-            //    Core.RenderingWindows[i].KeyDown += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(SourceDown);
-            //    Core.RenderingWindows[i].KeyUp += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(SourceUp);
-            //    Core.RenderingWindows[i].KeyPress += new EventHandler<OpenTK.KeyPressEventArgs>(SourcKeyPress);
-            //}
+                // Connect keyboard events
+                Core.RenderingWindows[i].KeyDown += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(SourceDown);
+                Core.RenderingWindows[i].KeyUp += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(SourceUp);
+                Core.RenderingWindows[i].KeyPress += new EventHandler<OpenTK.KeyPressEventArgs>(SourcKeyPress);
+            }
 
             DataSources_Register();
             Commands_Register();
 
             // Raise system event, informing that input router has completed
             BuiltInComponents.Host.raiseSystemEvent(eFunction.inputRouterInitialized, "1", "1", String.Empty);
+        }
+
+        static void InputRouter_MouseMove(object sender, OpenTK.Input.MouseMoveEventArgs e)
+        {
+            RenderingWindow window = sender as RenderingWindow;
+
+            MouseButton mb = MouseButton.None;
+            if (e.Mouse.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Left;
+            else if (e.Mouse.RightButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Right;
+            else if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Middle;
+
+            MouseMoveEventArgs eOM = new MouseMoveEventArgs(e.Position.X, e.Position.Y, 0, 0, mb);
+            window.RenderingWindow_MouseMove(window.Screen, eOM);
+        }
+
+        static void InputRouter_MouseUp(object sender, OpenTK.Input.MouseButtonEventArgs e)
+        {
+            RenderingWindow window = sender as RenderingWindow;
+            
+            MouseButton mb = MouseButton.None;
+            if (e.Mouse.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Left;
+            else if (e.Mouse.RightButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Right;
+            else if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Middle;
+
+            MouseButtonEventArgs eOM = new MouseButtonEventArgs(e.Position.X, e.Position.Y, mb, false);
+            window.RenderingWindow_MouseUp(window.Screen, eOM);
+        }
+
+        static void InputRouter_MouseDown(object sender, OpenTK.Input.MouseButtonEventArgs e)
+        {
+            RenderingWindow window = sender as RenderingWindow;
+
+            MouseButton mb = MouseButton.None;
+            if (e.Mouse.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Left;
+            else if (e.Mouse.RightButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Right;
+            else if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed)
+                mb = MouseButton.Middle;
+
+            MouseButtonEventArgs eOM = new MouseButtonEventArgs(e.Position.X, e.Position.Y, mb, false);
+            window.RenderingWindow_MouseDown(window.Screen, eOM);
         }
 
         private static OpenTK.Input.MouseState[] _MouseStates;
