@@ -43,6 +43,22 @@ namespace OpenMobile
             // Dummy call to ensure we initialize the OS functions
         }
 
+        /// <summary>
+        /// Initialize main form OS specific code
+        /// </summary>
+        /// <param name="hWnd"></param>
+        static public void MainFormInit(IntPtr hWnd)
+        {
+            if (_OS != null)
+            {
+                var result = _OS.MainFormInit(hWnd);
+                if (result)
+                    OM.Host.DebugMsg(DebugMessageType.Info, "OpenMobile.Core.OSFunctions.MainFormInit", "OS specific form initialization executed sucessfully");
+                else
+                    OM.Host.DebugMsg(DebugMessageType.Warning, "OpenMobile.Core.OSFunctions.MainFormInit", "OS specific form initialization FAILED to execute");
+            }
+        }
+
         static private void OSSpecificEventCallback(OpenMobile.Framework.OSInteractionBase.CallbackEvents ev)
         {
             OM.Host.DebugMsg(DebugMessageType.Info, "OpenMobile.Core.OSSpecificEventCallback", String.Format("Received OS Event: {0}", ev));

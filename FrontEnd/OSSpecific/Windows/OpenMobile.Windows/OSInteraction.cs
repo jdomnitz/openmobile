@@ -52,6 +52,14 @@ namespace OpenMobile.Framework.OS.Windows
                 });
         }
 
+        public override bool MainFormInit(IntPtr hWnd)
+        {
+            // Disable Win8 and higher touch events as this causes problems for mouse events
+            OpenMobile.Windows.Win8_Touch.Window_RegisterForTouch(hWnd);
+            var result = OpenMobile.Windows.Win8_Touch.Window_DisableTouchFunctions(hWnd);
+            return result;
+        }
+
         void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
             switch (e.Reason)

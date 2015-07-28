@@ -645,6 +645,7 @@ namespace OpenMobile.Media
             // Add predefined data for this media source
             base.AdditionalData.Add("Playlists", null);
             base.AdditionalData.Add("Playlists.InfoStrings", null);
+            base.AdditionalData.Add("InfoString", "");
 
             // Add predefined commands
             base.AdditionalCommands.Add("Playlist.Select", null);
@@ -679,6 +680,21 @@ namespace OpenMobile.Media
             set
             {
                 base.AdditionalData["Playlists.InfoStrings"] = value;
+            }
+        }
+
+        /// <summary>
+        /// An infostring from the service
+        /// </summary>
+        public string InfoString
+        {
+            get
+            {
+                return (string)base.AdditionalData["InfoString"];
+            }
+            set
+            {
+                base.AdditionalData["InfoString"] = value;
             }
         }
 
