@@ -269,7 +269,12 @@ namespace OMGPS3_DotSpatial
                 OM.Host.DebugMsg(DebugMessageType.Warning, "No GPS detected!");
                 OpenMobile.helperFunctions.SerialAccess.ReleaseAccess(this);
                 OM.Host.DebugMsg(DebugMessageType.Info, "Serial port access released");
-                Devices.Undetect();
+                // Undected devices but mask out any error being thrown while undetecting
+                try
+                {
+                    Devices.Undetect();
+                }
+                catch { }
             }
         }
 
