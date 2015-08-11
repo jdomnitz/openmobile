@@ -106,6 +106,8 @@ namespace OpenMobile
             // Connect events
             for (int i = 0; i < Core.theHost.ScreenCount; i++)
             {
+                IdleDetection_Start(i);
+
                 // Connect mouse events
                 Core.RenderingWindows[i].MouseDown += InputRouter_MouseDown;
                 Core.RenderingWindows[i].MouseUp += InputRouter_MouseUp;
@@ -127,6 +129,8 @@ namespace OpenMobile
         static void InputRouter_MouseMove(object sender, OpenTK.Input.MouseMoveEventArgs e)
         {
             RenderingWindow window = sender as RenderingWindow;
+
+            IdleDetection_Restart(window.Screen);
 
             MouseButton mb = MouseButton.None;
             if (e.Mouse.LeftButton == OpenTK.Input.ButtonState.Pressed)

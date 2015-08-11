@@ -1272,6 +1272,9 @@ namespace OpenMobile.Controls
                         var speed = System.Math.Abs(CursorSpeed.Y);
                         if (speed > 0.2f)
                         {
+                            if ((speed > 5.0f))
+                                speed = 5.0f;
+
                             speed = (int)(System.Math.Ceiling(speed));
                             var distance = TotalDistance.Y * (int)speed;
                             throwtmr[screen].Tag = (int)speed; 
