@@ -598,6 +598,7 @@ Namespace OMDSFuelPrices
             Dim price As String = ""
             Dim dprice As Double = 0
             Dim name As String = ""
+            Dim imageName As String = ""
             Dim address As String = ""
             Dim area As String = ""
             Dim timeStamp As String = ""
@@ -658,23 +659,16 @@ Namespace OMDSFuelPrices
                     a = data.IndexOf("<dt>", x)
                     b = data.IndexOf("</dt>", a)
                     w = data.Substring(a + 4, b - (a + 4))
-                    c = w.IndexOf("index.aspx"">", 0)
-                    ' Search w to see if a name or a logo
-                    If c < 0 Then
-                        ' we should have a logo (no name found)
-                        a = w.IndexOf("src=""", 0)
-                        b = w.IndexOf("""", a + 5)
-                        name = w.Substring(a + 5, b - (a + 5))
-                        'name = "unknown"
-                    Else
-                        ' we should have a name, fetch it
-                        a = w.IndexOf(""">", 0)
-                        b = w.IndexOf("</a>", a + 2)
-                        name = w.Substring(a + 2, b - (a + 2))
-                        name = name.Replace("&amp;", "&")
-                        name = name.Replace("'", "")
-                    End If
+                    a = w.LastIndexOf(";"">")
+                    b = w.LastIndexOf("</a>")
+                    name = w.Substring(a + 3, b - (a + 3))
 
+                    ' Fetch GasBuddy's attached image (not used yet)
+                    a = w.IndexOf("src=""", 0)
+                    b = w.IndexOf("?", a + 5)
+                    imageName = w.Substring(a + 5, b - (a + 5))
+
+                    ' Get the station address
                     x = data.IndexOf("<dd>", x)
                     z = data.IndexOf("</dd>", x)
                     address = data.Substring(x + 4, z - (x + 4))
