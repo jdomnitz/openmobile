@@ -180,6 +180,9 @@ Namespace OMFuel
             StoredData.SetDefaultValue(Me, "FAVS.homeState", sysHome.State)
             StoredData.SetDefaultValue(Me, "FAVS.homeCountry", sysHome.Country)
 
+            StoredData.SetDefaultValue(Me, "settings.VerboseDebug", m_Verbose)
+            m_Verbose = StoredData.Get(Me, "settings.VerboseDebug")
+
             Dim xZip As String = "", xCountry As String = "", xCity As String = "", xState As String = "", mFilter As String = ""
             ' For testing only
             'xZip = StoredData.Delete(Me, "FAVS.homeZip")
@@ -268,7 +271,7 @@ Namespace OMFuel
             ' Create a handler for settings changes
             AddHandler mySettings.OnSettingChanged, AddressOf mySettings_OnSettingChanged
 
-            mySettings.Add(New Setting(SettingTypes.MultiChoice, Me.pluginName & ";Settings.VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
+            mySettings.Add(New Setting(SettingTypes.MultiChoice, "settings.VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
 
             Return mySettings
 
@@ -279,8 +282,8 @@ Namespace OMFuel
             OpenMobile.helperFunctions.StoredData.Set(Me, settings.Name, settings.Value)
 
             Select Case settings.Name
-                Case "VerboseDebug"
-                    m_Verbose = settings.Value
+                Case "settings.VerboseDebug"
+                    m_Verbose = CBool(settings.Value)
             End Select
 
         End Sub
