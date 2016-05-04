@@ -214,23 +214,26 @@ Namespace OMDSFuelPrices
             ' Set up settings values
             'theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating data items...")
 
+            StoredData.SetDefaultValue(Me, "settings.VerboseDebug", m_Verbose)
+            m_Verbose = StoredData.Get(Me, "settings.VerboseDebug")
+
             Dim filter As String
 
-            StoredData.SetDefaultValue(Me, "last.Update", "")
-            StoredData.SetDefaultValue(Me, "last.Code", "")
-            searchZip = StoredData.Get(Me, "last.Code")
+            StoredData.SetDefaultValue(Me, "settings.last.Update", "")
+            StoredData.SetDefaultValue(Me, "settings.last.Code", "")
+            searchZip = StoredData.Get(Me, "settings.last.Code")
 
-            StoredData.SetDefaultValue(Me, "last.Country", "")
-            searchCountry = StoredData.Get(Me, "last.Country")
+            StoredData.SetDefaultValue(Me, "settings.last.Country", "")
+            searchCountry = StoredData.Get(Me, "settings.last.Country")
 
-            StoredData.SetDefaultValue(Me, "last.City", "")
-            searchCity = StoredData.Get(Me, "last.City")
+            StoredData.SetDefaultValue(Me, "settings.last.City", "")
+            searchCity = StoredData.Get(Me, "settings.last.City")
 
-            StoredData.SetDefaultValue(Me, "last.State", "")
-            searchState = StoredData.Get(Me, "last.State")
+            StoredData.SetDefaultValue(Me, "settings.last.State", "")
+            searchState = StoredData.Get(Me, "settings.last.State")
 
-            StoredData.SetDefaultValue(Me, "last.Filter", "Home")
-            filter = StoredData.Get(Me, "last.Filter")
+            StoredData.SetDefaultValue(Me, "settings.last.Filter", "Home")
+            filter = StoredData.Get(Me, "settings.last.Filter")
 
             ' Set up data source
             'theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating datasource...")
@@ -290,10 +293,10 @@ Namespace OMDSFuelPrices
             Dim result As Boolean = False
             Dim city As String, state As String, country As String, code As String
 
-            code = StoredData.Get(Me, "last.Code")
-            city = StoredData.Get(Me, "last.City")
-            state = StoredData.Get(Me, "last.State")
-            country = StoredData.Get(Me, "last.Country")
+            code = StoredData.Get(Me, "settings.last.Code")
+            city = StoredData.Get(Me, "settings.last.City")
+            state = StoredData.Get(Me, "settings.last.State")
+            country = StoredData.Get(Me, "settings.last.Country")
 
         End Sub
 
@@ -334,13 +337,13 @@ Namespace OMDSFuelPrices
                 End If
                 StoredData.Set(Me, "last.Update", DateTime.Now.ToString("s"))
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.City", searchCity.ToUpper)
-                helperFunctions.StoredData.Set(Me, "last.City", searchCity.ToUpper)
+                helperFunctions.StoredData.Set(Me, "settings.last.City", searchCity.ToUpper)
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.Code", searchZip.ToUpper)
-                helperFunctions.StoredData.Set(Me, "last.Code", searchZip.ToUpper)
+                helperFunctions.StoredData.Set(Me, "settings.last.Code", searchZip.ToUpper)
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.State", searchState.ToUpper)
-                helperFunctions.StoredData.Set(Me, "last.State", searchState.ToUpper)
+                helperFunctions.StoredData.Set(Me, "settings.last.State", searchState.ToUpper)
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.Country", searchCountry.ToUpper)
-                helperFunctions.StoredData.Set(Me, "last.Country", searchCountry.ToUpper)
+                helperFunctions.StoredData.Set(Me, "settings.last.Country", searchCountry.ToUpper)
                 theHost.execute(eFunction.dataUpdated, "OMDSFuelPrices")
             Else
                 ' Tell the user we cannot scrape
@@ -664,9 +667,13 @@ Namespace OMDSFuelPrices
                     name = w.Substring(a + 3, b - (a + 3))
 
                     ' Fetch GasBuddy's attached image (not used yet)
-                    a = w.IndexOf("src=""", 0)
+                    a = w.IndexOf("src=""", 1)
                     b = w.IndexOf("?", a + 5)
-                    imageName = w.Substring(a + 5, b - (a + 5))
+                    If a < 0 Or b < 0 Then
+                        imageName = ""
+                    Else
+                        imageName = w.Substring(a + 5, b - (a + 5))
+                    End If
 
                     ' Get the station address
                     x = data.IndexOf("<dd>", x)
@@ -779,7 +786,7 @@ Namespace OMDSFuelPrices
             cOptions2.Add("12")
             cOptions2.Add("24")
             cOptions2.Add("36")
-            Dim settingMaxAge = New Setting(SettingTypes.MultiChoice, "maxAge", "Max Age", "Max age of prices (hours)", cOptions2, cOptions2)
+            Dim settingMaxAge = New Setting(SettingTypes.MultiChoice, "max.Age", "Max Age", "Max age of prices (hours)", cOptions2, cOptions2)
             settingMaxAge.Value = StoredData.Get(Me, "max.Age")
             'mySettings.Add(settingMaxAge)
 
@@ -803,7 +810,9 @@ Namespace OMDSFuelPrices
             Dim settingHomeCode = New Setting(SettingTypes.Text, "home.Code", "Home Zip/Postal", "Set Home Zip / Postal Code", OpenMobile.helperFunctions.StoredData.Get(Me, "homeCode"))
             mySettings.Add(settingHomeCode)
 
-            mySettings.Add(New Setting(SettingTypes.MultiChoice, "VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
+            Dim verboseDebug = New Setting(SettingTypes.MultiChoice, "settings.VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose)
+            mySettings.Add(verboseDebug)
+            'mySettings.Add(New Setting(SettingTypes.MultiChoice, "VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose))
 
             Return mySettings
 
@@ -817,8 +826,8 @@ Namespace OMDSFuelPrices
             ' These settings take effect immediately
 
             Select Case settings.Name
-                Case "VerboseDebug"
-                    m_Verbose = settings.Value
+                Case "settings.VerboseDebug"
+                    m_Verbose = CBool(settings.Value)
             End Select
 
         End Sub
