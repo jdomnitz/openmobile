@@ -53,6 +53,7 @@ Namespace OMFuel
         Private m_Verbose As Boolean = False
         Private bannerStyle As Integer = 0
         Private locationText As String = "None"
+        Private locationType As String = "Location"
         Private gps_fixed As Boolean = False
         Private currLat As Single = 0
         Private currLng As Single = 0
@@ -175,6 +176,7 @@ Namespace OMFuel
             Dim sysHome As OpenMobile.Location
             sysHome = BuiltInComponents.SystemSettings.Location_Home
 
+
             StoredData.SetDefaultValue(Me, "FAVS.homeZip", sysHome.Zip)
             StoredData.SetDefaultValue(Me, "FAVS.homeCity", sysHome.City)
             StoredData.SetDefaultValue(Me, "FAVS.homeState", sysHome.State)
@@ -259,6 +261,9 @@ Namespace OMFuel
                         End If
                     Next
                     'updated = False
+
+                Case "Location.Current"
+                    ' Location service has been updated
 
             End Select
 
