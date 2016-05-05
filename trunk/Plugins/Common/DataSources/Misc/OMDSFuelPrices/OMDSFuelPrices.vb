@@ -75,11 +75,11 @@ Namespace OMDSFuelPrices
         Private PriceList(6, 0)
         Private maxRecords As Integer = 20              ' Max price records to fetch (per Grade)
         Private maxAge As Integer = 24                  ' Max age of price data
-        Private myLatitude As String
-        Private myLongitude As String
-        Private gps_fix As Boolean
+        Private myLocation As Location = OM.Host.CommandHandler.ExecuteCommand("Map.Lookup.Location", OM.Host.CurrentLocation)
+        Private gps_fix As Boolean                      ' Is there a GPS fix?
         Private favZip As String = ""                   ' Skin request to search specific postal code
         Private favCountry As String = ""               ' Skin request to search specific country
+        Private searchFilter As String = "Current"      ' Current location type (Current, Favorite, Home)
         Private searchGrade As String = "A"             ' Fuel Grade to search for
         Private searchZip As String = ""                ' The ZIP/Postal code
         Private searchCountry As String = ""            ' The Country
@@ -101,33 +101,32 @@ Namespace OMDSFuelPrices
                 theHost.DebugMsg("OMDSFuelPrices - CommandExecutor()", String.Format("Processing command {0}.", command.FullName))
             End If
 
-            Dim loc As Location
-            Dim mFilter As String = ""
-
             theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Messages.Text", Nothing)
 
             result = False
 
             Select Case command.NameLevel2
                 Case "Refresh"
-                    mFilter = command.NameLevel3
-                    If mFilter = "Last" Then
-                        mFilter = StoredData.Get(Me, "last.Filter")
+                    searchFilter = command.NameLevel3
+                    If searchFilter = "Last" Then
+                        searchFilter = StoredData.Get(Me, "settings.last.Filter")
                     End If
-                    StoredData.Set(Me, "last.Filter", mFilter)
-                    Select Case mFilter
+                    StoredData.Set(Me, "settings.last.Filter", searchFilter)
+                    Select Case searchFilter
                         Case "Current"
-                            loc = theHost.CurrentLocation
-                            searchZip = loc.Zip.Replace(" ", "")
+                            ' Last used filter was CURRENT location
+                            myLocation = OM.Host.CommandHandler.ExecuteCommand("Map.Lookup.Location", OM.Host.CurrentLocation)
+                            searchZip = myLocation.Zip.Replace(" ", "")
                             searchZip = searchZip.Replace("-", "")
-                            searchCity = loc.City
-                            searchState = loc.State
-                            searchCountry = loc.Country
+                            searchCity = myLocation.City
+                            searchState = myLocation.State
+                            searchCountry = myLocation.Country
                             If m_Verbose Then
                                 theHost.DebugMsg("OMDSFuelPrices - CommandExecutor()", String.Format("Searching {0}, {1}, {2}.", searchCity, searchState, searchZip))
                             End If
                             result = refreshData()
                         Case "Favorite"
+                            ' Last used filter was a FAVORITE location
                             If param Is Nothing Then
                                 ' Load the values we need from last search
                                 searchZip = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.Code").FormatedValue
@@ -143,6 +142,7 @@ Namespace OMDSFuelPrices
                             End If
                             result = refreshData()
                         Case "Home"
+                            ' Last search was HOME location
                             If param Is Nothing Then
                                 ' Load the values we need
                                 searchZip = theHost.DataHandler.GetDataSource(Me.pluginName & ";Fuel.Last.Code").FormatedValue
@@ -160,8 +160,8 @@ Namespace OMDSFuelPrices
                         Case Else
                             result = False
                     End Select
-                    StoredData.Set(Me, "last.Filter", mFilter)
-                    theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Filter", mFilter)
+                    StoredData.Set(Me, "settings.last.Filter", searchFilter)
+                    theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Filter", searchFilter)
                     If Not String.IsNullOrEmpty(status_msg) Then
                         theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Messages.Text", status_msg)
                         status_msg = ""
@@ -217,11 +217,9 @@ Namespace OMDSFuelPrices
             StoredData.SetDefaultValue(Me, "settings.VerboseDebug", m_Verbose)
             m_Verbose = StoredData.Get(Me, "settings.VerboseDebug")
 
-            Dim filter As String
-
             StoredData.SetDefaultValue(Me, "settings.last.Update", "")
-            StoredData.SetDefaultValue(Me, "settings.last.Code", "")
-            searchZip = StoredData.Get(Me, "settings.last.Code")
+            StoredData.SetDefaultValue(Me, "settings.last.Zip", "")
+            searchZip = StoredData.Get(Me, "settings.last.Zip")
 
             StoredData.SetDefaultValue(Me, "settings.last.Country", "")
             searchCountry = StoredData.Get(Me, "settings.last.Country")
@@ -232,15 +230,15 @@ Namespace OMDSFuelPrices
             StoredData.SetDefaultValue(Me, "settings.last.State", "")
             searchState = StoredData.Get(Me, "settings.last.State")
 
-            StoredData.SetDefaultValue(Me, "settings.last.Filter", "Home")
-            filter = StoredData.Get(Me, "settings.last.Filter")
+            StoredData.SetDefaultValue(Me, "settings.last.Filter", "Current")
+            searchFilter = StoredData.Get(Me, "settings.last.Filter")
 
             ' Set up data source
             'theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating datasource...")
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Price", "List", DataSource.DataTypes.raw, "Fuel Price Scrape Results"))
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Messages", "Text", DataSource.DataTypes.text, "Latest status/error message", ""))
-            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "Filter", DataSource.DataTypes.text, "Last search filter", filter))
-            theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Filter", filter)
+            theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "Filter", DataSource.DataTypes.text, "Last search filter", searchFilter))
+            theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.Filter", searchFilter)
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "City", DataSource.DataTypes.text, "Last searched city", searchCity))
             theHost.DataHandler.PushDataSourceValue(Me.pluginName & ";Fuel.Last.City", searchCity)
             theHost.DataHandler.AddDataSource(New DataSource(Me.pluginName, "Fuel", "Last", "State", DataSource.DataTypes.text, "Last searched state", searchState))
@@ -252,7 +250,7 @@ Namespace OMDSFuelPrices
 
             ' Set up commands
             'theHost.DebugMsg("OMDSFuelPrices - initialze()", "Creating commands...")
-            theHost.CommandHandler.AddCommand(New Command(Me, "OMDSFuelPrices", "Refresh", "Current", AddressOf CommandExecutor, 0, True, "Update prices for local area"))
+            theHost.CommandHandler.AddCommand(New Command(Me, "OMDSFuelPrices", "Refresh", "Current", AddressOf CommandExecutor, 0, True, "Update prices for current location"))
             theHost.CommandHandler.AddCommand(New Command(Me, "OMDSFuelPrices", "Refresh", "Favorite", AddressOf CommandExecutor, 4, True, "Update prices for specified area"))
             theHost.CommandHandler.AddCommand(New Command(Me, "OMDSFuelPrices", "Refresh", "Home", AddressOf CommandExecutor, 0, True, "Update prices for Home area"))
             theHost.CommandHandler.AddCommand(New Command(Me, "OMDSFuelPrices", "Refresh", "Last", AddressOf CommandExecutor, 0, True, "Update prices for last selected"))
@@ -291,12 +289,22 @@ Namespace OMDSFuelPrices
         Private Sub BackgroundLoad()
 
             Dim result As Boolean = False
-            Dim city As String, state As String, country As String, code As String
 
-            code = StoredData.Get(Me, "settings.last.Code")
-            city = StoredData.Get(Me, "settings.last.City")
-            state = StoredData.Get(Me, "settings.last.State")
-            country = StoredData.Get(Me, "settings.last.Country")
+            ' Check if we have a last searched location
+            ' If no last location, check if we have a Home location
+            ' if no home location, get system location
+
+            searchZip = StoredData.Get(Me, "settings.last.Zip")
+
+            If searchZip = "" Then
+                ' Get system location
+            Else
+
+            End If
+            searchCity = StoredData.Get(Me, "settings.last.City")
+            searchState = StoredData.Get(Me, "settings.last.State")
+            searchCountry = StoredData.Get(Me, "settings.last.Country")
+            searchFilter = StoredData.Get(Me, "settings.last.Filter")
 
         End Sub
 
@@ -335,11 +343,11 @@ Namespace OMDSFuelPrices
                 If m_Verbose Then
                     theHost.DebugMsg(String.Format("OMDSFuelPrices - refreshData()"), String.Format("Completed scrape #{0}.", scrapeCounter))
                 End If
-                StoredData.Set(Me, "last.Update", DateTime.Now.ToString("s"))
+                StoredData.Set(Me, "settings.last.Update", DateTime.Now.ToString("s"))
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.City", searchCity.ToUpper)
                 helperFunctions.StoredData.Set(Me, "settings.last.City", searchCity.ToUpper)
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.Code", searchZip.ToUpper)
-                helperFunctions.StoredData.Set(Me, "settings.last.Code", searchZip.ToUpper)
+                helperFunctions.StoredData.Set(Me, "settings.last.Zip", searchZip.ToUpper)
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.State", searchState.ToUpper)
                 helperFunctions.StoredData.Set(Me, "settings.last.State", searchState.ToUpper)
                 theHost.DataHandler.PushDataSourceValue("OMDSFuelPrices;Fuel.Last.Country", searchCountry.ToUpper)
@@ -366,7 +374,7 @@ Namespace OMDSFuelPrices
             ' For US/Canada we only need a zip/postal
             ' To support other countries, we need a scrape source
             If m_Verbose Then
-                theHost.DebugMsg("OMDSFuelPrices - getInfo()", "Entering...")
+                theHost.DebugMsg("OMDSFuelPrices - getInfo()", "Entering (scraping)...")
             End If
 
             myNotification.Text = "Updating..."
@@ -376,7 +384,7 @@ Namespace OMDSFuelPrices
             Select Case searchCountry.ToUpper
                 Case "US", "UNITED STATES" ' United States
                     If String.IsNullOrEmpty(searchZip) Then
-                        set_message("Insufficient data to perform search.")
+                        set_message("Insufficient data to perform search (no zip).")
                         result = False
                     Else
                         searchFormat = 1
@@ -387,7 +395,7 @@ Namespace OMDSFuelPrices
                 Case "CA", "CANADA" ' Canada
                     If String.IsNullOrEmpty(searchZip) Then
                         ' cannot search without info
-                        set_message("Insufficient data to perform search.")
+                        set_message("Insufficient data to perform search (no pc).")
                         result = False
                     Else
                         searchFormat = 100
@@ -406,8 +414,8 @@ Namespace OMDSFuelPrices
 
             'theHost.UIHandler.RemoveAllMyNotifications(Me)
             If result Then
-                'theHost.DebugMsg("OMDSFuelPrices - getInfo()", String.Format("Updated {0}: {1},{2}", StoredData.Get(Me, "last.Filter"), searchCity, searchState))
-                myNotification.Text = String.Format("Updated {0}: {1},{2}", StoredData.Get(Me, "last.Filter"), searchCity, searchState)
+                'theHost.DebugMsg("OMDSFuelPrices - getInfo()", String.Format("Updated {0}: {1},{2}", StoredData.Get(Me, "settings.last.Filter"), searchCity, searchState))
+                myNotification.Text = String.Format("Updated {0}: {1},{2}", StoredData.Get(Me, "settings.last.Filter"), searchCity, searchState)
             Else
                 'theHost.DebugMsg("OMDSFuelPrices - getInfo()", status_msg)
                 myNotification.Text = status_msg
@@ -462,15 +470,109 @@ Namespace OMDSFuelPrices
 
             End Try
 
+            ' Pull the base URL to add to each grade
             ' Pull the base URI for subsequent requests
             x = data.IndexOf("ctl00_head_base"" href=""")
             If x < 0 Then
                 ' We didn't find a base address
                 set_message("No results.")
-                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the base address.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the base URL.")
             End If
             y = data.IndexOf(""">", x)
             baseAddress = data.Substring(x + 23, y - (x + 23))
+
+            ' Pull the URLs for each fuel grade
+            x = data.IndexOf("ctl00_Content_P_hlRegular")
+            If x < 0 Then
+                ' We didn't find a grade list
+                set_message("No results.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine REGULAR grade list.")
+            Else
+                x = data.IndexOf("href=""/", x)
+                If x < 0 Then
+                    ' We didn't find the URL line we're looking for
+                    set_message("No results.")
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine Regular grade URL.")
+                End If
+                y = data.IndexOf(""">", x + 1)
+                URL_Regular = baseAddress & data.Substring(x + 7, y - (x + 7)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Regular"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Regular
+                If m_Verbose Then
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Regular: {0}", URL_Regular))
+                End If
+            End If
+
+            x = data.IndexOf("ctl00_Content_P_hlMidgrade", y)
+            If x < 0 Then
+                ' We didn't find a grade list
+                set_message("No results.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine MIDGRADE list.")
+            Else
+                x = data.IndexOf("href=""/", x)
+                If x < 0 Then
+                    ' We didn't find the URL line we're looking for
+                    set_message("No results.")
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the Midgrade URL.")
+                End If
+                y = data.IndexOf(""">", x + 1)
+                URL_Midgrade = baseAddress & data.Substring(x + 7, y - (x + 7)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Midgrade"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Midgrade
+                If m_Verbose Then
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Midgrade: {0}", URL_Midgrade))
+                End If
+            End If
+
+            x = data.IndexOf("ctl00_Content_P_hlPremium", y)
+            If x < 0 Then
+                ' We didn't find a grade list
+                set_message("No results.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine PREMIUM grade list.")
+            Else
+                x = data.IndexOf("href=""/", x)
+                If x < 0 Then
+                    ' We didn't find the URL line we're looking for
+                    set_message("No results.")
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the Premium URL.")
+                End If
+                y = data.IndexOf(""">", x + 1)
+                URL_Premium = baseAddress & data.Substring(x + 7, y - (x + 7)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Premium"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Premium
+                If m_Verbose Then
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Premium: {0}", URL_Premium))
+                End If
+            End If
+
+            x = data.IndexOf("ctl00_Content_P_hlDiesel", y)
+            If x < 0 Then
+                ' We didn't find a grade list
+                set_message("No results.")
+                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine DIESEL grade list.")
+            Else
+                x = data.IndexOf("href=""/", x)
+                If x < 0 Then
+                    ' We didn't find the URL line we're looking for
+                    set_message("No results.")
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the Diesel URL.")
+                End If
+                y = data.IndexOf(""">", x + 1)
+                URL_Diesel = baseAddress & data.Substring(x + 7, y - (x + 7)).Replace("&amp;", "&")
+                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
+                URL_Grade(URL_Grade.GetUpperBound(0)) = "Diesel"
+                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
+                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Diesel
+                If m_Verbose Then
+                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Diesel: {0}", URL_Diesel))
+                End If
+            End If
 
             ' Find the start of the price table
             x = data.IndexOf("<div id=""pp_table"">")
@@ -483,102 +585,6 @@ Namespace OMDSFuelPrices
 
             ' Find the other fuel grade URLs <ul class="p_ft">
             ' Not currently saving this.  But we will when we save our datasource(s) as a list
-
-            ' ctl00_Content_P_hlRegular
-            ' Our initial scrape is always using regular so we really don't need the link
-            '  but I captured it anyway
-            x = data.IndexOf("ctl00_Content_P_hlRegular")
-            If x < 0 Then
-                ' No URL found
-                set_message("Unexpected format.")
-                If m_Verbose Then
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
-                End If
-                myNotification.Text = "Data not in expected format."
-            End If
-
-            ' grab the URL
-            y = data.IndexOf(""">", x)
-            If y >= 0 Then
-                URL_Regular = baseAddress & data.Substring(x + 33, y - (x + 33)).Replace("&amp;", "&")
-                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
-                URL_Grade(URL_Grade.GetUpperBound(0)) = "Regular"
-                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
-                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Regular
-                If m_Verbose Then
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Regular: {0}", URL_Regular))
-                End If
-            End If
-
-            ' ctl00_Content_P_hlMidgrade
-            x = data.IndexOf("ctl00_Content_P_hlMidgrade")
-            If x < 0 Then
-                ' No URL found
-                set_message("Unexpected format.")
-                If m_Verbose Then
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
-                End If
-                myNotification.Text = "Data not in expected format."
-            End If
-
-            ' grab the URL
-            y = data.IndexOf(""">", x)
-            If y >= 0 Then
-                URL_Midgrade = baseAddress & data.Substring(x + 34, y - (x + 34)).Replace("&amp;", "&")
-                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
-                URL_Grade(URL_Grade.GetUpperBound(0)) = "Midgrade"
-                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
-                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Midgrade
-                If m_Verbose Then
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Midgrade: {0}", URL_Midgrade))
-                End If
-            End If
-
-            ' ctl00_Content_P_hlPremium
-            x = data.IndexOf("ctl00_Content_P_hlPremium")
-            If x < 0 Then
-                ' No URL found
-                set_message("Unexpected format.")
-                If m_Verbose Then
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
-                End If
-                myNotification.Text = "Data not in expected format."
-            End If
-
-            ' grab the URL
-            y = data.IndexOf(""">", x)
-            If y >= 0 Then
-                URL_Premium = baseAddress & data.Substring(x + 33, y - (x + 33)).Replace("&amp;", "&")
-                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
-                URL_Grade(URL_Grade.GetUpperBound(0)) = "Premium"
-                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
-                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Premium
-                If m_Verbose Then
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Premium: {0}", URL_Premium))
-                End If
-            End If
-
-            ' ctl00_Content_P_hlDiesel
-            x = data.IndexOf("ctl00_Content_P_hlDiesel")
-            If x < 0 Then
-                ' No URL found
-                set_message("Unexpected format.")
-                theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Data not in expected format")
-                myNotification.Text = "Data not in expected format."
-            End If
-
-            ' grab the URL
-            y = data.IndexOf(""">", x)
-            If y >= 0 Then
-                URL_Diesel = baseAddress & data.Substring(x + 32, y - (x + 32)).Replace("&amp;", "&")
-                ReDim Preserve URL_Grade(URL_Grade.GetUpperBound(0) + 1)
-                URL_Grade(URL_Grade.GetUpperBound(0)) = "Diesel"
-                ReDim Preserve URL_Paths(URL_Paths.GetUpperBound(0) + 1)
-                URL_Paths(URL_Grade.GetUpperBound(0)) = URL_Diesel
-                If m_Verbose Then
-                    theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("URL_Diesel: {0}", URL_Diesel))
-                End If
-            End If
 
             ' If count of URL_Grade = 0 then there was no fuel grades found
             ' (although we should always find regular or we wouldn't have found anything)
@@ -796,18 +802,18 @@ Namespace OMDSFuelPrices
             cOptions3.Add("20")
             cOptions3.Add("25")
             cOptions3.Add("30")
-            Dim settingMaxRecords = New Setting(SettingTypes.MultiChoice, "max.Records", "Max Records", "Maximum results to fetch", cOptions3, cOptions3)
-            settingMaxRecords.Value = StoredData.Get(Me, "max.Records")
+            Dim settingMaxRecords = New Setting(SettingTypes.MultiChoice, "settings.max.Records", "Max Records", "Maximum results to fetch", cOptions3, cOptions3)
+            settingMaxRecords.Value = StoredData.Get(Me, "settings.max.Records")
             mySettings.Add(settingMaxRecords)
 
             Dim cOptions4 As List(Of String) = New List(Of String)
             cOptions4.Add("CA")
             cOptions4.Add("US")
-            Dim settingHomeCountry = New Setting(SettingTypes.MultiChoice, "home.Country", "Home Country", "Set Home Country Code", cOptions4, cOptions4)
-            settingHomeCountry.Value = StoredData.Get(Me, "home.Country")
+            Dim settingHomeCountry = New Setting(SettingTypes.MultiChoice, "settings.home.Country", "Home Country", "Set Home Country Code", cOptions4, cOptions4)
+            settingHomeCountry.Value = StoredData.Get(Me, "settings.home.Country")
             mySettings.Add(settingHomeCountry)
 
-            Dim settingHomeCode = New Setting(SettingTypes.Text, "home.Code", "Home Zip/Postal", "Set Home Zip / Postal Code", OpenMobile.helperFunctions.StoredData.Get(Me, "homeCode"))
+            Dim settingHomeCode = New Setting(SettingTypes.Text, "settings.home.Code", "Home Zip/Postal", "Set Home Zip / Postal Code", OpenMobile.helperFunctions.StoredData.Get(Me, "settings.home.Code"))
             mySettings.Add(settingHomeCode)
 
             Dim verboseDebug = New Setting(SettingTypes.MultiChoice, "settings.VerboseDebug", "Verbose", "Verbose Debug Logging", Setting.BooleanList, Setting.BooleanList, m_Verbose)
