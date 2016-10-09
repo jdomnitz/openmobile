@@ -475,7 +475,7 @@ Namespace OMDSFuelPrices
             x = data.IndexOf("ctl00_head_base"" href=""")
             If x < 0 Then
                 ' We didn't find a base address
-                set_message("No results.")
+                set_message("No base URL.")
                 theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the base URL.")
             End If
             y = data.IndexOf(""">", x)
@@ -485,13 +485,13 @@ Namespace OMDSFuelPrices
             x = data.IndexOf("ctl00_Content_P_hlRegular")
             If x < 0 Then
                 ' We didn't find a grade list
-                set_message("No results.")
+                set_message("No results REGULAR.")
                 theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine REGULAR grade list.")
             Else
                 x = data.IndexOf("href=""/", x)
                 If x < 0 Then
                     ' We didn't find the URL line we're looking for
-                    set_message("No results.")
+                    set_message("No URL - Regular.")
                     theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine Regular grade URL.")
                 End If
                 y = data.IndexOf(""">", x + 1)
@@ -508,13 +508,13 @@ Namespace OMDSFuelPrices
             x = data.IndexOf("ctl00_Content_P_hlMidgrade", y)
             If x < 0 Then
                 ' We didn't find a grade list
-                set_message("No results.")
+                set_message("No results MID-GRADE.")
                 theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine MIDGRADE list.")
             Else
                 x = data.IndexOf("href=""/", x)
                 If x < 0 Then
                     ' We didn't find the URL line we're looking for
-                    set_message("No results.")
+                    set_message("No URL - Mid-grade.")
                     theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the Midgrade URL.")
                 End If
                 y = data.IndexOf(""">", x + 1)
@@ -531,13 +531,13 @@ Namespace OMDSFuelPrices
             x = data.IndexOf("ctl00_Content_P_hlPremium", y)
             If x < 0 Then
                 ' We didn't find a grade list
-                set_message("No results.")
+                set_message("No results PREMIUM.")
                 theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine PREMIUM grade list.")
             Else
                 x = data.IndexOf("href=""/", x)
                 If x < 0 Then
                     ' We didn't find the URL line we're looking for
-                    set_message("No results.")
+                    set_message("No URL - Premium.")
                     theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the Premium URL.")
                 End If
                 y = data.IndexOf(""">", x + 1)
@@ -554,13 +554,13 @@ Namespace OMDSFuelPrices
             x = data.IndexOf("ctl00_Content_P_hlDiesel", y)
             If x < 0 Then
                 ' We didn't find a grade list
-                set_message("No results.")
+                set_message("No results DIESEL.")
                 theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine DIESEL grade list.")
             Else
                 x = data.IndexOf("href=""/", x)
                 If x < 0 Then
                     ' We didn't find the URL line we're looking for
-                    set_message("No results.")
+                    set_message("No URL - Diesel.")
                     theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Could not determine the Diesel URL.")
                 End If
                 y = data.IndexOf(""">", x + 1)
@@ -575,10 +575,10 @@ Namespace OMDSFuelPrices
             End If
 
             ' Find the start of the price table
-            x = data.IndexOf("<div id=""pp_table"">")
+            x = data.IndexOf("<div id=""pp_table""")
             If x < 0 Then
                 ' Did not find what we need
-                set_message("No results.")
+                set_message("No price table.")
                 theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", "Did not find a data table")
                 Return False
             End If
@@ -599,7 +599,7 @@ Namespace OMDSFuelPrices
             ' Start loop for the fuel grade pages
 
             Dim row_counter As Integer = 0
-            Dim z As Integer = 0
+            Dim z As Integer = 0, zz As Integer
             Dim a As Integer = 0
             Dim b As Integer = 0
             Dim c As Integer = 0
@@ -645,20 +645,24 @@ Namespace OMDSFuelPrices
                         theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("Found record: {0}", w))
                     End If
                     ' Find the start of the price line
-                    y = data.IndexOf("<div class=""sp_p", x)
-                    ' Find the end of the price line
-                    z = data.IndexOf("</div></div>", y)
+                    y = data.IndexOf("<div class=""price_num", x)
+                    ' Find the start of the price
+                    z = data.IndexOf(""">", y) + 2
+                    zz = data.IndexOf("</div>", z) - 1
                     ' loop between y and z finding price digits
                     price = ""
-                    Do While y < z
-                        y = data.IndexOf("<div class=""p", y)
-                        If (y < 0) Or (y > z) Then
-                            ' no more digits
-                            Exit Do
-                        End If
-                        price = price & data.Substring(y + 13, 1)
-                        y = y + 13
-                    Loop
+                    For x = z To zz
+                        price = price & data.Substring(x, 1)
+                    Next
+                    'Do While y < z
+                    'y = data.IndexOf("<div class=""p", y)
+                    'If (y < 0) Or (y > z) Then
+                    ' no more digits
+                    'Exit Do
+                    'End If
+                    'price = price & data.Substring(y + 13, 1)
+                    'y = y + 13
+                    'Loop
                     price = price.Replace("d", ".")
                     If m_Verbose Then
                         theHost.DebugMsg("OMDSFuelPrices - scrape_gasbuddy()", String.Format("Found price: {0}", price))
@@ -686,6 +690,7 @@ Namespace OMDSFuelPrices
                     z = data.IndexOf("</dd>", x)
                     address = data.Substring(x + 4, z - (x + 4))
                     address = address.Replace("&amp;", "&")
+                    address = address.Replace("&#39;", "'")
 
                     x = data.IndexOf("class=""p_area"">", z)
                     z = data.IndexOf("</a>", x)
@@ -741,30 +746,30 @@ Namespace OMDSFuelPrices
 
                 Loop ' Loop through results for grade
 
-                If Results.Count = 0 Then
-                    Exit For
-                End If
+            If Results.Count = 0 Then
+                Exit For
+            End If
 
-                Grades.Add(URL_Grade(v), Results)
+            Grades.Add(URL_Grade(v), Results)
 
-                ' Fetch the page for the next grade
+            ' Fetch the page for the next grade
 
-                If v < URL_Grade.GetUpperBound(0) Then
+            If v < URL_Grade.GetUpperBound(0) Then
 
-                    Try
-                        If m_Verbose Then
-                            'theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Requesting page: " & URL_Paths(v + 1))
-                        End If
-                        data = client.DownloadString(URL_Paths(v + 1))
-                    Catch
-                        set_message("Lost internet?")
-                        theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Lost internet mid scrape.")
-                        Return False
-                    End Try
+                Try
+                    If m_Verbose Then
+                        'theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Requesting page: " & URL_Paths(v + 1))
+                    End If
+                    data = client.DownloadString(URL_Paths(v + 1))
+                Catch
+                    set_message("Lost internet?")
+                    theHost.DebugMsg(String.Format("OMDSFuelPrices - scrape_gasbuddy()"), "Lost internet mid scrape.")
+                    Return False
+                End Try
 
-                End If
+            End If
 
-                x = 0
+            x = 0
 
             Next ' Loop through grades
 
